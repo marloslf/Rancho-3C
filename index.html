@@ -47,7 +47,7 @@
         .header-container img { max-width: 80px; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1)); border-radius: 8px;}
         h2, h3 { color: var(--cor-verde-escuro); font-weight: 800; margin: 10px 0;}
 
-        /* --- MENU (AGORA FIXO/STICKY COM FUNDO) --- */
+        /* --- MENU FIXO --- */
         .menu { 
             display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; 
             flex-wrap: wrap; align-items: center;
@@ -73,12 +73,12 @@
         .status-conexao.conectado { background: #e8f5e9; color: #2e7d32; border-color: #66bb6a; }
         .status-conexao.aguardando { background: #FFF3E0; color: #E65100; border-color: #FFB74D; }
 
-        /* --- ABAS (TABS) --- */
+        /* --- ABAS --- */
         .tab { display: none; background: transparent; }
         .tab.active { display: block; animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- DASHBOARD E GRÁFICOS NATIVOS CSS --- */
+        /* --- DASHBOARD --- */
         .resumo-cards { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
         .card { flex: 1; min-width: 220px; padding: 15px 20px; border-radius: var(--borda-raio); text-align: center; box-shadow: var(--sombra); color: white; position: relative; overflow: hidden;}
         .card-receita { background: var(--cor-receita-grad); }
@@ -124,7 +124,7 @@
         .btn-salvar-compacto:hover { filter: brightness(0.9); transform: translateY(-1px);}
 
         .barra-pesquisa-relatorio { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: white; padding: 12px 15px; border-radius: 12px; box-shadow: var(--sombra); border: none;}
-        .barra-pesquisa-relatorio input { flex: 1; min-width: 150px; padding: 8px; border-radius: 6px; font-size: 13px; text-transform: uppercase; border: 1px solid #ccc;}
+        .barra-pesquisa-relatorio input, .barra-pesquisa-relatorio select { flex: 1; min-width: 150px; padding: 8px; border-radius: 6px; font-size: 13px; text-transform: uppercase; border: 1px solid #ccc; font-weight: bold;}
         .btn-pesquisar, .btn-limpar { padding: 8px 15px; border: none; border-radius: 6px; font-weight: 800; color: white; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1);}
         .btn-pesquisar { background: var(--cor-madeira); }
         .btn-limpar { background: #9E9E9E; }
@@ -187,21 +187,27 @@
         <button style="background-color: #5C6BC0; color: white; border: none;" onclick="exportarCSV()">⬇️ EXPORTAR EXCEL</button>
         <button style="background-color: #555; color: white; border: none;" onclick="window.print()">🖨️ GERAR PDF</button>
         
-        <!-- O NOVO BOTÃO DE SINCRONIZAÇÃO DA NUVEM -->
-        <button style="background-color: #1565C0; color: white; border: none;" onclick="carregarDadosNuvem()">🔄 SINCRONIZAR NUVEM</button>
+        <button style="background-color: #1565C0; color: white; border: none;" onclick="carregarDadosNuvem(true)">🔄 FORÇAR SINCRONIZAÇÃO</button>
         <div id="status_conexao" class="status-conexao aguardando">⏳ INICIALIZANDO...</div>
     </div>
 
     <!-- ABA 1: DASHBOARD DE RESUMO -->
     <div id="resumo" class="tab active">
+        
         <div class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; background: white; padding: 15px; border-radius: 12px; box-shadow: var(--sombra);">
-            <label style="font-weight: 800; color: var(--cor-madeira); text-transform: uppercase; font-size: 14px;">Filtrar Dashboard por Mês:</label>
+            <label style="font-weight: 800; color: var(--cor-madeira); text-transform: uppercase; font-size: 14px;">Filtrar Dashboard por Safra:</label>
+            <select id="filtro_safra_dashboard" onchange="atualizarResumoEGrafico()" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; font-family: 'Nunito', sans-serif;">
+                <option value="">TODAS AS SAFRAS</option>
+            </select>
+            
+            <label style="font-weight: 800; color: var(--cor-madeira); text-transform: uppercase; font-size: 14px; margin-left: 15px;">Ou por Mês Específico:</label>
             <input type="month" id="filtro_mes_dashboard" onchange="atualizarResumoEGrafico()" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; font-family: 'Nunito', sans-serif;">
-            <button onclick="document.getElementById('filtro_mes_dashboard').value=''; atualizarResumoEGrafico()" class="btn-limpar" style="padding: 8px 15px; font-size: 12px;">🧹 LIMPAR FILTRO</button>
+            
+            <button onclick="document.getElementById('filtro_safra_dashboard').value=''; document.getElementById('filtro_mes_dashboard').value=''; atualizarResumoEGrafico()" class="btn-limpar" style="padding: 8px 15px; font-size: 12px;">🧹 LIMPAR FILTROS</button>
         </div>
 
         <div id="alerta_vencidas" class="no-print" style="display: none; background: #ffebee; border-left: 5px solid #d32f2f; padding: 15px; margin-bottom: 15px; border-radius: 8px; color: #d32f2f; font-weight: 800; font-size: 14px; box-shadow: var(--sombra);">
-            ⚠️ ATENÇÃO: VOCÊ POSSUI <span id="qtd_vencidas">0</span> CONTA(S) ATRASADA(S)! Vá para Lançamentos para verificar.
+            ⚠️ ATENÇÃO: VOCÊ POSSUI <span id="qtd_vencidas">0</span> CONTA(S) ATRASADA(S) NESTE PERÍODO!
         </div>
 
         <div class="resumo-cards">
@@ -222,9 +228,7 @@
         <div class="dashboard-inferior" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <div class="grafico-container">
                 <h4 style="margin: 0 0 10px 0; color: var(--cor-madeira); font-size: 14px;">CAIXA EFETIVADO (PAGO)</h4>
-                <div id="grafico_caixa" class="grafico-circulo">
-                    <div class="grafico-furo"></div>
-                </div>
+                <div id="grafico_caixa" class="grafico-circulo"><div class="grafico-furo"></div></div>
                 <div class="legenda-grafico">
                     <div class="legenda-item"><span class="ponto-cor" style="background:#2E7D32;"></span>Receitas</div>
                     <div class="legenda-item"><span class="ponto-cor" style="background:#E65100;"></span>Despesas</div>
@@ -238,7 +242,6 @@
                     <div class="legenda-item"><span class="ponto-cor" style="background:#C62828;"></span>A Pagar</div>
                 </div>
             </div>
-
             <div class="top3-box" style="border-color: var(--cor-receita); margin: 0;">
                 <h4 style="color: var(--cor-receita); margin-top: 0; font-size: 14px;">TOP 3 RECEITAS</h4>
                 <ul id="lista_top_receitas" style="font-size: 13px;"></ul>
@@ -252,7 +255,6 @@
     
     <!-- ABA 2: LANÇAMENTOS E RELATÓRIO GERAL -->
     <div id="movimentacoes" class="tab">
-        
         <div class="area-fixa-topo no-print">
             <div class="linha-lancamento linha-despesa">
                 <div style="display:flex; justify-content:space-between; margin-bottom: 6px;">
@@ -269,9 +271,7 @@
                     <input type="text" id="d_und" placeholder="UNID.">
                     <input type="number" id="d_v_unit" placeholder="$ UNIT" step="0.01" oninput="calcularTotalDespesa()">
                     <input type="number" id="d_valor" placeholder="$ TOTAL" step="0.01" required>
-                    <select id="d_sit" title="Situação">
-                        <option value="A pagar">A PAGAR</option><option value="Pago">PAGO</option>
-                    </select>
+                    <select id="d_sit" title="Situação"><option value="A pagar">A PAGAR</option><option value="Pago">PAGO</option></select>
                     <div style="display: flex; gap: 4px; width: 100%;">
                         <button onclick="addTransacao('Despesa')" class="btn-salvar-compacto" style="background: var(--cor-despesa); flex: 1;" title="Gravar Despesa">💾</button>
                         <input type="file" id="xml_upload" accept=".xml" style="display:none;" onchange="processarXML(event)">
@@ -294,9 +294,7 @@
                     <input type="text" id="r_und" placeholder="UNID.">
                     <input type="number" id="r_v_unit" placeholder="$ UNIT" step="0.01" oninput="calcularTotalReceita()">
                     <input type="number" id="r_valor" placeholder="$ TOTAL" step="0.01" required>
-                    <select id="r_sit" title="Situação">
-                        <option value="A receber">A RECEBER</option><option value="Pago">PAGO</option>
-                    </select>
+                    <select id="r_sit" title="Situação"><option value="A receber">A RECEBER</option><option value="Pago">PAGO</option></select>
                     <button onclick="addTransacao('Receita')" class="btn-salvar-compacto" style="background: var(--cor-receita); width:100%;" title="Gravar Receita">💾 SALVAR</button>
                 </div>
                 <datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
@@ -304,11 +302,15 @@
 
             <div class="barra-pesquisa-relatorio" style="margin-bottom: 0;">
                 <button class="btn-filtro ativo" id="btn_f_todos" onclick="setFiltroRapido('')">📋 TODOS</button>
+                
+                <!-- NOVO BOTÃO DE FILTRO RÁPIDO PARA A SAFRA ATUAL -->
+                <button class="btn-filtro" id="btn_f_safra" onclick="setFiltroRapido('safra')" title="Exibe apenas a Safra Agrícola atual (Julho a Junho)">🌾 SAFRA ATUAL</button>
+                
                 <button class="btn-filtro" id="btn_f_pendentes" onclick="setFiltroRapido('pendentes')">⏳ PENDENTES</button>
                 <button class="btn-filtro" id="btn_f_entradas" onclick="setFiltroRapido('entradas')">🌱 RECEITAS</button>
-                <input type="month" id="filtro_mes_tabela" onchange="aplicarFiltros()" style="width: 150px; min-width: unset; padding: 8px; font-size: 14px;" title="Escolha um mês para filtrar a tabela">
-                <button onclick="document.getElementById('filtro_mes_tabela').value=''; aplicarFiltros()" class="btn-filtro" style="padding: 8px 12px;" title="Limpar Filtro de Mês">🧹</button>
+                
                 <span style="flex-grow: 1;"></span>
+                
                 <input type="text" id="pesquisa_global" placeholder="PESQUISA RÁPIDA NAS LINHAS..." onkeydown="if(event.key==='Enter') aplicarFiltros()" style="max-width: 250px; font-size: 13px;">
                 <button onclick="aplicarFiltros()" class="btn-pesquisar" style="padding: 8px 15px;">🔎</button>
                 <button onclick="limparFiltros()" class="btn-limpar" style="padding: 8px 15px;" title="Limpar todos os filtros da tabela">🧹</button>
@@ -350,9 +352,16 @@
     <!-- ABA 3: RELATÓRIOS DETALHADOS -->
     <div id="relatorios_detalhados" class="tab">
         <div class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; background: white; padding: 15px; border-radius: 12px; box-shadow: var(--sombra);">
-            <label style="font-weight: 800; color: var(--cor-texto); text-transform: uppercase; font-size: 15px;">Filtrar Relatórios por Mês:</label>
+            
+            <label style="font-weight: 800; color: var(--cor-texto); text-transform: uppercase; font-size: 14px;">Filtrar por Safra:</label>
+            <select id="filtro_safra_relatorios" onchange="atualizarRelatoriosDetalhados()" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; font-family: 'Nunito', sans-serif;">
+                <option value="">TODAS AS SAFRAS</option>
+            </select>
+
+            <label style="font-weight: 800; color: var(--cor-texto); text-transform: uppercase; font-size: 14px; margin-left: 15px;">Ou por Mês:</label>
             <input type="month" id="filtro_mes_relatorios" onchange="atualizarRelatoriosDetalhados()" style="padding: 8px 15px; border-radius: 6px; border: 1px solid #999; font-weight: bold; font-size: 15px; font-family: 'Nunito', sans-serif;">
-            <button onclick="document.getElementById('filtro_mes_relatorios').value=''; atualizarRelatoriosDetalhados()" class="btn-limpar" style="padding: 8px 15px; font-size: 13px;">🧹 MOSTRAR TUDO</button>
+            
+            <button onclick="document.getElementById('filtro_safra_relatorios').value=''; document.getElementById('filtro_mes_relatorios').value=''; atualizarRelatoriosDetalhados()" class="btn-limpar" style="padding: 8px 15px; font-size: 13px;">🧹 MOSTRAR TUDO</button>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
@@ -433,11 +442,10 @@
     <div id="toast">Operação realizada com sucesso!</div>
 
     <script>
-        // --- A PONTE COM O GOOGLE SHEETS ---
-        // Aqui colocamos a sua URL gerada no Apps Script
+        // =========================================================================
         const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxU-XxV63Eip3g636GkrVaV8zwnVPVomePZLIsZBV-ghCYJKxYUMtQoG2Kc903zeP4UoQ/exec";
+        // =========================================================================
 
-        // --- VARIÁVEIS GLOBAIS ---
         let transacoes = [];
         let ultimaListaFiltrada = []; 
         let indiceEdicao = -1;
@@ -449,559 +457,94 @@
         const dCategoriasPadrao = ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "DIÁRIAS", "DIESEL", "FUNGICIDA", "GASOLINA", "HERBICIDA", "INSETICIDA", "INSUMOS", "INVESTIMENTO", "MANUTENÇÃO", "MERCADO", "PROLABORE", "RAÇÃO"];
         const dSetoresPadrao = ["ADMINISTRAÇÃO", "CÃES", "CAFÉ", "CAFÉ 01", "CAFÉ 02", "CAFÉ 03", "CASA", "CAVALOS", "COLHEITA", "DEFINIR", "FAZENDA", "FUNCIONÁRIOS", "GADO", "GALINHAS", "IRRIGAÇÃO", "LAVOURAS", "MARACUJÁ", "PEDRO MARINELLI", "PEIXES", "TORREFAÇÃO", "TRATOR"];
         const rCategoriasPadrao = ["ACEROLA - POLPA", "CAFÉ 250G", "CAFÉ 500G", "CAFÉ EM GRÃOS", "CAFÉ SACA", "CRÉDITO", "ESTACAS DE EUCALÍPTO", "GRAVIOLA - POLPA S/SEM.", "MARACUJÁ - FRUTO", "MARACUJÁ - POLPA C/SEM.", "MARACUJÁ - POLPA S/SEM.", "OVOS", "PASTO - ALUGUEL", "RENDIMENTOS"];
-        
-        const unidadesReceita = {
-            "ACEROLA - POLPA": "KG", "CAFÉ 250G": "PCT", "CAFÉ 500G": "PCT", "CAFÉ EM GRÃOS": "PCT",
-            "CAFÉ SACA": "SC", "CRÉDITO": "R$", "ESTACAS DE EUCALÍPTO": "UN", "GRAVIOLA - POLPA S/SEM.": "KG",
-            "MARACUJÁ - FRUTO": "KG", "MARACUJÁ - POLPA C/SEM.": "KG", "MARACUJÁ - POLPA S/SEM.": "KG",
-            "OVOS": "DZ", "PASTO - ALUGUEL": "MÊS", "RENDIMENTOS": "R$"
-        };
+        const unidadesReceita = { "ACEROLA - POLPA": "KG", "CAFÉ 250G": "PCT", "CAFÉ 500G": "PCT", "CAFÉ EM GRÃOS": "PCT", "CAFÉ SACA": "SC", "CRÉDITO": "R$", "ESTACAS DE EUCALÍPTO": "UN", "GRAVIOLA - POLPA S/SEM.": "KG", "MARACUJÁ - FRUTO": "KG", "MARACUJÁ - POLPA C/SEM.": "KG", "MARACUJÁ - POLPA S/SEM.": "KG", "OVOS": "DZ", "PASTO - ALUGUEL": "MÊS", "RENDIMENTOS": "R$" };
 
-        // MATRIZ COMPLETA COM AS 513 LINHAS ORIGINAIS (Prontas a ir para o Google Sheets)
-        const dadosIniciais = [
-            {"data":"2026-01-17","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"ISABEL","desc":"","qtd":"4","und":"PCT","v_unit":40,"valor":160,"sit":"Pago","obs":""},
-            {"data":"2026-01-01","tipo":"Receita","categoria":"ESTACAS DE EUCALÍPTO","setor":"-","local":"REINAN","desc":"","qtd":"747","und":"UN","v_unit":11,"valor":8217,"sit":"Pago","obs":""},
-            {"data":"2026-01-08","tipo":"Receita","categoria":"OVOS","setor":"-","local":"LAR DE IDOSOS","desc":"","qtd":"15","und":"DZ","v_unit":10,"valor":150,"sit":"Pago","obs":""},
-            {"data":"2026-01-08","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MANOEL","desc":"REI DA LINGUIÇA","qtd":"15","und":"KG","v_unit":18,"valor":270,"sit":"Pago","obs":""},
-            {"data":"2026-01-08","tipo":"Receita","categoria":"OVOS","setor":"-","local":"MANOEL","desc":"REI DA LINGUIÇA","qtd":"10","und":"DZ","v_unit":8,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-01-12","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"32","und":"KG","v_unit":18,"valor":576,"sit":"Pago","obs":""},
-            {"data":"2026-01-21","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"JULIANE","desc":"RAPHAEL","qtd":"3","und":"KG","v_unit":20,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-01-21","tipo":"Receita","categoria":"ACEROLA - POLPA","setor":"-","local":"JULIANE","desc":"RAPHAEL","qtd":"3","und":"KG","v_unit":20,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-01-25","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"37","und":"KG","v_unit":18,"valor":666,"sit":"Pago","obs":""},
-            {"data":"2026-01-25","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"2","und":"PCT","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-01-27","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"AVP AGRONEGÓCIOS","desc":"","qtd":"6","und":"PCT","v_unit":30,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-01-27","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"JULIANE","desc":"RAFAEL","qtd":"4","und":"KG","v_unit":20,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-01-27","tipo":"Receita","categoria":"GRAVIOLA - POLPA S/SEM.","setor":"-","local":"JULIANE","desc":"RAFAEL","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-01-27","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"JULIANE","desc":"RAFAEL","qtd":"4","und":"PCT","v_unit":40,"valor":160,"sit":"Pago","obs":""},
-            {"data":"2026-02-04","tipo":"Receita","categoria":"OVOS","setor":"-","local":"DIVERSOS","desc":"","qtd":"12.5","und":"DZ","v_unit":10,"valor":125,"sit":"Pago","obs":""},
-            {"data":"2026-02-04","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"10","und":"KG","v_unit":18,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-02-04","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"9","und":"PCT","v_unit":12.5,"valor":112.5,"sit":"Pago","obs":""},
-            {"data":"2026-02-05","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"ISABEL","desc":"","qtd":"8","und":"PCT","v_unit":40,"valor":320,"sit":"Pago","obs":""},
-            {"data":"2026-02-05","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ISABEL","desc":"","qtd":"1","und":"KG","v_unit":20,"valor":20,"sit":"Pago","obs":""},
-            {"data":"2026-02-05","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"MECANICO DO TRATOR","desc":"","qtd":"1","und":"PCT","v_unit":40,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-02-05","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"GILSON","desc":"MECANICO DO TRATOR","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-02-08","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"SUELY","desc":"","qtd":"8","und":"KG","v_unit":20,"valor":160,"sit":"Pago","obs":""},
-            {"data":"2026-02-09","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"LUCIANA DE FÁTIMA","desc":"","qtd":"5","und":"KG","v_unit":10,"valor":50,"sit":"Pago","obs":""},
-            {"data":"2026-02-09","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"LUCIANA DE FÁTIMA","desc":"","qtd":"4","und":"PCT","v_unit":30,"valor":120,"sit":"Pago","obs":""},
-            {"data":"2026-02-09","tipo":"Receita","categoria":"OVOS","setor":"-","local":"MARCÃO","desc":"","qtd":"7.5","und":"DZ","v_unit":10,"valor":75,"sit":"Pago","obs":""},
-            {"data":"2026-02-09","tipo":"Receita","categoria":"MARACUJÁ - POLPA C/SEM.","setor":"-","local":"MARCÃO","desc":"","qtd":"10","und":"KG","v_unit":15,"valor":150,"sit":"Pago","obs":""},
-            {"data":"2026-02-09","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MARCÃO","desc":"","qtd":"40","und":"KG","v_unit":18,"valor":720,"sit":"Pago","obs":""},
-            {"data":"2026-02-09","tipo":"Receita","categoria":"CRÉDITO","setor":"-","local":"PEDRO MARINELLI","desc":"CRÉDITO","qtd":"1","und":"R$","v_unit":1,"valor":1,"sit":"Pago","obs":""},
-            {"data":"2026-02-10","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"CAPUL","desc":"UNAÍ","qtd":"60","und":"PCT","v_unit":30,"valor":1800,"sit":"Pago","obs":""},
-            {"data":"2026-02-10","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"50","und":"KG","v_unit":18,"valor":900,"sit":"Pago","obs":""},
-            {"data":"2026-02-13","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"JULIANE","desc":"RAPHAEL","qtd":"1","und":"KG","v_unit":20,"valor":20,"sit":"Pago","obs":""},
-            {"data":"2026-02-13","tipo":"Receita","categoria":"ACEROLA - POLPA","setor":"-","local":"JULIANE","desc":"RAFAEL","qtd":"3","und":"KG","v_unit":20,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-02-13","tipo":"Receita","categoria":"GRAVIOLA - POLPA S/SEM.","setor":"-","local":"JULIANE","desc":"RAPHAEL","qtd":"3","und":"KG","v_unit":20,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-02-18","tipo":"Receita","categoria":"ACEROLA - POLPA","setor":"-","local":"FERNANDA","desc":" ROBIM","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-02-18","tipo":"Receita","categoria":"GRAVIOLA - POLPA S/SEM.","setor":"-","local":"FERNANDA","desc":" ROBIM","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-02-18","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"FERNANDA ","desc":"ROBIM","qtd":"9","und":"KG","v_unit":20,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-02-18","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ROSE","desc":"MARLOS","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-02-18","tipo":"Receita","categoria":"ACEROLA - POLPA","setor":"-","local":"ROSE","desc":"MARLOS","qtd":"1","und":"KG","v_unit":20,"valor":20,"sit":"Pago","obs":""},
-            {"data":"2026-02-18","tipo":"Receita","categoria":"GRAVIOLA - POLPA S/SEM.","setor":"-","local":"ROSE","desc":"MARLOS","qtd":"1","und":"KG","v_unit":25,"valor":25,"sit":"Pago","obs":""},
-            {"data":"2026-02-20","tipo":"Receita","categoria":"ACEROLA - POLPA","setor":"-","local":"MARCELA","desc":"","qtd":"3","und":"KG","v_unit":18,"valor":54,"sit":"Pago","obs":""},
-            {"data":"2026-02-20","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MARCELA","desc":"","qtd":"32","und":"KG","v_unit":18,"valor":576,"sit":"Pago","obs":""},
-            {"data":"2026-02-20","tipo":"Receita","categoria":"GRAVIOLA - POLPA S/SEM.","setor":"-","local":"MARCELA","desc":"","qtd":"3","und":"KG","v_unit":18,"valor":54,"sit":"Pago","obs":""},
-            {"data":"2026-02-20","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"MARCELA","desc":"","qtd":"40","und":"PCT","v_unit":12.5,"valor":500,"sit":"Pago","obs":""},
-            {"data":"2026-02-20","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"MARCELA","desc":"","qtd":"50","und":"PCT","v_unit":26.5,"valor":1325,"sit":"Pago","obs":""},
-            {"data":"2026-02-20","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"MARCELA","desc":"","qtd":"5","und":"PCT","v_unit":30,"valor":150,"sit":"Pago","obs":""},
-            {"data":"2026-02-23","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"34","und":"KG","v_unit":18,"valor":612,"sit":"Pago","obs":""},
-            {"data":"2026-03-02","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"AVP AGRONEGÓCIOS","desc":"","qtd":"6","und":"PCT","v_unit":30,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-03-06","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"BEIRA RIO","desc":"CONVENIÊNCIA","qtd":"20","und":"KG","v_unit":20,"valor":400,"sit":"Pago","obs":""},
-            {"data":"2026-03-06","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"DIÓ","desc":"","qtd":"5","und":"KG","v_unit":20,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-03-09","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MARCÃO","desc":"","qtd":"50","und":"KG","v_unit":18,"valor":900,"sit":"Pago","obs":""},
-            {"data":"2026-03-10","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"CARMEM","desc":"EDNEI","qtd":"6","und":"KG","v_unit":20,"valor":120,"sit":"Pago","obs":""},
-            {"data":"2026-03-13","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"HELEN","desc":"","qtd":"25","und":"KG","v_unit":18,"valor":450,"sit":"Pago","obs":""},
-            {"data":"2026-03-13","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"MANOEL","desc":"REI DA LINGUIÇA","qtd":"8","und":"PCT","v_unit":15,"valor":120,"sit":"Pago","obs":""},
-            {"data":"2026-03-13","tipo":"Receita","categoria":"OVOS","setor":"-","local":"MANOEL","desc":"REI DA LINGUIÇA","qtd":"25","und":"DZ","v_unit":10,"valor":250,"sit":"Pago","obs":""},
-            {"data":"2026-03-14","tipo":"Receita","categoria":"OVOS","setor":"-","local":"RAFAEL","desc":"","qtd":"12.5","und":"DZ","v_unit":10,"valor":125,"sit":"Pago","obs":""},
-            {"data":"2026-03-16","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"FERNANDA","desc":"ROBSON","qtd":"11","und":"KG","v_unit":20,"valor":220,"sit":"Pago","obs":""},
-            {"data":"2026-03-16","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"34","und":"KG","v_unit":18,"valor":612,"sit":"Pago","obs":""},
-            {"data":"2026-03-16","tipo":"Receita","categoria":"MARACUJÁ - POLPA C/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"1","und":"KG","v_unit":16,"valor":16,"sit":"Pago","obs":""},
-            {"data":"2026-03-17","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"11","und":"KG","v_unit":18,"valor":198,"sit":"Pago","obs":""},
-            {"data":"2026-03-20","tipo":"Receita","categoria":"OVOS","setor":"-","local":"BAIANO","desc":"","qtd":"20","und":"DZ","v_unit":7.5,"valor":150,"sit":"Pago","obs":""},
-            {"data":"2026-03-20","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"50","und":"KG","v_unit":18,"valor":900,"sit":"Pago","obs":""},
-            {"data":"2026-03-20","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"2","und":"PCT","v_unit":40,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-03-24","tipo":"Receita","categoria":"MARACUJÁ - FRUTO","setor":"-","local":"REINAN","desc":"","qtd":"953.5","und":"KG","v_unit":3,"valor":2860.5,"sit":"Pago","obs":""},
-            {"data":"2026-03-25","tipo":"Receita","categoria":"MARACUJÁ - FRUTO","setor":"-","local":"LAIS","desc":"UNAÍ","qtd":"202.5","und":"KG","v_unit":3,"valor":607.5,"sit":"Pago","obs":""},
-            {"data":"2026-03-25","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"10","und":"KG","v_unit":18,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"AVP AGRONEGÓCIOS","desc":"","qtd":"6","und":"PCT","v_unit":30,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"BOI NA BRASA","desc":"","qtd":"3","und":"PCT","v_unit":15,"valor":45,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"EMILY","desc":"BOI NA BRASA","qtd":"1","und":"KG","v_unit":20,"valor":20,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ISMAEL ","desc":"EMBRAPA","qtd":"10","und":"KG","v_unit":20,"valor":200,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"JÉSSICA","desc":"BOI NA BRASA","qtd":"1","und":"KG","v_unit":20,"valor":20,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MAKUELLY","desc":"BOI NA BRASA","qtd":"1","und":"KG","v_unit":20,"valor":20,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Receita","categoria":"OVOS","setor":"-","local":"MARCELA","desc":"","qtd":"7.5","und":"DZ","v_unit":10,"valor":75,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"MARCELA","desc":"","qtd":"6","und":"PCT","v_unit":40,"valor":240,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"MARCELA","desc":"","qtd":"8","und":"PCT","v_unit":20,"valor":160,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"10","und":"DZ","v_unit":10,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-03-30","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ISABEL","desc":"","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-03-30","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"ISABEL","desc":"TIÃO","qtd":"3","und":"PCT","v_unit":40,"valor":120,"sit":"Pago","obs":""},
-            {"data":"2026-03-30","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"JULIANE","desc":"RAFAEL","qtd":"1","und":"PCT","v_unit":40,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-03-30","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"JULIANE","desc":"","qtd":"6","und":"PCT","v_unit":20,"valor":120,"sit":"Pago","obs":""},
-            {"data":"2026-03-30","tipo":"Receita","categoria":"ACEROLA - POLPA","setor":"-","local":"JULIANE","desc":"RAFAEL","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-03-30","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"JULIANE","desc":"RAFAEL","qtd":"3","und":"KG","v_unit":20,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-03-31","tipo":"Receita","categoria":"MARACUJÁ - FRUTO","setor":"-","local":"REINAN","desc":"","qtd":"1032.95","und":"KG","v_unit":3,"valor":3098.85,"sit":"Pago","obs":""},
-            {"data":"2026-04-08","tipo":"Receita","categoria":"OVOS","setor":"-","local":"BAIANO","desc":"","qtd":"17.5","und":"DZ","v_unit":8,"valor":140,"sit":"Pago","obs":""},
-            {"data":"2026-04-08","tipo":"Receita","categoria":"MARACUJÁ - POLPA C/SEM.","setor":"-","local":"MARCÃO","desc":"","qtd":"5","und":"KG","v_unit":16,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-04-08","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MARCÃO","desc":"","qtd":"50","und":"KG","v_unit":18,"valor":900,"sit":"Pago","obs":""},
-            {"data":"2026-04-08","tipo":"Receita","categoria":"OVOS","setor":"-","local":"MARCÃO","desc":"","qtd":"5","und":"DZ","v_unit":10,"valor":50,"sit":"Pago","obs":""},
-            {"data":"2026-04-08","tipo":"Receita","categoria":"MARACUJÁ - FRUTO","setor":"-","local":"REINAN","desc":"","qtd":"1369.65","und":"KG","v_unit":3,"valor":4108.95,"sit":"Pago","obs":""},
-            {"data":"2026-04-08","tipo":"Receita","categoria":"MARACUJÁ - FRUTO","setor":"-","local":"SAMUEL","desc":"MOTORISTA CAPUL","qtd":"48.1","und":"KG","v_unit":3,"valor":144.3,"sit":"Pago","obs":""},
-            {"data":"2026-04-09","tipo":"Receita","categoria":"OVOS","setor":"-","local":"LUCIANA DE FÁTIMA","desc":"","qtd":"5","und":"DZ","v_unit":10,"valor":50,"sit":"Pago","obs":""},
-            {"data":"2026-04-09","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"LUCIANA DE FÁTIMA","desc":"","qtd":"7","und":"KG","v_unit":20,"valor":140,"sit":"Pago","obs":""},
-            {"data":"2026-04-09","tipo":"Receita","categoria":"ACEROLA - POLPA","setor":"-","local":"LUCIANA DE FÁTIMA","desc":"","qtd":"1","und":"KG","v_unit":25,"valor":25,"sit":"Pago","obs":""},
-            {"data":"2026-04-09","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"LUCIANA DE FÁTIMA","desc":"","qtd":"2","und":"PCT","v_unit":40,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-04-13","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"FERNANDA","desc":" ROBIM","qtd":"10","und":"KG","v_unit":20,"valor":200,"sit":"Pago","obs":""},
-            {"data":"2026-04-13","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MANOEL / REI DA LINGUIÇA","desc":"","qtd":"5","und":"KG","v_unit":18,"valor":90,"sit":"Pago","obs":""},
-            {"data":"2026-04-13","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"MANOEL","desc":"REI DA LINGUIÇA","qtd":"8","und":"PCT","v_unit":15,"valor":120,"sit":"Pago","obs":""},
-            {"data":"2026-04-13","tipo":"Receita","categoria":"OVOS","setor":"-","local":"MANOEL","desc":"REI DA LINGUIÇA","qtd":"10","und":"DZ","v_unit":10,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-04-13","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ROBERTO - AGROPEÇAS","desc":"","qtd":"3","und":"KG","v_unit":20,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-04-13","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"30","und":"KG","v_unit":18,"valor":540,"sit":"Pago","obs":""},
-            {"data":"2026-04-15","tipo":"Receita","categoria":"OVOS","setor":"-","local":"BAIANO","desc":"","qtd":"10","und":"DZ","v_unit":10,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-04-17","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"IURY","desc":"","qtd":"5","und":"KG","v_unit":10,"valor":50,"sit":"Pago","obs":""},
-            {"data":"2026-04-18","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"DIMAR","desc":"","qtd":"12","und":"KG","v_unit":20,"valor":240,"sit":"Pago","obs":""},
-            {"data":"2026-04-18","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"GABRIELY","desc":"","qtd":"10","und":"KG","v_unit":20,"valor":200,"sit":"Pago","obs":""},
-            {"data":"2026-04-18","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"HELEN","desc":"","qtd":"12","und":"KG","v_unit":18,"valor":216,"sit":"Pago","obs":""},
-            {"data":"2026-04-18","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"20","und":"DZ","v_unit":10,"valor":200,"sit":"Pago","obs":""},
-            {"data":"2026-04-22","tipo":"Receita","categoria":"OVOS","setor":"-","local":"BAIANO","desc":"","qtd":"7.5","und":"DZ","v_unit":10,"valor":75,"sit":"Pago","obs":""},
-            {"data":"2026-04-22","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"15","und":"DZ","v_unit":10,"valor":150,"sit":"Pago","obs":""},
-            {"data":"2026-04-22","tipo":"Receita","categoria":"MARACUJÁ - FRUTO","setor":"-","local":"SAMUEL","desc":"MOTORISTA CAPUL","qtd":"80","und":"KG","v_unit":3,"valor":240,"sit":"Pago","obs":""},
-            {"data":"2026-05-04","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"AVP AGRONEGÓCIOS","desc":"","qtd":"6","und":"PCT","v_unit":18,"valor":108,"sit":"Pago","obs":""},
-            {"data":"2026-05-04","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"10","und":"DZ","v_unit":10,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-05-04","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"30","und":"KG","v_unit":18,"valor":540,"sit":"Pago","obs":""},
-            {"data":"2026-05-06","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ANA CLARA","desc":"","qtd":"3","und":"KG","v_unit":20,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-05-06","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"CARMEM","desc":"EDNEI","qtd":"10","und":"KG","v_unit":20,"valor":200,"sit":"Pago","obs":""},
-            {"data":"2026-05-06","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MAKUELI","desc":"","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-05-07","tipo":"Receita","categoria":"OVOS","setor":"-","local":"JOSIMAR","desc":"","qtd":"3","und":"DZ","v_unit":10,"valor":30,"sit":"Pago","obs":""},
-            {"data":"2026-05-07","tipo":"Receita","categoria":"GADO","setor":"-","local":"","desc":"VENDA VACAS","qtd":"482","und":"KG","v_unit":19.33,"valor":9317.06,"sit":"Pago","obs":""},
-            {"data":"2026-05-08","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"CREUSA MARIA","desc":"","qtd":"3","und":"PCT","v_unit":40,"valor":120,"sit":"Pago","obs":""},
-            {"data":"2026-05-08","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"CREUSA MARIA","desc":"","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-05-08","tipo":"Receita","categoria":"CAFÉ EM GRÃOS","setor":"-","local":"JULIANE","desc":"RAFAEL","qtd":"1","und":"PCT","v_unit":40,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-05-09","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ALEX","desc":"AVP","qtd":"5","und":"KG","v_unit":20,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-05-09","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"DANILO","desc":" AVP","qtd":"1","und":"KG","v_unit":20,"valor":20,"sit":"Pago","obs":""},
-            {"data":"2026-05-09","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"JULIANE","desc":"RAFAEL","qtd":"2","und":"PCT","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-05-09","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"JULIANE","desc":"RAFAEL","qtd":"1","und":"PCT","v_unit":40,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-05-10","tipo":"Receita","categoria":"OVOS","setor":"-","local":"MARCÃO","desc":"","qtd":"5","und":"DZ","v_unit":10,"valor":50,"sit":"Pago","obs":""},
-            {"data":"2026-05-10","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MARCÃO","desc":"","qtd":"50","und":"KG","v_unit":18,"valor":900,"sit":"Pago","obs":""},
-            {"data":"2026-05-10","tipo":"Receita","categoria":"MARACUJÁ - POLPA C/SEM.","setor":"-","local":"MARCÃO","desc":"","qtd":"5","und":"KG","v_unit":16,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-05-13","tipo":"Receita","categoria":"OVOS","setor":"-","local":"MARIA LUZIA","desc":"","qtd":"4","und":"DZ","v_unit":10,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-05-13","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"15","und":"DZ","v_unit":10,"valor":150,"sit":"Pago","obs":""},
-            {"data":"2026-05-19","tipo":"Receita","categoria":"OVOS","setor":"-","local":"TIÃOZINHO","desc":"","qtd":"2.5","und":"DZ","v_unit":10,"valor":25,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Receita","categoria":"OVOS","setor":"-","local":"BAIANO","desc":"","qtd":"12.5","und":"DZ","v_unit":8,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"BOI NA BRASA","desc":"","qtd":"8","und":"KG","v_unit":20,"valor":160,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"HELEN","desc":"","qtd":"19","und":"KG","v_unit":18,"valor":342,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MAKUELY","desc":"","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Receita","categoria":"OVOS","setor":"-","local":"MARIA LUZIA","desc":"","qtd":"10","und":"DZ","v_unit":10,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"5","und":"KG","v_unit":18,"valor":90,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Receita","categoria":"ACEROLA - POLPA","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"2","und":"KG","v_unit":18,"valor":36,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"6","und":"PCT","v_unit":15,"valor":90,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"12.5","und":"DZ","v_unit":10,"valor":125,"sit":"Pago","obs":""},
-            {"data":"2026-05-22","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"ISABEL","desc":"TIÃO","qtd":"2","und":"PCT","v_unit":40,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-05-22","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ISABEL","desc":"TIÃO","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-05-22","tipo":"Receita","categoria":"ACEROLA - POLPA","setor":"-","local":"BOI NA BRASA","desc":"","qtd":"7","und":"KG","v_unit":20,"valor":140,"sit":"Pago","obs":""},
-            {"data":"2026-05-23","tipo":"Receita","categoria":"OVOS","setor":"-","local":"TIÃOZINHO","desc":"","qtd":"10","und":"DZ","v_unit":10,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-05-24","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"ISMAEL ","desc":"EMBRAPA","qtd":"10","und":"PCT","v_unit":20,"valor":200,"sit":"Pago","obs":""},
-            {"data":"2026-05-24","tipo":"Receita","categoria":"OVOS","setor":"-","local":"TIÃOZINHO","desc":"","qtd":"5","und":"DZ","v_unit":10,"valor":50,"sit":"Pago","obs":""},
-            {"data":"2026-05-25","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MARCÃO","desc":"","qtd":"25","und":"KG","v_unit":18,"valor":450,"sit":"Pago","obs":""},
-            {"data":"2026-05-27","tipo":"Receita","categoria":"OVOS","setor":"-","local":"MERCI","desc":"","qtd":"7.5","und":"DZ","v_unit":10,"valor":75,"sit":"Pago","obs":""},
-            {"data":"2026-05-27","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MERCI","desc":"","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-05-27","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"12.5","und":"DZ","v_unit":10,"valor":125,"sit":"Pago","obs":""},
-            {"data":"2026-05-28","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"47","und":"KG","v_unit":20,"valor":940,"sit":"Pago","obs":""},
-            {"data":"2026-05-28","tipo":"Receita","categoria":"OVOS","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"2.5","und":"DZ","v_unit":10,"valor":25,"sit":"Pago","obs":""},
-            {"data":"2026-05-28","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"2","und":"PCT","v_unit":40,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-05-30","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"DIMAR","desc":"","qtd":"9","und":"KG","v_unit":18,"valor":162,"sit":"Pago","obs":""},
-            {"data":"2026-05-30","tipo":"Receita","categoria":"ACEROLA - POLPA","setor":"-","local":"HOTEL","desc":"","qtd":"6","und":"KG","v_unit":20,"valor":120,"sit":"Pago","obs":""},
-            {"data":"2026-05-30","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"HOTEL","desc":"","qtd":"10","und":"KG","v_unit":20,"valor":200,"sit":"Pago","obs":""},
-            {"data":"2026-05-30","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"12.5","und":"DZ","v_unit":10,"valor":125,"sit":"Pago","obs":""},
-            {"data":"2026-06-02","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"12.5","und":"DZ","v_unit":10,"valor":125,"sit":"Pago","obs":""},
-            {"data":"2026-06-06","tipo":"Receita","categoria":"OVOS","setor":"-","local":"TIÃOZINHO","desc":"","qtd":"3","und":"DZ","v_unit":10,"valor":30,"sit":"Pago","obs":""},
-            {"data":"2026-06-09","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"JULIANA","desc":"CAPUL","qtd":"3","und":"PCT","v_unit":40,"valor":120,"sit":"Pago","obs":""},
-            {"data":"2026-06-10","tipo":"Receita","categoria":"OVOS","setor":"-","local":"FERNANDA","desc":"TCU","qtd":"1","und":"DZ","v_unit":15,"valor":15,"sit":"Pago","obs":""},
-            {"data":"2026-06-10","tipo":"Receita","categoria":"OVOS","setor":"-","local":"MILENA","desc":"TCU","qtd":"1","und":"DZ","v_unit":15,"valor":15,"sit":"Pago","obs":""},
-            {"data":"2026-06-10","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MILENA TCU","desc":"","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-06-11","tipo":"Receita","categoria":"OVOS","setor":"-","local":"ERIKA TCU","desc":"","qtd":"1","und":"DZ","v_unit":15,"valor":15,"sit":"Pago","obs":""},
-            {"data":"2026-06-12","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"56","und":"KG","v_unit":18,"valor":1008,"sit":"Pago","obs":""},
-            {"data":"2026-06-14","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"15","und":"DZ","v_unit":10,"valor":150,"sit":"Pago","obs":""},
-            {"data":"2026-06-14","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MANOEL / REI DA LINGUIÇA","desc":"","qtd":"10","und":"KG","v_unit":18,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-06-17","tipo":"Receita","categoria":"OVOS","setor":"-","local":"TIÃOZINHO","desc":"","qtd":"10","und":"DZ","v_unit":10,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-06-20","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"DANILO","desc":" AVP","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-06-22","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"FERNANDA","desc":"ROBIM","qtd":"10","und":"KG","v_unit":10,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-06-22","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MANOEL","desc":"","qtd":"10","und":"KG","v_unit":18,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-06-22","tipo":"Receita","categoria":"OVOS","setor":"-","local":"MANOEL","desc":"","qtd":"5","und":"DZ","v_unit":10,"valor":50,"sit":"Pago","obs":""},
-            {"data":"2026-06-22","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MARCÃO","desc":"","qtd":"50","und":"KG","v_unit":18,"valor":900,"sit":"Pago","obs":""},
-            {"data":"2026-06-27","tipo":"Receita","categoria":"GRAVIOLA - POLPA S/SEM.","setor":"-","local":"JULIANE - RAFAEL","desc":"","qtd":"5","und":"KG","v_unit":20,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-06-27","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"JULIANE - RAFAEL","desc":"","qtd":"1","und":"PCT","v_unit":20,"valor":20,"sit":"Pago","obs":""},
-            {"data":"2026-06-30","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"BEIRA RIO - CONVENIÊNCIA","desc":"","qtd":"15","und":"KG","v_unit":20,"valor":300,"sit":"Pago","obs":""},
-            {"data":"2026-06-30","tipo":"Receita","categoria":"OVOS","setor":"-","local":"TIOZINHAO","desc":"","qtd":"7.5","und":"DZ","v_unit":10,"valor":75,"sit":"Pago","obs":""},
-            {"data":"2026-07-02","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"52","und":"KG","v_unit":18,"valor":936,"sit":"Pago","obs":""},
-            {"data":"2026-07-06","tipo":"Receita","categoria":"MARACUJÁ - POLPA C/SEM.","setor":"-","local":"CARMEN","desc":"EDNEI","qtd":"1","und":"KG","v_unit":20,"valor":20,"sit":"Pago","obs":""},
-            {"data":"2026-07-06","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"CARMEN","desc":"EDNEI","qtd":"8","und":"KG","v_unit":20,"valor":160,"sit":"Pago","obs":""},
-            {"data":"2026-07-06","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"10","und":"DZ","v_unit":10,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-07-06","tipo":"Receita","categoria":"MARACUJÁ - FRUTO","setor":"-","local":"SAMUEL - MOTORISTA CAPUL","desc":"","qtd":"100","und":"KG","v_unit":3,"valor":300,"sit":"Pago","obs":""},
-            {"data":"2026-07-07","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"LUCIANA DE FÁTIMA","desc":"","qtd":"4","und":"PCT","v_unit":40,"valor":160,"sit":"Pago","obs":""},
-            {"data":"2026-07-07","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"LUCIANA DE FÁTIMA","desc":"","qtd":"4","und":"KG","v_unit":20,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-07-13","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ADELCIO","desc":"","qtd":"1","und":"KG","v_unit":20,"valor":20,"sit":"Pago","obs":""},
-            {"data":"2026-07-13","tipo":"Receita","categoria":"OVOS","setor":"-","local":"TIÃOZINHO","desc":"","qtd":"7.5","und":"DZ","v_unit":10,"valor":75,"sit":"Pago","obs":""},
-            {"data":"2026-07-14","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"BEL","desc":"","qtd":"2","und":"PCT","v_unit":80,"valor":160,"sit":"Pago","obs":""},
-            {"data":"2026-07-14","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"BEL","desc":"","qtd":"3","und":"KG","v_unit":20,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-07-14","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"EMILY - BOI NA BRASA","desc":"","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-07-14","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"JÉSSICA - BOI NA BRASA","desc":"","qtd":"3","und":"KG","v_unit":20,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-07-14","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"12.5","und":"DZ","v_unit":10,"valor":125,"sit":"Pago","obs":""},
-            {"data":"2026-07-14","tipo":"Receita","categoria":"MARACUJÁ - FRUTO","setor":"-","local":"SAMUEL - MOTORISTA CAPUL","desc":"","qtd":"200","und":"KG","v_unit":3,"valor":600,"sit":"Pago","obs":""},
-            {"data":"2026-07-18","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"WELLINGTON","desc":"","qtd":"13","und":"KG","v_unit":20,"valor":260,"sit":"Pago","obs":""},
-            {"data":"2026-07-21","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"15","und":"DZ","v_unit":10,"valor":150,"sit":"Pago","obs":""},
-            {"data":"2026-07-22","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"MIGUEL CECHINATO","desc":"","qtd":"1","und":"PCT","v_unit":20,"valor":20,"sit":"Pago","obs":""},
-            {"data":"2026-07-24","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MARCÃO","desc":"","qtd":"49","und":"KG","v_unit":18,"valor":882,"sit":"Pago","obs":""},
-            {"data":"2026-07-27","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"FERNANDA ROBIM","desc":"","qtd":"19","und":"KG","v_unit":20,"valor":380,"sit":"Pago","obs":""},
-            {"data":"2026-07-27","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"NEIA","desc":"","qtd":"35","und":"KG","v_unit":18,"valor":630,"sit":"Pago","obs":""},
-            {"data":"2026-07-27","tipo":"Receita","categoria":"MARACUJÁ - POLPA C/SEM.","setor":"-","local":"NEIA","desc":"","qtd":"10","und":"KG","v_unit":18,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-07-27","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"NEIA","desc":"","qtd":"5","und":"KG","v_unit":18,"valor":90,"sit":"Pago","obs":""},
-            {"data":"2026-07-27","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"10","und":"KG","v_unit":18,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-07-27","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"12.5","und":"DZ","v_unit":10,"valor":125,"sit":"Pago","obs":""},
-            {"data":"2026-07-27","tipo":"Receita","categoria":"MARACUJÁ - FRUTO","setor":"-","local":"SAMUEL - MOTORISTA CAPUL","desc":"","qtd":"177","und":"KG","v_unit":3,"valor":531,"sit":"Pago","obs":""},
-            {"data":"2026-07-30","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"DIMAR","desc":"","qtd":"11","und":"KG","v_unit":20,"valor":220,"sit":"Pago","obs":""},
-            {"data":"2026-07-30","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"10","und":"KG","v_unit":18,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-08-03","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ALEX AVP","desc":"","qtd":"3","und":"KG","v_unit":20,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-08-09","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ISMAEL","desc":"CONTABILIDADE","qtd":"5","und":"KG","v_unit":10,"valor":50,"sit":"Pago","obs":""},
-            {"data":"2026-08-09","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"VITOR - LOJA DE PEÇAS","desc":"","qtd":"4","und":"KG","v_unit":20,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-08-11","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"EMPORIO BURITIS","desc":"","qtd":"4","und":"PCT","v_unit":15,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-08-11","tipo":"Receita","categoria":"CAFÉ 500G","setor":"-","local":"EMPORIO BURITIS","desc":"","qtd":"1","und":"PCT","v_unit":30,"valor":30,"sit":"Pago","obs":""},
-            {"data":"2026-08-12","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"BOI NA BRASA","desc":"","qtd":"4","und":"KG","v_unit":20,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-08-17","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"CARMEM","desc":"EDNEI","qtd":"12","und":"KG","v_unit":20,"valor":240,"sit":"A receber","obs":""},
-            {"data":"2026-08-17","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"FERNANDA ROBIM","desc":"","qtd":"10","und":"KG","v_unit":20,"valor":200,"sit":"Pago","obs":""},
-            {"data":"2026-08-17","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"FERNANDA ROBIM","desc":"","qtd":"10","und":"KG","v_unit":20,"valor":200,"sit":"Pago","obs":""},
-            {"data":"2026-08-17","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ISABEL","desc":"","qtd":"3","und":"KG","v_unit":20,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-08-17","tipo":"Receita","categoria":"OVOS","setor":"-","local":"LUZIA FERREIRA","desc":"","qtd":"5","und":"DZ","v_unit":10,"valor":50,"sit":"Pago","obs":""},
-            {"data":"2026-08-17","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MANOEL","desc":"","qtd":"10","und":"KG","v_unit":18,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-08-18","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"46","und":"KG","v_unit":18,"valor":828,"sit":"Pago","obs":""},
-            {"data":"2026-08-24","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"AVP","desc":"","qtd":"12","und":"PCT","v_unit":15,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-08-24","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"CARMEN / EDNEI","desc":"","qtd":"10","und":"KG","v_unit":20,"valor":200,"sit":"A receber","obs":""},
-            {"data":"2026-08-24","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"EMILY - BOI NA BRASA","desc":"","qtd":"6","und":"KG","v_unit":20,"valor":120,"sit":"A receber","obs":""},
-            {"data":"2026-08-24","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"LAIANY","desc":"","qtd":"4","und":"KG","v_unit":20,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-08-24","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MANOEL","desc":"","qtd":"10","und":"KG","v_unit":18,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-08-24","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MARCÃO","desc":"","qtd":"50","und":"KG","v_unit":18,"valor":900,"sit":"A receber","obs":""},
-            {"data":"2026-08-25","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"LUANA HOTEL","desc":"","qtd":"10","und":"KG","v_unit":18,"valor":180,"sit":"Pago","obs":""},
-            {"data":"2026-08-25","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"15","und":"DZ","v_unit":10,"valor":150,"sit":"Pago","obs":""},
-            {"data":"2026-09-01","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"LANCHONETE FENIX","desc":"","qtd":"10","und":"KG","v_unit":20,"valor":200,"sit":"Pago","obs":""},
-            {"data":"2026-09-01","tipo":"Receita","categoria":"OVOS","setor":"-","local":"LUZIA FERREIRA","desc":"","qtd":"5","und":"DZ","v_unit":10,"valor":50,"sit":"Pago","obs":""},
-            {"data":"2026-09-01","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"NEIA","desc":"","qtd":"5","und":"KG","v_unit":20,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-09-01","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"NEIA","desc":"","qtd":"4","und":"KG","v_unit":18,"valor":72,"sit":"A receber","obs":""},
-            {"data":"2026-09-01","tipo":"Receita","categoria":"OVOS","setor":"-","local":"REI DA LINGUIÇA","desc":"","qtd":"10","und":"DZ","v_unit":10,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-09-02","tipo":"Receita","categoria":"OVOS","setor":"-","local":"ERIKA ","desc":"TCU","qtd":"3","und":"DZ","v_unit":15,"valor":45,"sit":"A receber","obs":""},
-            {"data":"2026-09-09","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"FABIANO ","desc":"TCU","qtd":"2","und":"PCT","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-09-09","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"FERNANDA ROBIM","desc":"","qtd":"10","und":"KG","v_unit":20,"valor":200,"sit":"Pago","obs":""},
-            {"data":"2026-09-09","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"MILENA ","desc":"TCU","qtd":"2","und":"KG","v_unit":20,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-09-10","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"YURI","desc":"","qtd":"4","und":"KG","v_unit":20,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-09-21","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"ZÉ DO SOCORRO","desc":"","qtd":"75","und":"KG","v_unit":18,"valor":1350,"sit":"A receber","obs":""},
-            {"data":"2026-09-21","tipo":"Receita","categoria":"MARACUJÁ - POLPA S/SEM.","setor":"-","local":"JULIANE RAFAEL","desc":"","qtd":"5","und":"KG","v_unit":20,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-09-21","tipo":"Receita","categoria":"CAFÉ 250G","setor":"-","local":"JULIANE RAFAEL","desc":"","qtd":"2","und":"PCT","v_unit":20,"valor":40,"sit":"A receber","obs":""},
-            {"data":"2026-01-01","tipo":"Despesa","categoria":"INSUMOS","setor":"GADO","local":"ZOOFLORA 01X03","desc":"SAL PARA GADO","qtd":"40","und":"SACOS","v_unit":40.84,"valor":1633.87,"sit":"Pago","obs":""},
-            {"data":"2026-01-01","tipo":"Despesa","categoria":"POLPA DE MARACUJÁ","setor":"MARACUJÁ","local":"REINAN","desc":"","qtd":"180.33","und":"KG","v_unit":10,"valor":1803.3,"sit":"Pago","obs":""},
-            {"data":"2026-01-01","tipo":"Despesa","categoria":"POLPA DE GRAVIOLA","setor":"MARACUJÁ","local":"REINAN","desc":"","qtd":"37.55","und":"KG","v_unit":10,"valor":375.5,"sit":"Pago","obs":""},
-            {"data":"2026-01-02","tipo":"Despesa","categoria":"SALÁRIO","setor":"FUNCIONÁRIOS","local":"ALBERTO JUNIOR","desc":"FÉRIAS","qtd":"15","und":"DIA","v_unit":86.95,"valor":1304.25,"sit":"Pago","obs":""},
-            {"data":"2026-01-02","tipo":"Despesa","categoria":"EMPRÉSTIMO","setor":"ADMINISTRAÇÃO","local":"MARIA LÚCIA (MINHA MÃE)","desc":"","qtd":"1","und":"CONJUNTO","v_unit":938.12,"valor":938.12,"sit":"A pagar","obs":""},
-            {"data":"2026-01-03","tipo":"Despesa","categoria":"EMPRÉSTIMO","setor":"ADMINISTRAÇÃO","local":"MARIA LÚCIA (MINHA MÃE)","desc":"","qtd":"1","und":"CONJUNTO","v_unit":2000,"valor":2000,"sit":"A pagar","obs":""},
-            {"data":"2026-01-03","tipo":"Despesa","categoria":"SALÁRIO","setor":"FUNCIONÁRIOS","local":"ALBERTO JUNIOR","desc":"","qtd":1,"und":"MÊS","v_unit":1824.57,"valor":1824.57,"sit":"Pago","obs":""},
-            {"data":"2026-01-05","tipo":"Despesa","categoria":"MERCADO","setor":"ADMINISTRAÇÃO","local":"RESTAURANTE","desc":"ALMOÇO","qtd":"2","und":"CONJUNTO","v_unit":35.31,"valor":70.62,"sit":"Pago","obs":""},
-            {"data":"2026-01-05","tipo":"Despesa","categoria":"FARMÁCIA","setor":"ADMINISTRAÇÃO","local":"FARMÁCIA","desc":"MARIA LÚCIA","qtd":1,"und":"CONJUNTO","v_unit":4.6,"valor":4.6,"sit":"Pago","obs":""},
-            {"data":"2026-01-05","tipo":"Despesa","categoria":"ADUBO","setor":"ADMINISTRAÇÃO","local":"HOSPITAL SÃO LUCAS","desc":"MARIA LUCIA","qtd":1,"und":"CONJUNTO","v_unit":300,"valor":300,"sit":"Pago","obs":""},
-            {"data":"2026-01-05","tipo":"Despesa","categoria":"HERBICIDA","setor":"FAZENDA","local":"CAPUL","desc":"REGLONE SYNGENTA","qtd":20,"und":"LT","v_unit":10.25,"valor":205.02,"sit":"Pago","obs":""},
-            {"data":"2026-01-07","tipo":"Despesa","categoria":"INSUMOS","setor":"MARACUJÁ","local":"PLASTICOS SANTA RITA","desc":"EMBALAGEM P/POLPAS 1KG","qtd":5,"und":"KG","v_unit":25.7,"valor":128.5,"sit":"Pago","obs":""},
-            {"data":"2026-01-07","tipo":"Despesa","categoria":"INSUMOS","setor":"MARACUJÁ","local":"PLASTICOS SANTA RITA","desc":"COPOS 300ML","qtd":300,"und":"PÇ","v_unit":0.12,"valor":36.06,"sit":"Pago","obs":""},
-            {"data":"2026-01-07","tipo":"Despesa","categoria":"INSUMOS","setor":"MARACUJÁ","local":"PLASTICOS SANTA RITA","desc":"CARTELAS DE OVOS","qtd":0,"und":"","v_unit":0,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-01-08","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"INSUMOS","local":"LEROY MERLIN","desc":"INSUMOS GERAL","qtd":1,"und":"CONJUNTO","v_unit":309.9,"valor":309.9,"sit":"Pago","obs":""},
-            {"data":"2026-01-08","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"CLORETO DE POTÁSSIO TERRENA","qtd":100,"und":"KG","v_unit":4.22,"valor":422.95,"sit":"Pago","obs":""},
-            {"data":"2026-01-08","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"UREIA AGRICOLA","qtd":100,"und":"KG","v_unit":3.75,"valor":375.94,"sit":"Pago","obs":""},
-            {"data":"2026-01-08","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"MAP PURIFIC","qtd":25,"und":"KG","v_unit":9.6,"valor":240.23,"sit":"Pago","obs":""},
-            {"data":"2026-01-08","tipo":"Despesa","categoria":"INSUMOS","setor":"CASA","local":"REI DA LINGUIÇA","desc":"COMPRAS","qtd":2,"und":"KG","v_unit":24,"valor":48,"sit":"Pago","obs":""},
-            {"data":"2026-01-09","tipo":"Despesa","categoria":"HERBICIDA","setor":"CAFÉ 03","local":"VEGETAL","desc":"YAMATO","qtd":"1","und":"LT","v_unit":800,"valor":800,"sit":"Pago","obs":""},
-            {"data":"2026-01-09","tipo":"Despesa","categoria":"INSUMOS","setor":"CÃES","local":"MUNDO ANIMAL","desc":"DESPESAS","qtd":0,"und":"CONJUNTO","v_unit":0,"valor":306.8,"sit":"Pago","obs":""},
-            {"data":"2026-01-09","tipo":"Despesa","categoria":"FARMÁCIA","setor":"ADMINISTRAÇÃO","local":"FARMÁCIA","desc":"ADIMISTRAÇÃO","qtd":1,"und":"CONJUNTO","v_unit":5.63,"valor":5.63,"sit":"Pago","obs":""},
-            {"data":"2026-01-09","tipo":"Despesa","categoria":"INSUMOS","setor":"ADMINISTRAÇÃO","local":"AMAZON","desc":"VENTILADOR","qtd":1,"und":"PÇ","v_unit":233.23,"valor":233.23,"sit":"Pago","obs":""},
-            {"data":"2026-01-09","tipo":"Despesa","categoria":"GASOLINA","setor":"INSUMOS","local":"POSTO BEIRA RIO","desc":"COMBUSTÍVEL","qtd":1,"und":"CONJUNTO","v_unit":159.75,"valor":159.75,"sit":"Pago","obs":""},
-            {"data":"2026-01-09","tipo":"Despesa","categoria":"INSUMOS","setor":"CÃES","local":"MUNDO ANIMAL","desc":"DESPESAS","qtd":0,"und":"CONJUNTO","v_unit":0,"valor":170,"sit":"Pago","obs":""},
-            {"data":"2026-01-10","tipo":"Despesa","categoria":"INSUMOS","setor":"ADMINISTRAÇÃO","local":"CARTÃO DE CRÉDITO","desc":"","qtd":"1","und":"CONJUNTO","v_unit":4088.96,"valor":4088.96,"sit":"Pago","obs":""},
-            {"data":"2026-01-12","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO POSTURA","qtd":40,"und":"KG","v_unit":1.8,"valor":72.27,"sit":"Pago","obs":""},
-            {"data":"2026-01-12","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO DE CRESCIMENTO","qtd":20,"und":"KG","v_unit":2.3,"valor":46.09,"sit":"Pago","obs":""},
-            {"data":"2026-01-12","tipo":"Despesa","categoria":"INSUMOS","setor":"CASA","local":"AZM SUPERMERCADO","desc":"COMPRAS","qtd":0,"und":"","v_unit":0,"valor":372.63,"sit":"Pago","obs":""},
-            {"data":"2026-01-13","tipo":"Despesa","categoria":"PESSOAL","setor":"ADMINISTRAÇÃO","local":"MARLOS","desc":"","qtd":1,"und":"CONJUNTO","v_unit":115,"valor":115,"sit":"Pago","obs":""},
-            {"data":"2026-01-15","tipo":"Despesa","categoria":"MERCADO","setor":"ADMINISTRAÇÃO","local":"MARLOS","desc":"RESTAURANTE","qtd":1,"und":"CONJUNTO","v_unit":49.62,"valor":49.62,"sit":"Pago","obs":""},
-            {"data":"2026-01-15","tipo":"Despesa","categoria":"INSUMOS","setor":"MARACUJÁ","local":"PLASTICOS SANTA RITA","desc":"EMBALAGEM P/POLPAS 1KG","qtd":1,"und":"CONJUNTO","v_unit":242.17,"valor":242.17,"sit":"Pago","obs":""},
-            {"data":"2026-01-15","tipo":"Despesa","categoria":"INSUMOS","setor":"ADMINISTRAÇÃO","local":"ESTACIONAMENTO","desc":"","qtd":1,"und":"CONJUNTO","v_unit":12,"valor":12,"sit":"Pago","obs":""},
-            {"data":"2026-01-16","tipo":"Despesa","categoria":"BOLETO","setor":"","local":"CAPUL","desc":"","qtd":1,"und":"CONJUNTO","v_unit":1969.37,"valor":1969.37,"sit":"Pago","obs":""},
-            {"data":"2026-01-17","tipo":"Despesa","categoria":"INSUMOS","setor":"FAZENDA","local":"CAPUL","desc":"MAÇARICO","qtd":1,"und":"PÇ","v_unit":42.5,"valor":42.5,"sit":"Pago","obs":""},
-            {"data":"2026-01-17","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"OLEO VEGETAL STOLLER","qtd":5,"und":"LT","v_unit":26.08,"valor":130.4,"sit":"Pago","obs":""},
-            {"data":"2026-01-17","tipo":"Despesa","categoria":"FUNGICIDA","setor":"LAVOURAS","local":"CAPUL","desc":"RECOP ATAR","qtd":0,"und":"KG","v_unit":0,"valor":184.8,"sit":"Pago","obs":""},
-            {"data":"2026-01-17","tipo":"Despesa","categoria":"INSETICIDA","setor":"LAVOURAS","local":"CAPUL","desc":"POLYTRIM SYNGENTA","qtd":2,"und":"LT","v_unit":52.94,"valor":105.88,"sit":"Pago","obs":""},
-            {"data":"2026-01-17","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"INSUMOS","local":"CAPUL","desc":"TUBO JACTO","qtd":1,"und":"PÇ","v_unit":40.96,"valor":40.96,"sit":"Pago","obs":""},
-            {"data":"2026-01-17","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO DE CRESCIMENTO","qtd":40,"und":"KG","v_unit":1.95,"valor":78.28,"sit":"Pago","obs":""},
-            {"data":"2026-01-17","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"SUPERMERCADO","desc":"AÇUCAR CRISTAL","qtd":30,"und":"KG","v_unit":2.88,"valor":86.64,"sit":"Pago","obs":""},
-            {"data":"2026-01-17","tipo":"Despesa","categoria":"INSUMOS","setor":"CASA","local":"SUPERMERCADO","desc":"COMPRAS","qtd":0,"und":"","v_unit":0,"valor":279.38,"sit":"Pago","obs":""},
-            {"data":"2026-01-17","tipo":"Despesa","categoria":"INSUMOS","setor":"CASA","local":"AZM SUPERMERCADO","desc":"COMPRAS","qtd":0,"und":"","v_unit":0,"valor":33.9,"sit":"Pago","obs":""},
-            {"data":"2026-01-19","tipo":"Despesa","categoria":"INSUMOS","setor":"ADMINISTRAÇÃO","local":"TELEFONE PRÉ-PAGO","desc":"61995140083","qtd":1,"und":"CONJUNTO","v_unit":20,"valor":20,"sit":"Pago","obs":""},
-            {"data":"2026-01-19","tipo":"Despesa","categoria":"DIÁRIAS","setor":"","local":"JOSIMAR","desc":"MÃO DE OBRA","qtd":1,"und":"DIA","v_unit":120,"valor":120,"sit":"Pago","obs":""},
-            {"data":"2026-01-20","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"IMPOSTO","desc":"SIMPLES NACIONAL","qtd":1,"und":"CONJUNTO","v_unit":18,"valor":18,"sit":"Pago","obs":""},
-            {"data":"2026-01-20","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"TRATOR","local":"CLEBER BARRETO","desc":"","qtd":1,"und":"CONJUNTO","v_unit":340,"valor":340,"sit":"Pago","obs":""},
-            {"data":"2026-01-21","tipo":"Despesa","categoria":"INSUMOS","setor":"CASA","local":"SUPERMERCADO","desc":"COMPRAS","qtd":1,"und":"CONJUNTO","v_unit":14.62,"valor":14.62,"sit":"Pago","obs":""},
-            {"data":"2026-01-21","tipo":"Despesa","categoria":"GASOLINA","setor":"ADMINISTRAÇÃO","local":"SÃO ROQUE","desc":"SAVEIRO","qtd":1,"und":"CONJUNTO","v_unit":283.18,"valor":283.18,"sit":"Pago","obs":""},
-            {"data":"2026-01-22","tipo":"Despesa","categoria":"INSUMOS","setor":"TRATOR","local":"MAURÍLIO","desc":"ÓLEO DE MOTOR","qtd":40,"und":"LT","v_unit":7.5,"valor":300,"sit":"Pago","obs":""},
-            {"data":"2026-01-22","tipo":"Despesa","categoria":"PROLABORE","setor":"ADMINISTRAÇÃO","local":"MARLOS","desc":"","qtd":1,"und":"CONJUNTO","v_unit":80,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-01-23","tipo":"Despesa","categoria":"INSUMOS","setor":"FAZENDA","local":"AVP AGRONEGÓCIOS","desc":"MOTOSSERRA","qtd":1,"und":"PÇ","v_unit":1990,"valor":1990,"sit":"Pago","obs":""},
-            {"data":"2026-01-23","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"REI DA LINGUIÇA","desc":"","qtd":15,"und":"CONJUNTO","v_unit":10,"valor":150,"sit":"Pago","obs":""},
-            {"data":"2026-01-23","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"TRATOR","local":"AGROPEÇAS","desc":"GANCHO TRATOR","qtd":1,"und":"CONJUNTO","v_unit":130,"valor":130,"sit":"Pago","obs":""},
-            {"data":"2026-01-23","tipo":"Despesa","categoria":"MERCADO","setor":"ADMINISTRAÇÃO","local":"BOI NA BRASA","desc":"ALMOÇO","qtd":1,"und":"CONJUNTO","v_unit":83.27,"valor":83.27,"sit":"Pago","obs":""},
-            {"data":"2026-01-23","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"CLORETO DE POTÁSSIO 50KG","qtd":1,"und":"SACOS","v_unit":216.9,"valor":216.9,"sit":"Pago","obs":""},
-            {"data":"2026-01-23","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO POSTURA","qtd":40,"und":"KG","v_unit":1.86,"valor":74.74,"sit":"Pago","obs":""},
-            {"data":"2026-01-23","tipo":"Despesa","categoria":"RAÇÃO","setor":"CAVALOS","local":"CAPUL","desc":"RAÇÃO CAVALOS 40KG","qtd":1,"und":"SACOS","v_unit":74.77,"valor":74.77,"sit":"Pago","obs":""},
-            {"data":"2026-01-23","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"URÉIA 50KG","qtd":2,"und":"SACOS","v_unit":191.95,"valor":383.9,"sit":"Pago","obs":""},
-            {"data":"2026-01-23","tipo":"Despesa","categoria":"GASOLINA","setor":"ADMINISTRAÇÃO","local":"POSTO MONTRELLATO","desc":"STRADA","qtd":1,"und":"CONJUNTO","v_unit":294.04,"valor":294.04,"sit":"Pago","obs":""},
-            {"data":"2026-01-23","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"SUPERMERCADO","desc":"","qtd":1,"und":"CONJUNTO","v_unit":218.72,"valor":218.72,"sit":"Pago","obs":""},
-            {"data":"2026-01-23","tipo":"Despesa","categoria":"RAÇÃO","setor":"CÃES","local":"CAPUL","desc":"RAÇÃO CACHORRO 14KG","qtd":1,"und":"SACOS","v_unit":68.8,"valor":68.8,"sit":"Pago","obs":""},
-            {"data":"2026-01-24","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"CASA","local":"ELÉTRICA PINHEIRO","desc":"MATERIAL ELÉTRICO","qtd":190,"und":"CONJUNTO","v_unit":1,"valor":190,"sit":"Pago","obs":""},
-            {"data":"2026-01-24","tipo":"Despesa","categoria":"DIESEL","setor":"TRATOR","local":"POSTO BEIRA RIO","desc":"","qtd":464.8,"und":"CONJUNTO","v_unit":1,"valor":464.8,"sit":"Pago","obs":""},
-            {"data":"2026-01-24","tipo":"Despesa","categoria":"GASOLINA","setor":"FAZENDA","local":"POSTO BEIRA RIO","desc":"","qtd":179.53,"und":"CONJUNTO","v_unit":1,"valor":179.53,"sit":"Pago","obs":""},
-            {"data":"2026-01-24","tipo":"Despesa","categoria":"INSUMOS","setor":"TRATOR","local":"POSTO 3M","desc":"ÓLEO DE MOTOR","qtd":2,"und":"LT","v_unit":47.5,"valor":95,"sit":"Pago","obs":""},
-            {"data":"2026-01-25","tipo":"Despesa","categoria":"INSUMOS","setor":"MARACUJÁ","local":"REINAN","desc":"POLPA DE MARACUJÁ","qtd":202.35,"und":"KG","v_unit":10,"valor":2023.5,"sit":"Pago","obs":""},
-            {"data":"2026-01-26","tipo":"Despesa","categoria":"PROLABORE","setor":"ADMINISTRAÇÃO","local":"MARLOS","desc":"","qtd":1,"und":"CONJUNTO","v_unit":1400,"valor":1400,"sit":"Pago","obs":""},
-            {"data":"2026-01-27","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"TRATOR","local":"WALTER TEIXEIRA","desc":"TRATOR - MANGUEIRAS COMBUSTÍVEL","qtd":1,"und":"CONJUNTO","v_unit":349.78,"valor":349.78,"sit":"Pago","obs":""},
-            {"data":"2026-01-28","tipo":"Despesa","categoria":"INSUMOS","setor":"CASA","local":"CEMIG","desc":"TIO PEDRO","qtd":1,"und":"MÊS","v_unit":57.96,"valor":57.96,"sit":"Pago","obs":""},
-            {"data":"2026-01-28","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO INICIAL","qtd":40,"und":"KG","v_unit":2.01,"valor":80.55,"sit":"Pago","obs":""},
-            {"data":"2026-01-29","tipo":"Despesa","categoria":"GASOLINA","setor":"ADMINISTRAÇÃO","local":"POSTO MONUMENTAL","desc":"SAVEIRO","qtd":1,"und":"CONJUNTO","v_unit":239.52,"valor":239.52,"sit":"Pago","obs":""},
-            {"data":"2026-01-30","tipo":"Despesa","categoria":"BACTERICIDA","setor":"LAVOURAS","local":"VEGETAL","desc":"MANZATE 750WG","qtd":2,"und":"KG","v_unit":40,"valor":80,"sit":"Pago","obs":""},
-            {"data":"2026-01-30","tipo":"Despesa","categoria":"INSETICIDA","setor":"LAVOURAS","local":"VEGETAL","desc":"CLOFENAPIR CCAB 240","qtd":5,"und":"LT","v_unit":56,"valor":280,"sit":"Pago","obs":""},
-            {"data":"2026-01-30","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"CLORETO DE POTÁSSIO","qtd":50,"und":"KG","v_unit":4.33,"valor":216.9,"sit":"Pago","obs":""},
-            {"data":"2026-01-30","tipo":"Despesa","categoria":"RAÇÃO","setor":"PEIXES","local":"CAPUL","desc":"RAÇÃO DE PEIXE","qtd":25,"und":"KG","v_unit":4.63,"valor":115.95,"sit":"Pago","obs":""},
-            {"data":"2026-01-30","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"SULFATO DE AMÔNIA","qtd":50,"und":"KG","v_unit":2.44,"valor":122.15,"sit":"Pago","obs":""},
-            {"data":"2026-01-30","tipo":"Despesa","categoria":"ADUBO FOLIAR","setor":"LAVOURAS","local":"CAPUL","desc":"AMINOSAN","qtd":1,"und":"LT","v_unit":36.8,"valor":36.8,"sit":"Pago","obs":""},
-            {"data":"2026-01-30","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO DE CRESCIMENTO","qtd":40,"und":"KG","v_unit":1.95,"valor":78.01,"sit":"Pago","obs":""},
-            {"data":"2026-01-30","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"IRRIGAÇÃO","local":"CAPUL","desc":"LUVA 75MM","qtd":2,"und":"PÇ","v_unit":9.15,"valor":18.3,"sit":"Pago","obs":""},
-            {"data":"2026-01-30","tipo":"Despesa","categoria":"INSUMOS","setor":"FAZENDA","local":"CAPUL","desc":"CHAVE AJUSTÁVEL","qtd":1,"und":"PÇ","v_unit":62.65,"valor":62.65,"sit":"Pago","obs":""},
-            {"data":"2026-01-30","tipo":"Despesa","categoria":"INSUMOS","setor":"CASA","local":"CAPUL","desc":"PINO BOB ESPONJA","qtd":2,"und":"PÇ","v_unit":7.82,"valor":15.65,"sit":"Pago","obs":""},
-            {"data":"2026-01-30","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"IRRIGAÇÃO","local":"SOLOVITA","desc":"","qtd":1,"und":"PÇ","v_unit":7.8,"valor":7.8,"sit":"Pago","obs":""},
-            {"data":"2026-01-30","tipo":"Despesa","categoria":"INSETICIDA","setor":"CASA","local":"TREVO GÁS","desc":"GÁS","qtd":1,"und":"PÇ","v_unit":115,"valor":115,"sit":"Pago","obs":""},
-            {"data":"2026-01-31","tipo":"Despesa","categoria":"INSUMOS","setor":"GADO","local":"ZOOFLORA 02X03","desc":"SAL PARA GADO","qtd":40,"und":"SACOS","v_unit":40.84,"valor":1633.87,"sit":"Pago","obs":""},
-            {"data":"2026-02-02","tipo":"Despesa","categoria":"DIÁRIAS","setor":"FUNCIONÁRIOS","local":"JOSIMAR","desc":"","qtd":3,"und":"DIA","v_unit":120,"valor":360,"sit":"Pago","obs":""},
-            {"data":"2026-02-03","tipo":"Despesa","categoria":"FARMÁCIA","setor":"CASA","local":"FARMÁCIA","desc":"REMÉDIOS","qtd":1,"und":"CONJUNTO","v_unit":89.62,"valor":89.62,"sit":"Pago","obs":""},
-            {"data":"2026-02-06","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"SULFATO DE MANGANÊS 25KG","qtd":1,"und":"SACOS","v_unit":160.25,"valor":160.25,"sit":"Pago","obs":""},
-            {"data":"2026-02-06","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"SULFATO DE ZINCO 25KG","qtd":1,"und":"SACOS","v_unit":178.39,"valor":178.39,"sit":"Pago","obs":""},
-            {"data":"2026-02-06","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"MAP PURIFICADO 25KG","qtd":1,"und":"SACOS","v_unit":246.39,"valor":246.39,"sit":"Pago","obs":""},
-            {"data":"2026-02-06","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"UREIA 50KG","qtd":1,"und":"SACOS","v_unit":191.95,"valor":191.95,"sit":"Pago","obs":""},
-            {"data":"2026-02-06","tipo":"Despesa","categoria":"ADUBO FOLIAR","setor":"LAVOURAS","local":"CAPUL","desc":"AMINOSAN","qtd":10,"und":"LT","v_unit":28.84,"valor":288.49,"sit":"Pago","obs":""},
-            {"data":"2026-02-06","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO POSTURA","qtd":40,"und":"KG","v_unit":1.86,"valor":74.74,"sit":"Pago","obs":""},
-            {"data":"2026-02-06","tipo":"Despesa","categoria":"INSUMOS","setor":"LAVOURAS","local":"CAPUL","desc":"LUVA IRRIGAÇÃO 75MM","qtd":2,"und":"PÇ","v_unit":9.15,"valor":18.3,"sit":"Pago","obs":""},
-            {"data":"2026-02-06","tipo":"Despesa","categoria":"INSUMOS","setor":"LAVOURAS","local":"CAPUL","desc":"CONCHA P/ CEREAIS","qtd":1,"und":"PÇ","v_unit":39.25,"valor":39.25,"sit":"Pago","obs":""},
-            {"data":"2026-02-06","tipo":"Despesa","categoria":"INSUMOS","setor":"FAZENDA","local":"CAPUL","desc":"TINTA AGRICOLA SPRAY","qtd":1,"und":"PÇ","v_unit":19.5,"valor":19.5,"sit":"Pago","obs":""},
-            {"data":"2026-02-06","tipo":"Despesa","categoria":"INSUMOS","setor":"FAZENDA","local":"AVP AGRONEGÓCIOS","desc":"LUBRIFICANTE STHIS","qtd":1,"und":"LT","v_unit":61.5,"valor":61.5,"sit":"Pago","obs":""},
-            {"data":"2026-02-06","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"AVP AGRONEGÓCIOS","desc":"CORRENTE MOTOSSERRA","qtd":1,"und":"PÇ","v_unit":86.5,"valor":86.5,"sit":"Pago","obs":""},
-            {"data":"2026-02-09","tipo":"Despesa","categoria":"DIÁRIAS","setor":"GADO","local":"JOSIMAR","desc":"LIMPEZA DO PASTO TIO PEDRO","qtd":1,"und":"CONJUNTO","v_unit":1000,"valor":1000,"sit":"Pago","obs":""},
-            {"data":"2026-02-10","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO POSTURA","qtd":80,"und":"KG","v_unit":1.75,"valor":140.51,"sit":"Pago","obs":""},
-            {"data":"2026-02-13","tipo":"Despesa","categoria":"DIÁRIAS","setor":"CAFÉ 03","local":"JOSIMAR","desc":"","qtd":"4","und":"DIA","v_unit":120,"valor":480,"sit":"Pago","obs":""},
-            {"data":"2026-02-13","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"NOGUEIRA","desc":"","qtd":0,"und":"","v_unit":0,"valor":82.05,"sit":"Pago","obs":""},
-            {"data":"2026-02-13","tipo":"Despesa","categoria":"DIESEL","setor":"TRATOR","local":"POSTO BEIRA RIO","desc":"","qtd":60,"und":"LT","v_unit":6.09,"valor":365.4,"sit":"Pago","obs":""},
-            {"data":"2026-02-13","tipo":"Despesa","categoria":"GASOLINA","setor":"ADMINISTRAÇÃO","local":"POSTO BEIRA RIO","desc":"STRADA","qtd":"0","und":"","v_unit":0,"valor":0,"sit":"Pago","obs":""},
-            {"data":"2026-02-14","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"SUPERMERCADO","desc":"","qtd":0,"und":"","v_unit":0,"valor":129.69,"sit":"Pago","obs":""},
-            {"data":"2026-02-15","tipo":"Despesa","categoria":"INSUMOS","setor":"MARACUJÁ","local":"REINAN","desc":"POLPA DE MARACUJÁ","qtd":206.4,"und":"KG","v_unit":10,"valor":2064,"sit":"Pago","obs":""},
-            {"data":"2026-02-23","tipo":"Despesa","categoria":"INSUMOS","setor":"FAZENDA","local":"AVP AGRONEGÓCIOS","desc":"LAMINA ROSSADEIRA","qtd":1,"und":"PÇ","v_unit":69,"valor":69,"sit":"Pago","obs":""},
-            {"data":"2026-02-23","tipo":"Despesa","categoria":"INSUMOS","setor":"FUNCIONÁRIOS","local":"AVP AGRONEGÓCIOS","desc":"BOTA DE BORRACHA","qtd":1,"und":"PÇ","v_unit":59,"valor":59,"sit":"Pago","obs":""},
-            {"data":"2026-03-02","tipo":"Despesa","categoria":"INSUMOS","setor":"GADO","local":"ZOOFLORA 03X03","desc":"SAL PARA GADO","qtd":40,"und":"SACOS","v_unit":40.84,"valor":1633.87,"sit":"Pago","obs":""},
-            {"data":"2026-03-02","tipo":"Despesa","categoria":"IMPOSTOS","setor":"ADMINISTRAÇÃO","local":"CAPUL","desc":"COTA CAPTAL","qtd":"1","und":"MÊS","v_unit":188.3,"valor":188.3,"sit":"Pago","obs":""},
-            {"data":"2026-03-02","tipo":"Despesa","categoria":"SALÁRIO","setor":"FUNCIONÁRIOS","local":"ALBERTO JUNIOR","desc":"","qtd":"1","und":"MÊS","v_unit":1948.97,"valor":1948.97,"sit":"Pago","obs":""},
-            {"data":"2026-03-02","tipo":"Despesa","categoria":"SEVIÇOS CONTÁBEIS","setor":"ADMINISTRAÇÃO","local":"CONTABILIDADE PIMENTEL","desc":"","qtd":"1","und":"MÊS","v_unit":701.81,"valor":701.81,"sit":"Pago","obs":""},
-            {"data":"2026-03-08","tipo":"Despesa","categoria":"INSUMOS","setor":"MARACUJÁ","local":"REINAN","desc":"POLPA DE MARACUJÁ","qtd":202.65,"und":"KG","v_unit":10,"valor":2026.5,"sit":"Pago","obs":""},
-            {"data":"2026-03-08","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"AVP AGRONEGÓCIOS","desc":"VELA DE IGNIÇÃO","qtd":1,"und":"PÇ","v_unit":35.5,"valor":35.5,"sit":"Pago","obs":""},
-            {"data":"2026-03-08","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"AVP AGRONEGÓCIOS","desc":"CARBURADOR C1S S3H","qtd":1,"und":"PÇ","v_unit":303,"valor":303,"sit":"Pago","obs":""},
-            {"data":"2026-03-08","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"AVP AGRONEGÓCIOS","desc":"FILTRO ADICIONAL","qtd":1,"und":"PÇ","v_unit":12.5,"valor":12.5,"sit":"Pago","obs":""},
-            {"data":"2026-03-08","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"AVP AGRONEGÓCIOS","desc":"MÃO DE OBRA ( ROÇADEIRA )","qtd":1,"und":"PÇ","v_unit":100,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-03-14","tipo":"Despesa","categoria":"HERBICIDA","setor":"LAVOURAS","local":"CAPUL","desc":"GLUFOSINATO","qtd":5,"und":"LT","v_unit":24.37,"valor":121.88,"sit":"Pago","obs":""},
-            {"data":"2026-03-14","tipo":"Despesa","categoria":"HERBICIDA","setor":"LAVOURAS","local":"CAPUL","desc":"ROUNDUP","qtd":5,"und":"KG","v_unit":38.45,"valor":192.29,"sit":"Pago","obs":""},
-            {"data":"2026-03-14","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"URÉIA 50KG","qtd":1,"und":"SACOS","v_unit":259.75,"valor":259.75,"sit":"Pago","obs":""},
-            {"data":"2026-03-14","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"CLORETO DE POTÁSSIO 50KG","qtd":1,"und":"SACOS","v_unit":218.31,"valor":218.31,"sit":"Pago","obs":""},
-            {"data":"2026-03-14","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO DE CRESCIMENTO","qtd":40,"und":"KG","v_unit":3.65,"valor":146,"sit":"Pago","obs":""},
-            {"data":"2026-03-14","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO POSTURA","qtd":80,"und":"KG","v_unit":1.86,"valor":149.48,"sit":"Pago","obs":""},
-            {"data":"2026-03-14","tipo":"Despesa","categoria":"RAÇÃO","setor":"GADO","local":"CAPUL","desc":"MILHO MOÍDO 40 KG","qtd":1,"und":"SACOS","v_unit":60.44,"valor":60.44,"sit":"Pago","obs":""},
-            {"data":"2026-03-17","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO DE POSTURA","qtd":80,"und":"KG","v_unit":1.75,"valor":140.51,"sit":"Pago","obs":""},
-            {"data":"2026-03-20","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"SUPERMERCADO","desc":"","qtd":0,"und":"CONJUNTO","v_unit":0,"valor":33.5,"sit":"Pago","obs":""},
-            {"data":"2026-03-20","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"SUPERMERCADO","desc":"","qtd":0,"und":"CONJUNTO","v_unit":0,"valor":218.94,"sit":"Pago","obs":""},
-            {"data":"2026-03-25","tipo":"Despesa","categoria":"GASOLINA","setor":"ADMINISTRAÇÃO","local":"POSTO BEIRA RIO","desc":"COMBUSTIVEL MARCELA","qtd":"19","und":"LT","v_unit":7.89,"valor":150,"sit":"Pago","obs":""},
-            {"data":"2026-03-25","tipo":"Despesa","categoria":"RAÇÃO","setor":"CAVALOS","local":"CAPUL","desc":"RAÇÃO EQUINA","qtd":80,"und":"KG","v_unit":1.76,"valor":140.89,"sit":"Pago","obs":""},
-            {"data":"2026-03-25","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"CASA","local":"SUPERMERCADO","desc":"COMPRAS","qtd":0,"und":"CONJUNTO","v_unit":0,"valor":275.32,"sit":"Pago","obs":""},
-            {"data":"2026-03-26","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"MARACUJÁ","local":"CAPUL","desc":"ANALISE FOLIAR","qtd":1,"und":"SERVIÇO","v_unit":55,"valor":55,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Despesa","categoria":"DIESEL","setor":"TRATOR","local":"MONTRELATO","desc":"ÓLEO DIESEL","qtd":50,"und":"LT","v_unit":8.2,"valor":410,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Despesa","categoria":"GASOLINA","setor":"FAZENDA","local":"MONTRELATO","desc":"","qtd":30,"und":"LT","v_unit":6.45,"valor":193.5,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"IRRIGAÇÃO","local":"AVP AGRONEGÓCIOS","desc":"ADESIVO PLÁSTICO","qtd":1,"und":"PÇ","v_unit":16.95,"valor":16.95,"sit":"Pago","obs":""},
-            {"data":"2026-03-28","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"GADO","local":"ELÉTRICA PINHEIRO","desc":"BOIA PARA BEBEDOURO","qtd":3,"und":"PÇ","v_unit":12,"valor":36,"sit":"Pago","obs":""},
-            {"data":"2026-03-31","tipo":"Despesa","categoria":"GASOLINA","setor":"FAZENDA","local":"POSTO DE COMBUSTÍVEL","desc":"","qtd":43.93,"und":"LT","v_unit":6.45,"valor":283.38,"sit":"Pago","obs":""},
-            {"data":"2026-04-01","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"CASA","local":"SUPERMERCADO","desc":"COMPRAS","qtd":0,"und":"CONJUNTO","v_unit":0,"valor":362,"sit":"Pago","obs":""},
-            {"data":"2026-04-04","tipo":"Despesa","categoria":"INSETICIDA","setor":"LAVOURAS","local":"CAPUL","desc":"SULFETO SK","qtd":1,"und":"LT","v_unit":56.39,"valor":56.39,"sit":"Pago","obs":""},
-            {"data":"2026-04-04","tipo":"Despesa","categoria":"ADUBOS","setor":"LAVOURAS","local":"CAPUL","desc":"MAP PURIFICADO 25KG","qtd":2,"und":"SACOS","v_unit":245.61,"valor":491.22,"sit":"Pago","obs":""},
-            {"data":"2026-04-04","tipo":"Despesa","categoria":"ADUBO FOLIAR","setor":"LAVOURAS","local":"CAPUL","desc":"MANGANÊS ULTRA","qtd":25,"und":"KG","v_unit":6.47,"valor":161.77,"sit":"Pago","obs":""},
-            {"data":"2026-04-04","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"CLORETO DE POTÁSSIO 50KG","qtd":2,"und":"SACOS","v_unit":218.96,"valor":437.92,"sit":"Pago","obs":""},
-            {"data":"2026-04-04","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"CAPUL","desc":"BICO JACTO LEQUE","qtd":4,"und":"PÇ","v_unit":11.39,"valor":45.59,"sit":"Pago","obs":""},
-            {"data":"2026-04-04","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"AVP AGRONEGÓCIOS","desc":"CABO DO ACELERADOR","qtd":1,"und":"PÇ","v_unit":126,"valor":126,"sit":"Pago","obs":""},
-            {"data":"2026-04-04","tipo":"Despesa","categoria":"INSETICIDA","setor":"CAFÉ 02","local":"VEGETAL","desc":"CERCOBIN 875 WG","qtd":2,"und":"KG","v_unit":92.67,"valor":185.35,"sit":"Pago","obs":""},
-            {"data":"2026-04-07","tipo":"Despesa","categoria":"DIÁRIAS","setor":"FUNCIONÁRIOS","local":"SUARI","desc":"MÃO DE OBRA","qtd":0.5,"und":"DIA","v_unit":120,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-04-07","tipo":"Despesa","categoria":"DIÁRIAS","setor":"FUNCIONÁRIOS","local":"SUARI","desc":"MÃO DE OBRA","qtd":0.5,"und":"DIA","v_unit":120,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-04-16","tipo":"Despesa","categoria":"SEVIÇOS CONTÁBEIS","setor":"ADMINISTRAÇÃO","local":"CONTABILIDADE PIMENTEL","desc":"SERVIÇOS CONTÁBEIS","qtd":1,"und":"MÊS","v_unit":727.81,"valor":727.81,"sit":"Pago","obs":""},
-            {"data":"2026-04-18","tipo":"Despesa","categoria":"PROLABORE","setor":"ADMINISTRAÇÃO","local":"MARIA LÚCIA (MINHA MÃE)","desc":"","qtd":0,"und":"","v_unit":0,"valor":98,"sit":"Pago","obs":""},
-            {"data":"2026-04-18","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"REI DA LINGUIÇA","desc":"COMPRAS","qtd":0,"und":"CONJUNTO","v_unit":0,"valor":120,"sit":"Pago","obs":""},
-            {"data":"2026-04-18","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"SUPERMERCADO","desc":"COMPRAS","qtd":0,"und":"CONJUNTO","v_unit":0,"valor":30,"sit":"Pago","obs":""},
-            {"data":"2026-04-18","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO POSTURA","qtd":80,"und":"KG","v_unit":1.87,"valor":149.82,"sit":"Pago","obs":""},
-            {"data":"2026-04-18","tipo":"Despesa","categoria":"RAÇÃO","setor":"CÃES","local":"CAPUL","desc":"RAÇÃO CACHORRO 14KG","qtd":14,"und":"KG","v_unit":4.91,"valor":68.8,"sit":"Pago","obs":""},
-            {"data":"2026-04-18","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"MILHO MOÍDO 40 KG","qtd":40,"und":"KG","v_unit":1.54,"valor":61.69,"sit":"Pago","obs":""},
-            {"data":"2026-04-22","tipo":"Despesa","categoria":"GASOLINA","setor":"ADMINISTRAÇÃO","local":"POSTO DE COMBUSTÍVEL","desc":"STRADA","qtd":0,"und":"LT","v_unit":0,"valor":150,"sit":"Pago","obs":""},
-            {"data":"2026-04-22","tipo":"Despesa","categoria":"PROLABORE","setor":"ADMINISTRAÇÃO","local":"SUPERMERCADO","desc":"MARIA LUCIA - RETIRADA","qtd":1,"und":"DIA","v_unit":60,"valor":60,"sit":"Pago","obs":""},
-            {"data":"2026-04-22","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"CASA","local":"SUPERMERCADO","desc":"LAMPADAS","qtd":1,"und":"PÇ","v_unit":13,"valor":13,"sit":"Pago","obs":""},
-            {"data":"2026-04-22","tipo":"Despesa","categoria":"MERCADO","setor":"ADMINISTRAÇÃO","local":"RESTAURANTE","desc":"ALMOÇO","qtd":1,"und":"PÇ","v_unit":40,"valor":40,"sit":"Pago","obs":""},
-            {"data":"2026-04-30","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO POSTURA","qtd":120,"und":"KG","v_unit":1.76,"valor":211.25,"sit":"Pago","obs":""},
-            {"data":"2026-05-02","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"CAVALOS","local":"AVP AGRONEGÓCIOS","desc":"BARRIGUEIRA GRILON 24","qtd":1,"und":"PÇ","v_unit":47.6,"valor":47.6,"sit":"Pago","obs":""},
-            {"data":"2026-05-02","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"CLORETO DE POT 1.0.57 TERRENA","qtd":200,"und":"KG","v_unit":4.52,"valor":905.41,"sit":"Pago","obs":""},
-            {"data":"2026-05-02","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"UREIA AGRIC 46.00","qtd":100,"und":"KG","v_unit":5.77,"valor":577.63,"sit":"Pago","obs":""},
-            {"data":"2026-05-02","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"SULF.AMONIA 21.00","qtd":200,"und":"KG","v_unit":2.76,"valor":553.48,"sit":"Pago","obs":""},
-            {"data":"2026-05-02","tipo":"Despesa","categoria":"INSETICIDA","setor":"LAVOURAS","local":"CAPUL","desc":"POLYTRIM SYNGENTA","qtd":2,"und":"LT","v_unit":52.13,"valor":104.27,"sit":"Pago","obs":""},
-            {"data":"2026-05-02","tipo":"Despesa","categoria":"HERBICIDA","setor":"LAVOURAS","local":"CAPUL","desc":"ZAPP QI SYNGENYA","qtd":5,"und":"LT","v_unit":29.67,"valor":148.36,"sit":"Pago","obs":""},
-            {"data":"2026-05-02","tipo":"Despesa","categoria":"INSETICIDA","setor":"LAVOURAS","local":"CAPUL","desc":"CLORFENAPIR NORTOX","qtd":2,"und":"LT","v_unit":67.56,"valor":135.12,"sit":"Pago","obs":""},
-            {"data":"2026-05-04","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"SUPERMERCADO","desc":"","qtd":0,"und":"","v_unit":0,"valor":205.22,"sit":"Pago","obs":""},
-            {"data":"2026-05-04","tipo":"Despesa","categoria":"ACARICIDA","setor":"LAVOURAS","local":"VEGETAL","desc":"OBERON SC 240","qtd":1,"und":"LT","v_unit":138,"valor":138,"sit":"Pago","obs":""},
-            {"data":"2026-05-04","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"VEGETAL","desc":"NITRATO DE CALCIO CALCINIT YARA","qtd":125,"und":"KG","v_unit":3.6,"valor":450,"sit":"Pago","obs":""},
-            {"data":"2026-05-07","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"GADO","local":"AVP AGRONEGÓCIOS","desc":"VISITA VETERINÁRIO-YURI","qtd":1,"und":"CONJUNTO","v_unit":400,"valor":400,"sit":"Pago","obs":""},
-            {"data":"2026-05-09","tipo":"Despesa","categoria":"ADUBO FOLIAR","setor":"LAVOURAS","local":"VEGETAL","desc":"ACIDO BORICO 17% RAYQUIMICA","qtd":25,"und":"KG","v_unit":10.68,"valor":267,"sit":"Pago","obs":""},
-            {"data":"2026-05-13","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"SUPERMERCADO","desc":"","qtd":0,"und":"CONJUNTO","v_unit":0,"valor":249.75,"sit":"Pago","obs":""},
-            {"data":"2026-05-13","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"GÁS","desc":"","qtd":1,"und":"PÇ","v_unit":115,"valor":115,"sit":"Pago","obs":""},
-            {"data":"2026-05-13","tipo":"Despesa","categoria":"DIESEL","setor":"TRATOR","local":"MONTRELATO","desc":"","qtd":50,"und":"LT","v_unit":7.19,"valor":359.75,"sit":"Pago","obs":""},
-            {"data":"2026-05-13","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"BEBEDOURA P/AVES","qtd":1,"und":"PÇ","v_unit":30.07,"valor":30.07,"sit":"Pago","obs":""},
-            {"data":"2026-05-13","tipo":"Despesa","categoria":"INSETICIDA","setor":"LAVOURAS","local":"CAPUL","desc":"METOMIL 215 SL NORTOX","qtd":5,"und":"LT","v_unit":24.55,"valor":122.79,"sit":"Pago","obs":""},
-            {"data":"2026-05-13","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO POSTURA","qtd":120,"und":"KG","v_unit":1.85,"valor":223,"sit":"Pago","obs":""},
-            {"data":"2026-05-16","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"MATERIAL DE CONSTRUÇÃO","desc":"CIMENTO","qtd":3,"und":"SACOS","v_unit":38,"valor":114,"sit":"Pago","obs":""},
-            {"data":"2026-05-16","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"MATERIAL DE CONSTRUÇÃO","desc":"VEDACIT","qtd":1,"und":"LT","v_unit":30,"valor":30,"sit":"Pago","obs":""},
-            {"data":"2026-05-16","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"MATERIAL DE CONSTRUÇÃO","desc":"TIJOLOS 19X29","qtd":50,"und":"PÇ","v_unit":2,"valor":100,"sit":"Pago","obs":""},
-            {"data":"2026-05-16","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"MATERIAL DE CONSTRUÇÃO","desc":"PENEIRA","qtd":1,"und":"PÇ","v_unit":72,"valor":72,"sit":"Pago","obs":""},
-            {"data":"2026-05-16","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"TRATOR","local":"CAPUL","desc":"ALMOFADA MASSEY MF 200 50X299","qtd":1,"und":"PÇ","v_unit":314.49,"valor":314.49,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"AZM SUPERMERCADO","desc":"","qtd":0,"und":"CONJUNTO","v_unit":0,"valor":426,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"CASA","local":"FORTE FERRAGENS","desc":"BARRA ROSCADA","qtd":4,"und":"","v_unit":7.9,"valor":31.6,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"CASA","local":"FORTE FERRAGENS","desc":"ADAPTADORES DE TOMADA","qtd":2,"und":"","v_unit":6.7,"valor":13.4,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Despesa","categoria":"MERCADO","setor":"ADMINISTRAÇÃO","local":"BOI NA BRASA","desc":"ALMOÇO","qtd":2,"und":"","v_unit":28.5,"valor":57,"sit":"Pago","obs":""},
-            {"data":"2026-05-20","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"REI DA LINGUIÇA","desc":"","qtd":0,"und":"","v_unit":0,"valor":106,"sit":"Pago","obs":""},
-            {"data":"2026-05-22","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"SUPERMERCADO","desc":"","qtd":0,"und":"","v_unit":0,"valor":407.84,"sit":"Pago","obs":""},
-            {"data":"2026-05-22","tipo":"Despesa","categoria":"DIESEL","setor":"TRATOR","local":"MONTRELLATO","desc":"ABASTECIMENTOS","qtd":0,"und":"LT","v_unit":0,"valor":457.74,"sit":"Pago","obs":""},
-            {"data":"2026-05-28","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"SUPERMERCADO","desc":"","qtd":0,"und":"","v_unit":0,"valor":315.66,"sit":"Pago","obs":""},
-            {"data":"2026-05-28","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO POSTURA","qtd":120,"und":"KG","v_unit":1.93,"valor":231.66,"sit":"Pago","obs":""},
-            {"data":"2026-06-05","tipo":"Despesa","categoria":"DIÁRIAS","setor":"FUNCIONÁRIOS","local":"JOSIMAR","desc":"","qtd":"11.5","und":"DIA","v_unit":120,"valor":1380,"sit":"Pago","obs":""},
-            {"data":"2026-06-05","tipo":"Despesa","categoria":"ACARICIDA","setor":"CAFÉ 03","local":"VEGETAL","desc":"OBERON","qtd":1,"und":"LT","v_unit":146,"valor":146,"sit":"Pago","obs":""},
-            {"data":"2026-06-05","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"IRRIGAÇÃO","local":"VEGETAL","desc":"CANO PN60 25MM","qtd":14,"und":"PÇ","v_unit":17.2,"valor":240.8,"sit":"Pago","obs":""},
-            {"data":"2026-06-05","tipo":"Despesa","categoria":"INSETICIDA","setor":"MARACUJÁ","local":"CAPUL","desc":"DESIS","qtd":0.5,"und":"LT","v_unit":69.9,"valor":34.95,"sit":"Pago","obs":""},
-            {"data":"2026-06-10","tipo":"Despesa","categoria":"INVESTIMENTO","setor":"TORREFAÇÃO","local":"CETRO SOLUÇÕES","desc":"SELADORA","qtd":1,"und":"PÇ","v_unit":430,"valor":430,"sit":"Pago","obs":""},
-            {"data":"2026-06-19","tipo":"Despesa","categoria":"INSETICIDA","setor":"LAVOURAS","local":"VEGETAL","desc":"FAVORITO WG 700 IMIDACL.","qtd":1,"und":"KG","v_unit":109.91,"valor":109.91,"sit":"Pago","obs":""},
-            {"data":"2026-06-19","tipo":"Despesa","categoria":"INVESTIMENTO","setor":"IRRIGAÇÃO","local":"SOLOVITA","desc":"ADAP 75 X 3","qtd":2,"und":"PÇ","v_unit":7.5,"valor":15,"sit":"Pago","obs":""},
-            {"data":"2026-06-19","tipo":"Despesa","categoria":"INVESTIMENTO","setor":"IRRIGAÇÃO","local":"SOLOVITA","desc":"VALVULA CEBOLA 3\"","qtd":1,"und":"PÇ","v_unit":277.4,"valor":277.4,"sit":"Pago","obs":""},
-            {"data":"2026-06-19","tipo":"Despesa","categoria":"INVESTIMENTO","setor":"IRRIGAÇÃO","local":"SOLOVITA","desc":"CURVA 90 IRR DN75","qtd":1,"und":"PÇ","v_unit":19,"valor":19,"sit":"Pago","obs":""},
-            {"data":"2026-06-19","tipo":"Despesa","categoria":"INVESTIMENTO","setor":"IRRIGAÇÃO","local":"SOLOVITA","desc":"FITA VEDA ROSCA 18MMX50M","qtd":1,"und":"PÇ","v_unit":12.45,"valor":12.45,"sit":"Pago","obs":""},
-            {"data":"2026-06-19","tipo":"Despesa","categoria":"INVESTIMENTO","setor":"IRRIGAÇÃO","local":"SOLOVITA","desc":"LUVA EXCENTRICA M/F 3 X 1.1/2\"","qtd":1,"und":"PÇ","v_unit":143.8,"valor":143.8,"sit":"Pago","obs":""},
-            {"data":"2026-06-19","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"NITRATO DE CALCIO 25KG","qtd":2,"und":"SACOS","v_unit":123.15,"valor":246.3,"sit":"Pago","obs":""},
-            {"data":"2026-06-19","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"URÉIA 50KG","qtd":2,"und":"SACOS","v_unit":297.75,"valor":595.5,"sit":"Pago","obs":""},
-            {"data":"2026-06-19","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"CLORETO DE POTÁSSIO 50KG","qtd":1,"und":"SACOS","v_unit":232,"valor":232,"sit":"Pago","obs":""},
-            {"data":"2026-06-19","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"MAP PURIFICADO 25KG","qtd":1,"und":"SACOS","v_unit":243,"valor":243,"sit":"Pago","obs":""},
-            {"data":"2026-06-19","tipo":"Despesa","categoria":"INSETICIDA","setor":"CÃES","local":"CAPUL","desc":"SIMPARIC ZOETS 120MG","qtd":1,"und":"PÇ","v_unit":185.39,"valor":185.39,"sit":"Pago","obs":""},
-            {"data":"2026-06-19","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"CAPUL","desc":"JG. ALICATE 3PCS R2800","qtd":1,"und":"CONJUNTO","v_unit":130.35,"valor":130.35,"sit":"Pago","obs":""},
-            {"data":"2026-06-26","tipo":"Despesa","categoria":"INVESTIMENTO","setor":"IRRIGAÇÃO","local":"CAPUL","desc":"UNIAO 16MM C/ROSCA","qtd":30,"und":"PÇ","v_unit":1.05,"valor":31.5,"sit":"Pago","obs":""},
-            {"data":"2026-06-26","tipo":"Despesa","categoria":"INSETICIDA","setor":"LAVOURAS","local":"CAPUL","desc":"GALEÃO","qtd":1,"und":"KG","v_unit":109.09,"valor":109.09,"sit":"Pago","obs":""},
-            {"data":"2026-06-26","tipo":"Despesa","categoria":"RAÇÃO","setor":"CAVALOS","local":"CAPUL","desc":"RAÇÃO CAPULHORSE","qtd":1,"und":"SACOS","v_unit":75.41,"valor":75.41,"sit":"Pago","obs":""},
-            {"data":"2026-06-26","tipo":"Despesa","categoria":"RAÇÃO","setor":"PEIXES","local":"CAPUL","desc":"RACAO PEIXE 25KG","qtd":1,"und":"SACOS","v_unit":117.59,"valor":117.59,"sit":"Pago","obs":""},
-            {"data":"2026-06-26","tipo":"Despesa","categoria":"RAÇÃO","setor":"GADO","local":"CAPUL","desc":"MILHO MOÍDO 40 KG","qtd":1,"und":"SACOS","v_unit":57.28,"valor":57.28,"sit":"Pago","obs":""},
-            {"data":"2026-06-26","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO POSTURA","qtd":1,"und":"SACOS","v_unit":77.22,"valor":77.22,"sit":"Pago","obs":""},
-            {"data":"2026-06-26","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FUNCIONÁRIOS","local":"CAPUL","desc":"CONJUNTO EPI","qtd":1,"und":"CONJUNTO","v_unit":105.69,"valor":105.69,"sit":"Pago","obs":""},
-            {"data":"2026-07-04","tipo":"Despesa","categoria":"INSETICIDA","setor":"LAVOURAS","local":"CAPUL","desc":"GALEÃO","qtd":2,"und":"KG","v_unit":109.09,"valor":218.18,"sit":"Pago","obs":""},
-            {"data":"2026-07-04","tipo":"Despesa","categoria":"INSETICIDA","setor":"FAZENDA","local":"CAPUL","desc":"FORMICIDA GRANULADO","qtd":1,"und":"SACOS","v_unit":11.19,"valor":11.19,"sit":"Pago","obs":""},
-            {"data":"2026-07-04","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"URÉIA 50KG","qtd":1,"und":"SACOS","v_unit":297.75,"valor":297.75,"sit":"Pago","obs":""},
-            {"data":"2026-07-04","tipo":"Despesa","categoria":"INSUMOS","setor":"CAFÉ 02","local":"CAPUL","desc":"PINCEL ATÔMICO","qtd":1,"und":"PÇ","v_unit":5.65,"valor":5.65,"sit":"Pago","obs":""},
-            {"data":"2026-07-08","tipo":"Despesa","categoria":"GASOLINA","setor":"FAZENDA","local":"POSTO BEIRA RIO","desc":"STRADA","qtd":1,"und":"LT","v_unit":301.05,"valor":301.05,"sit":"Pago","obs":""},
-            {"data":"2026-07-09","tipo":"Despesa","categoria":"INSUMOS","setor":"GALINHAS","local":"CEASA-DF","desc":"CARTELAS DE OVOS","qtd":150,"und":"PÇ","v_unit":1,"valor":150,"sit":"Pago","obs":""},
-            {"data":"2026-07-10","tipo":"Despesa","categoria":"ADUBO FOLIAR","setor":"CAFÉ 02","local":"VEGETAL","desc":"FERTIGOFOL ULTRA/LT","qtd":2,"und":"LT","v_unit":43,"valor":86,"sit":"Pago","obs":""},
-            {"data":"2026-07-10","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"VEGETAL","desc":"URÉIA 50KG","qtd":1,"und":"SACOS","v_unit":242,"valor":242,"sit":"Pago","obs":""},
-            {"data":"2026-07-10","tipo":"Despesa","categoria":"ADUBO FOLIAR","setor":"CAFÉ 02","local":"VEGETAL","desc":"DRIPSOL MICRO ZINCO 700G","qtd":2,"und":"SACOS","v_unit":76,"valor":152,"sit":"Pago","obs":""},
-            {"data":"2026-07-14","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO POSTURA","qtd":120,"und":"KG","v_unit":1.87,"valor":224.69,"sit":"A pagar","obs":""},
-            {"data":"2026-07-14","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"CAPUL","desc":"SACHO TRAM","qtd":1,"und":"PÇ","v_unit":34.66,"valor":34.66,"sit":"A pagar","obs":""},
-            {"data":"2026-07-14","tipo":"Despesa","categoria":"RAÇÃO","setor":"CÃES","local":"CAPUL","desc":"RAÇÃO CAPITÃO DOG","qtd":14,"und":"KG","v_unit":4.69,"valor":65.77,"sit":"A pagar","obs":""},
-            {"data":"2026-07-14","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"SUPERMERCADO","desc":"","qtd":0,"und":"CONJUNTO","v_unit":0,"valor":300,"sit":"Pago","obs":""},
-            {"data":"2026-07-14","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"SUPERMERCADO","desc":"","qtd":0,"und":"CONJUNTO","v_unit":0,"valor":305.9,"sit":"Pago","obs":""},
-            {"data":"2026-07-16","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"CASA","local":"LEROY MERLIN","desc":"EXTENSOR TELESCOPIO 3M TIGRE","qtd":1,"und":"PÇ","v_unit":49.9,"valor":49.9,"sit":"Pago","obs":""},
-            {"data":"2026-07-16","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"CASA","local":"LEROY MERLIN","desc":"SILICONE PIA/BOX","qtd":1,"und":"PÇ","v_unit":15.98,"valor":15.98,"sit":"Pago","obs":""},
-            {"data":"2026-07-16","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"CASA","local":"LEROY MERLIN","desc":"LIMPA CONTATO","qtd":1,"und":"PÇ","v_unit":15.98,"valor":15.98,"sit":"Pago","obs":""},
-            {"data":"2026-07-16","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"LEROY MERLIN","desc":"DESENGRIPANTE","qtd":1,"und":"PÇ","v_unit":18.98,"valor":18.98,"sit":"Pago","obs":""},
-            {"data":"2026-07-16","tipo":"Despesa","categoria":"INSUMOS","setor":"CAFÉ 02","local":"LEROY MERLIN","desc":"FITA SILVER TAPE SCOT","qtd":1,"und":"PÇ","v_unit":69.94,"valor":69.94,"sit":"Pago","obs":""},
-            {"data":"2026-07-16","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"CASA","local":"LEROY MERLIN","desc":"REJUNTE BRANCO 1","qtd":1,"und":"KG","v_unit":49.72,"valor":49.72,"sit":"Pago","obs":""},
-            {"data":"2026-07-16","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"CASA","local":"LEROY MERLIN","desc":"KIT ANEL DE VEDAÇÃO","qtd":1,"und":"CONJUNTO","v_unit":23.9,"valor":23.9,"sit":"Pago","obs":""},
-            {"data":"2026-07-16","tipo":"Despesa","categoria":"INSUMOS","setor":"CAFÉ 02","local":"LEROY MERLIN","desc":"PILHA ALCALINA AAA","qtd":4,"und":"PÇ","v_unit":3.74,"valor":14.99,"sit":"Pago","obs":""},
-            {"data":"2026-07-21","tipo":"Despesa","categoria":"RAÇÃO","setor":"CAVALOS","local":"CAPUL","desc":"RAÇÃO EQUINA","qtd":40,"und":"KG","v_unit":1.78,"valor":71.55,"sit":"A pagar","obs":""},
-            {"data":"2026-07-21","tipo":"Despesa","categoria":"INSETICIDA","setor":"CAFÉ 02","local":"CAPUL","desc":"ACTARA","qtd":2,"und":"KG","v_unit":216.97,"valor":433.95,"sit":"A pagar","obs":""},
-            {"data":"2026-07-21","tipo":"Despesa","categoria":"ADUBO","setor":"LAVOURAS","local":"CAPUL","desc":"SULFATO DE ZINCO 25KG","qtd":25,"und":"KG","v_unit":7.76,"valor":194.2,"sit":"A pagar","obs":""},
-            {"data":"2026-07-21","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"IRRIGAÇÃO","local":"SOLOVITA","desc":"CONECXÃO PVC 100MM DE SOLDA PARA ROSCA","qtd":1,"und":"PÇ","v_unit":18,"valor":18,"sit":"Pago","obs":""},
-            {"data":"2026-07-21","tipo":"Despesa","categoria":"MERCADO","setor":"CASA","local":"SUPERMERCADO","desc":"","qtd":0,"und":"","v_unit":0,"valor":492.31,"sit":"Pago","obs":""},
-            {"data":"2026-08-13","tipo":"Despesa","categoria":"GASOLINA","setor":"ADMINISTRAÇÃO","local":"SÃO ROQUE","desc":"GASOLINA - SAVEIRO","qtd":59,"und":"LT","v_unit":2.86,"valor":169.06,"sit":"Pago","obs":""},
-            {"data":"2026-08-22","tipo":"Despesa","categoria":"INSETICIDA","setor":"LAVOURAS","local":"VEGETAL","desc":"EVIDENCE WG 700 180G","qtd":1,"und":"CONJUNTO","v_unit":84,"valor":84,"sit":"Pago","obs":""},
-            {"data":"2026-08-22","tipo":"Despesa","categoria":"ADUBO FOLIAR","setor":"MARACUJÁ","local":"CAPUL","desc":"ACORDA ","qtd":1,"und":"LT","v_unit":133.45,"valor":133.45,"sit":"Pago","obs":""},
-            {"data":"2026-08-22","tipo":"Despesa","categoria":"INSETICIDA","setor":"MARACUJÁ","local":"CAPUL","desc":"DECIS","qtd":0.25,"und":"LT","v_unit":131.16,"valor":32.79,"sit":"Pago","obs":""},
-            {"data":"2026-08-22","tipo":"Despesa","categoria":"RAÇÃO","setor":"GADO","local":"CAPUL","desc":"RAÇÃO POSTURA","qtd":40,"und":"KG","v_unit":1.94,"valor":77.84,"sit":"Pago","obs":""},
-            {"data":"2026-08-22","tipo":"Despesa","categoria":"RAÇÃO","setor":"CAVALOS","local":"CAPUL","desc":"RAÇÃO CAVALOS 40KG","qtd":40,"und":"KG","v_unit":1.84,"valor":73.94,"sit":"Pago","obs":""},
-            {"data":"2026-08-22","tipo":"Despesa","categoria":"RAÇÃO","setor":"CÃES","local":"CAPUL","desc":"RAÇÃO CACHORRO 14KG","qtd":1,"und":"SACOS","v_unit":68.8,"valor":68.8,"sit":"Pago","obs":""},
-            {"data":"2026-08-22","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"CAPUL","desc":"SPRAY 360ML","qtd":1,"und":"CONJUNTO","v_unit":20.55,"valor":20.55,"sit":"Pago","obs":""},
-            {"data":"2026-08-22","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"IRRIGAÇÃO","local":"CAPUL","desc":"CAP 150MM","qtd":2,"und":"PÇ","v_unit":41.8,"valor":83.6,"sit":"Pago","obs":""},
-            {"data":"2026-08-27","tipo":"Despesa","categoria":"RAÇÃO","setor":"GADO","local":"ZOOFLORA","desc":"PROTEVIT NUTRI 30 30 KG","qtd":50,"und":"SACOS","v_unit":78.71,"valor":3935.5,"sit":"A pagar","obs":""},
-            {"data":"2026-08-20","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"CASA","local":"EMMA","desc":"COLCHAO EMMA ONE PLUS SOLTEIRO","qtd":1,"und":"PÇ","v_unit":1149,"valor":1149,"sit":"Pago","obs":""},
-            {"data":"2026-08-12","tipo":"Despesa","categoria":"RAÇÃO","setor":"GALINHAS","local":"CAPUL","desc":"RAÇÃO POSTURA 40KG","qtd":1,"und":"SACOS","v_unit":78.02,"valor":78.02,"sit":"Pago","obs":""},
-            {"data":"2026-08-08","tipo":"Despesa","categoria":"INSETICIDA","setor":"CAFÉ 03","local":"CAPUL","desc":"ACTARA","qtd":3,"und":"KG","v_unit":219.99,"valor":659.97,"sit":"Pago","obs":""},
-            {"data":"2026-08-08","tipo":"Despesa","categoria":"FUNGICIDA","setor":"CAFÉ 02","local":"CAPUL","desc":"PRIORY TOP","qtd":1,"und":"LT","v_unit":177.59,"valor":177.59,"sit":"Pago","obs":""},
-            {"data":"2026-08-08","tipo":"Despesa","categoria":"INSETICIDA","setor":"CAFÉ 02","local":"CAPUL","desc":"KLORPAN","qtd":6,"und":"LT","v_unit":51.35,"valor":308.1,"sit":"Pago","obs":""},
-            {"data":"2026-08-08","tipo":"Despesa","categoria":"FUNGICIDA","setor":"CAFÉ 02","local":"CAPUL","desc":"RECOP 1KG","qtd":5,"und":"KG","v_unit":80.01,"valor":400.05,"sit":"Pago","obs":""},
-            {"data":"2026-08-08","tipo":"Despesa","categoria":"INSUMOS","setor":"FAZENDA","local":"CAPUL","desc":"CORDA SEDA 6MM","qtd":0.18,"und":"KG","v_unit":135.77,"valor":24.44,"sit":"Pago","obs":""},
-            {"data":"2026-08-08","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"CAPUL","desc":"SPRAY 360ML","qtd":1,"und":"CONJUNTO","v_unit":18.85,"valor":18.85,"sit":"Pago","obs":""},
-            {"data":"2026-08-08","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"CAPUL","desc":"ESGUICHO PLÁSTICO","qtd":1,"und":"PÇ","v_unit":28.19,"valor":28.19,"sit":"Pago","obs":""},
-            {"data":"2026-08-08","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"CAPUL","desc":"JOELHO SO.B.LATAO 25X34","qtd":2,"und":"PÇ","v_unit":15.15,"valor":30.3,"sit":"Pago","obs":""},
-            {"data":"2026-08-08","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"FAZENDA","local":"CAPUL","desc":"CONECTOR TORN.1/2 E 3/4","qtd":1,"und":"PÇ","v_unit":9.4,"valor":9.4,"sit":"Pago","obs":""},
-            {"data":"2026-08-27","tipo":"Despesa","categoria":"MANUTENÇÃO","setor":"TORREFAÇÃO","local":"CONTABILIDADE BURITIS","desc":"CERTIFICADO DIGITAL","qtd":12,"und":"MÊS","v_unit":16.66,"valor":200,"sit":"Pago","obs":""},
-            {"data":"2026-09-03","tipo":"Despesa","categoria":"SEVIÇOS CONTÁBEIS","setor":"ADMINISTRAÇÃO","local":"CONTABILIDADE PIMENTEL","desc":"","qtd":1,"und":"MÊS","v_unit":773.01,"valor":773.01,"sit":"Pago","obs":""},
-            {"data":"2026-09-03","tipo":"Despesa","categoria":"SALÁRIO","setor":"FUNCIONÁRIOS","local":"ALBERTO JUNIOR","desc":"","qtd":"30","und":"DIA","v_unit":64.96,"valor":1948.97,"sit":"Pago","obs":""},
-            {"data":"2026-09-03","tipo":"Despesa","categoria":"SEVIÇOS CONTÁBEIS","setor":"TORREFAÇÃO","local":"RS CONTABILIDADE","desc":"","qtd":1,"und":"MÊS","v_unit":332.5,"valor":332.5,"sit":"Pago","obs":""},
-            {"data":"2026-09-10","tipo":"Despesa","categoria":"INSUMOS","setor":"GADO","local":"YURI","desc":"VACINAÇÃO","qtd":1,"und":"SERVIÇO","v_unit":710,"valor":710,"sit":"Pago","obs":""},
-            {"data":"2026-09-15","tipo":"Despesa","categoria":"IMPOSTOS","setor":"FAZENDA","local":"RECEITA FEDERAL","desc":"ITR","qtd":1,"und":"CONJUNTO","v_unit":50.48,"valor":50.48,"sit":"Pago","obs":""}
-        ];
+        // --- SISTEMA INTELIGENTE DE CÁLCULO DE SAFRA ---
+        function obterSafra(dataStr) {
+            if(!dataStr || dataStr === '-' || dataStr === '') return 'Sem Data';
+            let d = new Date(dataStr + 'T00:00:00');
+            if (isNaN(d.getTime())) return 'Sem Data';
+            
+            let ano = d.getFullYear();
+            let mes = d.getMonth() + 1; // getMonth devolve de 0 a 11
+            
+            // Regra de Safra: Julho (Mês 7) a Junho (Mês 6)
+            if (mes >= 7) {
+                return ano + '/' + (ano + 1);
+            } else {
+                return (ano - 1) + '/' + ano;
+            }
+        }
 
-        // --- SISTEMA NUVEM (GOOGLE APPS SCRIPT) ---
+        function obterSafraAtual() {
+            let d = new Date();
+            let ano = d.getFullYear();
+            let mes = d.getMonth() + 1;
+            if (mes >= 7) {
+                return ano + '/' + (ano + 1);
+            } else {
+                return (ano - 1) + '/' + ano;
+            }
+        }
+
+        function preencherSelectsSafra() {
+            let safras = new Set();
+            transacoes.forEach(t => {
+                if(t.data && t.data !== '-') safras.add(obterSafra(t.data));
+            });
+            
+            // Ordena da safra mais recente para a mais antiga
+            let arrSafras = Array.from(safras).filter(s => s !== 'Sem Data').sort().reverse(); 
+            
+            let htmlOptions = '<option value="">TODAS AS SAFRAS</option>';
+            arrSafras.forEach(s => htmlOptions += `<option value="${s}">Safra ${s}</option>`);
+            if (safras.has('Sem Data')) htmlOptions += `<option value="Sem Data">Sem Data</option>`;
+            
+            let selDash = document.getElementById('filtro_safra_dashboard');
+            let selRel = document.getElementById('filtro_safra_relatorios');
+            
+            let valDash = selDash ? selDash.value : '';
+            let valRel = selRel ? selRel.value : '';
+            
+            if(selDash) { selDash.innerHTML = htmlOptions; selDash.value = valDash; }
+            if(selRel) { selRel.innerHTML = htmlOptions; selRel.value = valRel; }
+        }
+
+        // --- SISTEMA NUVEM (FETCH MELHORADO) ---
         
-        async function carregarDados() {
+        async function carregarDadosNuvem(forcar = false) {
             const statusDiv = document.getElementById('status_conexao');
             statusDiv.innerHTML = '⏳ A LER DA NUVEM...';
             statusDiv.className = 'status-conexao aguardando';
 
             try {
-                // Tenta buscar os dados do Google Sheets
                 const response = await fetch(URL_GOOGLE_SCRIPT);
+                if (!response.ok) throw new Error(`Erro de Servidor: Código ${response.status}`);
+
                 const data = await response.json();
                 
-                if (data.transacoes && data.transacoes.length > 0) {
+                if (data.transacoes) {
                     transacoes = data.transacoes;
-                    statusDiv.innerHTML = '🟢 NUVEM ATUALIZADA';
+                    statusDiv.innerHTML = '🟢 NUVEM SINCRONIZADA';
                     statusDiv.className = 'status-conexao conectado';
-                    
-                    // Atualiza o backup local de segurança
                     localStorage.setItem('rancho3c_offline', JSON.stringify(transacoes));
                 } else {
-                    // SE A FOLHA ESTIVER VAZIA (Primeiro acesso): Injeta os dados históricos!
-                    transacoes = dadosIniciais;
-                    await salvarDados();
+                    throw new Error("Formato de dados desconhecido.");
                 }
             } catch (error) {
-                console.error("Erro ao carregar da nuvem:", error);
-                // MODO OFFLINE: Se não houver internet, carrega a última versão guardada no computador
+                console.error("Erro Nuvem:", error);
+                statusDiv.innerHTML = "🔴 OFFLINE (Visualizando cópia guardada no computador)";
+                statusDiv.className = 'status-conexao';
+                
                 const localData = localStorage.getItem('rancho3c_offline');
                 if(localData) transacoes = JSON.parse(localData);
-                
-                if (transacoes.length === 0) transacoes = dadosIniciais;
-                
-                statusDiv.innerHTML = '🔴 MODO OFFLINE (Sem Internet)';
-                statusDiv.className = 'status-conexao';
             }
             
-            preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico();
+            preencherSelectsLancamento(); 
+            preencherSelectsSafra(); // Preenche os dropdowns de Safra
+            atualizarOpcoesFiltros(); 
+            aplicarFiltros(); 
+            atualizarResumoEGrafico();
         }
 
         async function salvarDados() {
@@ -1009,32 +552,26 @@
             statusDiv.innerHTML = '⏳ A GRAVAR NA NUVEM...';
             statusDiv.className = 'status-conexao aguardando';
             
-            // Grava sempre uma cópia de segurança no computador primeiro
             localStorage.setItem('rancho3c_offline', JSON.stringify(transacoes));
 
             try {
-                // Envia o pacote de dados para o Google Sheets
                 const response = await fetch(URL_GOOGLE_SCRIPT, {
                     method: 'POST',
                     body: JSON.stringify({ transacoes: transacoes }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } // text/plain evita bloqueios de segurança do navegador (CORS)
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
                 });
                 const result = await response.json();
-                
                 if(result.status === "sucesso") {
                     const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                     statusDiv.innerHTML = `🟢 NUVEM SINCRONIZADA (${horaAtual})`;
                     statusDiv.className = 'status-conexao conectado';
-                } else {
-                    throw new Error("Erro no servidor da Google");
-                }
+                } else { throw new Error("O Google rejeitou a gravação."); }
             } catch (error) {
-                console.error("Erro ao enviar para a nuvem:", error);
-                statusDiv.innerHTML = '🔴 OFFLINE (Salvo no PC. Sincronize depois)';
+                console.error("Erro ao enviar:", error);
+                statusDiv.innerHTML = '🔴 GRAVADO LOCALMENTE (Clique em Forçar Sincronização depois)';
                 statusDiv.className = 'status-conexao';
             }
         }
-
 
         // --- SISTEMA DE LEITURA DO XML ---
         function processarXML(event) {
@@ -1116,11 +653,11 @@
 
         // --- UTILIDADES ---
         function exportarCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,Data;Tipo;Categoria;Setor;Local;Descricao;Qtd;Valor Total;Situacao\n";
+            let csvContent = "data:text/csv;charset=utf-8,Data;Safra;Tipo;Categoria;Setor;Local;Descricao;Qtd;Valor Total;Situacao\n";
             ultimaListaFiltrada.forEach(obj => {
                 let t = obj.item; let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (t.tipo === 'Receita') ? strSafe(t.desc) : strSafe(t.setor);
                 let val = parseFloat(t.valor) || 0;
-                let row = [formatarData(t.data), t.tipo, cM, strSafe(t.setor), strSafe(t.local), strSafe(t.desc), strSafe(t.qtd) + ' ' + strSafe(t.und), val.toString().replace('.', ','), t.sit];
+                let row = [formatarData(t.data), obterSafra(t.data), t.tipo, cM, strSafe(t.setor), strSafe(t.local), strSafe(t.desc), strSafe(t.qtd) + ' ' + strSafe(t.und), val.toString().replace('.', ','), t.sit];
                 csvContent += row.join(";") + "\n";
             });
             const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", "relatorio_rancho3c.csv"); document.body.appendChild(link);
@@ -1231,14 +768,14 @@
                     valor: valor, sit: document.getElementById(prefix + 'sit').value || 'Pago', obs: ''
                 });
 
-                salvarDados(); // Agora salva direto no Google Sheets!
+                salvarDados(); 
                 
                 if (tipo === 'Despesa' && filaXML.length > 0) {
                     filaXML.shift(); 
                     if (filaXML.length > 0) {
                         mostrarToast('Item gravado! A carregar o próximo...');
                         carregarProximoItemXML();
-                        atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento(); atualizarResumoEGrafico();
+                        preencherSelectsSafra(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento(); atualizarResumoEGrafico();
                         return; 
                     } else {
                         document.getElementById('xml_contador').innerText = '';
@@ -1249,11 +786,11 @@
                 }
 
                 limparFormulario(tipo);
-                atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento(); atualizarResumoEGrafico();
+                preencherSelectsSafra(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento(); atualizarResumoEGrafico();
                 
                 if(filaXML.length === 0) {
                     mostrarToast(tipo.toUpperCase() + ' GRAVADA COM SUCESSO!');
-                    document.getElementById(prefix + 'data').focus(); // Foco automático na data
+                    document.getElementById(prefix + 'data').focus(); 
                 }
             } catch (error) { alert("Erro ao gravar: " + error.message); }
         }
@@ -1261,7 +798,7 @@
         function confirmarDuplicacao(idx) {
             if(confirm('Deseja CLONAR este lançamento?')) {
                 let nova = { ...transacoes[idx] }; transacoes.push(nova); salvarDados();
-                preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico();
+                preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico();
                 mostrarToast("LANÇAMENTO DUPLICADO!");
             }
         }
@@ -1269,7 +806,7 @@
         function confirmarExclusao(idxOriginal) {
             if(confirm('Deseja EXCLUIR este lançamento?')) {
                 transacoes.splice(idxOriginal, 1); salvarDados();
-                preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico();
+                preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico();
                 mostrarToast("REMOVIDO!");
             }
         }
@@ -1347,11 +884,11 @@
                 transacoes[indiceEdicao].valor = parseFloat(document.getElementById('ed_valor').value) || 0;
                 transacoes[indiceEdicao].sit = document.getElementById('ed_sit').value;
                 
-                salvarDados(); fecharModal(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico();
+                salvarDados(); fecharModal(); preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico();
             }
         }
 
-        function atualizarManual() { atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico(); mostrarToast("ATUALIZADOS!"); }
+        function atualizarManual() { carregarDadosNuvem(); mostrarToast("ATUALIZANDO DA NUVEM..."); }
 
         function atualizarOpcoesFiltros() {
             let cats = new Set(), sets = new Set(), locs = new Set(), descs = new Set();
@@ -1372,7 +909,7 @@
         }
 
         function limparFiltros() {
-            document.querySelectorAll('.barra-pesquisa-relatorio input, .filter-row input, .filter-row select').forEach(i => i.value = '');
+            document.querySelectorAll('.barra-pesquisa-relatorio input:not([type="button"]), .filter-row input, .filter-row select').forEach(i => i.value = '');
             colOrdenacao = 'data'; ordemAscendente = false; setFiltroRapido('');
         }
 
@@ -1382,6 +919,7 @@
             if(tipo === '') document.getElementById('btn_f_todos').classList.add('ativo');
             if(tipo === 'pendentes') document.getElementById('btn_f_pendentes').classList.add('ativo');
             if(tipo === 'entradas') document.getElementById('btn_f_entradas').classList.add('ativo');
+            if(tipo === 'safra') document.getElementById('btn_f_safra').classList.add('ativo');
             aplicarFiltros();
         }
 
@@ -1418,6 +956,9 @@
                 if (fMesTabela && (!t.data || !t.data.startsWith(fMesTabela))) match = false;
                 if (filtroRapido === 'pendentes' && sitTxtFiltro.includes('pago')) match = false;
                 if (filtroRapido === 'entradas' && t.tipo !== 'Receita') match = false;
+                
+                // NOVO: Regra do Filtro de Safra Atual
+                if (filtroRapido === 'safra' && obterSafra(t.data) !== obterSafraAtual()) match = false;
 
                 return match;
             });
@@ -1471,7 +1012,7 @@
 
                 linhasHTML.push(`
                     <tr class="${isAtrasado ? 'linha-atrasada' : ''}">
-                        <td style="white-space: nowrap;">${alertIcon}${formatarData(t.data)}</td>
+                        <td style="white-space: nowrap;" title="Safra: ${obterSafra(t.data)}">${alertIcon}${formatarData(t.data)}</td>
                         <td class="${eL}">${t.tipo}</td><td><b>${cM}</b></td><td>${strSafe(t.setor)}</td><td>${strSafe(t.local)}</td><td>${strSafe(t.desc)}</td><td>${strSafe(t.qtd)} ${strSafe(t.und)}</td>
                         <td style="font-weight:900;">${formatarMoeda(t.valor)}</td>
                         <td style="text-align: center; width: 100px;">${btnSit}</td>
@@ -1507,8 +1048,11 @@
             let recCat = {}; let recLocal = {};
             
             const filtroMes = document.getElementById('filtro_mes_relatorios') ? document.getElementById('filtro_mes_relatorios').value : '';
+            const filtroSafra = document.getElementById('filtro_safra_relatorios') ? document.getElementById('filtro_safra_relatorios').value : '';
 
             transacoes.forEach(t => {
+                // Filtro Duplo Inteligente
+                if (filtroSafra && obterSafra(t.data) !== filtroSafra) return;
                 if (filtroMes && (!t.data || !t.data.startsWith(filtroMes))) return;
 
                 let v = parseFloat(t.valor) || 0;
@@ -1555,10 +1099,16 @@
         function atualizarResumoEGrafico() {
             let tR = 0, tD = 0, aR = 0, aP = 0, rCat = {}, dCat = {}, qtdAtrasadas = 0;
             const hojeObj = new Date(); hojeObj.setHours(0,0,0,0);
+            
             const filtroMesElement = document.getElementById('filtro_mes_dashboard');
             const filtroMes = filtroMesElement ? filtroMesElement.value : '';
+            
+            const filtroSafraElement = document.getElementById('filtro_safra_dashboard');
+            const filtroSafra = filtroSafraElement ? filtroSafraElement.value : '';
 
             transacoes.forEach(t => {
+                // Filtro Duplo Inteligente
+                if (filtroSafra) { if (obterSafra(t.data) !== filtroSafra) return; }
                 if (filtroMes) { if (!t.data || typeof t.data !== 'string' || !t.data.startsWith(filtroMes)) return; }
 
                 let v = parseFloat(t.valor) || 0; let sit = strSafe(t.sit).toLowerCase();
@@ -1596,7 +1146,7 @@
 
         // INIT
         window.onload = () => { 
-            carregarDados();
+            carregarDadosNuvem();
         };
     </script>
 </body>
