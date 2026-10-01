@@ -303,8 +303,7 @@
             <div class="barra-pesquisa-relatorio" style="margin-bottom: 0;">
                 <button class="btn-filtro ativo" id="btn_f_todos" onclick="setFiltroRapido('')">📋 TODOS</button>
                 
-                <!-- NOVO BOTÃO DE FILTRO RÁPIDO PARA A SAFRA ATUAL -->
-                <button class="btn-filtro" id="btn_f_safra" onclick="setFiltroRapido('safra')" title="Exibe apenas a Safra Agrícola atual (Julho a Junho)">🌾 SAFRA ATUAL</button>
+                <button class="btn-filtro" id="btn_f_safra" onclick="setFiltroRapido('safra')" title="Exibe apenas a Safra Agrícola atual (Agosto a Julho)">🌾 SAFRA ATUAL</button>
                 
                 <button class="btn-filtro" id="btn_f_pendentes" onclick="setFiltroRapido('pendentes')">⏳ PENDENTES</button>
                 <button class="btn-filtro" id="btn_f_entradas" onclick="setFiltroRapido('entradas')">🌱 RECEITAS</button>
@@ -459,32 +458,55 @@
         const rCategoriasPadrao = ["ACEROLA - POLPA", "CAFÉ 250G", "CAFÉ 500G", "CAFÉ EM GRÃOS", "CAFÉ SACA", "CRÉDITO", "ESTACAS DE EUCALÍPTO", "GRAVIOLA - POLPA S/SEM.", "MARACUJÁ - FRUTO", "MARACUJÁ - POLPA C/SEM.", "MARACUJÁ - POLPA S/SEM.", "OVOS", "PASTO - ALUGUEL", "RENDIMENTOS"];
         const unidadesReceita = { "ACEROLA - POLPA": "KG", "CAFÉ 250G": "PCT", "CAFÉ 500G": "PCT", "CAFÉ EM GRÃOS": "PCT", "CAFÉ SACA": "SC", "CRÉDITO": "R$", "ESTACAS DE EUCALÍPTO": "UN", "GRAVIOLA - POLPA S/SEM.": "KG", "MARACUJÁ - FRUTO": "KG", "MARACUJÁ - POLPA C/SEM.": "KG", "MARACUJÁ - POLPA S/SEM.": "KG", "OVOS": "DZ", "PASTO - ALUGUEL": "MÊS", "RENDIMENTOS": "R$" };
 
-        // --- SISTEMA INTELIGENTE DE CÁLCULO DE SAFRA ---
+        // --- NOVO SISTEMA INTELIGENTE DE CÁLCULO DE SAFRA (A PARTIR DE 1 DE AGOSTO) ---
         function obterSafra(dataStr) {
             if(!dataStr || dataStr === '-' || dataStr === '') return 'Sem Data';
-            let d = new Date(dataStr + 'T00:00:00');
-            if (isNaN(d.getTime())) return 'Sem Data';
             
-            let ano = d.getFullYear();
-            let mes = d.getMonth() + 1; // getMonth devolve de 0 a 11
+            // Fatiar o texto da data para evitar problemas de fuso horário
+            let partes = dataStr.split('-');
+            if(partes.length !== 3) return 'Sem Data';
             
-            // Regra de Safra: Julho (Mês 7) a Junho (Mês 6)
-            if (mes >= 7) {
-                return ano + '/' + (ano + 1);
+            let ano = parseInt(partes[0], 10);
+            let mes = parseInt(partes[1], 10);
+            
+            if (isNaN(ano) || isNaN(mes)) return 'Sem Data';
+            
+            let anoInicio, anoFim;
+            
+            // Regra da Safra: 01 de Agosto (Mês 8) a 31 de Julho (Mês 7 do ano seguinte)
+            if (mes >= 8) {
+                anoInicio = ano;
+                anoFim = ano + 1;
             } else {
-                return (ano - 1) + '/' + ano;
+                anoInicio = ano - 1;
+                anoFim = ano;
             }
+            
+            // Formatar para dois dígitos (Ex: 2025 vira 25)
+            let strInicio = anoInicio.toString().slice(-2);
+            let strFim = anoFim.toString().slice(-2);
+            
+            return strInicio + '/' + strFim;
         }
 
         function obterSafraAtual() {
             let d = new Date();
             let ano = d.getFullYear();
             let mes = d.getMonth() + 1;
-            if (mes >= 7) {
-                return ano + '/' + (ano + 1);
+            
+            let anoInicio, anoFim;
+            if (mes >= 8) {
+                anoInicio = ano;
+                anoFim = ano + 1;
             } else {
-                return (ano - 1) + '/' + ano;
+                anoInicio = ano - 1;
+                anoFim = ano;
             }
+            
+            let strInicio = anoInicio.toString().slice(-2);
+            let strFim = anoFim.toString().slice(-2);
+            
+            return strInicio + '/' + strFim;
         }
 
         function preencherSelectsSafra() {
@@ -510,7 +532,7 @@
             if(selRel) { selRel.innerHTML = htmlOptions; selRel.value = valRel; }
         }
 
-        // --- SISTEMA NUVEM (FETCH MELHORADO) ---
+        // --- SISTEMA NUVEM ---
         
         async function carregarDadosNuvem(forcar = false) {
             const statusDiv = document.getElementById('status_conexao');
@@ -533,7 +555,15 @@
                 }
             } catch (error) {
                 console.error("Erro Nuvem:", error);
-                statusDiv.innerHTML = "🔴 OFFLINE (Visualizando cópia guardada no computador)";
+                
+                let mensagemErro = "";
+                if (error.message === "Failed to fetch") {
+                    mensagemErro = "🔴 BLOQUEIO LOCAL: Coloque o ficheiro no GitHub Pages para libertar o acesso.";
+                } else {
+                    mensagemErro = "🔴 OFFLINE (Visualizando cópia guardada no computador)";
+                }
+
+                statusDiv.innerHTML = mensagemErro;
                 statusDiv.className = 'status-conexao';
                 
                 const localData = localStorage.getItem('rancho3c_offline');
@@ -541,7 +571,7 @@
             }
             
             preencherSelectsLancamento(); 
-            preencherSelectsSafra(); // Preenche os dropdowns de Safra
+            preencherSelectsSafra(); 
             atualizarOpcoesFiltros(); 
             aplicarFiltros(); 
             atualizarResumoEGrafico();
@@ -887,8 +917,6 @@
                 salvarDados(); fecharModal(); preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico();
             }
         }
-
-        function atualizarManual() { carregarDadosNuvem(); mostrarToast("ATUALIZANDO DA NUVEM..."); }
 
         function atualizarOpcoesFiltros() {
             let cats = new Set(), sets = new Set(), locs = new Set(), descs = new Set();
