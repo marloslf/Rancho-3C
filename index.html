@@ -64,14 +64,16 @@
             background: var(--cor-madeira); color: white; box-shadow: 0 4px 8px rgba(93, 64, 55, 0.3);
         }
 
+        /* --- BOTÃO INTELIGENTE DE STATUS E SINCRONIZAÇÃO --- */
         .status-conexao {
-            padding: 8px 15px; border-radius: 30px; font-weight: 900; font-size: 12px;
+            padding: 8px 20px; border-radius: 30px; font-weight: 900; font-size: 12px;
             background: #ffebee; color: #c62828; border: 2px solid #ef5350;
-            display: inline-flex; align-items: center; gap: 8px;
+            display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
             transition: all 0.3s ease; box-shadow: 0 4px 8px rgba(0,0,0,0.05);
         }
+        .status-conexao:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); filter: brightness(0.95);}
         .status-conexao.conectado { background: #e8f5e9; color: #2e7d32; border-color: #66bb6a; }
-        .status-conexao.aguardando { background: #FFF3E0; color: #E65100; border-color: #FFB74D; }
+        .status-conexao.aguardando { background: #FFF3E0; color: #E65100; border-color: #FFB74D; pointer-events: none;} /* Desativa clique ao carregar */
 
         /* --- ABAS --- */
         .tab { display: none; background: transparent; }
@@ -94,20 +96,17 @@
         .legenda-item { display: flex; align-items: center; gap: 6px; }
         .ponto-cor { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
 
-        .top3-box { background: #fafafa; border-left: 5px solid var(--cor-verde-fazenda); padding: 20px; border-radius: 12px; box-shadow: var(--sombra);}
-        .top3-box li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ddd; font-size: 14px; font-weight: 800; text-transform: uppercase;}
+        /* --- GRÁFICOS DE BARRAS HORIZONTAIS CSS --- */
+        .top-graficos-box { background: #fafafa; padding: 20px; border-radius: 12px; box-shadow: var(--sombra); flex: 1; min-width: 300px;}
+        .top-graficos-box h4 { margin-top: 0; font-size: 15px; margin-bottom: 15px;}
+        .item-lista-grafico { list-style: none; margin-bottom: 12px; font-size: 14px; font-weight: 800; text-transform: uppercase; color: var(--cor-texto);}
+        .barra-grafico-container { width: 100%; background-color: #e0e0e0; border-radius: 6px; margin-top: 5px; height: 12px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);}
+        .barra-grafico-receita { height: 100%; background: var(--cor-receita-grad); transition: width 1s ease-in-out; border-radius: 6px;}
+        .barra-grafico-despesa { height: 100%; background: var(--cor-despesa-grad); transition: width 1s ease-in-out; border-radius: 6px;}
 
         /* --- LAYOUT COMPACTO E FIXO (FLUTUANTE) --- */
-        .area-fixa-topo {
-            position: sticky; top: 55px; z-index: 100;
-            background-color: var(--cor-fundo); 
-            padding-bottom: 10px;
-        }
-
-        .linha-lancamento { 
-            padding: 12px 15px; border-radius: 12px; margin-bottom: 15px; 
-            border: none; box-shadow: var(--sombra); 
-        }
+        .area-fixa-topo { position: sticky; top: 55px; z-index: 100; background-color: var(--cor-fundo); padding-bottom: 10px; }
+        .linha-lancamento { padding: 12px 15px; border-radius: 12px; margin-bottom: 15px; border: none; box-shadow: var(--sombra); }
         .linha-despesa { background-color: #FFF3E0; border-left: 6px solid var(--cor-despesa); }
         .linha-receita { background-color: #E8F5E9; border-left: 6px solid var(--cor-receita); }
         
@@ -179,16 +178,15 @@
         <div style="width: 150px;"></div>
     </div>
 
-    <!-- NAVEGAÇÃO FIXA -->
+    <!-- NAVEGAÇÃO FIXA (SEM BOTÃO EXCEL) -->
     <div class="menu no-print">
         <button id="btn_resumo" class="btn-ativo" onclick="showTab('resumo')">📊 DASHBOARD</button>
         <button id="btn_movimentacoes" onclick="showTab('movimentacoes')">📋 LANÇAMENTOS E EXTRATO</button>
         <button id="btn_relatorios_detalhados" onclick="showTab('relatorios_detalhados')">📈 RELATÓRIOS DETALHADOS</button>
-        <button style="background-color: #5C6BC0; color: white; border: none;" onclick="exportarCSV()">⬇️ EXPORTAR EXCEL</button>
         <button style="background-color: #555; color: white; border: none;" onclick="window.print()">🖨️ GERAR PDF</button>
         
-        <button style="background-color: #1565C0; color: white; border: none;" onclick="carregarDadosNuvem(true)">🔄 FORÇAR SINCRONIZAÇÃO</button>
-        <div id="status_conexao" class="status-conexao aguardando">⏳ INICIALIZANDO...</div>
+        <!-- BOTÃO HÍBRIDO: STATUS E SINCRONIZAÇÃO NUM SÓ -->
+        <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem(true)" title="Clique para forçar a sincronização com a nuvem">⏳ INICIALIZANDO...</button>
     </div>
 
     <!-- ABA 1: DASHBOARD DE RESUMO -->
@@ -225,7 +223,7 @@
             </div>
         </div>
         
-        <div class="dashboard-inferior" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="dashboard-inferior" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
             <div class="grafico-container">
                 <h4 style="margin: 0 0 10px 0; color: var(--cor-madeira); font-size: 14px;">CAIXA EFETIVADO (PAGO)</h4>
                 <div id="grafico_caixa" class="grafico-circulo"><div class="grafico-furo"></div></div>
@@ -242,13 +240,17 @@
                     <div class="legenda-item"><span class="ponto-cor" style="background:#C62828;"></span>A Pagar</div>
                 </div>
             </div>
-            <div class="top3-box" style="border-color: var(--cor-receita); margin: 0;">
-                <h4 style="color: var(--cor-receita); margin-top: 0; font-size: 14px;">TOP 3 RECEITAS</h4>
-                <ul id="lista_top_receitas" style="font-size: 13px;"></ul>
+        </div>
+
+        <!-- NOVOS GRÁFICOS DETALHADOS DE BARRAS -->
+        <div class="dashboard-inferior" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="top-graficos-box" style="border-top: 6px solid var(--cor-receita);">
+                <h4 style="color: var(--cor-receita);">🌱 DETALHAMENTO DAS MAIORES RECEITAS (TOP 5)</h4>
+                <ul id="lista_top_receitas" style="padding-left: 0;"></ul>
             </div>
-            <div class="top3-box" style="border-color: var(--cor-despesa); margin: 0;">
-                <h4 style="color: var(--cor-despesa); margin-top: 0; font-size: 14px;">TOP 3 DESPESAS</h4>
-                <ul id="lista_top_despesas" style="font-size: 13px;"></ul>
+            <div class="top-graficos-box" style="border-top: 6px solid var(--cor-despesa);">
+                <h4 style="color: var(--cor-despesa);">🚜 DETALHAMENTO DAS MAIORES DESPESAS (TOP 5)</h4>
+                <ul id="lista_top_despesas" style="padding-left: 0;"></ul>
             </div>
         </div>
     </div>
@@ -302,7 +304,7 @@
 
             <div class="barra-pesquisa-relatorio" style="margin-bottom: 0;">
                 <button class="btn-filtro ativo" id="btn_f_todos" onclick="setFiltroRapido('')">📋 TODOS</button>
-                <button class="btn-filtro" id="btn_f_safra" onclick="setFiltroRapido('safra')" title="Exibe apenas a Safra Agrícola atual (Agosto a Julho)">🌾 SAFRA ATUAL</button>
+                <button class="btn-filtro" id="btn_f_safra" onclick="setFiltroRapido('safra')" title="Exibe apenas a Safra Agrícola atual">🌾 SAFRA ATUAL</button>
                 <button class="btn-filtro" id="btn_f_pendentes" onclick="setFiltroRapido('pendentes')">⏳ PENDENTES</button>
                 <button class="btn-filtro" id="btn_f_entradas" onclick="setFiltroRapido('entradas')">🌱 RECEITAS</button>
                 
@@ -346,7 +348,7 @@
         </div>
     </div>
 
-    <!-- ABA 3: RELATÓRIOS DETALHADOS -->
+    <!-- ABA 3: RELATÓRIOS DETALHADOS E PENDÊNCIAS -->
     <div id="relatorios_detalhados" class="tab">
         <div class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; background: white; padding: 15px; border-radius: 12px; box-shadow: var(--sombra);">
             
@@ -361,7 +363,7 @@
             <button onclick="document.getElementById('filtro_safra_relatorios').value=''; document.getElementById('filtro_mes_relatorios').value=''; atualizarRelatoriosDetalhados()" class="btn-limpar" style="padding: 8px 15px; font-size: 13px;">🧹 MOSTRAR TUDO</button>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px;">
             <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra); border-top: 6px solid var(--cor-receita);">
                 <h3 style="color: var(--cor-receita); margin-top: 0; text-align: center;">🌱 RECEITAS POR CATEGORIA</h3>
                 <div class="table-container">
@@ -422,6 +424,41 @@
                 </div>
             </div>
         </div>
+
+        <!-- NOVOS RELATÓRIOS: DETALHAMENTO DE PENDÊNCIAS -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+            <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra); border-top: 6px solid #1565C0;">
+                <h3 style="color: #1565C0; margin-top: 0; text-align: center;">⏳ RECEITAS PENDENTES (A RECEBER)</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="background-color: #1565C0;">DATA</th>
+                                <th style="background-color: #1565C0;">CLIENTE/LOCAL</th>
+                                <th style="background-color: #1565C0; text-align: right;">VALOR (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody_receitas_pendentes"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra); border-top: 6px solid #C62828;">
+                <h3 style="color: #C62828; margin-top: 0; text-align: center;">⏳ DESPESAS PENDENTES (A PAGAR)</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="background-color: #C62828;">DATA</th>
+                                <th style="background-color: #C62828;">FORNECEDOR/LOCAL</th>
+                                <th style="background-color: #C62828; text-align: right;">VALOR (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody_despesas_pendentes"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL DE EDIÇÃO -->
@@ -456,11 +493,10 @@
         const rCategoriasPadrao = ["ACEROLA - POLPA", "CAFÉ 250G", "CAFÉ 500G", "CAFÉ EM GRÃOS", "CAFÉ SACA", "CRÉDITO", "ESTACAS DE EUCALÍPTO", "GRAVIOLA - POLPA S/SEM.", "MARACUJÁ - FRUTO", "MARACUJÁ - POLPA C/SEM.", "MARACUJÁ - POLPA S/SEM.", "OVOS", "PASTO - ALUGUEL", "RENDIMENTOS"];
         const unidadesReceita = { "ACEROLA - POLPA": "KG", "CAFÉ 250G": "PCT", "CAFÉ 500G": "PCT", "CAFÉ EM GRÃOS": "PCT", "CAFÉ SACA": "SC", "CRÉDITO": "R$", "ESTACAS DE EUCALÍPTO": "UN", "GRAVIOLA - POLPA S/SEM.": "KG", "MARACUJÁ - FRUTO": "KG", "MARACUJÁ - POLPA C/SEM.": "KG", "MARACUJÁ - POLPA S/SEM.": "KG", "OVOS": "DZ", "PASTO - ALUGUEL": "MÊS", "RENDIMENTOS": "R$" };
 
-        // --- SISTEMA DE PURIFICAÇÃO DE DATAS (O Detetive de Fuso Horário) ---
+        // --- SISTEMA DE PURIFICAÇÃO DE DATAS ---
         function normalizarDatas(lista) {
             return lista.map(t => {
                 if (t.data) {
-                    // Corta o fuso horário (o famoso "T") deixando apenas YYYY-MM-DD
                     if (typeof t.data === 'string' && t.data.includes('T')) {
                         t.data = t.data.substring(0, 10); 
                     } else if (t.data instanceof Date) {
@@ -471,7 +507,7 @@
             });
         }
 
-        // --- NOVO SISTEMA INTELIGENTE DE CÁLCULO DE SAFRA (A PARTIR DE 1 DE AGOSTO) ---
+        // --- SISTEMA DE CÁLCULO DE SAFRA (Agosto a Julho) ---
         function obterSafra(dataStr) {
             if(!dataStr || dataStr === '-' || dataStr === '') return 'Sem Data';
             
@@ -485,7 +521,6 @@
             
             let anoInicio, anoFim;
             
-            // Regra da Safra: 01 de Agosto (Mês 8) a 31 de Julho (Mês 7 do ano seguinte)
             if (mes >= 8) {
                 anoInicio = ano;
                 anoFim = ano + 1;
@@ -556,7 +591,6 @@
                 const data = await response.json();
                 
                 if (data.transacoes) {
-                    // Aplicação do Purificador de Datas para limpar as datas vindas do Google
                     transacoes = normalizarDatas(data.transacoes);
                     
                     statusDiv.innerHTML = '🟢 NUVEM SINCRONIZADA';
@@ -567,28 +601,16 @@
                 }
             } catch (error) {
                 console.error("Erro Nuvem:", error);
-                
-                let mensagemErro = "";
-                if (error.message === "Failed to fetch") {
-                    mensagemErro = "🔴 BLOQUEIO LOCAL: Coloque o ficheiro no GitHub Pages para libertar o acesso.";
-                } else {
-                    mensagemErro = "🔴 OFFLINE (Visualizando cópia guardada no computador)";
-                }
-
+                let mensagemErro = (error.message === "Failed to fetch") ? "🔴 BLOQUEIO LOCAL" : "🔴 OFFLINE (A usar cópia local)";
                 statusDiv.innerHTML = mensagemErro;
                 statusDiv.className = 'status-conexao';
                 
                 const localData = localStorage.getItem('rancho3c_offline');
-                if(localData) {
-                    transacoes = normalizarDatas(JSON.parse(localData));
-                }
+                if(localData) { transacoes = normalizarDatas(JSON.parse(localData)); }
             }
             
-            preencherSelectsLancamento(); 
-            preencherSelectsSafra(); 
-            atualizarOpcoesFiltros(); 
-            aplicarFiltros(); 
-            atualizarResumoEGrafico();
+            preencherSelectsLancamento(); preencherSelectsSafra(); 
+            atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico();
         }
 
         async function salvarDados() {
@@ -612,7 +634,7 @@
                 } else { throw new Error("O Google rejeitou a gravação."); }
             } catch (error) {
                 console.error("Erro ao enviar:", error);
-                statusDiv.innerHTML = '🔴 GRAVADO LOCALMENTE (Clique em Forçar Sincronização depois)';
+                statusDiv.innerHTML = '🔴 GRAVADO LOCALMENTE (Clique aqui para sincronizar depois)';
                 statusDiv.className = 'status-conexao';
             }
         }
@@ -627,7 +649,6 @@
                 try {
                     const parser = new DOMParser();
                     const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
-                    
                     let emitente = "";
                     const xNomeNode = xmlDoc.querySelector("emit xNome");
                     if(xNomeNode) emitente = xNomeNode.textContent;
@@ -694,20 +715,7 @@
             mostrarToast("Leitura de Nota Cancelada.");
         }
 
-
         // --- UTILIDADES ---
-        function exportarCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,Data;Safra;Tipo;Categoria;Setor;Local;Descricao;Qtd;Valor Total;Situacao\n";
-            ultimaListaFiltrada.forEach(obj => {
-                let t = obj.item; let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (t.tipo === 'Receita') ? strSafe(t.desc) : strSafe(t.setor);
-                let val = parseFloat(t.valor) || 0;
-                let row = [formatarData(t.data), obterSafra(t.data), t.tipo, cM, strSafe(t.setor), strSafe(t.local), strSafe(t.desc), strSafe(t.qtd) + ' ' + strSafe(t.und), val.toString().replace('.', ','), t.sit];
-                csvContent += row.join(";") + "\n";
-            });
-            const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", "relatorio_rancho3c.csv"); document.body.appendChild(link);
-            link.click(); link.remove(); mostrarToast("RELATÓRIO EXPORTADO!");
-        }
-
         function mostrarToast(msg) {
             const toast = document.getElementById("toast"); 
             if(toast) { toast.innerText = msg; toast.className = "toast show"; setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000); }
@@ -788,7 +796,6 @@
             const prefix = tipo === 'Despesa' ? 'd_' : 'r_';
             const campos = tipo === 'Despesa' ? ['data', 'categoria', 'setor', 'local', 'descricao', 'qtd', 'und', 'v_unit', 'valor'] : ['data', 'categoria', 'local', 'descricao', 'qtd', 'und', 'v_unit', 'valor'];
             campos.forEach(c => { let el = document.getElementById(prefix + c); if(el) el.value = ''; });
-            
             let elSit = document.getElementById(prefix + 'sit'); 
             if(elSit) elSit.value = tipo === 'Despesa' ? 'A pagar' : 'A receber';
         }
@@ -998,10 +1005,8 @@
                 let sitTxtFiltro = strSafe(t.sit).toLowerCase();
                 
                 if (fMesTabela && (!t.data || !t.data.startsWith(fMesTabela))) match = false;
-                if (filtroRapido === 'pendentes' && sitTxtFiltro.includes('pago')) match = false;
+                if (filtroRapido === 'pendentes' && (sitTxtFiltro.includes('pago') || (!sitTxtFiltro.includes('receber') && !sitTxtFiltro.includes('pagar') && !sitTxtFiltro.includes('pendente')))) match = false;
                 if (filtroRapido === 'entradas' && t.tipo !== 'Receita') match = false;
-                
-                // NOVO: Regra do Filtro de Safra Atual
                 if (filtroRapido === 'safra' && obterSafra(t.data) !== obterSafraAtual()) match = false;
 
                 return match;
@@ -1050,7 +1055,7 @@
                 }
                 
                 let sign = `${strSafe(t.data)}|${parseFloat(t.qtd)}|${strSafe(t.local).toUpperCase()}|${parseFloat(t.valor)}`;
-                let alertIcon = signCounts[sign] > 1 ? `<span title="⚠️ Lançamento duplicado detetado (Mesma Data, Quantidade, Local e Valor)" style="cursor:help; font-size: 16px;">⚠️</span> ` : '';
+                let alertIcon = signCounts[sign] > 1 ? `<span title="⚠️ Lançamento duplicado detetado" style="cursor:help; font-size: 16px;">⚠️</span> ` : '';
 
                 let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (t.tipo === 'Receita') ? strSafe(t.desc) : strSafe(t.setor);
 
@@ -1061,7 +1066,7 @@
                         <td style="font-weight:900;">${formatarMoeda(t.valor)}</td>
                         <td style="text-align: center; width: 100px;">${btnSit}</td>
                         <td class="no-print" style="white-space: nowrap; text-align: center;">
-                            <button onclick="abrirModalEdicao(${idx})" class="btn-acao btn-editar" title="Editar este lançamento">✏️️</button>
+                            <button onclick="abrirModalEdicao(${idx})" class="btn-acao btn-editar" title="Editar este lançamento">✏️</button>
                             <button onclick="confirmarDuplicacao(${idx})" class="btn-acao" style="background:#4FC3F7; color:#000;" title="Clonar este lançamento">👯</button>
                             <button onclick="confirmarExclusao(${idx})" class="btn-acao btn-excluir" title="Excluir este lançamento">🗑️</button>
                         </td>
@@ -1073,7 +1078,6 @@
         function renderizarGraficos(tR, tD, aR, aP) {
             let totalCaixa = tR + tD;
             let percRec = totalCaixa === 0 ? 0 : (tR / totalCaixa) * 100;
-            
             let totalPend = aR + aP;
             let percARec = totalPend === 0 ? 0 : (aR / totalPend) * 100;
 
@@ -1082,7 +1086,6 @@
 
             const chartCaixa = document.getElementById('grafico_caixa');
             const chartPend = document.getElementById('grafico_pendente');
-            
             if(chartCaixa) chartCaixa.style.background = `conic-gradient(${corCaixa})`;
             if(chartPend) chartPend.style.background = `conic-gradient(${corPend})`;
         }
@@ -1090,12 +1093,24 @@
         function atualizarRelatoriosDetalhados() {
             let despSetor = {}; let despCat = {};
             let recCat = {}; let recLocal = {};
+            let htmlRecPend = ''; let htmlDespPend = '';
+            let totRecPend = 0; let totDespPend = 0;
             
             const filtroMes = document.getElementById('filtro_mes_relatorios') ? document.getElementById('filtro_mes_relatorios').value : '';
             const filtroSafra = document.getElementById('filtro_safra_relatorios') ? document.getElementById('filtro_safra_relatorios').value : '';
 
+            // Filtrar apenas o que nos interessa para tabelas de PENDENTES
+            let pendentes = transacoes.filter(t => {
+                if (filtroSafra && obterSafra(t.data) !== filtroSafra) return false;
+                if (filtroMes && (!t.data || !t.data.startsWith(filtroMes))) return false;
+                let sit = strSafe(t.sit).toLowerCase();
+                return sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente');
+            });
+
+            // Ordenar pendentes por data (mais antigas primeiro)
+            pendentes.sort((a, b) => new Date(a.data||0) - new Date(b.data||0));
+
             transacoes.forEach(t => {
-                // Filtro Duplo Inteligente
                 if (filtroSafra && obterSafra(t.data) !== filtroSafra) return;
                 if (filtroMes && (!t.data || !t.data.startsWith(filtroMes))) return;
 
@@ -1103,7 +1118,9 @@
                 let cat = strSafe(t.categoria).toUpperCase() || 'SEM CATEGORIA';
                 let loc = strSafe(t.local).toUpperCase() || 'NÃO INFORMADO';
                 let setor = strSafe(t.setor).toUpperCase() || 'SEM SETOR';
+                let sit = strSafe(t.sit).toLowerCase();
 
+                // Tabelas de Agrupamento consideram TUDO do período ou só pagos? Vamos manter como estava (tudo no período).
                 if (t.tipo === 'Despesa') {
                     despSetor[setor] = (despSetor[setor] || 0) + v;
                     despCat[cat] = (despCat[cat] || 0) + v;
@@ -1113,15 +1130,36 @@
                 }
             });
 
+            // Gerar HTML dos Pendentes
+            pendentes.forEach(t => {
+                let sit = strSafe(t.sit).toLowerCase();
+                let v = parseFloat(t.valor) || 0;
+                let dF = formatarData(t.data);
+                if (t.tipo === 'Receita' && sit.includes('receber')) {
+                    htmlRecPend += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:bold; color:#1565C0; text-align:right;">${formatarMoeda(v)}</td></tr>`;
+                    totRecPend += v;
+                } else if (t.tipo === 'Despesa' && sit.includes('pagar')) {
+                    htmlDespPend += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:bold; color:#C62828; text-align:right;">${formatarMoeda(v)}</td></tr>`;
+                    totDespPend += v;
+                }
+            });
+
+            if (htmlRecPend === '') htmlRecPend = '<tr><td colspan="3" style="text-align:center;">Não há receitas pendentes neste período</td></tr>';
+            else htmlRecPend += `<tr style="background-color:#e3f2fd;"><td colspan="2" style="font-weight:900;">TOTAL A RECEBER</td><td style="font-weight:900; color:#1565C0; text-align:right; font-size:15px;">${formatarMoeda(totRecPend)}</td></tr>`;
+            
+            if (htmlDespPend === '') htmlDespPend = '<tr><td colspan="3" style="text-align:center;">Não há despesas pendentes neste período</td></tr>';
+            else htmlDespPend += `<tr style="background-color:#ffebee;"><td colspan="2" style="font-weight:900;">TOTAL A PAGAR</td><td style="font-weight:900; color:#C62828; text-align:right; font-size:15px;">${formatarMoeda(totDespPend)}</td></tr>`;
+
+            document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRecPend;
+            document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDespPend;
+
             function renderTabelaRelatorio(id, dadosObj, cor) {
                 let html = '';
                 let totalSoma = 0;
-                
                 Object.entries(dadosObj).sort((a,b) => b[1] - a[1]).forEach(item => {
                     html += `<tr><td>${item[0]}</td><td style="font-weight:bold; color:${cor}; text-align:right;">${formatarMoeda(item[1])}</td></tr>`;
                     totalSoma += item[1];
                 });
-                
                 if (html !== '') {
                     html += `<tr style="background-color: #f5f5f5; border-top: 2px solid ${cor};">
                                 <td style="font-weight:900;">TOTAL DO PERÍODO</td>
@@ -1130,7 +1168,6 @@
                 } else {
                     html = '<tr><td colspan="2" style="text-align:center;">Nenhum dado neste período</td></tr>';
                 }
-                
                 document.getElementById(id).innerHTML = html;
             }
 
@@ -1151,7 +1188,6 @@
             const filtroSafra = filtroSafraElement ? filtroSafraElement.value : '';
 
             transacoes.forEach(t => {
-                // Filtro Duplo Inteligente
                 if (filtroSafra) { if (obterSafra(t.data) !== filtroSafra) return; }
                 if (filtroMes) { if (!t.data || typeof t.data !== 'string' || !t.data.startsWith(filtroMes)) return; }
 
@@ -1178,20 +1214,38 @@
             document.getElementById('res_saldo').innerText = formatarMoeda(tR - tD);
             document.getElementById('card_saldo_div').style.background = (tR - tD >= 0) ? 'var(--cor-saldo-pos-grad)' : 'var(--cor-saldo-neg-grad)';
 
-            let hR = ''; Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 3).forEach(x => { hR += `<li><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></li>`; });
-            document.getElementById('lista_top_receitas').innerHTML = hR || '<li>Sem receitas pagas neste período</li>';
-
-            let hD = ''; Object.entries(dCat).sort((a,b) => b[1] - a[1]).slice(0, 3).forEach(x => { hD += `<li><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></li>`; });
-            document.getElementById('lista_top_despesas').innerHTML = hD || '<li>Sem despesas pagas neste período</li>';
-
             renderizarGraficos(tR, tD, aR, aP);
+
+            // GRÁFICOS DETALHADOS DE BARRAS HORIZONTAIS
+            let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); // Pega as Top 5
+            let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; // Pega o maior valor para servir de teto (100%)
+            let hR = '';
+            arrRCat.forEach(x => { 
+                let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0;
+                hR += `<li class="item-lista-grafico">
+                        <div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div>
+                        <div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div>
+                       </li>`; 
+            });
+            document.getElementById('lista_top_receitas').innerHTML = hR || '<li class="item-lista-grafico">Sem receitas neste período</li>';
+
+            let arrDCat = Object.entries(dCat).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            let maxDCat = arrDCat.length > 0 ? arrDCat[0][1] : 0;
+            let hD = '';
+            arrDCat.forEach(x => { 
+                let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0;
+                hD += `<li class="item-lista-grafico">
+                        <div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div>
+                        <div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div>
+                       </li>`; 
+            });
+            document.getElementById('lista_top_despesas').innerHTML = hD || '<li class="item-lista-grafico">Sem despesas neste período</li>';
+
             atualizarRelatoriosDetalhados();
         }
 
         // INIT
-        window.onload = () => { 
-            carregarDadosNuvem();
-        };
+        window.onload = () => { carregarDadosNuvem(); };
     </script>
 </body>
 </html>
