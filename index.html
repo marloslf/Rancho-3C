@@ -302,9 +302,7 @@
 
             <div class="barra-pesquisa-relatorio" style="margin-bottom: 0;">
                 <button class="btn-filtro ativo" id="btn_f_todos" onclick="setFiltroRapido('')">📋 TODOS</button>
-                
                 <button class="btn-filtro" id="btn_f_safra" onclick="setFiltroRapido('safra')" title="Exibe apenas a Safra Agrícola atual (Agosto a Julho)">🌾 SAFRA ATUAL</button>
-                
                 <button class="btn-filtro" id="btn_f_pendentes" onclick="setFiltroRapido('pendentes')">⏳ PENDENTES</button>
                 <button class="btn-filtro" id="btn_f_entradas" onclick="setFiltroRapido('entradas')">🌱 RECEITAS</button>
                 
@@ -458,11 +456,25 @@
         const rCategoriasPadrao = ["ACEROLA - POLPA", "CAFÉ 250G", "CAFÉ 500G", "CAFÉ EM GRÃOS", "CAFÉ SACA", "CRÉDITO", "ESTACAS DE EUCALÍPTO", "GRAVIOLA - POLPA S/SEM.", "MARACUJÁ - FRUTO", "MARACUJÁ - POLPA C/SEM.", "MARACUJÁ - POLPA S/SEM.", "OVOS", "PASTO - ALUGUEL", "RENDIMENTOS"];
         const unidadesReceita = { "ACEROLA - POLPA": "KG", "CAFÉ 250G": "PCT", "CAFÉ 500G": "PCT", "CAFÉ EM GRÃOS": "PCT", "CAFÉ SACA": "SC", "CRÉDITO": "R$", "ESTACAS DE EUCALÍPTO": "UN", "GRAVIOLA - POLPA S/SEM.": "KG", "MARACUJÁ - FRUTO": "KG", "MARACUJÁ - POLPA C/SEM.": "KG", "MARACUJÁ - POLPA S/SEM.": "KG", "OVOS": "DZ", "PASTO - ALUGUEL": "MÊS", "RENDIMENTOS": "R$" };
 
+        // --- SISTEMA DE PURIFICAÇÃO DE DATAS (O Detetive de Fuso Horário) ---
+        function normalizarDatas(lista) {
+            return lista.map(t => {
+                if (t.data) {
+                    // Corta o fuso horário (o famoso "T") deixando apenas YYYY-MM-DD
+                    if (typeof t.data === 'string' && t.data.includes('T')) {
+                        t.data = t.data.substring(0, 10); 
+                    } else if (t.data instanceof Date) {
+                        t.data = t.data.toISOString().substring(0, 10);
+                    }
+                }
+                return t;
+            });
+        }
+
         // --- NOVO SISTEMA INTELIGENTE DE CÁLCULO DE SAFRA (A PARTIR DE 1 DE AGOSTO) ---
         function obterSafra(dataStr) {
             if(!dataStr || dataStr === '-' || dataStr === '') return 'Sem Data';
             
-            // Fatiar o texto da data para evitar problemas de fuso horário
             let partes = dataStr.split('-');
             if(partes.length !== 3) return 'Sem Data';
             
@@ -482,7 +494,6 @@
                 anoFim = ano;
             }
             
-            // Formatar para dois dígitos (Ex: 2025 vira 25)
             let strInicio = anoInicio.toString().slice(-2);
             let strFim = anoFim.toString().slice(-2);
             
@@ -515,7 +526,6 @@
                 if(t.data && t.data !== '-') safras.add(obterSafra(t.data));
             });
             
-            // Ordena da safra mais recente para a mais antiga
             let arrSafras = Array.from(safras).filter(s => s !== 'Sem Data').sort().reverse(); 
             
             let htmlOptions = '<option value="">TODAS AS SAFRAS</option>';
@@ -546,7 +556,9 @@
                 const data = await response.json();
                 
                 if (data.transacoes) {
-                    transacoes = data.transacoes;
+                    // Aplicação do Purificador de Datas para limpar as datas vindas do Google
+                    transacoes = normalizarDatas(data.transacoes);
+                    
                     statusDiv.innerHTML = '🟢 NUVEM SINCRONIZADA';
                     statusDiv.className = 'status-conexao conectado';
                     localStorage.setItem('rancho3c_offline', JSON.stringify(transacoes));
@@ -567,7 +579,9 @@
                 statusDiv.className = 'status-conexao';
                 
                 const localData = localStorage.getItem('rancho3c_offline');
-                if(localData) transacoes = JSON.parse(localData);
+                if(localData) {
+                    transacoes = normalizarDatas(JSON.parse(localData));
+                }
             }
             
             preencherSelectsLancamento(); 
@@ -700,10 +714,12 @@
         }
 
         function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+        
         function formatarData(dataISO) {
-            if(!dataISO || String(dataISO).toLowerCase() === 'nan') return '-';
+            if(!dataISO || String(dataISO).toLowerCase() === 'nan' || String(dataISO).toLowerCase() === 'sem data') return '-';
             const strData = String(dataISO); const partes = strData.split('-'); return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : strData;
         }
+
         function strSafe(val) { return (val === null || val === undefined || val === 'nan' || val === '-') ? '' : String(val).trim(); }
 
         function showTab(id) {
@@ -1045,7 +1061,7 @@
                         <td style="font-weight:900;">${formatarMoeda(t.valor)}</td>
                         <td style="text-align: center; width: 100px;">${btnSit}</td>
                         <td class="no-print" style="white-space: nowrap; text-align: center;">
-                            <button onclick="abrirModalEdicao(${idx})" class="btn-acao btn-editar" title="Editar este lançamento">✏️</button>
+                            <button onclick="abrirModalEdicao(${idx})" class="btn-acao btn-editar" title="Editar este lançamento">✏️️</button>
                             <button onclick="confirmarDuplicacao(${idx})" class="btn-acao" style="background:#4FC3F7; color:#000;" title="Clonar este lançamento">👯</button>
                             <button onclick="confirmarExclusao(${idx})" class="btn-acao btn-excluir" title="Excluir este lançamento">🗑️</button>
                         </td>
