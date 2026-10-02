@@ -64,7 +64,6 @@
             background: var(--cor-madeira); color: white; box-shadow: 0 4px 8px rgba(93, 64, 55, 0.3);
         }
 
-        /* --- BOTÃO INTELIGENTE DE STATUS E SINCRONIZAÇÃO --- */
         .status-conexao {
             padding: 8px 20px; border-radius: 30px; font-weight: 900; font-size: 12px;
             background: #ffebee; color: #c62828; border: 2px solid #ef5350;
@@ -73,7 +72,7 @@
         }
         .status-conexao:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); filter: brightness(0.95);}
         .status-conexao.conectado { background: #e8f5e9; color: #2e7d32; border-color: #66bb6a; }
-        .status-conexao.aguardando { background: #FFF3E0; color: #E65100; border-color: #FFB74D; pointer-events: none;} /* Desativa clique ao carregar */
+        .status-conexao.aguardando { background: #FFF3E0; color: #E65100; border-color: #FFB74D; pointer-events: none;}
 
         /* --- ABAS --- */
         .tab { display: none; background: transparent; }
@@ -96,7 +95,6 @@
         .legenda-item { display: flex; align-items: center; gap: 6px; }
         .ponto-cor { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
 
-        /* --- GRÁFICOS DE BARRAS HORIZONTAIS CSS --- */
         .top-graficos-box { background: #fafafa; padding: 20px; border-radius: 12px; box-shadow: var(--sombra); flex: 1; min-width: 300px;}
         .top-graficos-box h4 { margin-top: 0; font-size: 15px; margin-bottom: 15px;}
         .item-lista-grafico { list-style: none; margin-bottom: 12px; font-size: 14px; font-weight: 800; text-transform: uppercase; color: var(--cor-texto);}
@@ -150,9 +148,10 @@
         .btn-editar { background: #FFCA28; color: #3E2723; }
         .btn-excluir { background: #E53935; color: white; }
 
-        /* --- MODAL E TOASTS --- */
-        #modal-edicao { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;}
+        /* --- MODAIS E TOASTS --- */
+        #modal-edicao, #modal-pendencias { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;}
         .modal-content { background: white; padding: 30px; border-radius: var(--borda-raio); width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: var(--sombra);}
+        #modal-pendencias .modal-content { max-width: 900px; } /* Modal maior para as pendências */
         .form-group-modal { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .form-group-modal input, .form-group-modal select { padding: 12px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-weight: 600; text-transform: uppercase;}
 
@@ -178,11 +177,15 @@
         <div style="width: 150px;"></div>
     </div>
 
-    <!-- NAVEGAÇÃO FIXA (SEM BOTÃO EXCEL) -->
+    <!-- NAVEGAÇÃO FIXA -->
     <div class="menu no-print">
         <button id="btn_resumo" class="btn-ativo" onclick="showTab('resumo')">📊 DASHBOARD</button>
         <button id="btn_movimentacoes" onclick="showTab('movimentacoes')">📋 LANÇAMENTOS E EXTRATO</button>
         <button id="btn_relatorios_detalhados" onclick="showTab('relatorios_detalhados')">📈 RELATÓRIOS DETALHADOS</button>
+        
+        <!-- NOVO BOTÃO DE PENDÊNCIAS INDEPENDENTE -->
+        <button style="background-color: #FF9800; color: white; border: none;" onclick="abrirModalPendencias()">🔔 PENDÊNCIAS</button>
+        
         <button style="background-color: #555; color: white; border: none;" onclick="window.print()">🖨️ GERAR PDF</button>
         
         <!-- BOTÃO HÍBRIDO: STATUS E SINCRONIZAÇÃO NUM SÓ -->
@@ -204,8 +207,8 @@
             <button onclick="document.getElementById('filtro_safra_dashboard').value=''; document.getElementById('filtro_mes_dashboard').value=''; atualizarResumoEGrafico()" class="btn-limpar" style="padding: 8px 15px; font-size: 12px;">🧹 LIMPAR FILTROS</button>
         </div>
 
-        <div id="alerta_vencidas" class="no-print" style="display: none; background: #ffebee; border-left: 5px solid #d32f2f; padding: 15px; margin-bottom: 15px; border-radius: 8px; color: #d32f2f; font-weight: 800; font-size: 14px; box-shadow: var(--sombra);">
-            ⚠️ ATENÇÃO: VOCÊ POSSUI <span id="qtd_vencidas">0</span> CONTA(S) ATRASADA(S) NESTE PERÍODO!
+        <div id="alerta_vencidas" class="no-print" style="display: none; background: #ffebee; border-left: 5px solid #d32f2f; padding: 15px; margin-bottom: 15px; border-radius: 8px; color: #d32f2f; font-weight: 800; font-size: 14px; box-shadow: var(--sombra); cursor: pointer;" onclick="abrirModalPendencias()" title="Clique para ver os detalhes das pendências">
+            ⚠️ ATENÇÃO: VOCÊ POSSUI <span id="qtd_vencidas">0</span> CONTA(S) ATRASADA(S) NESTE PERÍODO! (Clique para ver)
         </div>
 
         <div class="resumo-cards">
@@ -242,7 +245,6 @@
             </div>
         </div>
 
-        <!-- NOVOS GRÁFICOS DETALHADOS DE BARRAS -->
         <div class="dashboard-inferior" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <div class="top-graficos-box" style="border-top: 6px solid var(--cor-receita);">
                 <h4 style="color: var(--cor-receita);">🌱 DETALHAMENTO DAS MAIORES RECEITAS (TOP 5)</h4>
@@ -348,7 +350,7 @@
         </div>
     </div>
 
-    <!-- ABA 3: RELATÓRIOS DETALHADOS E PENDÊNCIAS -->
+    <!-- ABA 3: RELATÓRIOS DETALHADOS -->
     <div id="relatorios_detalhados" class="tab">
         <div class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; background: white; padding: 15px; border-radius: 12px; box-shadow: var(--sombra);">
             
@@ -424,41 +426,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- NOVOS RELATÓRIOS: DETALHAMENTO DE PENDÊNCIAS -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
-            <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra); border-top: 6px solid #1565C0;">
-                <h3 style="color: #1565C0; margin-top: 0; text-align: center;">⏳ RECEITAS PENDENTES (A RECEBER)</h3>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="background-color: #1565C0;">DATA</th>
-                                <th style="background-color: #1565C0;">CLIENTE/LOCAL</th>
-                                <th style="background-color: #1565C0; text-align: right;">VALOR (R$)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody_receitas_pendentes"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra); border-top: 6px solid #C62828;">
-                <h3 style="color: #C62828; margin-top: 0; text-align: center;">⏳ DESPESAS PENDENTES (A PAGAR)</h3>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="background-color: #C62828;">DATA</th>
-                                <th style="background-color: #C62828;">FORNECEDOR/LOCAL</th>
-                                <th style="background-color: #C62828; text-align: right;">VALOR (R$)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody_despesas_pendentes"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- MODAL DE EDIÇÃO -->
@@ -469,6 +436,55 @@
             <div style="display:flex; gap:10px;">
                 <button class="btn-salvar" onclick="guardarEdicao()">💾 SALVAR</button>
                 <button class="btn-limpar" style="width:100%" onclick="fecharModal()">❌ CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE PENDÊNCIAS (NOVO) -->
+    <div id="modal-pendencias">
+        <div class="modal-content">
+            <h3 style="margin-top: 0; color: #3E2723; text-align: center; font-size: 20px;">🔔 CONTAS PENDENTES</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                <!-- RECEITAS PENDENTES -->
+                <div style="background: white; padding: 10px; border-radius: var(--borda-raio); border: 2px solid #1565C0;">
+                    <h4 style="color: #1565C0; margin-top: 0; text-align: center; font-size: 14px;">⏳ A RECEBER</h4>
+                    <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                        <table style="font-size: 13px;">
+                            <thead>
+                                <tr>
+                                    <th style="background-color: #1565C0; padding: 8px;">DATA</th>
+                                    <th style="background-color: #1565C0; padding: 8px;">CLIENTE/LOCAL</th>
+                                    <th style="background-color: #1565C0; padding: 8px; text-align: right;">VALOR (R$)</th>
+                                    <th style="background-color: #1565C0; padding: 8px; text-align: center; width: 100px;">AÇÃO</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody_receitas_pendentes"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- DESPESAS PENDENTES -->
+                <div style="background: white; padding: 10px; border-radius: var(--borda-raio); border: 2px solid #C62828;">
+                    <h4 style="color: #C62828; margin-top: 0; text-align: center; font-size: 14px;">⏳ A PAGAR</h4>
+                    <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                        <table style="font-size: 13px;">
+                            <thead>
+                                <tr>
+                                    <th style="background-color: #C62828; padding: 8px;">DATA</th>
+                                    <th style="background-color: #C62828; padding: 8px;">FORNECEDOR/LOCAL</th>
+                                    <th style="background-color: #C62828; padding: 8px; text-align: right;">VALOR (R$)</th>
+                                    <th style="background-color: #C62828; padding: 8px; text-align: center; width: 100px;">AÇÃO</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody_despesas_pendentes"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <button class="btn-limpar" style="padding: 10px 30px; font-size: 14px;" onclick="fecharModalPendencias()">❌ FECHAR JANELA</button>
             </div>
         </div>
     </div>
@@ -510,29 +526,18 @@
         // --- SISTEMA DE CÁLCULO DE SAFRA (Agosto a Julho) ---
         function obterSafra(dataStr) {
             if(!dataStr || dataStr === '-' || dataStr === '') return 'Sem Data';
-            
             let partes = dataStr.split('-');
             if(partes.length !== 3) return 'Sem Data';
             
             let ano = parseInt(partes[0], 10);
             let mes = parseInt(partes[1], 10);
-            
             if (isNaN(ano) || isNaN(mes)) return 'Sem Data';
             
             let anoInicio, anoFim;
+            if (mes >= 8) { anoInicio = ano; anoFim = ano + 1; } 
+            else { anoInicio = ano - 1; anoFim = ano; }
             
-            if (mes >= 8) {
-                anoInicio = ano;
-                anoFim = ano + 1;
-            } else {
-                anoInicio = ano - 1;
-                anoFim = ano;
-            }
-            
-            let strInicio = anoInicio.toString().slice(-2);
-            let strFim = anoFim.toString().slice(-2);
-            
-            return strInicio + '/' + strFim;
+            return anoInicio.toString().slice(-2) + '/' + anoFim.toString().slice(-2);
         }
 
         function obterSafraAtual() {
@@ -541,18 +546,10 @@
             let mes = d.getMonth() + 1;
             
             let anoInicio, anoFim;
-            if (mes >= 8) {
-                anoInicio = ano;
-                anoFim = ano + 1;
-            } else {
-                anoInicio = ano - 1;
-                anoFim = ano;
-            }
+            if (mes >= 8) { anoInicio = ano; anoFim = ano + 1; } 
+            else { anoInicio = ano - 1; anoFim = ano; }
             
-            let strInicio = anoInicio.toString().slice(-2);
-            let strFim = anoFim.toString().slice(-2);
-            
-            return strInicio + '/' + strFim;
+            return anoInicio.toString().slice(-2) + '/' + anoFim.toString().slice(-2);
         }
 
         function preencherSelectsSafra() {
@@ -560,7 +557,6 @@
             transacoes.forEach(t => {
                 if(t.data && t.data !== '-') safras.add(obterSafra(t.data));
             });
-            
             let arrSafras = Array.from(safras).filter(s => s !== 'Sem Data').sort().reverse(); 
             
             let htmlOptions = '<option value="">TODAS AS SAFRAS</option>';
@@ -569,19 +565,17 @@
             
             let selDash = document.getElementById('filtro_safra_dashboard');
             let selRel = document.getElementById('filtro_safra_relatorios');
-            
-            let valDash = selDash ? selDash.value : '';
-            let valRel = selRel ? selRel.value : '';
+            let valDash = selDash ? selDash.value : ''; let valRel = selRel ? selRel.value : '';
             
             if(selDash) { selDash.innerHTML = htmlOptions; selDash.value = valDash; }
             if(selRel) { selRel.innerHTML = htmlOptions; selRel.value = valRel; }
         }
 
-        // --- SISTEMA NUVEM ---
+        // --- SISTEMA NUVEM E SINCRONIZAÇÃO HÍBRIDA ---
         
         async function carregarDadosNuvem(forcar = false) {
             const statusDiv = document.getElementById('status_conexao');
-            statusDiv.innerHTML = '⏳ A LER DA NUVEM...';
+            statusDiv.innerHTML = '⏳ SINCRONIZANDO...';
             statusDiv.className = 'status-conexao aguardando';
 
             try {
@@ -592,16 +586,13 @@
                 
                 if (data.transacoes) {
                     transacoes = normalizarDatas(data.transacoes);
-                    
                     statusDiv.innerHTML = '🟢 NUVEM SINCRONIZADA';
                     statusDiv.className = 'status-conexao conectado';
                     localStorage.setItem('rancho3c_offline', JSON.stringify(transacoes));
-                } else {
-                    throw new Error("Formato de dados desconhecido.");
-                }
+                } else { throw new Error("Formato de dados desconhecido."); }
             } catch (error) {
                 console.error("Erro Nuvem:", error);
-                let mensagemErro = (error.message === "Failed to fetch") ? "🔴 BLOQUEIO LOCAL" : "🔴 OFFLINE (A usar cópia local)";
+                let mensagemErro = (error.message === "Failed to fetch") ? "🔴 BLOQUEIO LOCAL" : "🔴 OFFLINE (Cópia local)";
                 statusDiv.innerHTML = mensagemErro;
                 statusDiv.className = 'status-conexao';
                 
@@ -615,7 +606,7 @@
 
         async function salvarDados() {
             const statusDiv = document.getElementById('status_conexao');
-            statusDiv.innerHTML = '⏳ A GRAVAR NA NUVEM...';
+            statusDiv.innerHTML = '⏳ A GRAVAR...';
             statusDiv.className = 'status-conexao aguardando';
             
             localStorage.setItem('rancho3c_offline', JSON.stringify(transacoes));
@@ -634,10 +625,74 @@
                 } else { throw new Error("O Google rejeitou a gravação."); }
             } catch (error) {
                 console.error("Erro ao enviar:", error);
-                statusDiv.innerHTML = '🔴 GRAVADO LOCALMENTE (Clique aqui para sincronizar depois)';
+                statusDiv.innerHTML = '🔴 GRAVADO LOCAL (Clique aqui p/ nuvem)';
                 statusDiv.className = 'status-conexao';
             }
         }
+
+        // --- GESTÃO DA MODAL DE PENDÊNCIAS ---
+        function abrirModalPendencias() {
+            renderizarTabelasPendencias();
+            document.getElementById('modal-pendencias').style.display = 'flex';
+        }
+
+        function fecharModalPendencias() {
+            document.getElementById('modal-pendencias').style.display = 'none';
+        }
+
+        function renderizarTabelasPendencias() {
+            let htmlRecPend = ''; let htmlDespPend = '';
+            let totRecPend = 0; let totDespPend = 0;
+
+            // Filtramos as pendentes mantendo o índice original para permitir edição
+            let pendentes = transacoes.map((t, i) => ({ item: t, indexOriginal: i }))
+                .filter(obj => {
+                    let sit = strSafe(obj.item.sit).toLowerCase();
+                    return sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente');
+                });
+
+            // Ordenar por data mais antiga primeiro
+            pendentes.sort((a, b) => new Date(a.item.data || 0) - new Date(b.item.data || 0));
+
+            pendentes.forEach(obj => {
+                let t = obj.item; let idx = obj.indexOriginal;
+                let sit = strSafe(t.sit).toLowerCase();
+                let v = parseFloat(t.valor) || 0;
+                let dF = formatarData(t.data);
+                
+                if (t.tipo === 'Receita' && sit.includes('receber')) {
+                    htmlRecPend += `<tr>
+                        <td>${dF}</td><td>${strSafe(t.local)}</td>
+                        <td style="font-weight:bold; color:#1565C0; text-align:right;">${formatarMoeda(v)}</td>
+                        <td style="text-align: center;"><button class="btn-acao bg-pago" style="font-size:11px; width:100%;" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️ RECEBER</button></td>
+                    </tr>`;
+                    totRecPend += v;
+                } else if (t.tipo === 'Despesa' && sit.includes('pagar')) {
+                    htmlDespPend += `<tr>
+                        <td>${dF}</td><td>${strSafe(t.local)}</td>
+                        <td style="font-weight:bold; color:#C62828; text-align:right;">${formatarMoeda(v)}</td>
+                        <td style="text-align: center;"><button class="btn-acao bg-pago" style="font-size:11px; width:100%;" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️ PAGAR</button></td>
+                    </tr>`;
+                    totDespPend += v;
+                }
+            });
+
+            if (htmlRecPend === '') htmlRecPend = '<tr><td colspan="4" style="text-align:center; padding: 15px;">🎉 Nenhuma receita pendente!</td></tr>';
+            else htmlRecPend += `<tr style="background-color:#e3f2fd;"><td colspan="2" style="font-weight:900;">TOTAL A RECEBER</td><td style="font-weight:900; color:#1565C0; text-align:right; font-size:14px;">${formatarMoeda(totRecPend)}</td><td></td></tr>`;
+            
+            if (htmlDespPend === '') htmlDespPend = '<tr><td colspan="4" style="text-align:center; padding: 15px;">🎉 Nenhuma despesa pendente!</td></tr>';
+            else htmlDespPend += `<tr style="background-color:#ffebee;"><td colspan="2" style="font-weight:900;">TOTAL A PAGAR</td><td style="font-weight:900; color:#C62828; text-align:right; font-size:14px;">${formatarMoeda(totDespPend)}</td><td></td></tr>`;
+
+            document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRecPend;
+            document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDespPend;
+        }
+
+        function mudarSitEAtualizarPendencias(idx, novaSit) {
+            mudarSitTransacao(idx, novaSit); // Função nativa que já atualiza e grava tudo
+            renderizarTabelasPendencias(); // Recarrega a tabela da janela flutuante para o item sumir na hora
+            mostrarToast("Conta liquidada com sucesso!");
+        }
+
 
         // --- SISTEMA DE LEITURA DO XML ---
         function processarXML(event) {
@@ -722,12 +777,10 @@
         }
 
         function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
-        
         function formatarData(dataISO) {
             if(!dataISO || String(dataISO).toLowerCase() === 'nan' || String(dataISO).toLowerCase() === 'sem data') return '-';
             const strData = String(dataISO); const partes = strData.split('-'); return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : strData;
         }
-
         function strSafe(val) { return (val === null || val === undefined || val === 'nan' || val === '-') ? '' : String(val).trim(); }
 
         function showTab(id) {
@@ -758,9 +811,7 @@
 
         function preencherSelectsLancamento() {
             let dCats = new Set(dCategoriasPadrao); let dSets = new Set(dSetoresPadrao);
-            let dLocais = new Set(), dDescs = new Set();
-            let rCats = new Set(rCategoriasPadrao); let rLocais = new Set();
-
+            let dLocais = new Set(), dDescs = new Set(); let rCats = new Set(rCategoriasPadrao); let rLocais = new Set();
             transacoes.forEach(t => {
                 if (t.tipo === 'Despesa') {
                     if (strSafe(t.categoria)) dCats.add(strSafe(t.categoria).toUpperCase());
@@ -772,12 +823,10 @@
                     if (strSafe(t.local)) rLocais.add(strSafe(t.local).toUpperCase());
                 }
             });
-
             function buildDatalist(id, setVals) {
                 const dl = document.getElementById(id); if (!dl) return; dl.innerHTML = '';
                 Array.from(setVals).sort().forEach(v => { if(v && v !== '-') dl.innerHTML += `<option value="${v}">`; });
             }
-
             buildDatalist('lista_d_categoria', dCats); buildDatalist('lista_d_setor', dSets);
             buildDatalist('lista_d_local', dLocais); buildDatalist('lista_d_descricao', dDescs);
             buildDatalist('lista_r_categoria', rCats); buildDatalist('lista_r_local', rLocais);
@@ -1093,22 +1142,9 @@
         function atualizarRelatoriosDetalhados() {
             let despSetor = {}; let despCat = {};
             let recCat = {}; let recLocal = {};
-            let htmlRecPend = ''; let htmlDespPend = '';
-            let totRecPend = 0; let totDespPend = 0;
             
             const filtroMes = document.getElementById('filtro_mes_relatorios') ? document.getElementById('filtro_mes_relatorios').value : '';
             const filtroSafra = document.getElementById('filtro_safra_relatorios') ? document.getElementById('filtro_safra_relatorios').value : '';
-
-            // Filtrar apenas o que nos interessa para tabelas de PENDENTES
-            let pendentes = transacoes.filter(t => {
-                if (filtroSafra && obterSafra(t.data) !== filtroSafra) return false;
-                if (filtroMes && (!t.data || !t.data.startsWith(filtroMes))) return false;
-                let sit = strSafe(t.sit).toLowerCase();
-                return sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente');
-            });
-
-            // Ordenar pendentes por data (mais antigas primeiro)
-            pendentes.sort((a, b) => new Date(a.data||0) - new Date(b.data||0));
 
             transacoes.forEach(t => {
                 if (filtroSafra && obterSafra(t.data) !== filtroSafra) return;
@@ -1118,9 +1154,7 @@
                 let cat = strSafe(t.categoria).toUpperCase() || 'SEM CATEGORIA';
                 let loc = strSafe(t.local).toUpperCase() || 'NÃO INFORMADO';
                 let setor = strSafe(t.setor).toUpperCase() || 'SEM SETOR';
-                let sit = strSafe(t.sit).toLowerCase();
 
-                // Tabelas de Agrupamento consideram TUDO do período ou só pagos? Vamos manter como estava (tudo no período).
                 if (t.tipo === 'Despesa') {
                     despSetor[setor] = (despSetor[setor] || 0) + v;
                     despCat[cat] = (despCat[cat] || 0) + v;
@@ -1130,36 +1164,15 @@
                 }
             });
 
-            // Gerar HTML dos Pendentes
-            pendentes.forEach(t => {
-                let sit = strSafe(t.sit).toLowerCase();
-                let v = parseFloat(t.valor) || 0;
-                let dF = formatarData(t.data);
-                if (t.tipo === 'Receita' && sit.includes('receber')) {
-                    htmlRecPend += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:bold; color:#1565C0; text-align:right;">${formatarMoeda(v)}</td></tr>`;
-                    totRecPend += v;
-                } else if (t.tipo === 'Despesa' && sit.includes('pagar')) {
-                    htmlDespPend += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:bold; color:#C62828; text-align:right;">${formatarMoeda(v)}</td></tr>`;
-                    totDespPend += v;
-                }
-            });
-
-            if (htmlRecPend === '') htmlRecPend = '<tr><td colspan="3" style="text-align:center;">Não há receitas pendentes neste período</td></tr>';
-            else htmlRecPend += `<tr style="background-color:#e3f2fd;"><td colspan="2" style="font-weight:900;">TOTAL A RECEBER</td><td style="font-weight:900; color:#1565C0; text-align:right; font-size:15px;">${formatarMoeda(totRecPend)}</td></tr>`;
-            
-            if (htmlDespPend === '') htmlDespPend = '<tr><td colspan="3" style="text-align:center;">Não há despesas pendentes neste período</td></tr>';
-            else htmlDespPend += `<tr style="background-color:#ffebee;"><td colspan="2" style="font-weight:900;">TOTAL A PAGAR</td><td style="font-weight:900; color:#C62828; text-align:right; font-size:15px;">${formatarMoeda(totDespPend)}</td></tr>`;
-
-            document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRecPend;
-            document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDespPend;
-
             function renderTabelaRelatorio(id, dadosObj, cor) {
                 let html = '';
                 let totalSoma = 0;
+                
                 Object.entries(dadosObj).sort((a,b) => b[1] - a[1]).forEach(item => {
                     html += `<tr><td>${item[0]}</td><td style="font-weight:bold; color:${cor}; text-align:right;">${formatarMoeda(item[1])}</td></tr>`;
                     totalSoma += item[1];
                 });
+                
                 if (html !== '') {
                     html += `<tr style="background-color: #f5f5f5; border-top: 2px solid ${cor};">
                                 <td style="font-weight:900;">TOTAL DO PERÍODO</td>
@@ -1168,6 +1181,7 @@
                 } else {
                     html = '<tr><td colspan="2" style="text-align:center;">Nenhum dado neste período</td></tr>';
                 }
+                
                 document.getElementById(id).innerHTML = html;
             }
 
@@ -1183,7 +1197,6 @@
             
             const filtroMesElement = document.getElementById('filtro_mes_dashboard');
             const filtroMes = filtroMesElement ? filtroMesElement.value : '';
-            
             const filtroSafraElement = document.getElementById('filtro_safra_dashboard');
             const filtroSafra = filtroSafraElement ? filtroSafraElement.value : '';
 
@@ -1217,8 +1230,8 @@
             renderizarGraficos(tR, tD, aR, aP);
 
             // GRÁFICOS DETALHADOS DE BARRAS HORIZONTAIS
-            let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); // Pega as Top 5
-            let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; // Pega o maior valor para servir de teto (100%)
+            let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); 
+            let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; 
             let hR = '';
             arrRCat.forEach(x => { 
                 let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0;
@@ -1227,7 +1240,7 @@
                         <div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div>
                        </li>`; 
             });
-            document.getElementById('lista_top_receitas').innerHTML = hR || '<li class="item-lista-grafico">Sem receitas neste período</li>';
+            document.getElementById('lista_top_receitas').innerHTML = hR || '<li class="item-lista-grafico" style="text-align:center;">Sem receitas pagas neste período</li>';
 
             let arrDCat = Object.entries(dCat).sort((a,b) => b[1] - a[1]).slice(0, 5);
             let maxDCat = arrDCat.length > 0 ? arrDCat[0][1] : 0;
@@ -1239,7 +1252,7 @@
                         <div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div>
                        </li>`; 
             });
-            document.getElementById('lista_top_despesas').innerHTML = hD || '<li class="item-lista-grafico">Sem despesas neste período</li>';
+            document.getElementById('lista_top_despesas').innerHTML = hD || '<li class="item-lista-grafico" style="text-align:center;">Sem despesas pagas neste período</li>';
 
             atualizarRelatoriosDetalhados();
         }
