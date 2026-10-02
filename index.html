@@ -109,7 +109,7 @@
             border: 1px solid rgba(255,255,255,0.2);
             box-shadow: var(--sombra-neumorfica);
         }
-        .card::after { /* Efeito de vidro por cima do card */
+        .card::after { 
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 50%;
             background: linear-gradient(to bottom, rgba(255,255,255,0.15), transparent); pointer-events: none;
         }
@@ -120,27 +120,26 @@
         .card h4 { margin: 0; font-size: 15px; font-weight: 800; opacity: 0.9; text-transform: uppercase; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);}
         .card span { font-size: 32px; display: block; margin-top: 10px; font-weight: 900; text-shadow: 2px 2px 5px rgba(0,0,0,0.5);}
 
-        /* Gráficos 3D Chart.js Containers */
         .grafico-container { 
             flex: 1; min-width: 300px; max-width: 450px; margin: auto; padding: 30px; 
             background: var(--cor-fundo); border-radius: 24px; 
-            box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);
             display: flex; flex-direction: column; align-items: center;
         }
         .legenda-grafico { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; font-size: 13px; font-weight: 800; width: 100%; margin-top: 15px; }
         .legenda-item { display: flex; align-items: center; gap: 6px; color: #555; }
         .ponto-cor { width: 14px; height: 14px; border-radius: 50%; display: inline-block; box-shadow: inset 2px 2px 4px rgba(255,255,255,0.5), 2px 2px 4px rgba(0,0,0,0.2);}
 
-        /* --- GRÁFICOS DE BARRAS TUBULARES 3D (TOP 5) --- */
+        /* --- GRÁFICOS DE BARRAS TUBULARES 3D --- */
         .top-graficos-box { 
             background: var(--cor-fundo); padding: 25px; border-radius: 24px; 
-            box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5); flex: 1; min-width: 300px;
+            box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6); flex: 1; min-width: 300px;
         }
-        .item-lista-grafico { list-style: none; margin-bottom: 18px; font-size: 14px; font-weight: 800; text-transform: uppercase; color: var(--cor-texto); padding: 10px 15px; border-radius: 12px; transition: 0.3s;}
+        .item-lista-grafico { list-style: none; margin-bottom: 15px; font-size: 14px; font-weight: 800; text-transform: uppercase; color: var(--cor-texto); padding: 10px 15px; border-radius: 12px; transition: 0.3s;}
         
         .item-lista-grafico.interativo:hover { 
-            background-color: #f4f6f9; transform: scale(1.02); 
-            box-shadow: var(--sombra-neumorfica); cursor: pointer; 
+            background-color: white; transform: scale(1.02); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08); cursor: pointer; 
         }
         
         .barra-grafico-container { 
@@ -148,10 +147,9 @@
             background: var(--cor-fundo); box-shadow: var(--sombra-interna); overflow: visible; position: relative;
         }
         
-        /* Tubo 3D Realista nas Barras CSS */
         .barra-grafico-receita { 
             height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1);
-            background: linear-gradient(to bottom, #A5D6A7 0%, #4CAF50 40%, #2E7D32 100%);
+            background: linear-gradient(to bottom, #81C784 0%, #2E7D32 50%, #1B5E20 100%);
             box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.3), 0 3px 6px rgba(46,125,50,0.4);
         }
         .barra-grafico-despesa { 
@@ -160,33 +158,32 @@
             box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.3), 0 3px 6px rgba(230,81,0,0.4);
         }
 
-        /* --- LAYOUT DE LANÇAMENTO E EXTRATO (NEUMORFISMO APLICADO) --- */
+        /* --- LAYOUT DE LANÇAMENTO E EXTRATO --- */
         .area-fixa-topo { position: sticky; top: 75px; z-index: 100; background-color: var(--cor-fundo); padding-bottom: 10px; }
         
         .linha-lancamento { 
             padding: 20px; border-radius: 20px; margin-bottom: 20px; border: none; 
-            background: var(--cor-fundo); box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5);
         }
-        /* Indicadores laterais coloridos, mas com fundo neumórfico */
-        .linha-despesa { border-left: 8px solid var(--cor-despesa); transition: 0.3s;}
-        .linha-investimento-ativa { border-left: 8px solid var(--cor-investimento); }
-        .linha-receita { border-left: 8px solid var(--cor-receita); }
+        .linha-despesa { background-color: #FFF3E0; border-left: 8px solid var(--cor-despesa); transition: 0.3s;}
+        .linha-investimento-ativa { background-color: #F3E5F5; border-left: 8px solid var(--cor-investimento); }
+        .linha-receita { background-color: #E8F5E9; border-left: 8px solid var(--cor-receita); }
         
         .grid-despesa { display: grid; grid-template-columns: 110px 2fr 1.5fr 2fr 2fr 70px 60px 100px 110px 90px 140px; gap: 12px; align-items: center; }
         .grid-receita { display: grid; grid-template-columns: 110px 3.5fr 2fr 2fr 70px 60px 100px 110px 90px 140px; gap: 12px; align-items: center; }
 
-        /* Campos de Input Neumórficos (Pressionados para dentro) */
         .grid-despesa input, .grid-receita input, .grid-despesa select, .grid-receita select, .filter-row input, .filter-row select {
             padding: 10px; font-size: 13px; border: none;
             border-radius: 8px; font-weight: 800; text-transform: uppercase;
-            width: 100%; background-color: var(--cor-fundo); 
+            width: 100%; 
+            background-color: rgba(255, 255, 255, 0.5); 
             box-shadow: var(--sombra-interna); color: var(--cor-texto); transition: 0.2s;
         }
         .grid-despesa input:focus, .grid-receita input:focus, .filter-row input:focus {
-            outline: none; box-shadow: inset 4px 4px 8px rgba(163,177,198,0.6), inset -4px -4px 8px rgba(255,255,255, 0.8), 0 0 0 2px var(--cor-verde-fazenda);
+            outline: none; box-shadow: inset 4px 4px 8px rgba(163,177,198,0.4), inset -4px -4px 8px rgba(255,255,255, 0.9), 0 0 0 2px var(--cor-verde-fazenda);
+            background-color: rgba(255, 255, 255, 0.8);
         }
 
-        /* Botões de Ação Neumórficos (Saltados para fora) */
         .btn-salvar-compacto { 
             padding: 10px; font-size: 13px; font-weight: 800; border: none; border-radius: 8px; 
             cursor: pointer; color: white; transition: 0.2s; 
@@ -196,13 +193,13 @@
         .btn-salvar-compacto:active { box-shadow: inset 4px 4px 8px rgba(0,0,0,0.2), inset -4px -4px 8px rgba(255,255,255,0.1); transform: translateY(1px);}
         
         .select-tipo-saida {
-            background-color: var(--cor-fundo); border: none; border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.6); border: none; border-radius: 8px;
             padding: 4px 10px; font-weight: 900; color: var(--cor-despesa); margin-left: 10px;
-            font-size: 13px; cursor: pointer; transition: 0.3s; box-shadow: var(--sombra-neumorfica);
+            font-size: 13px; cursor: pointer; transition: 0.3s; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
         }
 
         .barra-pesquisa-relatorio { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: var(--cor-fundo); padding: 15px 20px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5);}
-        .barra-pesquisa-relatorio input, .barra-pesquisa-relatorio select { flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; font-size: 13px; text-transform: uppercase; border: none; box-shadow: var(--sombra-interna); font-weight: bold; background-color: var(--cor-fundo);}
+        .barra-pesquisa-relatorio input, .barra-pesquisa-relatorio select { flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; font-size: 13px; text-transform: uppercase; border: none; box-shadow: var(--sombra-interna); font-weight: bold; background-color: rgba(255, 255, 255, 0.5);}
         .btn-pesquisar, .btn-limpar { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 800; color: white; cursor: pointer; box-shadow: 4px 4px 8px rgba(163,177,198,0.5), -4px -4px 8px rgba(255,255,255, 0.8); transition: 0.2s;}
         .btn-pesquisar:hover, .btn-limpar:hover { transform: translateY(-2px);}
         .btn-pesquisar { background: var(--cor-madeira); }
@@ -231,7 +228,7 @@
         .btn-editar { background: #FFCA28; color: #3E2723; }
         .btn-excluir { background: #E53935; color: white; }
 
-        /* --- MODAL E TOASTS --- */
+        /* --- MODAIS E TOASTS --- */
         #modal-edicao { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px);}
         .modal-content { background: var(--cor-fundo); padding: 35px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3);}
         .form-group-modal { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
@@ -273,7 +270,7 @@
         <button id="btn_movimentacoes" onclick="showTab('movimentacoes')">📋 LANÇAMENTOS E EXTRATO</button>
         <button id="btn_relatorios_detalhados" onclick="showTab('relatorios_detalhados')">📈 RELATÓRIOS DETALHADOS</button>
         
-        <button id="btn_pendencias" style="color: #E65100;" onclick="showTab('pendencias')">
+        <button id="btn_pendencias" onclick="showTab('pendencias')">
             🔔 PENDÊNCIAS
             <span id="badge_atrasadas" class="badge-atrasadas" style="display: none;">0</span>
         </button>
@@ -355,14 +352,12 @@
     <!-- ABA EXTRA: VISÃO GERAL DETALHADA DA CATEGORIA (RAIO-X 2.0) -->
     <div id="visao_categoria" class="tab">
         <div style="background: var(--cor-fundo); padding: 30px; border-radius: 24px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
-            
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 3px solid white; padding-bottom: 15px;">
                 <div>
-                    <h3 id="titulo_raiox" style="margin: 0; font-size: 26px; color: var(--cor-texto); font-weight: 900;">🔍 RAIO-X</h3>
-                    <!-- VALOR TOTAL MOVIDO PARA O TOPO -->
+                    <h3 id="titulo_raiox" style="margin: 0; font-size: 26px; color: var(--cor-texto); font-weight: 900; text-shadow: 1px 1px 2px white;">🔍 RAIO-X</h3>
                     <div id="valor_total_raiox" style="font-size: 32px; font-weight: 900; color: var(--cor-madeira); text-shadow: 1px 1px 2px white; margin-top: 5px;">R$ 0,00</div>
                 </div>
-                <button class="btn-limpar" style="background-color: var(--cor-madeira); padding: 12px 25px; border-radius: 12px; box-shadow: var(--sombra-neumorfica); font-weight: 900;" onclick="showTab('resumo')">⬅️ VOLTAR AO DASHBOARD</button>
+                <button class="btn-limpar" style="background-color: #555; padding: 12px 25px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="showTab('resumo')">⬅️ VOLTAR AO DASHBOARD</button>
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
@@ -492,6 +487,7 @@
             </div>
         </div> 
 
+        <!-- TABELA PRINCIPAL ATUALIZADA (COM V. UNIT) -->
         <div class="table-container">
             <table class="tabela-larga">
                 <thead>
@@ -503,7 +499,11 @@
                         <th onclick="setOrdenacao('local')">LOCAL/PESSOA <span class="sort-icon" id="sort_icon_local"></span></th>
                         <th onclick="setOrdenacao('desc')">DESCRIÇÃO <span class="sort-icon" id="sort_icon_desc"></span></th>
                         <th onclick="setOrdenacao('qtd')">QTD <span class="sort-icon" id="sort_icon_qtd"></span></th>
-                        <th onclick="setOrdenacao('valor')">VALOR (R$) <span class="sort-icon" id="sort_icon_valor"></span></th>
+                        
+                        <!-- NOVA COLUNA ADICIONADA AQUI -->
+                        <th onclick="setOrdenacao('v_unit')">V. UNIT <span class="sort-icon" id="sort_icon_v_unit"></span></th>
+                        
+                        <th onclick="setOrdenacao('valor')">TOTAL (R$) <span class="sort-icon" id="sort_icon_valor"></span></th>
                         <th onclick="setOrdenacao('sit')" style="text-align: center;">SITUAÇÃO <span class="sort-icon" id="sort_icon_sit"></span></th>
                         <th class="no-print" style="text-align: center; width: 120px;">AÇÕES</th>
                     </tr>
@@ -521,7 +521,10 @@
                         <th><select id="f_setor" onchange="aplicarFiltros()"></select></th>
                         <th><select id="f_local" onchange="aplicarFiltros()"></select></th>
                         <th><select id="f_desc" onchange="aplicarFiltros()"></select></th>
-                        <th></th><th></th>
+                        <th></th>
+                        <!-- ESPAÇO EXTRA PARA A NOVA COLUNA NO FILTRO -->
+                        <th></th>
+                        <th></th>
                         <th><select id="f_sit" onchange="aplicarFiltros()"><option value="">TUDO</option><option value="pago">PAGO</option><option value="a pagar">A PAGAR</option><option value="a receber">A RECEBER</option></select></th>
                         <th></th>
                     </tr>
@@ -592,7 +595,6 @@
                 </div>
             </div>
             
-            <!-- TABELA RESTAURADA: RESOLVE O BUG DO CARREGAMENTO -->
             <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6); border-top: 6px solid var(--cor-despesa);">
                 <h3 style="color: var(--cor-despesa); margin-top: 0; text-align: center;">🚜 DESPESAS POR SETOR</h3>
                 <div class="table-container">
@@ -631,7 +633,7 @@
             <h3 style="margin-top: 0;">EDITAR REGISTRO</h3>
             <div class="form-group-modal" id="form-edicao"></div>
             <div style="display:flex; gap:10px;">
-                <button class="btn-salvar" style="padding: 12px; font-weight: 900; background: var(--cor-verde-fazenda); color: white; border: none; border-radius: 8px; flex: 1;" onclick="guardarEdicao()">💾 SALVAR</button>
+                <button class="btn-salvar" style="padding: 12px; font-weight: 900; background: var(--cor-verde-fazenda); color: white; border: none; border-radius: 8px; flex: 1; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="guardarEdicao()">💾 SALVAR</button>
                 <button class="btn-limpar" style="width:100%" onclick="fecharModal()">❌ CANCELAR</button>
             </div>
         </div>
@@ -652,11 +654,9 @@
         let filtroRapido = '';
         let filaXML = [];
         
-        // Instâncias Chart.js
         let chartCaixaObj = null;
         let chartPendenteObj = null;
 
-        // Plugin nativo Chart.js para criar sombras e efeito 3D flutuante nos anéis
         const pluginSombra3D = {
             id: 'pluginSombra3D',
             beforeDatasetsDraw: (chart) => {
@@ -666,9 +666,7 @@
                 chart.ctx.shadowOffsetX = 8;
                 chart.ctx.shadowOffsetY = 12;
             },
-            afterDatasetsDraw: (chart) => {
-                chart.ctx.restore();
-            }
+            afterDatasetsDraw: (chart) => { chart.ctx.restore(); }
         };
         Chart.register(pluginSombra3D);
 
@@ -849,7 +847,7 @@
                     totRecPend += v;
                 } else if ((t.tipo === 'Despesa' || t.tipo === 'Investimento') && sit.includes('pagar')) {
                     htmlDespPend += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:bold; color:#C62828; text-align:right;">${formatarMoeda(v)}</td>
-                        <td style="text-align: center;"><button class="btn-acao bg-pago" style="font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️ PAGAR</button></td></tr>`;
+                        <td style="text-align: center;"><button class="btn-acao bg-pago" style="font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️️ PAGAR</button></td></tr>`;
                     totDespPend += v;
                 }
             });
@@ -1159,7 +1157,7 @@
             lista.sort((a, b) => {
                 let vA = a.item[colOrdenacao], vB = b.item[colOrdenacao];
                 if (colOrdenacao === 'categoria') { vA = vA === '-' ? a.item.desc : vA; vB = vB === '-' ? b.item.desc : vB; }
-                if(colOrdenacao === 'valor' || colOrdenacao === 'qtd') { vA = parseFloat(vA)||0; vB = parseFloat(vB)||0; } 
+                if(colOrdenacao === 'valor' || colOrdenacao === 'qtd' || colOrdenacao === 'v_unit') { vA = parseFloat(vA)||0; vB = parseFloat(vB)||0; } 
                 else if(colOrdenacao === 'data') { vA = new Date(strSafe(vA)).getTime()||0; vB = new Date(strSafe(vB)).getTime()||0; } 
                 else { vA = String(vA).toLowerCase(); vB = String(vB).toLowerCase(); }
                 if(vA < vB) return ordemAscendente ? -1 : 1; if(vA > vB) return ordemAscendente ? 1 : -1; return 0;
@@ -1209,7 +1207,9 @@
                 linhasHTML.push(`
                     <tr class="${isAtrasado ? 'linha-atrasada' : ''}">
                         <td style="white-space: nowrap;" title="Safra: ${obterSafra(t.data)}">${alertIcon}${formatarData(t.data)}</td>
-                        <td class="${eL}">${t.tipo.toUpperCase()}</td><td><b>${cM}</b></td><td>${strSafe(t.setor)}</td><td>${strSafe(t.local)}</td><td>${strSafe(t.desc)}</td><td>${strSafe(t.qtd)} ${strSafe(t.und)}</td>
+                        <td class="${eL}">${t.tipo.toUpperCase()}</td><td><b>${cM}</b></td><td>${strSafe(t.setor)}</td><td>${strSafe(t.local)}</td><td>${strSafe(t.desc)}</td>
+                        <td>${strSafe(t.qtd)} ${strSafe(t.und)}</td>
+                        <td>${formatarMoeda(t.v_unit)}</td>
                         <td style="font-weight:900;">${formatarMoeda(t.valor)}</td>
                         <td style="text-align: center; width: 100px;">${btnSit}</td>
                         <td class="no-print" style="white-space: nowrap; text-align: center;">
@@ -1222,280 +1222,6 @@
             tbody.innerHTML = linhasHTML.join('');
         }
 
-        // --- SISTEMA DE GRÁFICOS 3D PROFISSIONAIS (CHART.JS) ---
-        function renderizarGraficos(tR, tD, tI, aR, aP) {
-            if (chartCaixaObj) chartCaixaObj.destroy();
-            if (chartPendenteObj) chartPendenteObj.destroy();
-
-            const ctxCaixa = document.getElementById('canvas_caixa').getContext('2d');
-            
-            // Degradês Vibrantes para as Fatias do Gráfico
-            let gradRec = ctxCaixa.createLinearGradient(0, 0, 0, 300);
-            gradRec.addColorStop(0, '#81C784'); gradRec.addColorStop(1, '#1B5E20');
-            
-            let gradDesp = ctxCaixa.createLinearGradient(0, 0, 0, 300);
-            gradDesp.addColorStop(0, '#FFB74D'); gradDesp.addColorStop(1, '#E65100');
-
-            let gradInv = ctxCaixa.createLinearGradient(0, 0, 0, 300);
-            gradInv.addColorStop(0, '#BA68C8'); gradInv.addColorStop(1, '#4A148C');
-
-            chartCaixaObj = new Chart(ctxCaixa, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Receitas', 'Custeio', 'Investimentos'],
-                    datasets: [{
-                        data: [tR, tD, tI],
-                        backgroundColor: [gradRec, gradDesp, gradInv],
-                        borderWidth: 0,
-                        hoverOffset: 12
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '75%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } }
-                    },
-                    layout: { padding: 15 } // Espaço para a sombra 3D respirar
-                }
-            });
-
-            const ctxPendente = document.getElementById('canvas_pendente').getContext('2d');
-            
-            let gradARec = ctxPendente.createLinearGradient(0, 0, 0, 300);
-            gradARec.addColorStop(0, '#64B5F6'); gradARec.addColorStop(1, '#0D47A1');
-            
-            let gradAPag = ctxPendente.createLinearGradient(0, 0, 0, 300);
-            gradAPag.addColorStop(0, '#E57373'); gradAPag.addColorStop(1, '#B71C1C');
-
-            chartPendenteObj = new Chart(ctxPendente, {
-                type: 'doughnut',
-                data: {
-                    labels: ['A Receber', 'A Pagar'],
-                    datasets: [{
-                        data: [aR, aP],
-                        backgroundColor: [gradARec, gradAPag],
-                        borderWidth: 0, hoverOffset: 12
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '75%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } }
-                    },
-                    layout: { padding: 15 }
-                }
-            });
-        }
-
-        // --- SISTEMA RAIO-X (VISÃO DETALHADA DA CATEGORIA) ---
-        function abrirDetalheCategoria(categoria, tipoFiltro) {
-            const filtroMes = document.getElementById('filtro_mes_dashboard') ? document.getElementById('filtro_mes_dashboard').value : '';
-            const filtroSafra = document.getElementById('filtro_safra_dashboard') ? document.getElementById('filtro_safra_dashboard').value : '';
-            
-            let divisao = {}; let divisaoDesc = {}; let valorTotal = 0;
-
-            transacoes.forEach(t => {
-                let sit = strSafe(t.sit).toLowerCase();
-                if (!sit.includes('pago')) return;
-                
-                if (filtroSafra && obterSafra(t.data) !== filtroSafra) return;
-                if (filtroMes && (!t.data || !t.data.startsWith(filtroMes))) return;
-
-                let checkTipo = false;
-                if (tipoFiltro === 'Saida') checkTipo = (t.tipo === 'Despesa' || t.tipo === 'Investimento');
-                else checkTipo = (t.tipo === 'Receita');
-
-                if (checkTipo && strSafe(t.categoria).toUpperCase() === categoria.toUpperCase()) {
-                    let v = parseFloat(t.valor) || 0;
-                    valorTotal += v;
-                    
-                    let chaveAgrupamento = tipoFiltro === 'Saida' ? strSafe(t.setor).toUpperCase() : strSafe(t.local).toUpperCase();
-                    if (!chaveAgrupamento || chaveAgrupamento === '-') chaveAgrupamento = "NÃO INFORMADO";
-                    divisao[chaveAgrupamento] = (divisao[chaveAgrupamento] || 0) + v;
-
-                    let chaveDesc = strSafe(t.desc).toUpperCase();
-                    if (!chaveDesc || chaveDesc === '-') chaveDesc = "SEM DESCRIÇÃO";
-                    divisaoDesc[chaveDesc] = (divisaoDesc[chaveDesc] || 0) + v;
-                }
-            });
-
-            let arrDivisao = Object.entries(divisao).sort((a,b) => b[1] - a[1]);
-            let arrDesc = Object.entries(divisaoDesc).sort((a,b) => b[1] - a[1]);
-            
-            let etiqueta = tipoFiltro === 'Receita' ? 'RECEITA' : 'SAÍDA';
-            document.getElementById('titulo_raiox').innerHTML = `🔍 RAIO-X: ${categoria} <span style="font-size: 14px; background: white; color: var(--cor-texto); text-shadow: none; padding: 4px 8px; border-radius: 8px; margin-left: 10px; box-shadow: var(--sombra-neumorfica);">${etiqueta}</span>`;
-            document.getElementById('valor_total_raiox').innerHTML = formatarMoeda(valorTotal);
-            
-            let textoSubtitulo = tipoFiltro === 'Saida' ? "Divisão deste gasto por Setor" : "Divisão desta receita por Cliente/Local";
-            document.getElementById('subtitulo_raiox').innerHTML = textoSubtitulo;
-
-            let classeBarra = tipoFiltro === 'Saida' ? 'barra-grafico-despesa' : 'barra-grafico-receita';
-            
-            // Renderiza as Barras da Esquerda
-            let htmlBarras = '';
-            let maxDivisao = arrDivisao.length > 0 ? arrDivisao[0][1] : 0;
-            
-            arrDivisao.forEach(x => {
-                let perc = maxDivisao > 0 ? (x[1] / maxDivisao) * 100 : 0;
-                htmlBarras += `<li style="list-style: none; margin-bottom: 20px;">
-                        <div style="display:flex; justify-content:space-between; font-weight:900; font-size:14px; color: var(--cor-texto);">
-                            <span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span>
-                        </div>
-                        <div class="barra-grafico-container">
-                            <div class="${classeBarra}" style="width: ${perc}%;"></div>
-                        </div>
-                       </li>`;
-            });
-            if (htmlBarras === '') htmlBarras = '<li style="list-style: none;">Nenhum dado encontrado para esta categoria.</li>';
-            document.getElementById('lista_raiox').innerHTML = htmlBarras;
-
-            // Renderiza a Lista da Direita (Detalhamento por Descrição)
-            let htmlDesc = '';
-            arrDesc.forEach(x => {
-                htmlDesc += `<li style="list-style: none; margin-bottom: 12px; border-bottom: 2px dashed #eee; padding-bottom: 10px;">
-                        <div style="display:flex; justify-content:space-between; font-size:14px; color: #555;">
-                            <span style="font-weight: 800; max-width: 65%;">${x[0]}</span> 
-                            <span style="font-weight: 900; color: var(--cor-texto); font-size: 15px;">${formatarMoeda(x[1])}</span>
-                        </div>
-                       </li>`;
-            });
-            document.getElementById('lista_raiox_desc').innerHTML = htmlDesc;
-
-            showTab('visao_categoria');
-        }
-
-        // --- CORREÇÃO DO RELATÓRIO DETALHADO ---
-        function atualizarRelatoriosDetalhados() {
-            let despSetor = {}; let despCat = {}; let invCat = {}; let recCat = {}; let recLocal = {};
-            
-            const filtroMes = document.getElementById('filtro_mes_relatorios') ? document.getElementById('filtro_mes_relatorios').value : '';
-            const filtroSafra = document.getElementById('filtro_safra_relatorios') ? document.getElementById('filtro_safra_relatorios').value : '';
-
-            transacoes.forEach(t => {
-                let sit = strSafe(t.sit).toLowerCase();
-                
-                // O Relatório Detalhado foca nas contas Pagas (para bater com o saldo do Dashboard)
-                if (!sit.includes('pago')) return; 
-
-                if (filtroSafra && obterSafra(t.data) !== filtroSafra) return;
-                if (filtroMes && (!t.data || !t.data.startsWith(filtroMes))) return;
-
-                let v = parseFloat(t.valor) || 0;
-                let cat = strSafe(t.categoria).toUpperCase() || 'SEM CATEGORIA';
-                let loc = strSafe(t.local).toUpperCase() || 'NÃO INFORMADO';
-                let setor = strSafe(t.setor).toUpperCase() || 'SEM SETOR';
-                
-                // Normaliza o tipo para não falhar na leitura
-                let tipo = String(t.tipo).toLowerCase();
-
-                if (tipo === 'despesa') {
-                    despSetor[setor] = (despSetor[setor] || 0) + v;
-                    despCat[cat] = (despCat[cat] || 0) + v;
-                } else if (tipo === 'investimento') {
-                    invCat[cat] = (invCat[cat] || 0) + v;
-                } else if (tipo === 'receita') {
-                    recCat[cat] = (recCat[cat] || 0) + v;
-                    recLocal[loc] = (recLocal[loc] || 0) + v;
-                }
-            });
-
-            function renderTabelaRelatorio(id, dadosObj, cor) {
-                let html = ''; let totalSoma = 0;
-                Object.entries(dadosObj).sort((a,b) => b[1] - a[1]).forEach(item => {
-                    html += `<tr><td>${item[0]}</td><td style="font-weight:bold; color:${cor}; text-align:right;">${formatarMoeda(item[1])}</td></tr>`;
-                    totalSoma += item[1];
-                });
-                if (html !== '') {
-                    html += `<tr style="background-color: #f5f5f5; border-top: 2px solid ${cor};">
-                                <td style="font-weight:900;">TOTAL PAGO/RECEBIDO</td>
-                                <td style="font-weight:900; color:${cor}; text-align:right; font-size: 15px;">${formatarMoeda(totalSoma)}</td>
-                             </tr>`;
-                } else { html = '<tr><td colspan="2" style="text-align:center;">Nenhum dado neste período</td></tr>'; }
-                document.getElementById(id).innerHTML = html;
-            }
-
-            renderTabelaRelatorio('tbody_gastos_setor', despSetor, 'var(--cor-despesa)');
-            renderTabelaRelatorio('tbody_gastos_categoria', despCat, '#F57C00');
-            renderTabelaRelatorio('tbody_investimentos_categoria', invCat, 'var(--cor-investimento)');
-            renderTabelaRelatorio('tbody_receitas_categoria', recCat, 'var(--cor-receita)');
-            renderTabelaRelatorio('tbody_receitas_local', recLocal, 'var(--cor-verde-escuro)');
-        }
-
-        function atualizarResumoEGrafico() {
-            let tR = 0, tD = 0, tI = 0, aR = 0, aP = 0, rCat = {}, dCat = {}, qtdAtrasadas = 0;
-            const hojeObj = new Date(); hojeObj.setHours(0,0,0,0);
-            
-            const filtroMesElement = document.getElementById('filtro_mes_dashboard');
-            const filtroMes = filtroMesElement ? filtroMesElement.value : '';
-            const filtroSafraElement = document.getElementById('filtro_safra_dashboard');
-            const filtroSafra = filtroSafraElement ? filtroSafraElement.value : '';
-
-            transacoes.forEach(t => {
-                if (filtroSafra) { if (obterSafra(t.data) !== filtroSafra) return; }
-                if (filtroMes) { if (!t.data || typeof t.data !== 'string' || !t.data.startsWith(filtroMes)) return; }
-
-                let v = parseFloat(t.valor) || 0; let sit = strSafe(t.sit).toLowerCase();
-                let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (t.tipo === 'Receita') ? strSafe(t.desc) : strSafe(t.setor); cat = cat.toUpperCase();
-                let tipo = String(t.tipo).toLowerCase();
-
-                if (tipo === 'receita') {
-                    if (sit.includes('pago')) { tR += v; rCat[cat] = (rCat[cat] || 0) + v; } 
-                    else if (sit.includes('receber') || sit.includes('pendente') || sit.includes('pagar')) aR += v;
-                } else if (tipo === 'despesa') {
-                    if (sit.includes('pago')) { tD += v; dCat[cat] = (dCat[cat] || 0) + v; } 
-                    else if (sit.includes('pagar') || sit.includes('pendente') || sit.includes('receber')) {
-                        aP += v; if(t.data && new Date(String(t.data) + 'T00:00:00') < hojeObj) qtdAtrasadas++;
-                    }
-                } else if (tipo === 'investimento') {
-                    if (sit.includes('pago')) { tI += v; dCat[cat] = (dCat[cat] || 0) + v; } 
-                    else if (sit.includes('pagar') || sit.includes('pendente') || sit.includes('receber')) {
-                        aP += v; if(t.data && new Date(String(t.data) + 'T00:00:00') < hojeObj) qtdAtrasadas++;
-                    }
-                }
-            });
-
-            const badgeElement = document.getElementById('badge_atrasadas');
-            if(qtdAtrasadas > 0) { badgeElement.innerText = qtdAtrasadas; badgeElement.style.display = 'inline-block'; } 
-            else { badgeElement.style.display = 'none'; }
-
-            document.getElementById('res_receitas').innerText = formatarMoeda(tR);
-            document.getElementById('res_despesas').innerText = formatarMoeda(tD);
-            document.getElementById('res_investimentos').innerText = formatarMoeda(tI);
-            
-            let saldoFinal = tR - tD - tI;
-            document.getElementById('res_saldo').innerText = formatarMoeda(saldoFinal);
-
-            renderizarGraficos(tR, tD, tI, aR, aP);
-
-            let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); 
-            let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
-            arrRCat.forEach(x => { 
-                let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0;
-                hR += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${x[0]}', 'Receita')" title="Clique para ver os detalhes">
-                        <div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div>
-                        <div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div>
-                       </li>`; 
-            });
-            document.getElementById('lista_top_receitas').innerHTML = hR || '<li class="item-lista-grafico" style="text-align:center;">Sem receitas pagas neste período</li>';
-
-            let arrDCat = Object.entries(dCat).sort((a,b) => b[1] - a[1]).slice(0, 5);
-            let maxDCat = arrDCat.length > 0 ? arrDCat[0][1] : 0; let hD = '';
-            arrDCat.forEach(x => { 
-                let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0;
-                hD += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${x[0]}', 'Saida')" title="Clique para ver o detalhamento deste custo">
-                        <div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div>
-                        <div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div>
-                       </li>`; 
-            });
-            document.getElementById('lista_top_despesas').innerHTML = hD || '<li class="item-lista-grafico" style="text-align:center;">Sem saídas pagas neste período</li>';
-
-            atualizarRelatoriosDetalhados();
-        }
-
-        // INIT
-        window.onload = () => { carregarDadosNuvem(); };
     </script>
 </body>
 </html>
