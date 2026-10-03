@@ -199,8 +199,9 @@
         .table-container { overflow-x: auto; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5); background: white;}
         table { width: 100%; border-collapse: collapse; font-size: 14.5px; background: white;}
         .tabela-larga { min-width: 1100px; } 
+        /* O Background das TH GERAIS é definido aqui */
         th { background: linear-gradient(to right, #1B5E20, #2E7D32); color: white; font-weight: 800; padding: 16px 12px; text-align: left; cursor: pointer; white-space: nowrap;}
-        .filter-row th { background-color: #f1f8e9; padding: 8px 5px; border-bottom: 2px solid var(--cor-verde-fazenda); }
+        .filter-row th { background-color: #f1f8e9 !important; background-image: none !important; padding: 8px 5px; border-bottom: 2px solid var(--cor-verde-fazenda); }
         td { border-bottom: 1px solid #f0f0f0; padding: 14px 12px; font-weight: 600; text-transform: uppercase; }
         
         .bg-pago { background-color: #4caf50; color: white; font-weight: 800; border:none; border-radius: 6px; box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);}
@@ -372,16 +373,18 @@
             <h3 style="margin-top: 0; color: #3E2723; text-align: center; font-size: 26px; margin-bottom: 30px; font-weight: 900;">🔔 GESTÃO DE CONTAS PENDENTES</h3>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px;">
+                <!-- RECEITAS PENDENTES -->
                 <div style="border-radius: 16px; border: 3px solid white; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.08);">
                     <h4 style="background: linear-gradient(135deg, #1976D2, #0D47A1); color: white; margin: 0; padding: 18px; text-align: center; font-size: 16px;">⏳ CONTAS A RECEBER</h4>
                     <div class="table-container" style="max-height: 500px; overflow-y: auto; border: none; box-shadow: none; border-radius: 0;">
                         <table style="font-size: 14px;">
                             <thead>
                                 <tr>
-                                    <th style="background-color: #e3f2fd; color: #1565C0; padding: 12px;">DATA</th>
-                                    <th style="background-color: #e3f2fd; color: #1565C0; padding: 12px;">CLIENTE/LOCAL</th>
-                                    <th style="background-color: #e3f2fd; color: #1565C0; padding: 12px; text-align: right;">VALOR (R$)</th>
-                                    <th style="background-color: #e3f2fd; color: #1565C0; padding: 12px; text-align: center; width: 120px;">AÇÃO</th>
+                                    <!-- A CORREÇÃO DA COR ESTÁ NESTA LINHA !important -->
+                                    <th style="background: #1565C0 !important; background-image: none !important; color: white; padding: 12px; border: none;">DATA</th>
+                                    <th style="background: #1565C0 !important; background-image: none !important; color: white; padding: 12px; border: none;">CLIENTE/LOCAL</th>
+                                    <th style="background: #1565C0 !important; background-image: none !important; color: white; padding: 12px; text-align: right; border: none;">VALOR (R$)</th>
+                                    <th style="background: #1565C0 !important; background-image: none !important; color: white; padding: 12px; text-align: center; width: 120px; border: none;">AÇÃO</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody_receitas_pendentes"></tbody>
@@ -389,16 +392,18 @@
                     </div>
                 </div>
 
+                <!-- DESPESAS PENDENTES -->
                 <div style="border-radius: 16px; border: 3px solid white; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.08);">
                     <h4 style="background: linear-gradient(135deg, #E53935, #B71C1C); color: white; margin: 0; padding: 18px; text-align: center; font-size: 16px;">⏳ CONTAS A PAGAR</h4>
                     <div class="table-container" style="max-height: 500px; overflow-y: auto; border: none; box-shadow: none; border-radius: 0;">
                         <table style="font-size: 14px;">
                             <thead>
                                 <tr>
-                                    <th style="background-color: #ffebee; color: #C62828; padding: 12px;">DATA</th>
-                                    <th style="background-color: #ffebee; color: #C62828; padding: 12px;">FORNECEDOR/LOCAL</th>
-                                    <th style="background-color: #ffebee; color: #C62828; padding: 12px; text-align: right;">VALOR (R$)</th>
-                                    <th style="background-color: #ffebee; color: #C62828; padding: 12px; text-align: center; width: 120px;">AÇÃO</th>
+                                    <!-- A CORREÇÃO DA COR ESTÁ NESTA LINHA !important -->
+                                    <th style="background: #C62828 !important; background-image: none !important; color: white; padding: 12px; border: none;">DATA</th>
+                                    <th style="background: #C62828 !important; background-image: none !important; color: white; padding: 12px; border: none;">FORNECEDOR/LOCAL</th>
+                                    <th style="background: #C62828 !important; background-image: none !important; color: white; padding: 12px; text-align: right; border: none;">VALOR (R$)</th>
+                                    <th style="background: #C62828 !important; background-image: none !important; color: white; padding: 12px; text-align: center; width: 120px; border: none;">AÇÃO</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody_despesas_pendentes"></tbody>
@@ -639,11 +644,9 @@
         let filtroRapido = '';
         let filaXML = [];
         
-        // Instâncias Chart.js
         let chartCaixaObj = null;
         let chartPendenteObj = null;
 
-        // Plugin nativo Chart.js para criar sombras
         if (typeof Chart !== 'undefined') {
             const pluginSombra3D = {
                 id: 'pluginSombra3D',
@@ -708,31 +711,12 @@
             if(selRel) { selRel.innerHTML = htmlOptions; selRel.value = valRel; }
         }
 
-        // --- SISTEMA DE NAVEGAÇÃO OTIMIZADO ---
-        function showTab(id) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
-            document.getElementById(id).classList.add('active');
-            
-            if(id === 'relatorios_detalhados') { document.getElementById('btn_relatorios_detalhados').classList.add('btn-ativo'); } 
-            else if (id === 'pendencias') { document.getElementById('btn_pendencias').classList.add('btn-ativo'); }
-            else if (id !== 'visao_categoria') { document.getElementById('btn_' + id).classList.add('btn-ativo'); }
-            
-            // Só executa o código que pertence a cada aba quando ela é aberta
-            if(id === 'resumo') { atualizarResumoEGrafico(); }
-            if(id === 'relatorios_detalhados') { atualizarRelatoriosDetalhados(); }
-            if(id === 'movimentacoes') { atualizarOpcoesFiltros(); preencherSelectsLancamento(); aplicarFiltros(); }
-            if(id === 'pendencias') { renderizarTabelasPendencias(); }
-            
-            window.scrollTo(0, 0); 
-        }
-
         async function carregarDadosNuvem(forcar = false) {
             const statusDiv = document.getElementById('status_conexao');
             statusDiv.innerHTML = '⏳ SINCRONIZANDO...'; statusDiv.className = 'status-conexao aguardando';
             try {
                 const response = await fetch(URL_GOOGLE_SCRIPT);
-                if (!response.ok) throw new Error(`Erro de Servidor: Código ${response.status}`);
+                if (!response.ok) throw new Error(`Erro de Servidor`);
                 const data = await response.json();
                 if (data.transacoes) {
                     transacoes = normalizarDatas(data.transacoes);
@@ -746,12 +730,8 @@
                 if(localData) { transacoes = normalizarDatas(JSON.parse(localData)); }
             }
             
-            preencherSelectsLancamento(); 
-            preencherSelectsSafra(); 
-            atualizarOpcoesFiltros(); 
-            aplicarFiltros(); 
+            preencherSelectsLancamento(); preencherSelectsSafra(); atualizarOpcoesFiltros(); aplicarFiltros(); 
             
-            // Atualiza apenas a aba que está aberta para evitar erros de renderização escondida
             if(document.getElementById('resumo').classList.contains('active')) { atualizarResumoEGrafico(); }
             if(document.getElementById('relatorios_detalhados').classList.contains('active')) { atualizarRelatoriosDetalhados(); }
             if(document.getElementById('pendencias').classList.contains('active')) { renderizarTabelasPendencias(); }
@@ -849,6 +829,52 @@
             } catch (error) { alert("Erro ao gravar: " + error.message); }
         }
 
+        // --- SISTEMA DE PENDÊNCIAS OTIMIZADO ---
+        function renderizarTabelasPendencias() {
+            let htmlRecPend = ''; let htmlDespPend = ''; let totRecPend = 0; let totDespPend = 0;
+            
+            // O segredo do Bug das Pendências vazias estava aqui: O tipo pode vir capitalizado de várias formas do Excel.
+            let pendentes = transacoes.map((t, i) => ({ item: t, indexOriginal: i }))
+                .filter(obj => { 
+                    let sit = strSafe(obj.item.sit).toLowerCase(); 
+                    return sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente'); 
+                });
+                
+            pendentes.sort((a, b) => new Date(a.item.data || 0) - new Date(b.item.data || 0));
+
+            pendentes.forEach(obj => {
+                let t = obj.item; let idx = obj.indexOriginal; let sit = strSafe(t.sit).toLowerCase();
+                let v = parseFloat(t.valor) || 0; let dF = formatarData(t.data);
+                
+                // Converte tipo para minúsculas para não falhar na verificação (Correção do Bug)
+                let tipoLower = String(t.tipo).toLowerCase();
+                
+                if (tipoLower === 'receita' && sit.includes('receber')) {
+                    htmlRecPend += `<tr>
+                        <td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:900; color:#1565C0; text-align:right;">${formatarMoeda(v)}</td>
+                        <td style="text-align: center;"><button class="btn-acao" style="background:#1565C0; color:white; font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️ RECEBER</button></td>
+                    </tr>`;
+                    totRecPend += v;
+                } else if ((tipoLower === 'despesa' || tipoLower === 'investimento') && sit.includes('pagar')) {
+                    htmlDespPend += `<tr>
+                        <td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:900; color:#C62828; text-align:right;">${formatarMoeda(v)}</td>
+                        <td style="text-align: center;"><button class="btn-acao" style="background:#C62828; color:white; font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️ PAGAR</button></td>
+                    </tr>`;
+                    totDespPend += v;
+                }
+            });
+
+            if (htmlRecPend === '') htmlRecPend = '<tr><td colspan="4" style="text-align:center; padding: 15px;">🎉 Nenhuma receita pendente!</td></tr>';
+            else htmlRecPend += `<tr style="background-color:#e3f2fd;"><td colspan="2" style="font-weight:900;">TOTAL A RECEBER</td><td style="font-weight:900; color:#1565C0; text-align:right; font-size:15px;">${formatarMoeda(totRecPend)}</td><td></td></tr>`;
+            
+            if (htmlDespPend === '') htmlDespPend = '<tr><td colspan="4" style="text-align:center; padding: 15px;">🎉 Nenhuma conta a pagar!</td></tr>';
+            else htmlDespPend += `<tr style="background-color:#ffebee;"><td colspan="2" style="font-weight:900;">TOTAL A PAGAR</td><td style="font-weight:900; color:#C62828; text-align:right; font-size:15px;">${formatarMoeda(totDespPend)}</td><td></td></tr>`;
+
+            document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRecPend; document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDespPend;
+        }
+
+        function mudarSitEAtualizarPendencias(idx, novaSit) { mudarSitTransacao(idx, novaSit); mostrarToast("Conta liquidada!"); }
+
         function processarXML(event) {
             const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
@@ -897,6 +923,25 @@
             const strData = String(dataISO); const partes = strData.split('-'); return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : strData;
         }
         function strSafe(val) { return (val === null || val === undefined || val === 'nan' || val === '-') ? '' : String(val).trim(); }
+
+        // --- SISTEMA DE NAVEGAÇÃO DESACOPLADO (Resolve Bug do Chart.js) ---
+        function showTab(id) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
+            document.getElementById(id).classList.add('active');
+            
+            if(id === 'relatorios_detalhados') { document.getElementById('btn_relatorios_detalhados').classList.add('btn-ativo'); } 
+            else if (id === 'pendencias') { document.getElementById('btn_pendencias').classList.add('btn-ativo'); }
+            else if (id !== 'visao_categoria') { document.getElementById('btn_' + id).classList.add('btn-ativo'); }
+            
+            // Só executa o código que pertence a cada aba quando ela é aberta
+            if(id === 'resumo') { atualizarResumoEGrafico(); }
+            if(id === 'relatorios_detalhados') { atualizarRelatoriosDetalhados(); }
+            if(id === 'movimentacoes') { atualizarOpcoesFiltros(); preencherSelectsLancamento(); aplicarFiltros(); }
+            if(id === 'pendencias') { renderizarTabelasPendencias(); }
+            
+            window.scrollTo(0, 0); 
+        }
 
         function autoPreencherUnidade() {
             const catField = document.getElementById('r_categoria'); if(!catField) return;
@@ -1125,6 +1170,7 @@
                 if(fSi && strSafe(t.sit).toLowerCase() !== fSi) match = false;
                 
                 let sitTxtFiltro = strSafe(t.sit).toLowerCase();
+                
                 if (fMesTabela && (!t.data || !t.data.startsWith(fMesTabela))) match = false;
                 if (filtroRapido === 'pendentes' && (sitTxtFiltro.includes('pago') || (!sitTxtFiltro.includes('receber') && !sitTxtFiltro.includes('pagar') && !sitTxtFiltro.includes('pendente')))) match = false;
                 if (filtroRapido === 'entradas' && String(t.tipo).toLowerCase() !== 'receita') match = false;
@@ -1184,7 +1230,7 @@
                 }
                 
                 let sign = `${strSafe(t.data)}|${parseFloat(t.qtd)}|${strSafe(t.local).toUpperCase()}|${parseFloat(t.valor)}`;
-                let alertIcon = signCounts[sign] > 1 ? `<span title="⚠️ Lançamento duplicado detetado" style="cursor:help; font-size: 16px;">⚠️</span> ` : '';
+                let alertIcon = signCounts[sign] > 1 ? `<span title="⚠️ Lançamento duplicado detetado" style="cursor:help; font-size: 16px;">⚠️️</span> ` : '';
 
                 let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (tipoLower === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
 
@@ -1473,7 +1519,7 @@
 
             renderizarGraficos(tR, tD, tI, aR, aP);
 
-            // GERAÇÃO DOS BARRAS 3D (COM LIMPEZA DE TEXTO PARA CLIQUE SEGURO)
+            // GERAÇÃO DAS BARRAS 3D (COM LIMPEZA DE TEXTO PARA CLIQUE SEGURO)
             let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); 
             let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
             arrRCat.forEach(x => { 
