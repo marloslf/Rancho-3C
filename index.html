@@ -29,6 +29,9 @@
             --cor-investimento: #6A1B9A;
             --cor-investimento-grad: linear-gradient(135deg, #AB47BC, #6A1B9A);
 
+            --cor-saldo-pos-grad: linear-gradient(135deg, #42A5F5, #1565C0);
+            --cor-saldo-neg-grad: linear-gradient(135deg, #EF5350, #C62828);
+
             --cor-agri-app: #2980B9;
             --cor-agri-est: #F39C12;
             --cor-solo: #8E44AD;
@@ -88,10 +91,9 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 70vh; text-align: center;
         }
-        .home-container img { width: 300px; max-width: 80vw; filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.15)); margin-bottom: 30px; animation: float 6s ease-in-out infinite;}
+        .home-container img { width: 450px; max-width: 80vw; filter: drop-shadow(0px 15px 25px rgba(0,0,0,0.15)); margin-bottom: 30px; animation: float 6s ease-in-out infinite;}
         @keyframes float { 0% {transform: translateY(0px);} 50% {transform: translateY(-15px);} 100% {transform: translateY(0px);} }
-        .home-container h1 { color: var(--cor-texto); font-size: 32px; font-weight: 900; margin-bottom: 10px;}
-        .home-container p { color: #666; font-size: 18px; font-weight: 600;}
+        .home-container h1 { color: var(--cor-texto); font-size: 38px; font-weight: 900; margin-bottom: 10px; letter-spacing: 2px;}
 
         /* --- CARTÕES --- */
         .resumo-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 20px; }
@@ -125,7 +127,7 @@
         
         .area-fixa-topo { position: sticky; top: 80px; z-index: 100; background-color: var(--cor-fundo); padding-bottom: 10px; }
         .linha-lancamento { padding: 15px; border-radius: 16px; margin-bottom: 15px; border: none; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5);}
-        .linha-despesa { background-color: #FFF3E0; border-left: 8px solid var(--cor-despesa); }
+        .linha-despesa { background-color: #FFF3E0; border-left: 8px solid var(--cor-despesa); transition: 0.3s;}
         .linha-investimento-ativa { background-color: #F3E5F5; border-left: 8px solid var(--cor-investimento); }
         .linha-receita { background-color: #E8F5E9; border-left: 8px solid var(--cor-receita); }
         .linha-agri-app { background-color: #E1F5FE; border-left: 8px solid #0288D1; }
@@ -146,6 +148,7 @@
         .tabela-larga { min-width: 1100px; } 
         th { background: linear-gradient(to right, #1B5E20, #2E7D32); color: white; font-weight: 800; padding: 12px; text-align: left; cursor: pointer; position: sticky; top: 0; z-index: 3;}
         .th-agri { background: linear-gradient(to right, #01579B, #0288D1); }
+        .th-calc { background: linear-gradient(to right, #6A1B9A, #8E44AD); } 
         .filter-row th { background: #f1f8e9 !important; padding: 6px 5px; border-bottom: 2px solid var(--cor-verde-fazenda); top: 40px; z-index: 2;}
         td { border-bottom: 1px solid #f0f0f0; padding: 10px 12px; font-weight: 600; text-transform: uppercase; vertical-align: middle;}
         tr:hover td { background-color: rgba(0, 0, 0, 0.02); }
@@ -171,6 +174,9 @@
         .grid-solo { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
         .box-solo { background: rgba(255,255,255,0.5); padding: 15px; border-radius: 12px; box-shadow: var(--sombra-interna); border: 1px solid rgba(255,255,255,0.8); margin-bottom: 15px;}
         .box-solo h4 { margin-top: 0; margin-bottom: 10px; color: var(--cor-solo); border-bottom: 2px dashed #ccc; padding-bottom: 5px; font-size: 13px;}
+        
+        .status-conexao { padding: 10px 20px; border-radius: 30px; font-weight: 900; font-size: 12px; background: #ffebee; color: #c62828; border: 2px solid #ef5350; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: var(--sombra-neumorfica); transition: all 0.3s ease;}
+        .status-conexao.conectado { background: #e8f5e9; color: #2e7d32; border-color: #66bb6a; }
     </style>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -212,8 +218,7 @@
 <div id="home" class="tab active">
     <div class="home-container">
         <img src="https://i.imgur.com/jPLDeyi.png" alt="Rancho 3C Logo" referrerpolicy="no-referrer">
-        <h1>BEM-VINDO AO SISTEMA ERP</h1>
-        <p>Selecione um módulo no menu superior para começar a trabalhar.</p>
+        <h1>BEM-VINDO</h1>
     </div>
 </div>
 
@@ -247,7 +252,7 @@
         </div>
     </div>
 
-    <!-- LISTAS DO DASHBOARD CORRIGIDAS -->
+    <!-- LISTAS DO DASHBOARD (Bug Corrigido) -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="top-graficos-box">
             <h4 style="color: var(--cor-receita); font-weight: 900; font-size: 14px; border-bottom: 2px solid var(--cor-receita); padding-bottom: 5px;">🌱 MAIORES RECEITAS</h4>
@@ -268,7 +273,7 @@
                     <select id="d_natureza" class="select-tipo-saida" onchange="mudarTemaSaida()"><option value="Despesa">CUSTEIO</option><option value="Investimento">INVESTIMENTO</option></select>
                 </span>
             </div>
-            <div class="grid-despesa">
+            <form class="grid-despesa" onsubmit="addTransacao(event, 'Saida')">
                 <input type="date" id="d_data" required>
                 <input list="lista_d_categoria" id="d_categoria" placeholder="CATEGORIA..." required>
                 <input list="lista_d_setor" id="d_setor" placeholder="SETOR..." required>
@@ -279,13 +284,13 @@
                 <input type="number" id="d_v_unit" placeholder="$ UNIT" step="0.01" oninput="calcularTotalDespesa()">
                 <input type="number" id="d_valor" placeholder="$ TOTAL" step="0.01" required>
                 <select id="d_sit"><option value="A pagar">A PAGAR</option><option value="Pago">PAGO</option></select>
-                <button onclick="addTransacao('Saida')" id="btn_salvar_saida" class="btn-salvar-compacto" style="background: var(--cor-despesa);">💾 SALVAR</button>
-            </div>
+                <button type="submit" id="btn_salvar_saida" class="btn-salvar-compacto" style="background: var(--cor-despesa);">💾 SALVAR</button>
+            </form>
         </div>
 
         <div class="linha-lancamento linha-receita">
             <div style="font-size:13px; font-weight:900; color:var(--cor-receita); margin-bottom: 6px;">🌱 INSERIR RECEITA</div>
-            <div class="grid-receita">
+            <form class="grid-receita" onsubmit="addTransacao(event, 'Receita')">
                 <input type="date" id="r_data" required>
                 <input list="lista_r_categoria" id="r_categoria" placeholder="O QUE VENDEU?" required onblur="autoPreencherUnidade()">
                 <input list="lista_r_local" id="r_local" placeholder="CLIENTE?" required>
@@ -295,8 +300,8 @@
                 <input type="number" id="r_v_unit" placeholder="$ UNIT" step="0.01" oninput="calcularTotalReceita()">
                 <input type="number" id="r_valor" placeholder="$ TOTAL" step="0.01" required>
                 <select id="r_sit"><option value="A receber">A RECEBER</option><option value="Pago">PAGO</option></select>
-                <button onclick="addTransacao('Receita')" class="btn-salvar-compacto" style="background: var(--cor-receita);">💾 SALVAR</button>
-            </div>
+                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-receita);">💾 SALVAR</button>
+            </form>
         </div>
         
         <datalist id="lista_d_categoria"></datalist><datalist id="lista_d_setor"></datalist>
@@ -327,6 +332,14 @@
 </div>
 
 <div id="relatorios_detalhados" class="tab">
+    <div class="no-print top-filtros" style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px; background: var(--cor-fundo); padding: 20px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
+        <label style="font-weight: 900; color: var(--cor-texto);">Filtrar por Safra:</label>
+        <select id="filtro_safra_relatorios" onchange="atualizarRelatoriosDetalhados()"><option value="">TODAS</option></select>
+        <label style="font-weight: 900; color: var(--cor-texto); margin-left: 15px;">Mês:</label>
+        <input type="month" id="filtro_mes_relatorios" onchange="atualizarRelatoriosDetalhados()">
+        <button onclick="document.getElementById('filtro_safra_relatorios').value=''; document.getElementById('filtro_mes_relatorios').value=''; atualizarRelatoriosDetalhados()" class="btn-limpar">🧹 LIMPAR</button>
+    </div>
+
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px;">
         <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid var(--cor-receita);">
             <h3 style="color: var(--cor-receita); text-align: center;">🌱 RECEITAS / CATEGORIA</h3>
@@ -390,7 +403,7 @@
         <div class="card" style="background: linear-gradient(135deg, #00897B, #004D40);"><h4>REGISTROS NA SAFRA</h4><span id="kpi-registros">0</span></div>
     </div>
 
-    <!-- GRÁFICOS COMPACTOS PARA CABER NA TELA (height: 24vh) -->
+    <!-- GRÁFICOS COMPACTOS (height: 24vh para caber num único ecrã) -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="grafico-container wide" style="width: 100%; padding: 15px;">
             <h4 style="margin: 0 0 10px 0; color:var(--cor-texto); font-weight: 900; font-size: 13px;">DISTRIBUIÇÃO POR TALHÃO (VOL.)</h4>
@@ -417,16 +430,17 @@
     <div class="area-fixa-topo no-print">
         <div class="linha-lancamento linha-agri-app">
             <div style="font-size:14px; font-weight:900; color:var(--cor-agri-app); margin-bottom: 10px;">🚜 NOVO REGISTRO DE APLICAÇÃO</div>
-            <form id="appForm" class="grid-agri-app">
+            <!-- onSubmit blindado -->
+            <form id="appForm" class="grid-agri-app" onsubmit="addAgriApp(event)">
                 <input type="hidden" id="editIndex" value="-1">
-                <input type="date" id="dataApp" required>
+                <input type="date" id="dataApp" required title="Data">
                 <input type="text" id="talhao" list="lista-talhoes" placeholder="TALHÃO..." required autocomplete="off">
                 <input type="text" id="produto" list="lista-produtos-estoque" placeholder="PRODUTO..." required autocomplete="off" oninput="preencherTipoProduto()">
-                <input type="text" id="tipo" list="lista-tipos" placeholder="TIPO..." required autocomplete="off">
-                <input type="text" id="alvo" list="lista-alvos" placeholder="ALVO..." autocomplete="off">
+                <input type="text" id="tipo" list="lista-tipos" placeholder="TIPO PRODUTO..." required autocomplete="off">
+                <input type="text" id="alvo" list="lista-alvos" placeholder="ALVO/FENOLOGIA..." autocomplete="off">
                 <input type="number" step="0.01" id="dosagem_qtd" placeholder="QTD" required>
                 <select id="dosagem_un" required><option value="L">LITROS</option><option value="KG">QUILOS</option></select>
-                <input type="text" id="forma" list="lista-formas" placeholder="FORMA..." required autocomplete="off">
+                <input type="text" id="forma" list="lista-formas" placeholder="FORMA APLIC..." required autocomplete="off">
                 <select id="status" required><option value="PLANEJADO">PLANEJADO</option><option value="APLICADO">APLICADO</option></select>
                 <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-agri-app);">💾 REGISTRAR</button>
             </form>
@@ -458,7 +472,7 @@
     <div class="area-fixa-topo no-print">
         <div class="linha-lancamento linha-agri-est">
             <div style="font-size:14px; font-weight:900; color:#FF8F00; margin-bottom: 10px;">📦 ENTRADA DE ESTOQUE</div>
-            <form id="estoqueForm" class="grid-agri-est">
+            <form id="estoqueForm" class="grid-agri-est" onsubmit="addEstoque(event)">
                 <input type="hidden" id="editEstoqueIndex" value="-1">
                 <input type="text" id="est_produto" placeholder="NOME DO PRODUTO..." required autocomplete="off">
                 <input type="text" id="est_principio" placeholder="PRINCÍPIO ATIVO..." autocomplete="off">
@@ -489,17 +503,17 @@
 </div>
 
 <!-- ========================================== -->
-<!-- NOVO MÓDULO: SOLO & NUTRIÇÃO (COMPLETO)    -->
+<!-- NOVO MÓDULO: SOLO & NUTRIÇÃO               -->
 <!-- ========================================== -->
 <div id="solo_main" class="tab">
     
     <div class="sub-menu">
         <button id="btn_solo_reg" class="active" onclick="switchSoloTab('solo_reg')">➕ REGISTAR ANÁLISE</button>
-        <button id="btn_solo_hist" onclick="switchSoloTab('solo_hist')">📈 HISTÓRICO & GRÁFICOS</button>
-        <button id="btn_solo_calc" onclick="switchSoloTab('solo_calc')">🧮 CALCULADORA DE RECOMENDAÇÃO</button>
+        <button id="btn_solo_hist" onclick="switchSoloTab('solo_hist')">📈 HISTÓRICO DE SOLO</button>
+        <button id="btn_solo_calc" onclick="switchSoloTab('solo_calc')">🧮 CALCULADORA DE NUTRIENTES</button>
     </div>
 
-    <!-- TELA 1: REGISTO COMPLETO (PDF) -->
+    <!-- TELA 1: REGISTO (TODOS OS DADOS) -->
     <div id="solo_reg" class="sub-tab active">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <h3 style="color: var(--cor-solo); margin-top:0;">REGISTAR NOVA ANÁLISE DE SOLO</h3>
@@ -563,27 +577,22 @@
         </div>
     </div>
 
-    <!-- TELA 2: HISTÓRICO EM GRÁFICO -->
+    <!-- TELA 2: HISTÓRICO EM GRÁFICO (NOVO FORMATO EVOLUTIVO) -->
     <div id="solo_hist" class="sub-tab">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <div style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
                 <div style="flex:1"><label>TALHÃO:</label><select id="hist_talhao" onchange="renderizarHistoricoSolo()"></select></div>
-                <div style="flex:1"><label>NUTRIENTE A AVALIAR:</label>
-                    <select id="hist_nutriente" onchange="renderizarHistoricoSolo()">
-                        <option value="sl_p_meh">Fósforo (P)</option>
-                        <option value="sl_k">Potássio (K)</option>
-                        <option value="sl_ca">Cálcio (Ca)</option>
-                        <option value="sl_mg">Magnésio (Mg)</option>
-                        <option value="sl_v">Saturação Bases (V%)</option>
-                        <option value="sl_m">Sat. Alumínio (m%)</option>
-                        <option value="sl_mo">Matéria Orgânica (M.O.)</option>
+                <div style="flex:1"><label>PROFUNDIDADE:</label>
+                    <select id="hist_prof" onchange="renderizarHistoricoSolo()">
+                        <option value="0-20">0 - 20 cm</option>
+                        <option value="20-40">20 - 40 cm</option>
                     </select>
                 </div>
             </div>
             
             <div class="grafico-container wide" style="width: 100%; box-shadow: var(--sombra-interna);">
-                <h4 style="margin: 0 0 10px 0; color:var(--cor-texto);" id="titulo_hist_solo">EVOLUÇÃO DO NUTRIENTE</h4>
-                <div style="width: 100%; height: 35vh; min-height: 250px; position: relative;"><canvas id="chartHistoricoSolo"></canvas></div>
+                <h4 style="margin: 0 0 10px 0; color:var(--cor-texto);" id="titulo_hist_solo">EVOLUÇÃO DOS NUTRIENTES (Lado a Lado)</h4>
+                <div style="width: 100%; height: 40vh; min-height: 350px; position: relative;"><canvas id="chartHistoricoSolo"></canvas></div>
             </div>
         </div>
     </div>
@@ -654,9 +663,9 @@
                             <thead>
                                 <tr>
                                     <th style="background:#555; padding:8px;">MÊS</th>
-                                    <th style="background:#2E7D32; padding:8px;">UREIA (45% N)</th>
-                                    <th style="background:#E65100; padding:8px;">MAP (60% P)</th>
-                                    <th style="background:#1565C0; padding:8px;">KCl (60% K)</th>
+                                    <th style="background:#2E7D32; padding:8px; text-align: center;">UREIA (45% N)</th>
+                                    <th style="background:#E65100; padding:8px; text-align: center;">MAP (60% P)</th>
+                                    <th style="background:#1565C0; padding:8px; text-align: center;">KCl (60% K)</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody_cronograma_calc">
@@ -768,7 +777,7 @@
             if (data.aplicacoes) agriRecords = normalizarDatas(data.aplicacoes);
             if (data.estoque) estoque = data.estoque;
             if (data.opcoes) opcoesDin = data.opcoes;
-            if (data.analises) analisesSolo = normalizarDatas(data.analises); // Traz as análises de solo
+            if (data.analises) analisesSolo = normalizarDatas(data.analises); 
             
             statusDiv.innerHTML = '🟢 NUVEM SINCRONIZADA'; statusDiv.className = 'status-conexao conectado';
             localStorage.setItem('rancho3c_offline', JSON.stringify({ transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo }));
@@ -784,7 +793,7 @@
         
         preencherSelectsLancamento(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); popularSeletorSolo();
         
-        // Renderiza apenas a aba ativa
+        // Renderiza apenas a aba ativa para não travar os gráficos
         if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico();
         if(document.getElementById('movimentacoes').classList.contains('active')) { atualizarOpcoesFiltros(); aplicarFiltros(); }
         if(document.getElementById('agri_dash').classList.contains('active')) { renderAgriDashboard(); }
@@ -833,7 +842,7 @@
     }
 
     /* =========================================================================
-       MÓDULO FINANCEIRO (Com o Bug do Top 5 Corrigido)
+       MÓDULO FINANCEIRO
     ========================================================================= */
     function preencherSelectsSafraFin() {
         let safras = new Set(); transacoes.forEach(t => { if(t.data && t.data !== '-') safras.add(obterSafraGeral(t.data)); });
@@ -886,7 +895,7 @@
             chartPendenteObj = new Chart(ctxPendente, { type: 'doughnut', data: { labels: ['A Receber', 'A Pagar'], datasets: [{ data: [aR, aP], backgroundColor: [gradARec, gradAPag], borderWidth: 0, hoverOffset: 12 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } }, layout: { padding: 15 } } });
         }
 
-        // CORREÇÃO: Criação da lista Top 5 Blindada
+        // Listas Top 5 Blindadas (encodeURIComponent resolve bug de aspas no clique)
         let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
         arrRCat.forEach(x => { 
             let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0; 
@@ -957,9 +966,6 @@
         showTab('visao_categoria');
     }
 
-    // Mantivemos as restantes funções financeiras (addTransacao, aplicarFiltros, renderTabela, etc) tal como estavam.
-    // ... [Funções de Filtro, Tabelas, Edição, etc. omitidas aqui para focar nas novidades - elas estão no corpo base intactas]
-    
     function mudarTemaSaida() {
         const select = document.getElementById('d_natureza'); const caixa = document.getElementById('caixa_lancamento_saida');
         const titulo = document.getElementById('titulo_saida'); const btn = document.getElementById('btn_salvar_saida');
@@ -972,7 +978,8 @@
         }
     }
 
-    function addTransacao(tipoBase) {
+    function addTransacao(e, tipoBase) {
+        e.preventDefault();
         try {
             const prefix = tipoBase === 'Saida' ? 'd_' : 'r_';
             let data = document.getElementById(prefix + 'data').value;
@@ -1006,6 +1013,130 @@
         } catch (error) { alert("Erro ao gravar: " + error.message); }
     }
 
+    function renderizarTabelasPendencias() {
+        let htmlRec = ''; let htmlDesp = ''; let tRec = 0; let tDesp = 0;
+        let pendentes = transacoes.map((t, i) => ({ item: t, idx: i })).filter(obj => { 
+            let sit = strSafe(obj.item.sit).toLowerCase(); return sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente'); 
+        }).sort((a, b) => new Date(a.item.data || 0) - new Date(b.item.data || 0));
+
+        pendentes.forEach(obj => {
+            let t = obj.item; let v = parseFloat(t.valor) || 0; let dF = formatarData(t.data); let tipoL = String(t.tipo).toLowerCase();
+            
+            if (tipoL === 'receita') {
+                htmlRec += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:900; color:#1565C0; text-align:right;">${formatarMoeda(v)}</td>
+                    <td style="text-align: center;"><button class="btn-acao" style="background:#1565C0; color:white; font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${obj.idx}, 'Pago')">✔️ RECEBER</button></td></tr>`;
+                tRec += v;
+            } else {
+                htmlDesp += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:900; color:#C62828; text-align:right;">${formatarMoeda(v)}</td>
+                    <td style="text-align: center;"><button class="btn-acao" style="background:#C62828; color:white; font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${obj.idx}, 'Pago')">✔️ PAGAR</button></td></tr>`;
+                tDesp += v;
+            }
+        });
+
+        document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRec || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
+        document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDesp || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
+    }
+
+    function mudarSitEAtualizarPendencias(idx, novaSit) { transacoes[idx].sit = novaSit; salvarDados(); aplicarFiltros(); renderizarTabelasPendencias(); mostrarToast("Liquidada!"); }
+    function mudarSitTransacao(idx, novaSit) { transacoes[idx].sit = novaSit; salvarDados(); aplicarFiltros(); if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico(); }
+
+    function autoPreencherUnidade() {
+        const cat = document.getElementById('r_categoria').value.trim().toUpperCase();
+        if (unidadesReceita[cat]) document.getElementById('r_und').value = unidadesReceita[cat];
+    }
+
+    function preencherSelectsLancamento() {
+        let dCats = new Set(dCategoriasPadrao); let dSets = new Set(dSetoresPadrao);
+        let dLocais = new Set(), dDescs = new Set(); let rCats = new Set(rCategoriasPadrao); let rLocais = new Set();
+        transacoes.forEach(t => {
+            let tipoLower = String(t.tipo).toLowerCase();
+            if (tipoLower === 'despesa' || tipoLower === 'investimento') {
+                if (strSafe(t.categoria)) dCats.add(strSafe(t.categoria).toUpperCase());
+                if (strSafe(t.setor)) dSets.add(strSafe(t.setor).toUpperCase());
+                if (strSafe(t.local)) dLocais.add(strSafe(t.local).toUpperCase());
+                if (strSafe(t.desc)) dDescs.add(strSafe(t.desc).toUpperCase());
+            } else if(tipoLower === 'receita') {
+                if (strSafe(t.categoria)) rCats.add(strSafe(t.categoria).toUpperCase());
+                if (strSafe(t.local)) rLocais.add(strSafe(t.local).toUpperCase());
+            }
+        });
+        function buildDatalist(id, setVals) {
+            const dl = document.getElementById(id); if (dl) dl.innerHTML = Array.from(setVals).sort().map(v => `<option value="${v}">`).join('');
+        }
+        buildDatalist('lista_d_categoria', dCats); buildDatalist('lista_d_setor', dSets); buildDatalist('lista_d_local', dLocais); buildDatalist('lista_d_descricao', dDescs);
+        buildDatalist('lista_r_categoria', rCats); buildDatalist('lista_r_local', rLocais);
+    }
+
+    function calcularTotalReceita() {
+        let q = parseFloat(document.getElementById('r_qtd').value) || 0; let v = parseFloat(document.getElementById('r_v_unit').value) || 0;
+        if (q>0 && v>0) document.getElementById('r_valor').value = (q * v).toFixed(2);
+    }
+    function calcularTotalDespesa() {
+        let q = parseFloat(document.getElementById('d_qtd').value) || 0; let v = parseFloat(document.getElementById('d_v_unit').value) || 0;
+        if (q>0 && v>0) document.getElementById('d_valor').value = (q * v).toFixed(2);
+    }
+
+    function confirmarDuplicacao(idx) {
+        if(confirm('CLONAR lançamento?')) {
+            transacoes.push({ ...transacoes[idx] }); salvarDados(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
+            mostrarToast("DUPLICADO!");
+        }
+    }
+    function confirmarExclusao(idxOriginal) {
+        if(confirm('EXCLUIR lançamento?')) {
+            transacoes.splice(idxOriginal, 1); salvarDados(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
+            mostrarToast("REMOVIDO!");
+        }
+    }
+
+    function abrirModalEdicao(indexOriginal) {
+        indiceEdicao = indexOriginal; const t = transacoes[indexOriginal];
+        let vCat = strSafe(t.categoria).toUpperCase(); let vSet = strSafe(t.setor).toUpperCase();
+        let vLoc = strSafe(t.local).toUpperCase(); let vDesc = strSafe(t.desc).toUpperCase();
+        let tipoLowerT = String(t.tipo).toLowerCase();
+
+        let htmlSel = tipoLowerT === 'receita' ? `<input type="hidden" id="ed_tipo" value="Receita">` : `
+            <label style="font-weight: 800; font-size: 13px;">TIPO:</label><select id="ed_tipo">
+                <option value="Despesa" ${tipoLowerT === 'despesa' ? 'selected' : ''}>CUSTEIO</option>
+                <option value="Investimento" ${tipoLowerT === 'investimento' ? 'selected' : ''}>INVESTIMENTO</option>
+            </select>`;
+
+        document.getElementById('form-edicao').innerHTML = `
+            <label style="font-weight: 800; font-size: 13px;">DATA:</label> <input type="date" id="ed_data" value="${strSafe(t.data)}"> ${htmlSel}
+            <label style="font-weight: 800; font-size: 13px;">CATEGORIA:</label> <input type="text" id="ed_categoria" value="${vCat}">
+            <label style="font-weight: 800; font-size: 13px;">SETOR:</label> <input type="text" id="ed_setor" value="${vSet}">
+            <label style="font-weight: 800; font-size: 13px;">LOCAL:</label> <input type="text" id="ed_local" value="${vLoc}">
+            <label style="font-weight: 800; font-size: 13px;">DESCRIÇÃO:</label> <input type="text" id="ed_desc" value="${vDesc}">
+            <label style="font-weight: 800; font-size: 13px;">QTD:</label> <input type="number" id="ed_qtd" step="0.01" value="${parseFloat(t.qtd)||0}">
+            <label style="font-weight: 800; font-size: 13px;">UNID:</label> <input type="text" id="ed_und" value="${strSafe(t.und)}">
+            <label style="font-weight: 800; font-size: 13px;">VALOR TOTAL:</label> <input type="number" id="ed_valor" step="0.01" value="${parseFloat(t.valor)||0}">
+            <label style="font-weight: 800; font-size: 13px;">SITUAÇÃO:</label> <select id="ed_sit">
+                <option value="Pago" ${strSafe(t.sit).toLowerCase() === 'pago' ? 'selected' : ''}>PAGO</option>
+                <option value="A pagar" ${strSafe(t.sit).toLowerCase() === 'a pagar' ? 'selected' : ''}>A PAGAR / RECEBER</option>
+            </select>
+        `;
+        document.getElementById('modal-edicao').style.display = 'flex';
+    }
+
+    function fecharModal() { document.getElementById('modal-edicao').style.display = 'none'; }
+
+    function guardarEdicao() {
+        if (indiceEdicao > -1) {
+            transacoes[indiceEdicao].data = document.getElementById('ed_data').value;
+            transacoes[indiceEdicao].tipo = document.getElementById('ed_tipo').value;
+            transacoes[indiceEdicao].categoria = document.getElementById('ed_categoria').value.toUpperCase();
+            transacoes[indiceEdicao].setor = document.getElementById('ed_setor').value.toUpperCase();
+            transacoes[indiceEdicao].local = document.getElementById('ed_local').value.toUpperCase();
+            transacoes[indiceEdicao].desc = document.getElementById('ed_desc').value.toUpperCase();
+            transacoes[indiceEdicao].qtd = document.getElementById('ed_qtd').value;
+            transacoes[indiceEdicao].und = document.getElementById('ed_und').value.toUpperCase();
+            transacoes[indiceEdicao].valor = parseFloat(document.getElementById('ed_valor').value) || 0;
+            transacoes[indiceEdicao].sit = document.getElementById('ed_sit').value;
+            
+            salvarDados(); fecharModal(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); 
+        }
+    }
+
     function atualizarOpcoesFiltros() {
         let cats = new Set(), sets = new Set(), locs = new Set(), descs = new Set();
         transacoes.forEach(t => {
@@ -1020,7 +1151,9 @@
         }
         preencher('f_cat', cats); preencher('f_setor', sets); preencher('f_local', locs); preencher('f_desc', descs);
     }
+
     function limparFiltros() { document.querySelectorAll('.barra-pesquisa-relatorio input:not([type="button"]), .filter-row input, .filter-row select').forEach(i => i.value = ''); setFiltroRapido(''); }
+
     function setFiltroRapido(tipo) {
         filtroRapido = tipo; document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
         if(tipo === '') document.getElementById('btn_f_todos').classList.add('ativo');
@@ -1029,6 +1162,7 @@
         if(tipo === 'safra') document.getElementById('btn_f_safra').classList.add('ativo');
         aplicarFiltros();
     }
+
     function setOrdenacao(coluna) { colOrdenacao = coluna; ordemAscendente = !ordemAscendente; aplicarFiltros(); }
 
     function aplicarFiltros() {
@@ -1066,7 +1200,7 @@
         });
         renderTabela(lista);
     }
-    
+
     function renderTabela(lista) {
         let linhasHTML = []; const hojeObj = new Date(); hojeObj.setHours(0,0,0,0);
         lista.forEach(obj => {
@@ -1075,7 +1209,7 @@
             let eL = tipoLower === 'despesa' ? 'bg-despesa' : (tipoLower === 'investimento' ? 'bg-investimento' : 'bg-receita');
             let sitTxt = strSafe(t.sit).toLowerCase(); let isPago = sitTxt.includes('pago');
             let btnSit = isPago 
-                ? `<button class="btn-acao bg-pago" style="width:100%; font-size:11px;" onclick="mudarSitTransacao(${idx}, '${tipoLower === 'receita'?'A receber':'A pagar'}')">✔️ PAGO</button>` 
+                ? `<button class="btn-acao bg-pago" style="width:100%; font-size:11px;" onclick="mudarSitTransacao(${idx}, '${tipoLower === 'receita'?'A receber':'A pagar'}')">✔️️ PAGO</button>` 
                 : `<button class="btn-acao bg-pendente" style="width:100%; font-size:11px;" onclick="mudarSitTransacao(${idx}, 'Pago')">⏳ PENDENTE</button>`;
             let isAtrasado = (!isPago) && (t.data && new Date(String(t.data) + 'T00:00:00') < hojeObj);
             let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (tipoLower === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
@@ -1095,91 +1229,6 @@
         document.getElementById('tabela_relatorio').innerHTML = linhasHTML.join('');
     }
 
-    function renderizarTabelasPendencias() {
-        let htmlRec = ''; let htmlDesp = ''; let tRec = 0; let tDesp = 0;
-        let pendentes = transacoes.map((t, i) => ({ item: t, idx: i })).filter(obj => { 
-            let sit = strSafe(obj.item.sit).toLowerCase(); return sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente'); 
-        }).sort((a, b) => new Date(a.item.data || 0) - new Date(b.item.data || 0));
-
-        pendentes.forEach(obj => {
-            let t = obj.item; let v = parseFloat(t.valor) || 0; let dF = formatarData(t.data); let tipoL = String(t.tipo).toLowerCase();
-            
-            if (tipoL === 'receita') {
-                htmlRec += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:900; color:#1565C0; text-align:right;">${formatarMoeda(v)}</td>
-                    <td style="text-align: center;"><button class="btn-acao" style="background:#1565C0; color:white; font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${obj.idx}, 'Pago')">✔️ RECEBER</button></td></tr>`;
-                tRec += v;
-            } else {
-                htmlDesp += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:900; color:#C62828; text-align:right;">${formatarMoeda(v)}</td>
-                    <td style="text-align: center;"><button class="btn-acao" style="background:#C62828; color:white; font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${obj.idx}, 'Pago')">✔️ PAGAR</button></td></tr>`;
-                tDesp += v;
-            }
-        });
-
-        document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRec || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
-        document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDesp || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
-    }
-
-    function mudarSitEAtualizarPendencias(idx, novaSit) { transacoes[idx].sit = novaSit; salvarDados(); aplicarFiltros(); renderizarTabelasPendencias(); mostrarToast("Liquidada!"); }
-    function mudarSitTransacao(idx, novaSit) { transacoes[idx].sit = novaSit; salvarDados(); aplicarFiltros(); if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico(); }
-
-    function calcularTotalReceita() {
-        let q = parseFloat(document.getElementById('r_qtd').value) || 0; let v = parseFloat(document.getElementById('r_v_unit').value) || 0;
-        if (q>0 && v>0) document.getElementById('r_valor').value = (q * v).toFixed(2);
-    }
-    function calcularTotalDespesa() {
-        let q = parseFloat(document.getElementById('d_qtd').value) || 0; let v = parseFloat(document.getElementById('d_v_unit').value) || 0;
-        if (q>0 && v>0) document.getElementById('d_valor').value = (q * v).toFixed(2);
-    }
-    function confirmarExclusao(idxOriginal) {
-        if(confirm('EXCLUIR lançamento?')) {
-            transacoes.splice(idxOriginal, 1); salvarDados(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
-            mostrarToast("REMOVIDO!");
-        }
-    }
-    function abrirModalEdicao(indexOriginal) {
-        indiceEdicao = indexOriginal; const t = transacoes[indexOriginal];
-        let vCat = strSafe(t.categoria).toUpperCase(); let vSet = strSafe(t.setor).toUpperCase();
-        let vLoc = strSafe(t.local).toUpperCase(); let vDesc = strSafe(t.desc).toUpperCase();
-        let tipoLowerT = String(t.tipo).toLowerCase();
-
-        let htmlSel = tipoLowerT === 'receita' ? `<input type="hidden" id="ed_tipo" value="Receita">` : `
-            <label style="font-weight: 800; font-size: 13px;">TIPO:</label><select id="ed_tipo">
-                <option value="Despesa" ${tipoLowerT === 'despesa' ? 'selected' : ''}>CUSTEIO</option>
-                <option value="Investimento" ${tipoLowerT === 'investimento' ? 'selected' : ''}>INVESTIMENTO</option>
-            </select>`;
-
-        document.getElementById('form-edicao').innerHTML = `
-            <label style="font-weight: 800; font-size: 13px;">DATA:</label> <input type="date" id="ed_data" value="${strSafe(t.data)}"> ${htmlSel}
-            <label style="font-weight: 800; font-size: 13px;">CATEGORIA:</label> <input type="text" id="ed_categoria" value="${vCat}">
-            <label style="font-weight: 800; font-size: 13px;">SETOR:</label> <input type="text" id="ed_setor" value="${vSet}">
-            <label style="font-weight: 800; font-size: 13px;">LOCAL:</label> <input type="text" id="ed_local" value="${vLoc}">
-            <label style="font-weight: 800; font-size: 13px;">DESCRIÇÃO:</label> <input type="text" id="ed_desc" value="${vDesc}">
-            <label style="font-weight: 800; font-size: 13px;">QTD:</label> <input type="number" id="ed_qtd" step="0.01" value="${parseFloat(t.qtd)||0}">
-            <label style="font-weight: 800; font-size: 13px;">UNID:</label> <input type="text" id="ed_und" value="${strSafe(t.und)}">
-            <label style="font-weight: 800; font-size: 13px;">VALOR TOTAL:</label> <input type="number" id="ed_valor" step="0.01" value="${parseFloat(t.valor)||0}">
-            <label style="font-weight: 800; font-size: 13px;">SITUAÇÃO:</label> <select id="ed_sit">
-                <option value="Pago" ${strSafe(t.sit).toLowerCase() === 'pago' ? 'selected' : ''}>PAGO</option>
-                <option value="A pagar" ${strSafe(t.sit).toLowerCase() === 'a pagar' ? 'selected' : ''}>A PAGAR / RECEBER</option>
-            </select>
-        `;
-        document.getElementById('modal-edicao').style.display = 'flex';
-    }
-    function fecharModal() { document.getElementById('modal-edicao').style.display = 'none'; }
-    function guardarEdicao() {
-        if (indiceEdicao > -1) {
-            transacoes[indiceEdicao].data = document.getElementById('ed_data').value;
-            transacoes[indiceEdicao].tipo = document.getElementById('ed_tipo').value;
-            transacoes[indiceEdicao].categoria = document.getElementById('ed_categoria').value.toUpperCase();
-            transacoes[indiceEdicao].setor = document.getElementById('ed_setor').value.toUpperCase();
-            transacoes[indiceEdicao].local = document.getElementById('ed_local').value.toUpperCase();
-            transacoes[indiceEdicao].desc = document.getElementById('ed_desc').value.toUpperCase();
-            transacoes[indiceEdicao].qtd = document.getElementById('ed_qtd').value;
-            transacoes[indiceEdicao].und = document.getElementById('ed_und').value.toUpperCase();
-            transacoes[indiceEdicao].valor = parseFloat(document.getElementById('ed_valor').value) || 0;
-            transacoes[indiceEdicao].sit = document.getElementById('ed_sit').value;
-            salvarDados(); fecharModal(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); 
-        }
-    }
     function atualizarRelatoriosDetalhados() {
         let despSetor = {}; let despCat = {}; let invCat = {}; let recCat = {}; let recLocal = {};
         const filtroMes = document.getElementById('filtro_mes_relatorios') ? document.getElementById('filtro_mes_relatorios').value : '';
@@ -1217,35 +1266,10 @@
         renderTabelaRel('tbody_receitas_categoria', recCat, 'var(--cor-receita)');
         renderTabelaRel('tbody_receitas_local', recLocal, 'var(--cor-verde-escuro)');
     }
-    
-    function autoPreencherUnidade() {
-        const catField = document.getElementById('r_categoria'); if(!catField) return;
-        const catVal = catField.value.trim().toUpperCase();
-        if (unidadesReceita[catVal]) { const undField = document.getElementById('r_und'); if(undField) undField.value = unidadesReceita[catVal]; }
-    }
-    function preencherSelectsLancamento() {
-        let dCats = new Set(dCategoriasPadrao); let dSets = new Set(dSetoresPadrao);
-        let dLocais = new Set(), dDescs = new Set(); let rCats = new Set(rCategoriasPadrao); let rLocais = new Set();
-        transacoes.forEach(t => {
-            let tipoLower = String(t.tipo).toLowerCase();
-            if (tipoLower === 'despesa' || tipoLower === 'investimento') {
-                if (strSafe(t.categoria)) dCats.add(strSafe(t.categoria).toUpperCase());
-                if (strSafe(t.setor)) dSets.add(strSafe(t.setor).toUpperCase());
-                if (strSafe(t.local)) dLocais.add(strSafe(t.local).toUpperCase());
-                if (strSafe(t.desc)) dDescs.add(strSafe(t.desc).toUpperCase());
-            } else if(tipoLower === 'receita') {
-                if (strSafe(t.categoria)) rCats.add(strSafe(t.categoria).toUpperCase());
-                if (strSafe(t.local)) rLocais.add(strSafe(t.local).toUpperCase());
-            }
-        });
-        function buildDatalist(id, setVals) { const dl = document.getElementById(id); if (dl) dl.innerHTML = Array.from(setVals).sort().map(v => `<option value="${v}">`).join(''); }
-        buildDatalist('lista_d_categoria', dCats); buildDatalist('lista_d_setor', dSets); buildDatalist('lista_d_local', dLocais); buildDatalist('lista_d_descricao', dDescs);
-        buildDatalist('lista_r_categoria', rCats); buildDatalist('lista_r_local', rLocais);
-    }
 
-    /* =========================================================================
-       MÓDULO AGRÍCOLA (APLICAÇÕES E ESTOQUE)
-    ========================================================================= */
+    /* -------------------------------------------------------------------------
+       BLOCO AGRÍCOLA (Sincronizado via Nuvem e Integrado)
+    ------------------------------------------------------------------------- */
     function preencherTipoProduto() {
         const prod = document.getElementById('produto').value.toUpperCase();
         const item = estoque.find(e => e.produto === prod);
@@ -1284,7 +1308,7 @@
         } return valor || '-';
     }
 
-    document.getElementById('appForm').addEventListener('submit', function(e) {
+    function addAgriApp(e) {
         e.preventDefault();
         let produtoStr = document.getElementById('produto').value.toUpperCase();
         let dosagemQtd = parseFloat(document.getElementById('dosagem_qtd').value);
@@ -1309,8 +1333,8 @@
         } else { agriRecords[editIndex] = record; document.getElementById('editIndex').value = "-1"; }
         
         salvarDados(); popularSeletorSafraApp(); document.getElementById('safraSelector').value = obterSafraGeral(record.data); aplicarFiltroSafraApp();
-        this.reset(); document.getElementById('status').value = 'PLANEJADO'; mostrarToast("Registro Agrícola Salvo!");
-    });
+        document.getElementById('appForm').reset(); document.getElementById('status').value = 'PLANEJADO'; mostrarToast("Registro Agrícola Salvo!");
+    }
 
     function toggleStatusApp(index) {
         const safraSelecionada = document.getElementById('safraSelector').value;
@@ -1358,7 +1382,7 @@
         updateFilterOptionsAgri(visibleRecords);
     }
 
-    document.getElementById('estoqueForm').addEventListener('submit', function(e) {
+    function addEstoque(e) {
         e.preventDefault();
         const estRecord = {
             produto: document.getElementById('est_produto').value.toUpperCase(), principio: document.getElementById('est_principio').value.toUpperCase(),
@@ -1372,8 +1396,8 @@
             else estoque.push(estRecord);
         } else { estoque[editIndex] = estRecord; document.getElementById('editEstoqueIndex').value = "-1"; }
         
-        salvarDados(); renderDatalistsAgri(); saveAndRenderEstoque(); saveAndRenderApp(); this.reset(); mostrarToast("Estoque Atualizado!");
-    });
+        salvarDados(); renderDatalistsAgri(); saveAndRenderEstoque(); saveAndRenderApp(); document.getElementById('estoqueForm').reset(); mostrarToast("Estoque Atualizado!");
+    }
 
     function saveAndRenderEstoque() {
         estoque.sort((a, b) => a.produto.localeCompare(b.produto));
@@ -1384,7 +1408,6 @@
             agriRecords.forEach(r => { if(r.status === 'PLANEJADO' && r.data.startsWith(mesAtual) && r.produto === rec.produto && r.dosagem_un === rec.un) demanda += r.dosagem_qtd; });
             
             let corQtd = ''; let aviso = ''; let cClass = ''; let tStr = (rec.tipo||'').toUpperCase();
-            
             if (tStr.includes('ADUBO')) cClass = 'linha-adubo'; else if (tStr.includes('INSETICIDA')) cClass = 'linha-inseticida'; else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida'; else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
 
             if(rec.qtd < 0) { cClass = 'tr-alerta'; corQtd = 'color: #D32F2F; font-weight: 900;'; aviso = `<br><span class="stock-warning">⚠️ SALDO NEGATIVO</span>`; } 
@@ -1589,34 +1612,28 @@
         mostrarToast("Análise Salva com Sucesso!");
     }
 
-    // --- GRÁFICO HISTÓRICO DE SOLO ---
+    // --- GRÁFICO HISTÓRICO DE SOLO (TODOS OS NUTRIENTES) ---
     function renderizarHistoricoSolo() {
         if (typeof Chart === 'undefined') return;
         const talhao = document.getElementById('hist_talhao').value;
-        const nutVal = document.getElementById('hist_nutriente').value;
-        const nutLabel = document.getElementById('hist_nutriente').options[document.getElementById('hist_nutriente').selectedIndex].text;
+        const prof = document.getElementById('hist_prof').value;
         
-        document.getElementById('titulo_hist_solo').innerText = `EVOLUÇÃO DO ${nutLabel.toUpperCase()} - ${talhao}`;
+        document.getElementById('titulo_hist_solo').innerText = `EVOLUÇÃO DOS NUTRIENTES (${prof} cm) - ${talhao}`;
 
-        // Filtra as análises por talhão e ordena por data
-        let analisesFiltradas = analisesSolo.filter(a => a.talhao === talhao).sort((a, b) => new Date(a.data) - new Date(b.data));
+        // Filtra as análises por talhão e profundidade, ordenando por data (ascendente)
+        let filtradas = analisesSolo.filter(a => a.talhao === talhao && a.prof === prof).sort((a, b) => new Date(a.data) - new Date(b.data));
         
-        let datasUnicas = [...new Set(analisesFiltradas.map(a => formatarData(a.data)))];
+        const labelsNutrientes = ['pH (H₂O)', 'P (mg)', 'K (mg)', 'Ca (cmol)', 'Mg (cmol)', 'M.O.', 'V (%)'];
+        const cores = ['#8E44AD', '#3498DB', '#2ECC71', '#F39C12', '#E74C3C']; // Cores para cada data diferente
         
-        // Mapeia os dados puxando a variável selecionada (ex: p_meh, ca)
-        let paramMap = {
-            'sl_p_meh': 'p_meh', 'sl_k': 'k', 'sl_ca': 'ca', 'sl_mg': 'mg', 'sl_v': 'v', 'sl_m': 'm', 'sl_mo': 'mo'
-        };
-        let paramReal = paramMap[nutVal];
-
-        let dados020 = datasUnicas.map(d => {
-            let an = analisesFiltradas.find(a => formatarData(a.data) === d && a.prof === '0-20');
-            return an ? an[paramReal] : 0;
-        });
-        
-        let dados2040 = datasUnicas.map(d => {
-            let an = analisesFiltradas.find(a => formatarData(a.data) === d && a.prof === '20-40');
-            return an ? an[paramReal] : 0;
+        // Cada data de análise vira um Dataset (um conjunto de barras coloridas)
+        let datasets = filtradas.map((an, idx) => {
+            return {
+                label: formatarData(an.data),
+                data: [an.ph_h2o, an.p_meh, an.k, an.ca, an.mg, an.mo, an.v],
+                backgroundColor: cores[idx % cores.length],
+                borderRadius: 4
+            };
         });
 
         if (chartHistSoloObj) chartHistSoloObj.destroy();
@@ -1625,17 +1642,17 @@
         chartHistSoloObj = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: datasUnicas.length ? datasUnicas : ['Sem Dados'],
-                datasets: [
-                    { label: 'Camada 0-20 cm', data: dados020, backgroundColor: '#8E44AD', borderRadius: 8 },
-                    { label: 'Camada 20-40 cm', data: dados2040, backgroundColor: '#D2B4DE', borderRadius: 8 }
-                ]
+                labels: labelsNutrientes,
+                datasets: datasets.length ? datasets : [{ label: 'Sem Dados', data: [] }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { 
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
         });
     }
 
-    // --- CALCULADORA (RECOMENDAÇÃO) ---
+    // --- CALCULADORA (RECOMENDAÇÃO INTELIGENTE) ---
     function carregarUltimaAnaliseParaCalculo() {
         const talhao = document.getElementById('calc_talhao').value;
         let filtradas = analisesSolo.filter(a => a.talhao === talhao).sort((a, b) => new Date(b.data) - new Date(a.data)); // Mais recentes primeiro
@@ -1646,7 +1663,7 @@
         document.getElementById('lbl_data_020').innerText = ultima020 ? formatarData(ultima020.data) : "SEM DADOS";
         document.getElementById('lbl_data_2040').innerText = ultima2040 ? formatarData(ultima2040.data) : "SEM DADOS";
 
-        // Preenche com 0 se não encontrar
+        // Preenche os campos (read-only)
         document.getElementById('calc_p').value = ultima020 ? ultima020.p_meh : 0;
         document.getElementById('calc_k').value = ultima020 ? ultima020.k : 0;
         document.getElementById('calc_v020').value = ultima020 ? ultima020.v : 0;
@@ -1665,7 +1682,7 @@
         const prod = parseFloat(document.getElementById('calc_prod').value) || 0;
         const cultura = document.getElementById('calc_cultura').value;
         
-        // Puxa valores já preenchidos auto pelo sistema
+        // Puxa valores auto-preenchidos do sistema
         const v_020 = parseFloat(document.getElementById('calc_v020').value) || 0;
         const ctc_020 = parseFloat(document.getElementById('calc_ctc').value) || 0;
         const p_020 = parseFloat(document.getElementById('calc_p').value) || 0;
@@ -1688,7 +1705,7 @@
             gesso = 75 * argila_uso; 
         }
 
-        // 2. Adubação NPK Base Matemática
+        // 2. Adubação NPK Base (Lógica Original Mantida)
         let f_p = parseFloat(document.getElementById('calc_fp').value) || 1;
         let f_k = parseFloat(document.getElementById('calc_fk').value) || 1;
 
@@ -1703,7 +1720,7 @@
             reqGeralCalc.k = k_020 < 60 ? 300 : (k_020 < 120 ? 200 : (k_020 < 200 ? 100 : 0));
         }
 
-        // Output Interface
+        // Interface
         document.getElementById('res_n').innerText = reqGeralCalc.n.toFixed(0);
         document.getElementById('res_p').innerText = reqGeralCalc.p.toFixed(0);
         document.getElementById('res_k').innerText = reqGeralCalc.k.toFixed(0);
@@ -1741,7 +1758,7 @@
 
         let bodyHTML = "";
         dist.forEach(d => {
-            let frac = (d.pct / 100) / 3; // Considerando 3 aplicações mensais da lógica original[cite: 13]
+            let frac = (d.pct / 100) / 3; 
             bodyHTML += `<tr style="background: white;">
                 <td style="font-weight:900; color: #555;">${d.mes}</td>
                 <td style="font-weight:900; color:#2E7D32;">${(vol_ureia * frac).toFixed(2)}</td>
