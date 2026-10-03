@@ -86,7 +86,7 @@
         .tab.active { display: block; animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- TELA INICIAL (HOME LIMPA) --- */
+        /* --- TELA INICIAL (HOME LIMPA E MAIOR) --- */
         .home-container {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 70vh; text-align: center;
@@ -148,7 +148,6 @@
         .tabela-larga { min-width: 1100px; } 
         th { background: linear-gradient(to right, #1B5E20, #2E7D32); color: white; font-weight: 800; padding: 12px; text-align: left; cursor: pointer; position: sticky; top: 0; z-index: 3;}
         .th-agri { background: linear-gradient(to right, #01579B, #0288D1); }
-        .th-calc { background: linear-gradient(to right, #6A1B9A, #8E44AD); } 
         .filter-row th { background: #f1f8e9 !important; padding: 6px 5px; border-bottom: 2px solid var(--cor-verde-fazenda); top: 40px; z-index: 2;}
         td { border-bottom: 1px solid #f0f0f0; padding: 10px 12px; font-weight: 600; text-transform: uppercase; vertical-align: middle;}
         tr:hover td { background-color: rgba(0, 0, 0, 0.02); }
@@ -174,9 +173,6 @@
         .grid-solo { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
         .box-solo { background: rgba(255,255,255,0.5); padding: 15px; border-radius: 12px; box-shadow: var(--sombra-interna); border: 1px solid rgba(255,255,255,0.8); margin-bottom: 15px;}
         .box-solo h4 { margin-top: 0; margin-bottom: 10px; color: var(--cor-solo); border-bottom: 2px dashed #ccc; padding-bottom: 5px; font-size: 13px;}
-        
-        .status-conexao { padding: 10px 20px; border-radius: 30px; font-weight: 900; font-size: 12px; background: #ffebee; color: #c62828; border: 2px solid #ef5350; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: var(--sombra-neumorfica); transition: all 0.3s ease;}
-        .status-conexao.conectado { background: #e8f5e9; color: #2e7d32; border-color: #66bb6a; }
     </style>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -213,7 +209,7 @@
 </div>
 
 <!-- ========================================== -->
-<!-- TELA INICIAL (HOME LIMPA)                  -->
+<!-- TELA INICIAL (HOME LIMPA E MAIOR)          -->
 <!-- ========================================== -->
 <div id="home" class="tab active">
     <div class="home-container">
@@ -252,7 +248,6 @@
         </div>
     </div>
 
-    <!-- LISTAS DO DASHBOARD (Bug Corrigido) -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="top-graficos-box">
             <h4 style="color: var(--cor-receita); font-weight: 900; font-size: 14px; border-bottom: 2px solid var(--cor-receita); padding-bottom: 5px;">🌱 MAIORES RECEITAS</h4>
@@ -273,6 +268,7 @@
                     <select id="d_natureza" class="select-tipo-saida" onchange="mudarTemaSaida()"><option value="Despesa">CUSTEIO</option><option value="Investimento">INVESTIMENTO</option></select>
                 </span>
             </div>
+            <!-- ONSUBMIT PARA EVITAR FALHAS -->
             <form class="grid-despesa" onsubmit="addTransacao(event, 'Saida')">
                 <input type="date" id="d_data" required>
                 <input list="lista_d_categoria" id="d_categoria" placeholder="CATEGORIA..." required>
@@ -290,6 +286,7 @@
 
         <div class="linha-lancamento linha-receita">
             <div style="font-size:13px; font-weight:900; color:var(--cor-receita); margin-bottom: 6px;">🌱 INSERIR RECEITA</div>
+            <!-- ONSUBMIT PARA EVITAR FALHAS -->
             <form class="grid-receita" onsubmit="addTransacao(event, 'Receita')">
                 <input type="date" id="r_data" required>
                 <input list="lista_r_categoria" id="r_categoria" placeholder="O QUE VENDEU?" required onblur="autoPreencherUnidade()">
@@ -307,6 +304,15 @@
         <datalist id="lista_d_categoria"></datalist><datalist id="lista_d_setor"></datalist>
         <datalist id="lista_d_local"></datalist><datalist id="lista_d_descricao"></datalist>
         <datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
+
+        <div class="barra-pesquisa-relatorio">
+            <button class="btn-filtro ativo" id="btn_f_todos" onclick="setFiltroRapido('')">📋 TODOS</button>
+            <button class="btn-filtro" id="btn_f_safra" onclick="setFiltroRapido('safra')">🌾 SAFRA ATUAL</button>
+            <span style="flex-grow: 1;"></span>
+            <input type="text" id="pesquisa_global" placeholder="PESQUISA RÁPIDA..." onkeydown="if(event.key==='Enter') aplicarFiltros()">
+            <button onclick="aplicarFiltros()" class="btn-pesquisar">🔎</button>
+            <button onclick="limparFiltros()" class="btn-limpar">🧹</button>
+        </div>
     </div> 
 
     <div class="table-container">
@@ -324,6 +330,17 @@
                     <th onclick="setOrdenacao('valor')">TOTAL ↕</th>
                     <th onclick="setOrdenacao('sit')" style="text-align: center;">SITUAÇÃO ↕</th>
                     <th class="no-print" style="text-align: center;">AÇÕES</th>
+                </tr>
+                <tr class="filter-row no-print">
+                    <th><input type="date" id="f_data" onchange="aplicarFiltros()"></th>
+                    <th><select id="f_tipo" onchange="aplicarFiltros()"><option value="">TUDO</option><option value="receita">RECEITA</option><option value="despesa">DESPESA</option><option value="investimento">INVESTIMENTO</option></select></th>
+                    <th><select id="f_cat" onchange="aplicarFiltros()"></select></th>
+                    <th><select id="f_setor" onchange="aplicarFiltros()"></select></th>
+                    <th><select id="f_local" onchange="aplicarFiltros()"></select></th>
+                    <th><select id="f_desc" onchange="aplicarFiltros()"></select></th>
+                    <th></th><th></th><th></th>
+                    <th><select id="f_sit" onchange="aplicarFiltros()"><option value="">TUDO</option><option value="pago">PAGO</option><option value="a pagar">A PAGAR</option><option value="a receber">A RECEBER</option></select></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody id="tabela_relatorio"></tbody>
@@ -371,7 +388,7 @@
                 <h3 id="titulo_raiox" style="margin: 0; font-size: 26px; color: var(--cor-texto); font-weight: 900;">🔍 RAIO-X</h3>
                 <div id="valor_total_raiox" style="font-size: 32px; font-weight: 900; color: var(--cor-madeira); margin-top: 5px;">R$ 0,00</div>
             </div>
-            <button class="btn-salvar-compacto" style="background-color: #555; padding: 12px 25px; width: auto;" onclick="showTab('resumo')">⬅️ VOLTAR</button>
+            <button class="btn-salvar-compacto" style="background-color: #555; padding: 12px 25px; width: auto;" onclick="showTab('resumo')">⬅️️ VOLTAR</button>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
             <div>
@@ -386,8 +403,9 @@
     </div>
 </div>
 
+
 <!-- ========================================== -->
-<!-- MÓDULO AGRÍCOLA (ALINHADO FIT-TO-SCREEN)   -->
+<!-- MÓDULO AGRÍCOLA (ALINHADO E GIGANTE)       -->
 <!-- ========================================== -->
 
 <div id="agri_dash" class="tab">
@@ -403,7 +421,7 @@
         <div class="card" style="background: linear-gradient(135deg, #00897B, #004D40);"><h4>REGISTROS NA SAFRA</h4><span id="kpi-registros">0</span></div>
     </div>
 
-    <!-- GRÁFICOS COMPACTOS (height: 24vh para caber num único ecrã) -->
+    <!-- GRÁFICOS COMPACTOS (Altura controlada via height para não criar Scroll) -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="grafico-container wide" style="width: 100%; padding: 15px;">
             <h4 style="margin: 0 0 10px 0; color:var(--cor-texto); font-weight: 900; font-size: 13px;">DISTRIBUIÇÃO POR TALHÃO (VOL.)</h4>
@@ -430,20 +448,25 @@
     <div class="area-fixa-topo no-print">
         <div class="linha-lancamento linha-agri-app">
             <div style="font-size:14px; font-weight:900; color:var(--cor-agri-app); margin-bottom: 10px;">🚜 NOVO REGISTRO DE APLICAÇÃO</div>
-            <!-- onSubmit blindado -->
             <form id="appForm" class="grid-agri-app" onsubmit="addAgriApp(event)">
                 <input type="hidden" id="editIndex" value="-1">
-                <input type="date" id="dataApp" required title="Data">
+                <input type="date" id="dataApp" required>
                 <input type="text" id="talhao" list="lista-talhoes" placeholder="TALHÃO..." required autocomplete="off">
                 <input type="text" id="produto" list="lista-produtos-estoque" placeholder="PRODUTO..." required autocomplete="off" oninput="preencherTipoProduto()">
-                <input type="text" id="tipo" list="lista-tipos" placeholder="TIPO PRODUTO..." required autocomplete="off">
-                <input type="text" id="alvo" list="lista-alvos" placeholder="ALVO/FENOLOGIA..." autocomplete="off">
+                <input type="text" id="tipo" list="lista-tipos" placeholder="TIPO..." required autocomplete="off">
+                <input type="text" id="alvo" list="lista-alvos" placeholder="ALVO..." autocomplete="off">
                 <input type="number" step="0.01" id="dosagem_qtd" placeholder="QTD" required>
                 <select id="dosagem_un" required><option value="L">LITROS</option><option value="KG">QUILOS</option></select>
-                <input type="text" id="forma" list="lista-formas" placeholder="FORMA APLIC..." required autocomplete="off">
+                <input type="text" id="forma" list="lista-formas" placeholder="FORMA..." required autocomplete="off">
                 <select id="status" required><option value="PLANEJADO">PLANEJADO</option><option value="APLICADO">APLICADO</option></select>
                 <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-agri-app);">💾 REGISTRAR</button>
             </form>
+        </div>
+        <div class="barra-pesquisa-relatorio">
+            <h4 style="margin:0; color: var(--cor-agri-app);">CRONOGRAMA GERAL</h4>
+            <select id="safraSelector" onchange="aplicarFiltroSafraApp()" style="max-width: 200px;"></select>
+            <span style="flex-grow: 1;"></span>
+            <button onclick="limparFiltrosAgri()" class="btn-limpar">🧹 LIMPAR FILTROS</button>
         </div>
     </div>
 
@@ -503,7 +526,7 @@
 </div>
 
 <!-- ========================================== -->
-<!-- NOVO MÓDULO: SOLO & NUTRIÇÃO               -->
+<!-- NOVO MÓDULO: SOLO & NUTRIÇÃO (COMPLETO)    -->
 <!-- ========================================== -->
 <div id="solo_main" class="tab">
     
@@ -523,9 +546,11 @@
                     <div style="flex:1"><label>Data da Análise:</label><input type="date" id="sl_data" required></div>
                     <div style="flex:1"><label>Talhão / Cultura:</label><input type="text" id="sl_talhao" list="lista-talhoes" placeholder="EX: CAFÉ 2022" required></div>
                     <div style="flex:1"><label>Profundidade (cm):</label>
+                        <!-- CORREÇÃO: ADICIONADA OPÇÃO FOLIAR -->
                         <select id="sl_prof" required>
                             <option value="0-20">Camada 0 - 20 cm</option>
                             <option value="20-40">Camada 20 - 40 cm</option>
+                            <option value="Foliar">Análise Foliar</option>
                         </select>
                     </div>
                 </div>
@@ -577,7 +602,7 @@
         </div>
     </div>
 
-    <!-- TELA 2: HISTÓRICO EM GRÁFICO (NOVO FORMATO EVOLUTIVO) -->
+    <!-- TELA 2: HISTÓRICO EM GRÁFICO (NOVO FORMATO EVOLUTIVO DE TODOS OS NUTRIENTES) -->
     <div id="solo_hist" class="sub-tab">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <div style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
@@ -586,6 +611,7 @@
                     <select id="hist_prof" onchange="renderizarHistoricoSolo()">
                         <option value="0-20">0 - 20 cm</option>
                         <option value="20-40">20 - 40 cm</option>
+                        <option value="Foliar">Análise Foliar</option>
                     </select>
                 </div>
             </div>
@@ -679,8 +705,6 @@
     </div>
 </div>
 
-
-<!-- MODAL DE EDIÇÃO -->
 <div id="modal-edicao">
     <div class="modal-content">
         <h3 style="margin-top: 0; color: var(--cor-texto); border-bottom: 2px solid #ccc; padding-bottom:10px;">✏️ EDITAR REGISTRO</h3>
@@ -696,24 +720,24 @@
 
 <script>
     /* =========================================================================
-       INICIALIZAÇÃO DE BASE DE DADOS LIMPA (CLEAN SLATE)
+       INICIALIZAÇÃO (BLINDADA CONTRA ERROS DE ESTRUTURA ANTIGA)
     ========================================================================= */
     const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxU-XxV63Eip3g636GkrVaV8zwnVPVomePZLIsZBV-ghCYJKxYUMtQoG2Kc903zeP4UoQ/exec";
 
-    // Matrizes Vazias Prontas para o Uso Real
     let transacoes = [];
     let agriRecords = [];
     let estoque = [];
-    let analisesSolo = []; // Novo BD para Solo
+    let analisesSolo = []; 
     
+    // Opcões por defeito (sempre seguras)
     let opcoesDin = {
         talhoes: ["CAFÉ 2019", "CAFÉ 2022", "CAFÉ 2025", "MARACUJÁ"],
         tipos: ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "FUNGICIDA", "HERBICIDA", "INSETICIDA"],
-        formas: ["FERTIRRIGAÇÃO", "MANUAL", "PULVERIZAÇÃO"], alvos: ["BROCA-DO-CAFÉ", "BICHO-MINEIRO", "FERRUGEM", "FLORADA", "FRUTIFICAÇÃO", "MATO"]
+        formas: ["FERTIRRIGAÇÃO", "MANUAL", "PULVERIZAÇÃO"], 
+        alvos: ["BROCA-DO-CAFÉ", "BICHO-MINEIRO", "FERRUGEM", "FLORADA", "FRUTIFICAÇÃO", "MATO"]
     };
     
-    let indiceEdicao = -1;
-    let colOrdenacao = 'data'; let ordemAscendente = false; let filtroRapido = '';
+    let indiceEdicao = -1; let colOrdenacao = 'data'; let ordemAscendente = false; let filtroRapido = '';
     
     let chartCaixaObj = null, chartPendenteObj = null;
     let chartS_Agri = null, chartT_Agri = null, chartTp_Agri = null, chartCS_Agri = null, chartCT_Agri = null;
@@ -725,8 +749,7 @@
             beforeDatasetsDraw: (chart) => {
                 if(chart.config.type === 'doughnut') {
                     chart.ctx.save();
-                    chart.ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-                    chart.ctx.shadowBlur = 20; chart.ctx.shadowOffsetX = 8; chart.ctx.shadowOffsetY = 12;
+                    chart.ctx.shadowColor = 'rgba(0, 0, 0, 0.4)'; chart.ctx.shadowBlur = 20; chart.ctx.shadowOffsetX = 8; chart.ctx.shadowOffsetY = 12;
                 }
             },
             afterDatasetsDraw: (chart) => { if(chart.config.type === 'doughnut') chart.ctx.restore(); }
@@ -745,6 +768,7 @@
         if(toast) { toast.innerText = msg; toast.className = "toast show"; setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000); }
     }
     function normalizarDatas(lista) {
+        if(!Array.isArray(lista)) return [];
         return lista.map(t => {
             if (t.data) {
                 if (typeof t.data === 'string' && t.data.includes('T')) t.data = t.data.substring(0, 10);
@@ -776,26 +800,42 @@
             if (data.transacoes) transacoes = normalizarDatas(data.transacoes);
             if (data.aplicacoes) agriRecords = normalizarDatas(data.aplicacoes);
             if (data.estoque) estoque = data.estoque;
-            if (data.opcoes) opcoesDin = data.opcoes;
+            if (data.opcoes) {
+                // Fusão Inteligente: Protege contra ausência de campos novos (ex: Alvo) no banco antigo
+                opcoesDin.talhoes = data.opcoes.talhoes || opcoesDin.talhoes;
+                opcoesDin.tipos = data.opcoes.tipos || opcoesDin.tipos;
+                opcoesDin.formas = data.opcoes.formas || opcoesDin.formas;
+                opcoesDin.alvos = data.opcoes.alvos || opcoesDin.alvos;
+            }
             if (data.analises) analisesSolo = normalizarDatas(data.analises); 
             
             statusDiv.innerHTML = '🟢 NUVEM SINCRONIZADA'; statusDiv.className = 'status-conexao conectado';
             localStorage.setItem('rancho3c_offline', JSON.stringify({ transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo }));
         } catch (error) {
             statusDiv.innerHTML = "🔴 MODO OFFLINE"; statusDiv.className = 'status-conexao';
-            const localData = JSON.parse(localStorage.getItem('rancho3c_offline') || '{}');
+            const localStr = localStorage.getItem('rancho3c_offline');
+            const localData = localStr ? JSON.parse(localStr) : {};
             if(localData.transacoes) transacoes = normalizarDatas(localData.transacoes);
             if(localData.aplicacoes) agriRecords = normalizarDatas(localData.aplicacoes);
             if(localData.estoque) estoque = localData.estoque;
-            if(localData.opcoes) opcoesDin = localData.opcoes;
+            if(localData.opcoes) {
+                opcoesDin.talhoes = localData.opcoes.talhoes || opcoesDin.talhoes;
+                opcoesDin.tipos = localData.opcoes.tipos || opcoesDin.tipos;
+                opcoesDin.formas = localData.opcoes.formas || opcoesDin.formas;
+                opcoesDin.alvos = localData.opcoes.alvos || opcoesDin.alvos;
+            }
             if(localData.analises) analisesSolo = normalizarDatas(localData.analises);
         }
         
         preencherSelectsLancamento(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); popularSeletorSolo();
         
-        // Renderiza apenas a aba ativa para não travar os gráficos
+        // Renderiza apenas a aba ativa para não travar
         if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico();
+        if(document.getElementById('relatorios_detalhados').classList.contains('active')) atualizarRelatoriosDetalhados();
         if(document.getElementById('movimentacoes').classList.contains('active')) { atualizarOpcoesFiltros(); aplicarFiltros(); }
+        if(document.getElementById('pendencias').classList.contains('active')) renderizarTabelasPendencias();
+        if(document.getElementById('agri_app').classList.contains('active')) { aplicarFiltroSafraApp(); }
+        if(document.getElementById('agri_est').classList.contains('active')) { saveAndRenderEstoque(); }
         if(document.getElementById('agri_dash').classList.contains('active')) { renderAgriDashboard(); }
     }
 
@@ -817,7 +857,6 @@
         }
     }
 
-    // --- ROTEADOR DE ABAS PRINCIPAL ---
     function showTab(id) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
@@ -833,9 +872,11 @@
         if(id === 'relatorios_detalhados') atualizarRelatoriosDetalhados();
         if(id === 'movimentacoes') { atualizarOpcoesFiltros(); aplicarFiltros(); }
         if(id === 'pendencias') renderizarTabelasPendencias();
+
         if(id === 'agri_app') { aplicarFiltroSafraApp(); }
         if(id === 'agri_est') { saveAndRenderEstoque(); }
         if(id === 'agri_dash') { renderAgriDashboard(); }
+        
         if(id === 'solo_main') { popularSeletorSolo(); renderizarHistoricoSolo(); }
         
         window.scrollTo(0, 0); 
@@ -895,7 +936,7 @@
             chartPendenteObj = new Chart(ctxPendente, { type: 'doughnut', data: { labels: ['A Receber', 'A Pagar'], datasets: [{ data: [aR, aP], backgroundColor: [gradARec, gradAPag], borderWidth: 0, hoverOffset: 12 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } }, layout: { padding: 15 } } });
         }
 
-        // Listas Top 5 Blindadas (encodeURIComponent resolve bug de aspas no clique)
+        // Listas Top 5 Blindadas com encodeURIComponent
         let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
         arrRCat.forEach(x => { 
             let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0; 
@@ -1021,7 +1062,6 @@
 
         pendentes.forEach(obj => {
             let t = obj.item; let v = parseFloat(t.valor) || 0; let dF = formatarData(t.data); let tipoL = String(t.tipo).toLowerCase();
-            
             if (tipoL === 'receita') {
                 htmlRec += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:900; color:#1565C0; text-align:right;">${formatarMoeda(v)}</td>
                     <td style="text-align: center;"><button class="btn-acao" style="background:#1565C0; color:white; font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${obj.idx}, 'Pago')">✔️ RECEBER</button></td></tr>`;
@@ -1032,7 +1072,6 @@
                 tDesp += v;
             }
         });
-
         document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRec || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
         document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDesp || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
     }
@@ -1060,9 +1099,7 @@
                 if (strSafe(t.local)) rLocais.add(strSafe(t.local).toUpperCase());
             }
         });
-        function buildDatalist(id, setVals) {
-            const dl = document.getElementById(id); if (dl) dl.innerHTML = Array.from(setVals).sort().map(v => `<option value="${v}">`).join('');
-        }
+        function buildDatalist(id, setVals) { const dl = document.getElementById(id); if (dl) dl.innerHTML = Array.from(setVals).sort().map(v => `<option value="${v}">`).join(''); }
         buildDatalist('lista_d_categoria', dCats); buildDatalist('lista_d_setor', dSets); buildDatalist('lista_d_local', dLocais); buildDatalist('lista_d_descricao', dDescs);
         buildDatalist('lista_r_categoria', rCats); buildDatalist('lista_r_local', rLocais);
     }
@@ -1076,12 +1113,6 @@
         if (q>0 && v>0) document.getElementById('d_valor').value = (q * v).toFixed(2);
     }
 
-    function confirmarDuplicacao(idx) {
-        if(confirm('CLONAR lançamento?')) {
-            transacoes.push({ ...transacoes[idx] }); salvarDados(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
-            mostrarToast("DUPLICADO!");
-        }
-    }
     function confirmarExclusao(idxOriginal) {
         if(confirm('EXCLUIR lançamento?')) {
             transacoes.splice(idxOriginal, 1); salvarDados(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
@@ -1119,7 +1150,6 @@
     }
 
     function fecharModal() { document.getElementById('modal-edicao').style.display = 'none'; }
-
     function guardarEdicao() {
         if (indiceEdicao > -1) {
             transacoes[indiceEdicao].data = document.getElementById('ed_data').value;
@@ -1132,7 +1162,6 @@
             transacoes[indiceEdicao].und = document.getElementById('ed_und').value.toUpperCase();
             transacoes[indiceEdicao].valor = parseFloat(document.getElementById('ed_valor').value) || 0;
             transacoes[indiceEdicao].sit = document.getElementById('ed_sit').value;
-            
             salvarDados(); fecharModal(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); 
         }
     }
@@ -1162,7 +1191,6 @@
         if(tipo === 'safra') document.getElementById('btn_f_safra').classList.add('ativo');
         aplicarFiltros();
     }
-
     function setOrdenacao(coluna) { colOrdenacao = coluna; ordemAscendente = !ordemAscendente; aplicarFiltros(); }
 
     function aplicarFiltros() {
@@ -1209,7 +1237,7 @@
             let eL = tipoLower === 'despesa' ? 'bg-despesa' : (tipoLower === 'investimento' ? 'bg-investimento' : 'bg-receita');
             let sitTxt = strSafe(t.sit).toLowerCase(); let isPago = sitTxt.includes('pago');
             let btnSit = isPago 
-                ? `<button class="btn-acao bg-pago" style="width:100%; font-size:11px;" onclick="mudarSitTransacao(${idx}, '${tipoLower === 'receita'?'A receber':'A pagar'}')">✔️️ PAGO</button>` 
+                ? `<button class="btn-acao bg-pago" style="width:100%; font-size:11px;" onclick="mudarSitTransacao(${idx}, '${tipoLower === 'receita'?'A receber':'A pagar'}')">✔️ PAGO</button>` 
                 : `<button class="btn-acao bg-pendente" style="width:100%; font-size:11px;" onclick="mudarSitTransacao(${idx}, 'Pago')">⏳ PENDENTE</button>`;
             let isAtrasado = (!isPago) && (t.data && new Date(String(t.data) + 'T00:00:00') < hojeObj);
             let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (tipoLower === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
@@ -1267,8 +1295,9 @@
         renderTabelaRel('tbody_receitas_local', recLocal, 'var(--cor-verde-escuro)');
     }
 
+
     /* -------------------------------------------------------------------------
-       BLOCO AGRÍCOLA (Sincronizado via Nuvem e Integrado)
+       BLOCO AGRÍCOLA 
     ------------------------------------------------------------------------- */
     function preencherTipoProduto() {
         const prod = document.getElementById('produto').value.toUpperCase();
@@ -1286,21 +1315,22 @@
         selector.value = Array.from(safras).includes(currentSelection) ? currentSelection : "TODAS";
         
         const selDash = document.getElementById('talhaoDashboardSelector');
-        if(selDash) selDash.innerHTML = '<option value="TODOS">TODOS OS TALHÕES</option>' + opcoesDin.talhoes.map(t => `<option value="${t}">${t}</option>`).join('');
+        if(selDash) selDash.innerHTML = '<option value="TODOS">TODOS OS TALHÕES</option>' + (opcoesDin.talhoes||[]).map(t => `<option value="${t}">${t}</option>`).join('');
     }
 
     function aplicarFiltroSafraApp() { saveAndRenderApp(); saveAndRenderEstoque(); if (document.getElementById('agri_dash').classList.contains('active')) renderAgriDashboard(); }
 
     function renderDatalistsAgri() {
-        document.getElementById('lista-talhoes').innerHTML = opcoesDin.talhoes.map(t => `<option value="${t}">`).join('');
-        document.getElementById('lista-tipos').innerHTML = opcoesDin.tipos.map(t => `<option value="${t}">`).join('');
-        document.getElementById('lista-formas').innerHTML = opcoesDin.formas.map(t => `<option value="${t}">`).join('');
-        document.getElementById('lista-alvos').innerHTML = opcoesDin.alvos.map(t => `<option value="${t}">`).join('');
+        document.getElementById('lista-talhoes').innerHTML = (opcoesDin.talhoes||[]).map(t => `<option value="${t}">`).join('');
+        document.getElementById('lista-tipos').innerHTML = (opcoesDin.tipos||[]).map(t => `<option value="${t}">`).join('');
+        document.getElementById('lista-formas').innerHTML = (opcoesDin.formas||[]).map(t => `<option value="${t}">`).join('');
+        document.getElementById('lista-alvos').innerHTML = (opcoesDin.alvos||[]).map(t => `<option value="${t}">`).join('');
         document.getElementById('lista-produtos-estoque').innerHTML = [...new Set(estoque.map(e => e.produto))].sort().map(p => `<option value="${p}">`).join('');
     }
 
     function verificarNovaOpcao(categoria, valorStr) {
         let valor = valorStr.toUpperCase().trim();
+        if(!opcoesDin[categoria]) opcoesDin[categoria] = [];
         if (valor && valor !== '-' && !opcoesDin[categoria].includes(valor)) {
             if (confirm(`Adicionar "${valor}" à lista de opções futuras?`)) {
                 opcoesDin[categoria].push(valor); opcoesDin[categoria].sort(); salvarDados(); renderDatalistsAgri();
@@ -1563,11 +1593,12 @@
     function popularSeletorSolo() {
         const talhoesSet = new Set();
         analisesSolo.forEach(a => talhoesSet.add(a.talhao));
-        opcoesDin.talhoes.forEach(t => talhoesSet.add(t)); // Junta com os talhões gerais
+        (opcoesDin.talhoes||[]).forEach(t => talhoesSet.add(t));
         
         const html = Array.from(talhoesSet).sort().map(t => `<option value="${t}">${t}</option>`).join('');
         document.getElementById('hist_talhao').innerHTML = html;
         document.getElementById('calc_talhao').innerHTML = html;
+        document.getElementById('lista-talhoes-solo').innerHTML = html;
     }
 
     function salvarAnaliseSolo() {
@@ -1606,13 +1637,10 @@
         };
 
         analisesSolo.push(novaAnalise);
-        salvarDados();
-        popularSeletorSolo();
-        document.getElementById('formSolo').reset();
+        salvarDados(); popularSeletorSolo(); document.getElementById('formSolo').reset();
         mostrarToast("Análise Salva com Sucesso!");
     }
 
-    // --- GRÁFICO HISTÓRICO DE SOLO (TODOS OS NUTRIENTES) ---
     function renderizarHistoricoSolo() {
         if (typeof Chart === 'undefined') return;
         const talhao = document.getElementById('hist_talhao').value;
@@ -1620,19 +1648,16 @@
         
         document.getElementById('titulo_hist_solo').innerText = `EVOLUÇÃO DOS NUTRIENTES (${prof} cm) - ${talhao}`;
 
-        // Filtra as análises por talhão e profundidade, ordenando por data (ascendente)
         let filtradas = analisesSolo.filter(a => a.talhao === talhao && a.prof === prof).sort((a, b) => new Date(a.data) - new Date(b.data));
         
         const labelsNutrientes = ['pH (H₂O)', 'P (mg)', 'K (mg)', 'Ca (cmol)', 'Mg (cmol)', 'M.O.', 'V (%)'];
-        const cores = ['#8E44AD', '#3498DB', '#2ECC71', '#F39C12', '#E74C3C']; // Cores para cada data diferente
+        const cores = ['#8E44AD', '#3498DB', '#2ECC71', '#F39C12', '#E74C3C']; 
         
-        // Cada data de análise vira um Dataset (um conjunto de barras coloridas)
         let datasets = filtradas.map((an, idx) => {
             return {
                 label: formatarData(an.data),
                 data: [an.ph_h2o, an.p_meh, an.k, an.ca, an.mg, an.mo, an.v],
-                backgroundColor: cores[idx % cores.length],
-                borderRadius: 4
+                backgroundColor: cores[idx % cores.length], borderRadius: 4
             };
         });
 
@@ -1640,22 +1665,14 @@
         const ctx = document.getElementById('chartHistoricoSolo').getContext('2d');
         
         chartHistSoloObj = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labelsNutrientes,
-                datasets: datasets.length ? datasets : [{ label: 'Sem Dados', data: [] }]
-            },
-            options: { 
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } }
-            }
+            type: 'bar', data: { labels: labelsNutrientes, datasets: datasets.length ? datasets : [{ label: 'Sem Dados', data: [] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
     }
 
-    // --- CALCULADORA (RECOMENDAÇÃO INTELIGENTE) ---
     function carregarUltimaAnaliseParaCalculo() {
         const talhao = document.getElementById('calc_talhao').value;
-        let filtradas = analisesSolo.filter(a => a.talhao === talhao).sort((a, b) => new Date(b.data) - new Date(a.data)); // Mais recentes primeiro
+        let filtradas = analisesSolo.filter(a => a.talhao === talhao).sort((a, b) => new Date(b.data) - new Date(a.data));
 
         let ultima020 = filtradas.find(a => a.prof === '0-20');
         let ultima2040 = filtradas.find(a => a.prof === '20-40');
@@ -1663,7 +1680,6 @@
         document.getElementById('lbl_data_020').innerText = ultima020 ? formatarData(ultima020.data) : "SEM DADOS";
         document.getElementById('lbl_data_2040').innerText = ultima2040 ? formatarData(ultima2040.data) : "SEM DADOS";
 
-        // Preenche os campos (read-only)
         document.getElementById('calc_p').value = ultima020 ? ultima020.p_meh : 0;
         document.getElementById('calc_k').value = ultima020 ? ultima020.k : 0;
         document.getElementById('calc_v020').value = ultima020 ? ultima020.v : 0;
@@ -1682,7 +1698,6 @@
         const prod = parseFloat(document.getElementById('calc_prod').value) || 0;
         const cultura = document.getElementById('calc_cultura').value;
         
-        // Puxa valores auto-preenchidos do sistema
         const v_020 = parseFloat(document.getElementById('calc_v020').value) || 0;
         const ctc_020 = parseFloat(document.getElementById('calc_ctc').value) || 0;
         const p_020 = parseFloat(document.getElementById('calc_p').value) || 0;
@@ -1695,17 +1710,12 @@
         const argila_kg = parseFloat(document.getElementById('calc_argila').value) || 0;
         const argila_pct = argila_kg / 10; 
 
-        // 1. Calagem e Gessagem
         const v_alvo = cultura === 'maracuja' ? 80 : 60;
-        let calcario = v_020 < v_alvo ? ((ctc_020 * (v_alvo - v_020)) / 90) * 1000 : 0; // PRNT Assumido 90
+        let calcario = v_020 < v_alvo ? ((ctc_020 * (v_alvo - v_020)) / 90) * 1000 : 0; 
         
         let gesso = 0;
-        if (ca_2040 < 0.5 || m_2040 > 20) {
-            const argila_uso = argila_pct > 0 ? argila_pct : 42; 
-            gesso = 75 * argila_uso; 
-        }
+        if (ca_2040 < 0.5 || m_2040 > 20) { const argila_uso = argila_pct > 0 ? argila_pct : 42; gesso = 75 * argila_uso; }
 
-        // 2. Adubação NPK Base (Lógica Original Mantida)
         let f_p = parseFloat(document.getElementById('calc_fp').value) || 1;
         let f_k = parseFloat(document.getElementById('calc_fk').value) || 1;
 
@@ -1720,51 +1730,34 @@
             reqGeralCalc.k = k_020 < 60 ? 300 : (k_020 < 120 ? 200 : (k_020 < 200 ? 100 : 0));
         }
 
-        // Interface
         document.getElementById('res_n').innerText = reqGeralCalc.n.toFixed(0);
         document.getElementById('res_p').innerText = reqGeralCalc.p.toFixed(0);
         document.getElementById('res_k').innerText = reqGeralCalc.k.toFixed(0);
         document.getElementById('res_calcario').innerText = calcario.toFixed(0);
         document.getElementById('res_gesso').innerText = gesso.toFixed(0);
 
-        gerarCronogramaAdub();
-        mostrarToast("Cálculo Finalizado!");
+        gerarCronogramaAdub(); mostrarToast("Cálculo Finalizado!");
     }
 
     function gerarCronogramaAdub() {
         const cultura = document.getElementById('calc_cultura').value;
         const tabela = document.getElementById('tbody_cronograma_calc');
         
-        let vol_map = reqGeralCalc.p / 0.60; 
-        let n_from_map = vol_map * 0.12; 
-        let n_remaining = reqGeralCalc.n - n_from_map;
-        let vol_ureia = n_remaining > 0 ? n_remaining / 0.45 : 0; 
+        let vol_map = reqGeralCalc.p / 0.60; let n_from_map = vol_map * 0.12; 
+        let n_remaining = reqGeralCalc.n - n_from_map; let vol_ureia = n_remaining > 0 ? n_remaining / 0.45 : 0; 
         let vol_kcl = reqGeralCalc.k / 0.60; 
 
         let dist = [];
         if (cultura === 'conilon') {
-            dist = [
-                { mes: "Agosto", pct: 5 }, { mes: "Setembro", pct: 8 }, { mes: "Outubro", pct: 12 }, { mes: "Novembro", pct: 15 },
-                { mes: "Dezembro", pct: 15 }, { mes: "Janeiro", pct: 15 }, { mes: "Fevereiro", pct: 12 }, { mes: "Março", pct: 10 },
-                { mes: "Abril", pct: 8 }, { mes: "Maio", pct: 0 }, { mes: "Junho", pct: 0 }, { mes: "Julho", pct: 0 }
-            ];
+            dist = [ { mes: "Agosto", pct: 5 }, { mes: "Setembro", pct: 8 }, { mes: "Outubro", pct: 12 }, { mes: "Novembro", pct: 15 }, { mes: "Dezembro", pct: 15 }, { mes: "Janeiro", pct: 15 }, { mes: "Fevereiro", pct: 12 }, { mes: "Março", pct: 10 }, { mes: "Abril", pct: 8 }, { mes: "Maio", pct: 0 }, { mes: "Junho", pct: 0 }, { mes: "Julho", pct: 0 } ];
         } else {
-            dist = [
-                { mes: "Agosto", pct: 8 }, { mes: "Setembro", pct: 8 }, { mes: "Outubro", pct: 10 }, { mes: "Novembro", pct: 10 },
-                { mes: "Dezembro", pct: 10 }, { mes: "Janeiro", pct: 10 }, { mes: "Fevereiro", pct: 10 }, { mes: "Março", pct: 10 },
-                { mes: "Abril", pct: 8 }, { mes: "Maio", pct: 6 }, { mes: "Junho", pct: 5 }, { mes: "Julho", pct: 5 }
-            ];
+            dist = [ { mes: "Agosto", pct: 8 }, { mes: "Setembro", pct: 8 }, { mes: "Outubro", pct: 10 }, { mes: "Novembro", pct: 10 }, { mes: "Dezembro", pct: 10 }, { mes: "Janeiro", pct: 10 }, { mes: "Fevereiro", pct: 10 }, { mes: "Março", pct: 10 }, { mes: "Abril", pct: 8 }, { mes: "Maio", pct: 6 }, { mes: "Junho", pct: 5 }, { mes: "Julho", pct: 5 } ];
         }
 
         let bodyHTML = "";
         dist.forEach(d => {
             let frac = (d.pct / 100) / 3; 
-            bodyHTML += `<tr style="background: white;">
-                <td style="font-weight:900; color: #555;">${d.mes}</td>
-                <td style="font-weight:900; color:#2E7D32;">${(vol_ureia * frac).toFixed(2)}</td>
-                <td style="font-weight:900; color:#E65100;">${(vol_map * frac).toFixed(2)}</td>
-                <td style="font-weight:900; color:#1565C0;">${(vol_kcl * frac).toFixed(2)}</td>
-            </tr>`;
+            bodyHTML += `<tr style="background: white;"><td style="font-weight:900; color: #555;">${d.mes}</td><td style="font-weight:900; color:#2E7D32;">${(vol_ureia * frac).toFixed(2)}</td><td style="font-weight:900; color:#E65100;">${(vol_map * frac).toFixed(2)}</td><td style="font-weight:900; color:#1565C0;">${(vol_kcl * frac).toFixed(2)}</td></tr>`;
         });
         tabela.innerHTML = bodyHTML;
     }
