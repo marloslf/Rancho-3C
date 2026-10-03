@@ -14,9 +14,11 @@
             --cor-verde-escuro: #1B5E20;
             --cor-madeira: #5D4037;
             
+            /* Fundo Neumórfico Suave e Moderno */
             --cor-fundo: #e0e5ec; 
             --cor-texto: #2C3E50;
             
+            /* Sombras 3D High-Tech */
             --sombra-neumorfica: 9px 9px 16px rgba(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
             --sombra-interna: inset 6px 6px 10px rgba(163,177,198,0.5), inset -6px -6px 10px rgba(255,255,255, 0.8);
             
@@ -306,7 +308,7 @@
         <div class="dashboard-inferior" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px;">
             <div class="grafico-container">
                 <h4 style="margin: 0 0 15px 0; color: var(--cor-madeira); font-size: 16px; font-weight: 900;">SAÍDAS EFETIVADAS (PAGAS)</h4>
-                <div style="width: 100%; height: 220px; position: relative;">
+                <div style="width: 100%; height: 220px; position: relative;" id="wrapper_caixa">
                     <canvas id="canvas_caixa"></canvas>
                 </div>
                 <div class="legenda-grafico">
@@ -317,7 +319,7 @@
             </div>
             <div class="grafico-container">
                 <h4 style="margin: 0 0 15px 0; color: #555; font-size: 16px; font-weight: 900;">PREVISÃO (PENDENTES)</h4>
-                <div style="width: 100%; height: 220px; position: relative;">
+                <div style="width: 100%; height: 220px; position: relative;" id="wrapper_pendente">
                     <canvas id="canvas_pendente"></canvas>
                 </div>
                 <div class="legenda-grafico">
@@ -339,15 +341,16 @@
         </div>
     </div>
     
-    <!-- ABA EXTRA: VISÃO GERAL DETALHADA DA CATEGORIA (RAIO-X) -->
+    <!-- ABA EXTRA: VISÃO GERAL DETALHADA DA CATEGORIA (RAIO-X 2.0) -->
     <div id="visao_categoria" class="tab">
         <div style="background: var(--cor-fundo); padding: 30px; border-radius: 24px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 3px solid white; padding-bottom: 15px;">
                 <div>
-                    <h3 id="titulo_raiox" style="margin: 0; font-size: 26px; color: var(--cor-texto); font-weight: 900;">🔍 RAIO-X</h3>
+                    <h3 id="titulo_raiox" style="margin: 0; font-size: 26px; color: var(--cor-texto); font-weight: 900; text-shadow: 1px 1px 2px white;">🔍 RAIO-X</h3>
+                    <div id="valor_total_raiox" style="font-size: 32px; font-weight: 900; color: var(--cor-madeira); text-shadow: 1px 1px 2px white; margin-top: 5px;">R$ 0,00</div>
                 </div>
-                <button class="btn-limpar" style="background-color: var(--cor-madeira); padding: 12px 25px; border-radius: 12px; box-shadow: var(--sombra-neumorfica); font-weight: 900;" onclick="showTab('resumo')">⬅️ VOLTAR AO DASHBOARD</button>
+                <button class="btn-limpar" style="background-color: #555; padding: 12px 25px; border-radius: 12px; box-shadow: var(--sombra-neumorfica); font-weight: 900;" onclick="showTab('resumo')">⬅️ VOLTAR AO DASHBOARD</button>
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
@@ -640,6 +643,7 @@
         let chartCaixaObj = null;
         let chartPendenteObj = null;
 
+        // Armadura de segurança do Chart.js: impede erro se falhar o carregamento da biblioteca externa
         if (typeof Chart !== 'undefined') {
             const pluginSombra3D = {
                 id: 'pluginSombra3D',
@@ -704,6 +708,25 @@
             if(selRel) { selRel.innerHTML = htmlOptions; selRel.value = valRel; }
         }
 
+        // --- SISTEMA DE NAVEGAÇÃO DESACOPLADO (Resolve Bugs de Exibição) ---
+        function showTab(id) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
+            document.getElementById(id).classList.add('active');
+            
+            if(id === 'relatorios_detalhados') { document.getElementById('btn_relatorios_detalhados').classList.add('btn-ativo'); } 
+            else if (id === 'pendencias') { document.getElementById('btn_pendencias').classList.add('btn-ativo'); }
+            else if (id !== 'visao_categoria') { document.getElementById('btn_' + id).classList.add('btn-ativo'); }
+            
+            // Só executa o código que pertence a cada aba quando ela é aberta
+            if(id === 'resumo') { atualizarResumoEGrafico(); }
+            if(id === 'relatorios_detalhados') { atualizarRelatoriosDetalhados(); }
+            if(id === 'movimentacoes') { atualizarOpcoesFiltros(); preencherSelectsLancamento(); aplicarFiltros(); }
+            if(id === 'pendencias') { renderizarTabelasPendencias(); }
+            
+            window.scrollTo(0, 0); 
+        }
+
         async function carregarDadosNuvem(forcar = false) {
             const statusDiv = document.getElementById('status_conexao');
             statusDiv.innerHTML = '⏳ SINCRONIZANDO...'; statusDiv.className = 'status-conexao aguardando';
@@ -722,12 +745,15 @@
                 const localData = localStorage.getItem('rancho3c_offline');
                 if(localData) { transacoes = normalizarDatas(JSON.parse(localData)); }
             }
-            preencherSelectsLancamento(); preencherSelectsSafra(); atualizarOpcoesFiltros(); aplicarFiltros(); 
             
-            // Só atualiza os gráficos no arranque se o Dashboard estiver aberto
-            if(document.getElementById('resumo').classList.contains('active')) {
-                atualizarResumoEGrafico(); 
-            }
+            preencherSelectsLancamento(); 
+            preencherSelectsSafra(); 
+            atualizarOpcoesFiltros(); 
+            aplicarFiltros(); 
+            
+            if(document.getElementById('resumo').classList.contains('active')) { atualizarResumoEGrafico(); }
+            if(document.getElementById('relatorios_detalhados').classList.contains('active')) { atualizarRelatoriosDetalhados(); }
+            if(document.getElementById('pendencias').classList.contains('active')) { renderizarTabelasPendencias(); }
         }
 
         async function salvarDados() {
@@ -871,25 +897,6 @@
         }
         function strSafe(val) { return (val === null || val === undefined || val === 'nan' || val === '-') ? '' : String(val).trim(); }
 
-        // --- SISTEMA DE NAVEGAÇÃO DESACOPLADO (Resolve o Bug do Chart.js) ---
-        function showTab(id) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
-            document.getElementById(id).classList.add('active');
-            
-            if(id === 'relatorios_detalhados') { document.getElementById('btn_relatorios_detalhados').classList.add('btn-ativo'); } 
-            else if (id === 'pendencias') { document.getElementById('btn_pendencias').classList.add('btn-ativo'); }
-            else if (id !== 'visao_categoria') { document.getElementById('btn_' + id).classList.add('btn-ativo'); }
-            
-            // Só executa o código que pertence a cada aba quando ela é aberta
-            if(id === 'resumo') { atualizarResumoEGrafico(); }
-            if(id === 'relatorios_detalhados') { atualizarRelatoriosDetalhados(); }
-            if(id === 'movimentacoes') { atualizarOpcoesFiltros(); preencherSelectsLancamento(); aplicarFiltros(); }
-            if(id === 'pendencias') { renderizarTabelasPendencias(); }
-            
-            window.scrollTo(0, 0); 
-        }
-
         function autoPreencherUnidade() {
             const catField = document.getElementById('r_categoria'); if(!catField) return;
             const catVal = catField.value.trim().toUpperCase();
@@ -905,12 +912,13 @@
             let dCats = new Set(dCategoriasPadrao); let dSets = new Set(dSetoresPadrao);
             let dLocais = new Set(), dDescs = new Set(); let rCats = new Set(rCategoriasPadrao); let rLocais = new Set();
             transacoes.forEach(t => {
-                if (t.tipo === 'Despesa' || t.tipo === 'Investimento') {
+                let tipoLower = String(t.tipo).toLowerCase();
+                if (tipoLower === 'despesa' || tipoLower === 'investimento') {
                     if (strSafe(t.categoria)) dCats.add(strSafe(t.categoria).toUpperCase());
                     if (strSafe(t.setor)) dSets.add(strSafe(t.setor).toUpperCase());
                     if (strSafe(t.local)) dLocais.add(strSafe(t.local).toUpperCase());
                     if (strSafe(t.desc)) dDescs.add(strSafe(t.desc).toUpperCase());
-                } else if(t.tipo === 'Receita') {
+                } else if(tipoLower === 'receita') {
                     if (strSafe(t.categoria)) rCats.add(strSafe(t.categoria).toUpperCase());
                     if (strSafe(t.local)) rLocais.add(strSafe(t.local).toUpperCase());
                 }
@@ -945,6 +953,8 @@
             if(confirm('Deseja CLONAR este lançamento?')) {
                 let nova = { ...transacoes[idx] }; transacoes.push(nova); salvarDados();
                 preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
+                if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico();
+                if(document.getElementById('pendencias').classList.contains('active')) renderizarTabelasPendencias();
                 mostrarToast("LANÇAMENTO DUPLICADO!");
             }
         }
@@ -953,6 +963,8 @@
             if(confirm('Deseja EXCLUIR este lançamento?')) {
                 transacoes.splice(idxOriginal, 1); salvarDados();
                 preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
+                if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico();
+                if(document.getElementById('pendencias').classList.contains('active')) renderizarTabelasPendencias();
                 mostrarToast("REMOVIDO!");
             }
         }
@@ -964,12 +976,14 @@
 
         function abrirModalEdicao(indexOriginal) {
             indiceEdicao = indexOriginal; const t = transacoes[indexOriginal];
-            let cats = new Set(t.tipo === 'Despesa' || t.tipo === 'Investimento' ? dCategoriasPadrao : rCategoriasPadrao);
-            let sets = new Set(t.tipo === 'Despesa' || t.tipo === 'Investimento' ? dSetoresPadrao : []);
+            let cats = new Set(String(t.tipo).toLowerCase() === 'despesa' || String(t.tipo).toLowerCase() === 'investimento' ? dCategoriasPadrao : rCategoriasPadrao);
+            let sets = new Set(String(t.tipo).toLowerCase() === 'despesa' || String(t.tipo).toLowerCase() === 'investimento' ? dSetoresPadrao : []);
             let locs = new Set(), descs = new Set();
             
             transacoes.forEach(tr => {
-                let checkTipo = (t.tipo === 'Despesa' || t.tipo === 'Investimento') ? (tr.tipo === 'Despesa' || tr.tipo === 'Investimento') : (tr.tipo === t.tipo);
+                let tipoT = String(t.tipo).toLowerCase();
+                let tipoTr = String(tr.tipo).toLowerCase();
+                let checkTipo = (tipoT === 'despesa' || tipoT === 'investimento') ? (tipoTr === 'despesa' || tipoTr === 'investimento') : (tipoTr === tipoT);
                 if(checkTipo) {
                     if(strSafe(tr.categoria) && strSafe(tr.categoria) !== '-') cats.add(strSafe(tr.categoria).toUpperCase());
                     if(strSafe(tr.setor) && strSafe(tr.setor) !== '-') sets.add(strSafe(tr.setor).toUpperCase());
@@ -990,20 +1004,21 @@
                 html += `</datalist>`; return html;
             }
 
-            let extraCatAttr = t.tipo === 'Receita' ? 'oninput="autoPreencherUnidadeEdicao()"' : '';
+            let tipoLowerT = String(t.tipo).toLowerCase();
+            let extraCatAttr = tipoLowerT === 'receita' ? 'oninput="autoPreencherUnidadeEdicao()"' : '';
             let catField = renderInputList('ed_categoria', vCat, cats, extraCatAttr);
             
             let selectorTipo = '';
-            if(t.tipo === 'Despesa' || t.tipo === 'Investimento') {
+            if(tipoLowerT === 'despesa' || tipoLowerT === 'investimento') {
                 selectorTipo = `<label>TIPO DA SAÍDA:</label>
                                 <select id="ed_tipo">
-                                    <option value="Despesa" ${t.tipo === 'Despesa' ? 'selected' : ''}>Custeio (Operacional)</option>
-                                    <option value="Investimento" ${t.tipo === 'Investimento' ? 'selected' : ''}>Investimento (Bens)</option>
+                                    <option value="Despesa" ${tipoLowerT === 'despesa' ? 'selected' : ''}>Custeio (Operacional)</option>
+                                    <option value="Investimento" ${tipoLowerT === 'investimento' ? 'selected' : ''}>Investimento (Bens)</option>
                                 </select>`;
             } else { selectorTipo = `<input type="hidden" id="ed_tipo" value="Receita">`; }
 
-            let setorField = (t.tipo === 'Despesa' || t.tipo === 'Investimento') ? `<label>SETOR:</label> ${renderInputList('ed_setor', vSet, sets)}` : `<input type="hidden" id="ed_setor" value="-">`;
-            let descField = t.tipo === 'Receita' ? `<label>DESCRIÇÃO/DETALHES:</label> <input type="text" id="ed_desc" value="${vDesc}" style="text-transform: uppercase;">` : `<label>DESCRIÇÃO/DETALHES:</label> ${renderInputList('ed_desc', vDesc, descs)}`;
+            let setorField = (tipoLowerT === 'despesa' || tipoLowerT === 'investimento') ? `<label>SETOR:</label> ${renderInputList('ed_setor', vSet, sets)}` : `<input type="hidden" id="ed_setor" value="-">`;
+            let descField = tipoLowerT === 'receita' ? `<label>DESCRIÇÃO/DETALHES:</label> <input type="text" id="ed_desc" value="${vDesc}" style="text-transform: uppercase;">` : `<label>DESCRIÇÃO/DETALHES:</label> ${renderInputList('ed_desc', vDesc, descs)}`;
 
             document.getElementById('form-edicao').innerHTML = `
                 <label>DATA:</label> <input type="date" id="ed_data" value="${strSafe(t.data)}">
@@ -1042,14 +1057,16 @@
                 transacoes[indiceEdicao].valor = parseFloat(document.getElementById('ed_valor').value) || 0;
                 transacoes[indiceEdicao].sit = document.getElementById('ed_sit').value;
                 
-                salvarDados(); fecharModal(); preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
+                salvarDados(); fecharModal(); preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); 
+                if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico();
+                if(document.getElementById('pendencias').classList.contains('active')) renderizarTabelasPendencias();
             }
         }
 
         function atualizarOpcoesFiltros() {
             let cats = new Set(), sets = new Set(), locs = new Set(), descs = new Set();
             transacoes.forEach(t => {
-                let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (t.tipo === 'Receita') ? strSafe(t.desc) : strSafe(t.setor);
+                let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
                 if(cat && cat !== '-') cats.add(String(cat).toUpperCase());
                 if(strSafe(t.setor) && t.setor !== '-') sets.add(strSafe(t.setor).toUpperCase());
                 if(strSafe(t.local) && t.local !== '-') locs.add(strSafe(t.local).toUpperCase());
@@ -1096,11 +1113,11 @@
 
             lista = lista.filter(obj => {
                 let t = obj.item; let match = true;
-                let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (t.tipo === 'Receita') ? strSafe(t.desc) : strSafe(t.setor);
+                let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
 
                 if(pG && !`${strSafe(t.desc)} ${strSafe(t.local)} ${cM} ${strSafe(t.setor)} ${t.tipo}`.toLowerCase().includes(pG)) match = false;
                 if(fD && strSafe(t.data) !== fD) match = false;
-                if(fT && t.tipo.toLowerCase() !== fT) match = false;
+                if(fT && String(t.tipo).toLowerCase() !== fT) match = false;
                 if(fC && cM.toLowerCase() !== fC) match = false;
                 if(fSe && strSafe(t.setor).toLowerCase() !== fSe) match = false;
                 if(fL && strSafe(t.local).toLowerCase() !== fL) match = false;
@@ -1108,10 +1125,9 @@
                 if(fSi && strSafe(t.sit).toLowerCase() !== fSi) match = false;
                 
                 let sitTxtFiltro = strSafe(t.sit).toLowerCase();
-                
                 if (fMesTabela && (!t.data || !t.data.startsWith(fMesTabela))) match = false;
                 if (filtroRapido === 'pendentes' && (sitTxtFiltro.includes('pago') || (!sitTxtFiltro.includes('receber') && !sitTxtFiltro.includes('pagar') && !sitTxtFiltro.includes('pendente')))) match = false;
-                if (filtroRapido === 'entradas' && t.tipo !== 'Receita') match = false;
+                if (filtroRapido === 'entradas' && String(t.tipo).toLowerCase() !== 'receita') match = false;
                 if (filtroRapido === 'safra' && obterSafra(t.data) !== obterSafraAtual()) match = false;
 
                 return match;
@@ -1130,6 +1146,8 @@
             renderTabela(lista);
         }
 
+        function mudarSitTransacao(idx, novaSit) { transacoes[idx].sit = novaSit; salvarDados(); aplicarFiltros(); if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico(); if(document.getElementById('pendencias').classList.contains('active')) renderizarTabelasPendencias(); }
+
         function renderTabela(lista) {
             const tbody = document.getElementById('tabela_relatorio');
             let linhasHTML = [];
@@ -1144,14 +1162,15 @@
             lista.forEach(obj => {
                 const t = obj.item; const idx = obj.indexOriginal;
                 
+                let tipoLower = String(t.tipo).toLowerCase();
                 let eL = 'bg-receita';
-                if(t.tipo === 'Despesa') eL = 'bg-despesa';
-                if(t.tipo === 'Investimento') eL = 'bg-investimento';
+                if(tipoLower === 'despesa') eL = 'bg-despesa';
+                if(tipoLower === 'investimento') eL = 'bg-investimento';
                 
                 let sitTxt = strSafe(t.sit).toLowerCase();
                 let isPago = sitTxt.includes('pago');
                 let btnSit = isPago 
-                    ? `<button class="btn-acao bg-pago" style="width:100%; font-size:11px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitTransacao(${idx}, '${t.tipo === 'Receita'?'A receber':'A pagar'}')" title="Marcar como Pendente">✔️ PAGO</button>` 
+                    ? `<button class="btn-acao bg-pago" style="width:100%; font-size:11px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitTransacao(${idx}, '${tipoLower === 'receita'?'A receber':'A pagar'}')" title="Marcar como Pendente">✔️ PAGO</button>` 
                     : `<button class="btn-acao bg-pendente" style="width:100%; font-size:11px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitTransacao(${idx}, 'Pago')" title="Marcar como Pago">⏳ PENDENTE</button>`;
                 
                 let isAtrasado = false;
@@ -1163,12 +1182,12 @@
                 let sign = `${strSafe(t.data)}|${parseFloat(t.qtd)}|${strSafe(t.local).toUpperCase()}|${parseFloat(t.valor)}`;
                 let alertIcon = signCounts[sign] > 1 ? `<span title="⚠️ Lançamento duplicado detetado" style="cursor:help; font-size: 16px;">⚠️</span> ` : '';
 
-                let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (t.tipo === 'Receita') ? strSafe(t.desc) : strSafe(t.setor);
+                let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (tipoLower === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
 
                 linhasHTML.push(`
                     <tr class="${isAtrasado ? 'linha-atrasada' : ''}">
                         <td style="white-space: nowrap;" title="Safra: ${obterSafra(t.data)}">${alertIcon}${formatarData(t.data)}</td>
-                        <td class="${eL}">${t.tipo.toUpperCase()}</td><td><b>${cM}</b></td><td>${strSafe(t.setor)}</td><td>${strSafe(t.local)}</td><td>${strSafe(t.desc)}</td>
+                        <td class="${eL}">${String(t.tipo).toUpperCase()}</td><td><b>${cM}</b></td><td>${strSafe(t.setor)}</td><td>${strSafe(t.local)}</td><td>${strSafe(t.desc)}</td>
                         <td>${strSafe(t.qtd)} ${strSafe(t.und)}</td>
                         <td>${formatarMoeda(t.v_unit)}</td>
                         <td style="font-weight:900;">${formatarMoeda(t.valor)}</td>
@@ -1183,68 +1202,7 @@
             tbody.innerHTML = linhasHTML.join('');
         }
 
-        function mudarSitTransacao(idx, novaSit) { transacoes[idx].sit = novaSit; salvarDados(); aplicarFiltros(); if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico(); if(document.getElementById('pendencias').classList.contains('active')) renderizarTabelasPendencias(); }
-
-        function renderizarTabelasPendencias() {
-            let htmlRecPend = ''; let htmlDespPend = ''; let totRecPend = 0; let totDespPend = 0;
-            let pendentes = transacoes.map((t, i) => ({ item: t, indexOriginal: i }))
-                .filter(obj => { let sit = strSafe(obj.item.sit).toLowerCase(); return sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente'); });
-            pendentes.sort((a, b) => new Date(a.item.data || 0) - new Date(b.item.data || 0));
-
-            pendentes.forEach(obj => {
-                let t = obj.item; let idx = obj.indexOriginal; let sit = strSafe(t.sit).toLowerCase();
-                let v = parseFloat(t.valor) || 0; let dF = formatarData(t.data);
-                
-                if (t.tipo === 'Receita' && sit.includes('receber')) {
-                    htmlRecPend += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:bold; color:#1565C0; text-align:right;">${formatarMoeda(v)}</td>
-                        <td style="text-align: center;"><button class="btn-acao bg-pago" style="font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️ RECEBER</button></td></tr>`;
-                    totRecPend += v;
-                } else if ((t.tipo === 'Despesa' || t.tipo === 'Investimento') && sit.includes('pagar')) {
-                    htmlDespPend += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:bold; color:#C62828; text-align:right;">${formatarMoeda(v)}</td>
-                        <td style="text-align: center;"><button class="btn-acao bg-pago" style="font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️ PAGAR</button></td></tr>`;
-                    totDespPend += v;
-                }
-            });
-
-            if (htmlRecPend === '') htmlRecPend = '<tr><td colspan="4" style="text-align:center; padding: 15px;">🎉 Nenhuma receita pendente!</td></tr>';
-            else htmlRecPend += `<tr style="background-color:#e3f2fd;"><td colspan="2" style="font-weight:900;">TOTAL A RECEBER</td><td style="font-weight:900; color:#1565C0; text-align:right; font-size:15px;">${formatarMoeda(totRecPend)}</td><td></td></tr>`;
-            if (htmlDespPend === '') htmlDespPend = '<tr><td colspan="4" style="text-align:center; padding: 15px;">🎉 Nenhuma conta a pagar!</td></tr>';
-            else htmlDespPend += `<tr style="background-color:#ffebee;"><td colspan="2" style="font-weight:900;">TOTAL A PAGAR</td><td style="font-weight:900; color:#C62828; text-align:right; font-size:15px;">${formatarMoeda(totDespPend)}</td><td></td></tr>`;
-
-            document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRecPend; document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDespPend;
-        }
-
-        function mudarSitEAtualizarPendencias(idx, novaSit) { mudarSitTransacao(idx, novaSit); mostrarToast("Conta liquidada!"); }
-
-        function renderizarGraficos(tR, tD, tI, aR, aP) {
-            if (typeof Chart === 'undefined' || !document.getElementById('resumo').classList.contains('active')) return;
-
-            if (chartCaixaObj) chartCaixaObj.destroy();
-            if (chartPendenteObj) chartPendenteObj.destroy();
-
-            const ctxCaixa = document.getElementById('canvas_caixa').getContext('2d');
-            let gradRec = ctxCaixa.createLinearGradient(0, 0, 0, 300); gradRec.addColorStop(0, '#81C784'); gradRec.addColorStop(1, '#1B5E20');
-            let gradDesp = ctxCaixa.createLinearGradient(0, 0, 0, 300); gradDesp.addColorStop(0, '#FFB74D'); gradDesp.addColorStop(1, '#E65100');
-            let gradInv = ctxCaixa.createLinearGradient(0, 0, 0, 300); gradInv.addColorStop(0, '#BA68C8'); gradInv.addColorStop(1, '#4A148C');
-
-            chartCaixaObj = new Chart(ctxCaixa, {
-                type: 'doughnut',
-                data: { labels: ['Receitas', 'Custeio', 'Investimentos'], datasets: [{ data: [tR, tD, tI], backgroundColor: [gradRec, gradDesp, gradInv], borderWidth: 0, hoverOffset: 12 }] },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } } }, layout: { padding: 15 } }
-            });
-
-            const ctxPendente = document.getElementById('canvas_pendente').getContext('2d');
-            let gradARec = ctxPendente.createLinearGradient(0, 0, 0, 300); gradARec.addColorStop(0, '#64B5F6'); gradARec.addColorStop(1, '#0D47A1');
-            let gradAPag = ctxPendente.createLinearGradient(0, 0, 0, 300); gradAPag.addColorStop(0, '#E57373'); gradAPag.addColorStop(1, '#B71C1C');
-
-            chartPendenteObj = new Chart(ctxPendente, {
-                type: 'doughnut',
-                data: { labels: ['A Receber', 'A Pagar'], datasets: [{ data: [aR, aP], backgroundColor: [gradARec, gradAPag], borderWidth: 0, hoverOffset: 12 }] },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } } }, layout: { padding: 15 } }
-            });
-        }
-
-        // --- SISTEMA RAIO-X (VISÃO DETALHADA COM DESCRIÇÕES) ---
+        // --- SISTEMA RAIO-X REFORÇADO (VISÃO DETALHADA COM DESCRIÇÕES) ---
         function abrirDetalheCategoria(categoria, tipoFiltro) {
             const filtroMes = document.getElementById('filtro_mes_dashboard') ? document.getElementById('filtro_mes_dashboard').value : '';
             const filtroSafra = document.getElementById('filtro_safra_dashboard') ? document.getElementById('filtro_safra_dashboard').value : '';
@@ -1254,16 +1212,18 @@
             transacoes.forEach(t => {
                 let sit = strSafe(t.sit).toLowerCase();
                 if (!sit.includes('pago')) return;
+                
                 if (filtroSafra && obterSafra(t.data) !== filtroSafra) return;
                 if (filtroMes && (!t.data || !t.data.startsWith(filtroMes))) return;
 
+                let tipoStr = String(t.tipo).toLowerCase();
                 let checkTipo = false;
-                if (tipoFiltro === 'Saida') checkTipo = (t.tipo === 'Despesa' || t.tipo === 'Investimento');
-                else checkTipo = (t.tipo === 'Receita');
+                if (tipoFiltro === 'Saida') checkTipo = (tipoStr === 'despesa' || tipoStr === 'investimento');
+                else checkTipo = (tipoStr === 'receita');
 
-                // Garante que o Match usa a mesma lógica do Dashboard
+                // Lógica de fallback garantida para o Raio-X
                 let cat = strSafe(t.categoria); 
-                if (!cat || cat === '-') cat = (t.tipo === 'Receita') ? strSafe(t.desc) : strSafe(t.setor); 
+                if (!cat || cat === '-') cat = (tipoStr === 'receita') ? strSafe(t.desc) : strSafe(t.setor); 
                 cat = cat.toUpperCase();
 
                 if (checkTipo && cat === categoria.toUpperCase()) {
@@ -1294,13 +1254,16 @@
             
             let htmlBarras = '';
             let maxDivisao = arrDivisao.length > 0 ? arrDivisao[0][1] : 0;
+            
             arrDivisao.forEach(x => {
                 let perc = maxDivisao > 0 ? (x[1] / maxDivisao) * 100 : 0;
                 htmlBarras += `<li style="list-style: none; margin-bottom: 20px;">
                         <div style="display:flex; justify-content:space-between; font-weight:900; font-size:14px; color: var(--cor-texto);">
                             <span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span>
                         </div>
-                        <div class="barra-grafico-container"><div class="${classeBarra}" style="width: ${perc}%;"></div></div>
+                        <div class="barra-grafico-container">
+                            <div class="${classeBarra}" style="width: ${perc}%;"></div>
+                        </div>
                        </li>`;
             });
             if (htmlBarras === '') htmlBarras = '<li style="list-style: none;">Nenhum dado encontrado para esta categoria.</li>';
@@ -1337,7 +1300,6 @@
                 let v = parseFloat(t.valor) || 0;
                 let tipo = String(t.tipo).toLowerCase();
 
-                // Lógica de fallback garantida para o Categoria
                 let cat = strSafe(t.categoria).toUpperCase();
                 if (!cat || cat === '-' || cat === 'SEM CATEGORIA') {
                     cat = (tipo === 'receita') ? strSafe(t.desc).toUpperCase() : strSafe(t.setor).toUpperCase();
@@ -1370,7 +1332,9 @@
                                 <td style="font-weight:900; color:${cor}; text-align:right; font-size: 15px;">${formatarMoeda(totalSoma)}</td>
                              </tr>`;
                 } else { html = '<tr><td colspan="2" style="text-align:center;">Nenhum dado neste período</td></tr>'; }
-                document.getElementById(id).innerHTML = html;
+                
+                let el = document.getElementById(id);
+                if (el) el.innerHTML = html;
             }
 
             renderTabelaRelatorio('tbody_gastos_setor', despSetor, 'var(--cor-despesa)');
@@ -1394,8 +1358,11 @@
                 if (filtroMes) { if (!t.data || typeof t.data !== 'string' || !t.data.startsWith(filtroMes)) return; }
 
                 let v = parseFloat(t.valor) || 0; let sit = strSafe(t.sit).toLowerCase();
-                let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (t.tipo === 'Receita') ? strSafe(t.desc) : strSafe(t.setor); cat = cat.toUpperCase();
                 let tipo = String(t.tipo).toLowerCase();
+                
+                let cat = strSafe(t.categoria); 
+                if (!cat || cat === '-') cat = (tipo === 'receita') ? strSafe(t.desc) : strSafe(t.setor); 
+                cat = cat.toUpperCase();
 
                 if (tipo === 'receita') {
                     if (sit.includes('pago')) { tR += v; rCat[cat] = (rCat[cat] || 0) + v; } 
@@ -1425,13 +1392,40 @@
             document.getElementById('res_saldo').innerText = formatarMoeda(saldoFinal);
             document.getElementById('card_saldo_div').style.background = (saldoFinal >= 0) ? 'var(--cor-saldo-pos-grad)' : 'var(--cor-saldo-neg-grad)';
 
-            renderizarGraficos(tR, tD, tI, aR, aP);
+            if (typeof Chart !== 'undefined') {
+                if (chartCaixaObj) chartCaixaObj.destroy();
+                if (chartPendenteObj) chartPendenteObj.destroy();
 
+                const ctxCaixa = document.getElementById('canvas_caixa').getContext('2d');
+                let gradRec = ctxCaixa.createLinearGradient(0, 0, 0, 300); gradRec.addColorStop(0, '#81C784'); gradRec.addColorStop(1, '#1B5E20');
+                let gradDesp = ctxCaixa.createLinearGradient(0, 0, 0, 300); gradDesp.addColorStop(0, '#FFB74D'); gradDesp.addColorStop(1, '#E65100');
+                let gradInv = ctxCaixa.createLinearGradient(0, 0, 0, 300); gradInv.addColorStop(0, '#BA68C8'); gradInv.addColorStop(1, '#4A148C');
+
+                chartCaixaObj = new Chart(ctxCaixa, {
+                    type: 'doughnut',
+                    data: { labels: ['Receitas', 'Custeio', 'Investimentos'], datasets: [{ data: [tR, tD, tI], backgroundColor: [gradRec, gradDesp, gradInv], borderWidth: 0, hoverOffset: 12 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } } }, layout: { padding: 15 } }
+                });
+
+                const ctxPendente = document.getElementById('canvas_pendente').getContext('2d');
+                let gradARec = ctxPendente.createLinearGradient(0, 0, 0, 300); gradARec.addColorStop(0, '#64B5F6'); gradARec.addColorStop(1, '#0D47A1');
+                let gradAPag = ctxPendente.createLinearGradient(0, 0, 0, 300); gradAPag.addColorStop(0, '#E57373'); gradAPag.addColorStop(1, '#B71C1C');
+
+                chartPendenteObj = new Chart(ctxPendente, {
+                    type: 'doughnut',
+                    data: { labels: ['A Receber', 'A Pagar'], datasets: [{ data: [aR, aP], backgroundColor: [gradARec, gradAPag], borderWidth: 0, hoverOffset: 12 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } } }, layout: { padding: 15 } }
+                });
+            } else {
+                document.querySelectorAll('.grafico-container').forEach(el => el.style.display = 'none');
+            }
+
+            // GRÁFICOS DETALHADOS (RAIO-X SEGURO)
             let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); 
             let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
             arrRCat.forEach(x => { 
                 let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0;
-                let safeCatName = x[0].replace(/'/g, "\\'"); // Tratamento de segurança para cliques
+                let safeCatName = String(x[0]).replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/(\r\n|\n|\r)/gm, " ");
                 hR += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${safeCatName}', 'Receita')" title="Clique para ver os detalhes">
                         <div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div>
                         <div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div>
@@ -1443,7 +1437,7 @@
             let maxDCat = arrDCat.length > 0 ? arrDCat[0][1] : 0; let hD = '';
             arrDCat.forEach(x => { 
                 let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0;
-                let safeCatName = x[0].replace(/'/g, "\\'");
+                let safeCatName = String(x[0]).replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/(\r\n|\n|\r)/gm, " ");
                 hD += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${safeCatName}', 'Saida')" title="Clique para ver o detalhamento deste custo">
                         <div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div>
                         <div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div>
