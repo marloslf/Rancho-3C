@@ -13,12 +13,11 @@
             --cor-verde-fazenda: #2E7D32; 
             --cor-verde-escuro: #1B5E20;
             --cor-madeira: #5D4037;
-            
             --cor-fundo: #e0e5ec; 
             --cor-texto: #2C3E50;
             
             --sombra-neumorfica: 9px 9px 16px rgba(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
-            --sombra-interna: inset 6px 6px 10px rgba(163,177,198,0.5), inset -6px -6px 10px rgba(255,255,255, 0.8);
+            --sombra-interna: inset 6px 6px 10px rgba(163,177,198,0.5), -6px -6px 10px rgba(255,255,255, 0.8);
             
             --borda-raio: 16px;
             
@@ -28,10 +27,6 @@
             --cor-receita-grad: linear-gradient(135deg, #66BB6A, #2E7D32);
             --cor-investimento: #6A1B9A;
             --cor-investimento-grad: linear-gradient(135deg, #AB47BC, #6A1B9A);
-
-            --cor-saldo-pos-grad: linear-gradient(135deg, #42A5F5, #1565C0);
-            --cor-saldo-neg-grad: linear-gradient(135deg, #EF5350, #C62828);
-
             --cor-agri-app: #2980B9;
             --cor-agri-est: #F39C12;
             --cor-solo: #8E44AD;
@@ -39,16 +34,11 @@
 
         * { font-family: 'Nunito', sans-serif; box-sizing: border-box; }
 
-        body { 
-            zoom: 75%; 
-            max-width: 98%; width: 100%; margin: auto; padding: 15px; 
-            background-color: var(--cor-fundo); color: var(--cor-texto);
-        }
+        body { zoom: 75%; max-width: 98%; width: 100%; margin: auto; padding: 15px; background-color: var(--cor-fundo); color: var(--cor-texto); }
 
         .watermark-logo {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 70vw; height: 70vh;
-            background-image: url('https://i.imgur.com/jPLDeyi.png');
+            width: 70vw; height: 70vh; background-image: url('https://i.imgur.com/jPLDeyi.png');
             background-repeat: no-repeat; background-position: center; background-size: contain;
             opacity: 0.04; z-index: -1; pointer-events: none; 
         }
@@ -65,14 +55,12 @@
         .menu { 
             display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; 
             flex-wrap: wrap; align-items: center; position: sticky; top: 0; z-index: 1001; 
-            background-color: var(--cor-fundo); padding: 15px 0; margin-top: -15px;
-            border-bottom: 2px solid rgba(255,255,255,0.5);
+            background-color: var(--cor-fundo); padding: 15px 0; margin-top: -15px; border-bottom: 2px solid rgba(255,255,255,0.5);
         }
         .menu-divisor { width: 4px; height: 30px; background: #ccc; border-radius: 2px; margin: 0 5px; box-shadow: var(--sombra-interna);}
         .menu button { 
             padding: 10px 15px; cursor: pointer; border: none; background: var(--cor-fundo); color: #666; 
-            border-radius: 30px; font-weight: 900; font-size: 13px; transition: all 0.3s ease; 
-            position: relative; box-shadow: var(--sombra-neumorfica);
+            border-radius: 30px; font-weight: 900; font-size: 13px; transition: all 0.3s ease; box-shadow: var(--sombra-neumorfica);
         }
         .menu button:hover { transform: translateY(-2px); color: var(--cor-madeira);}
         .menu button.btn-ativo { box-shadow: var(--sombra-interna); }
@@ -81,16 +69,20 @@
         .menu button.btn-ativo[id^="btn_agri"] { color: var(--cor-agri-app); }
         .menu button.btn-ativo[id^="btn_solo"] { color: var(--cor-solo); }
 
-        /* --- ABAS GERAIS --- */
+        .status-conexao {
+            padding: 10px 20px; border-radius: 30px; font-weight: 900; font-size: 12px; background: #ffebee; color: #c62828; border: 2px solid #ef5350;
+            display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: var(--sombra-neumorfica); transition: all 0.3s ease;
+        }
+        .status-conexao.conectado { background: #e8f5e9; color: #2e7d32; border-color: #66bb6a; }
+        .status-conexao.aguardando { background: #FFF3E0; color: #E65100; border-color: #FFB74D; pointer-events: none;} 
+
+        /* --- ABAS --- */
         .tab { display: none; background: transparent; position: relative; min-height: 80vh; }
         .tab.active { display: block; animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- TELA INICIAL (HOME LIMPA E MAIOR) --- */
-        .home-container {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 70vh; text-align: center;
-        }
+        /* --- TELA INICIAL --- */
+        .home-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 70vh; text-align: center; }
         .home-container img { width: 450px; max-width: 80vw; filter: drop-shadow(0px 15px 25px rgba(0,0,0,0.15)); margin-bottom: 30px; animation: float 6s ease-in-out infinite;}
         @keyframes float { 0% {transform: translateY(0px);} 50% {transform: translateY(-15px);} 100% {transform: translateY(0px);} }
         .home-container h1 { color: var(--cor-texto); font-size: 38px; font-weight: 900; margin-bottom: 10px; letter-spacing: 2px;}
@@ -98,27 +90,21 @@
         /* --- CARTÕES --- */
         .resumo-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .card { padding: 15px; border-radius: var(--borda-raio); text-align: center; color: white; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); box-shadow: var(--sombra-neumorfica);}
-        .card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to bottom, rgba(255,255,255,0.15), transparent); pointer-events: none;}
         .card-receita { background: var(--cor-receita-grad); } .card-despesa { background: var(--cor-despesa-grad); }
         .card-investimento { background: var(--cor-investimento-grad); } .card-saldo { transition: background 0.5s; } 
         .card-agri1 { background: linear-gradient(135deg, #4FC3F7, #0277BD); } .card-agri2 { background: linear-gradient(135deg, #FFD54F, #FF8F00); }
         .card h4 { margin: 0; font-size: 13px; font-weight: 800; opacity: 0.9; text-transform: uppercase; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);}
         .card span { font-size: 26px; display: block; margin-top: 8px; font-weight: 900; text-shadow: 2px 2px 5px rgba(0,0,0,0.5);}
 
-        /* Gráficos e Caixas */
         .grafico-container { flex: 1; background: var(--cor-fundo); border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6); display: flex; flex-direction: column; align-items: center; padding: 15px;}
-        .legenda-grafico { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; font-size: 12px; font-weight: 800; width: 100%; margin-top: 10px; }
-        .legenda-item { display: flex; align-items: center; gap: 6px; color: #555; }
-        .ponto-cor { width: 12px; height: 12px; border-radius: 50%; display: inline-block; box-shadow: inset 2px 2px 4px rgba(255,255,255,0.5), 2px 2px 4px rgba(0,0,0,0.2);}
-
         .top-graficos-box { background: var(--cor-fundo); padding: 20px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6); flex: 1; }
         .item-lista-grafico { list-style: none; margin-bottom: 15px; font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--cor-texto); padding: 8px 12px; border-radius: 10px; transition: 0.3s;}
         .item-lista-grafico.interativo:hover { background-color: white; transform: scale(1.02); box-shadow: 0 5px 10px rgba(0,0,0,0.08); cursor: pointer; }
         .barra-grafico-container { width: 100%; border-radius: 10px; margin-top: 6px; height: 12px; background: var(--cor-fundo); box-shadow: var(--sombra-interna); overflow: visible;}
-        .barra-grafico-receita { height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); background: linear-gradient(to bottom, #A5D6A7 0%, #4CAF50 40%, #2E7D32 100%); box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.3), 0 3px 6px rgba(46,125,50,0.4);}
-        .barra-grafico-despesa { height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); background: linear-gradient(to bottom, #FFCC80 0%, #FF9800 40%, #E65100 100%); box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.3), 0 3px 6px rgba(230,81,0,0.4);}
+        .barra-grafico-receita { height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); background: linear-gradient(to bottom, #A5D6A7 0%, #4CAF50 40%, #2E7D32 100%);}
+        .barra-grafico-despesa { height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); background: linear-gradient(to bottom, #FFCC80 0%, #FF9800 40%, #E65100 100%);}
 
-        /* Campos e Inputs */
+        /* --- INPUTS --- */
         input, select, .filter-row input, .filter-row select {
             padding: 10px; font-size: 13px; border: none; border-radius: 8px; font-weight: 800; text-transform: uppercase; width: 100%; 
             background-color: rgba(255, 255, 255, 0.5); box-shadow: var(--sombra-interna); color: var(--cor-texto); transition: 0.2s;
@@ -127,7 +113,7 @@
         
         .area-fixa-topo { position: sticky; top: 80px; z-index: 100; background-color: var(--cor-fundo); padding-bottom: 10px; }
         .linha-lancamento { padding: 15px; border-radius: 16px; margin-bottom: 15px; border: none; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5);}
-        .linha-despesa { background-color: #FFF3E0; border-left: 8px solid var(--cor-despesa); transition: 0.3s;}
+        .linha-despesa { background-color: #FFF3E0; border-left: 8px solid var(--cor-despesa); }
         .linha-investimento-ativa { background-color: #F3E5F5; border-left: 8px solid var(--cor-investimento); }
         .linha-receita { background-color: #E8F5E9; border-left: 8px solid var(--cor-receita); }
         .linha-agri-app { background-color: #E1F5FE; border-left: 8px solid #0288D1; }
@@ -140,7 +126,14 @@
 
         .btn-salvar-compacto { padding: 10px; font-size: 13px; font-weight: 800; border: none; border-radius: 8px; cursor: pointer; color: white; transition: 0.2s; box-shadow: 4px 4px 8px rgba(163,177,198,0.5), -4px -4px 8px rgba(255,255,255, 0.8); width: 100%;}
         .btn-salvar-compacto:hover { filter: brightness(1.1); transform: translateY(-2px);}
-        .btn-salvar-compacto:active { box-shadow: inset 4px 4px 8px rgba(0,0,0,0.2), inset -4px -4px 8px rgba(255,255,255,0.1); transform: translateY(1px);}
+        
+        .select-tipo-saida { background-color: rgba(255, 255, 255, 0.6); border: none; border-radius: 8px; padding: 4px 10px; font-weight: 900; color: var(--cor-despesa); margin-left: 10px; font-size: 13px; cursor: pointer; }
+
+        .barra-pesquisa-relatorio { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: var(--cor-fundo); padding: 15px 20px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5);}
+        .btn-pesquisar, .btn-limpar { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 800; color: white; cursor: pointer; box-shadow: 4px 4px 8px rgba(163,177,198,0.5), -4px -4px 8px rgba(255,255,255, 0.8); transition: 0.2s;}
+        .btn-pesquisar { background: var(--cor-madeira); } .btn-limpar { background: #9E9E9E; }
+        .btn-filtro { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 800; transition: 0.3s; background: var(--cor-fundo); color: #555; box-shadow: var(--sombra-neumorfica);}
+        .btn-filtro.ativo { background-color: var(--cor-verde-fazenda); color: white; box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2), inset -3px -3px 6px rgba(255,255,255,0.2);}
 
         /* --- TABELAS --- */
         .table-container { overflow-x: auto; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5); background: white; max-height: 55vh;}
@@ -148,11 +141,17 @@
         .tabela-larga { min-width: 1100px; } 
         th { background: linear-gradient(to right, #1B5E20, #2E7D32); color: white; font-weight: 800; padding: 12px; text-align: left; cursor: pointer; position: sticky; top: 0; z-index: 3;}
         .th-agri { background: linear-gradient(to right, #01579B, #0288D1); }
+        .th-calc { background: linear-gradient(to right, #6A1B9A, #8E44AD); } 
         .filter-row th { background: #f1f8e9 !important; padding: 6px 5px; border-bottom: 2px solid var(--cor-verde-fazenda); top: 40px; z-index: 2;}
         td { border-bottom: 1px solid #f0f0f0; padding: 10px 12px; font-weight: 600; text-transform: uppercase; vertical-align: middle;}
         tr:hover td { background-color: rgba(0, 0, 0, 0.02); }
-
-        .btn-acao { display: inline-flex; align-items: center; justify-content: center; border: none; padding: 8px; cursor: pointer; border-radius: 8px; font-size: 15px; margin-right: 4px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.15);}
+        
+        .bg-pago { background-color: #4caf50; color: white; font-weight: 800; border:none; border-radius: 6px; padding: 6px; box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);}
+        .bg-pendente { background-color: #ff9800; color: white; font-weight: 800; border:none; border-radius: 6px; padding: 6px; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);}
+        .status-planejado { background-color: #FFE082; color: #E65100; border: 1px solid #FFCA28; padding: 6px; border-radius: 6px; font-weight: 800; cursor: pointer; width: 100%;}
+        .status-aplicado { background-color: #A5D6A7; color: #1B5E20; border: 1px solid #66BB6A; padding: 6px; border-radius: 6px; font-weight: 800; cursor: pointer; width: 100%;}
+        
+        .btn-acao { display: inline-flex; align-items: center; justify-content: center; border: none; padding: 8px; cursor: pointer; border-radius: 8px; font-size: 15px; margin-right: 4px; transition: 0.2s;}
         .btn-acao:hover { filter: brightness(0.9); transform: scale(1.1); }
         .btn-editar { background: #FFCA28; color: #3E2723; }
         .btn-excluir { background: #E53935; color: white; }
@@ -173,6 +172,20 @@
         .grid-solo { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
         .box-solo { background: rgba(255,255,255,0.5); padding: 15px; border-radius: 12px; box-shadow: var(--sombra-interna); border: 1px solid rgba(255,255,255,0.8); margin-bottom: 15px;}
         .box-solo h4 { margin-top: 0; margin-bottom: 10px; color: var(--cor-solo); border-bottom: 2px dashed #ccc; padding-bottom: 5px; font-size: 13px;}
+
+        /* --- ESTILOS DE IMPRESSÃO (LAUDO) --- */
+        @media print {
+            body { height: auto; overflow: visible; background: white !important; zoom: 100%; color: black;}
+            .no-print, .menu, .area-fixa-topo, .watermark-logo, .sub-menu { display: none !important; }
+            .tab { display: none; }
+            
+            /* Classe especial acionada via JavaScript para o Laudo */
+            body.modo-laudo #solo_main { display: block !important; }
+            body.modo-laudo #solo_hist { display: block !important; page-break-after: always; }
+            body.modo-laudo #solo_calc { display: block !important; }
+            body.modo-laudo .grafico-container, body.modo-laudo .box-solo { box-shadow: none !important; border: 1px solid #ddd !important; }
+            @page { margin: 1cm; size: A4 portrait; }
+        }
     </style>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -214,7 +227,6 @@
 <div id="home" class="tab active">
     <div class="home-container">
         <img src="https://i.imgur.com/jPLDeyi.png" alt="Rancho 3C Logo" referrerpolicy="no-referrer">
-        <h1>BEM-VINDO</h1>
     </div>
 </div>
 
@@ -268,7 +280,6 @@
                     <select id="d_natureza" class="select-tipo-saida" onchange="mudarTemaSaida()"><option value="Despesa">CUSTEIO</option><option value="Investimento">INVESTIMENTO</option></select>
                 </span>
             </div>
-            <!-- ONSUBMIT PARA EVITAR FALHAS -->
             <form class="grid-despesa" onsubmit="addTransacao(event, 'Saida')">
                 <input type="date" id="d_data" required>
                 <input list="lista_d_categoria" id="d_categoria" placeholder="CATEGORIA..." required>
@@ -286,7 +297,6 @@
 
         <div class="linha-lancamento linha-receita">
             <div style="font-size:13px; font-weight:900; color:var(--cor-receita); margin-bottom: 6px;">🌱 INSERIR RECEITA</div>
-            <!-- ONSUBMIT PARA EVITAR FALHAS -->
             <form class="grid-receita" onsubmit="addTransacao(event, 'Receita')">
                 <input type="date" id="r_data" required>
                 <input list="lista_r_categoria" id="r_categoria" placeholder="O QUE VENDEU?" required onblur="autoPreencherUnidade()">
@@ -330,17 +340,6 @@
                     <th onclick="setOrdenacao('valor')">TOTAL ↕</th>
                     <th onclick="setOrdenacao('sit')" style="text-align: center;">SITUAÇÃO ↕</th>
                     <th class="no-print" style="text-align: center;">AÇÕES</th>
-                </tr>
-                <tr class="filter-row no-print">
-                    <th><input type="date" id="f_data" onchange="aplicarFiltros()"></th>
-                    <th><select id="f_tipo" onchange="aplicarFiltros()"><option value="">TUDO</option><option value="receita">RECEITA</option><option value="despesa">DESPESA</option><option value="investimento">INVESTIMENTO</option></select></th>
-                    <th><select id="f_cat" onchange="aplicarFiltros()"></select></th>
-                    <th><select id="f_setor" onchange="aplicarFiltros()"></select></th>
-                    <th><select id="f_local" onchange="aplicarFiltros()"></select></th>
-                    <th><select id="f_desc" onchange="aplicarFiltros()"></select></th>
-                    <th></th><th></th><th></th>
-                    <th><select id="f_sit" onchange="aplicarFiltros()"><option value="">TUDO</option><option value="pago">PAGO</option><option value="a pagar">A PAGAR</option><option value="a receber">A RECEBER</option></select></th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody id="tabela_relatorio"></tbody>
@@ -388,7 +387,7 @@
                 <h3 id="titulo_raiox" style="margin: 0; font-size: 26px; color: var(--cor-texto); font-weight: 900;">🔍 RAIO-X</h3>
                 <div id="valor_total_raiox" style="font-size: 32px; font-weight: 900; color: var(--cor-madeira); margin-top: 5px;">R$ 0,00</div>
             </div>
-            <button class="btn-salvar-compacto" style="background-color: #555; padding: 12px 25px; width: auto;" onclick="showTab('resumo')">⬅️️ VOLTAR</button>
+            <button class="btn-salvar-compacto" style="background-color: #555; padding: 12px 25px; width: auto;" onclick="showTab('resumo')">⬅ VOLTAR</button>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
             <div>
@@ -405,7 +404,7 @@
 
 
 <!-- ========================================== -->
-<!-- MÓDULO AGRÍCOLA (ALINHADO E GIGANTE)       -->
+<!-- MÓDULO AGRÍCOLA (ALINHADO FIT-TO-SCREEN)   -->
 <!-- ========================================== -->
 
 <div id="agri_dash" class="tab">
@@ -421,7 +420,7 @@
         <div class="card" style="background: linear-gradient(135deg, #00897B, #004D40);"><h4>REGISTROS NA SAFRA</h4><span id="kpi-registros">0</span></div>
     </div>
 
-    <!-- GRÁFICOS COMPACTOS (Altura controlada via height para não criar Scroll) -->
+    <!-- GRÁFICOS COMPACTOS (height: 24vh) -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="grafico-container wide" style="width: 100%; padding: 15px;">
             <h4 style="margin: 0 0 10px 0; color:var(--cor-texto); font-weight: 900; font-size: 13px;">DISTRIBUIÇÃO POR TALHÃO (VOL.)</h4>
@@ -450,7 +449,7 @@
             <div style="font-size:14px; font-weight:900; color:var(--cor-agri-app); margin-bottom: 10px;">🚜 NOVO REGISTRO DE APLICAÇÃO</div>
             <form id="appForm" class="grid-agri-app" onsubmit="addAgriApp(event)">
                 <input type="hidden" id="editIndex" value="-1">
-                <input type="date" id="dataApp" required>
+                <input type="date" id="dataApp" required title="Data">
                 <input type="text" id="talhao" list="lista-talhoes" placeholder="TALHÃO..." required autocomplete="off">
                 <input type="text" id="produto" list="lista-produtos-estoque" placeholder="PRODUTO..." required autocomplete="off" oninput="preencherTipoProduto()">
                 <input type="text" id="tipo" list="lista-tipos" placeholder="TIPO..." required autocomplete="off">
@@ -526,17 +525,17 @@
 </div>
 
 <!-- ========================================== -->
-<!-- NOVO MÓDULO: SOLO & NUTRIÇÃO (COMPLETO)    -->
+<!-- NOVO MÓDULO: SOLO & NUTRIÇÃO (LAUDOS/CALC) -->
 <!-- ========================================== -->
 <div id="solo_main" class="tab">
     
-    <div class="sub-menu">
+    <div class="sub-menu no-print">
         <button id="btn_solo_reg" class="active" onclick="switchSoloTab('solo_reg')">➕ REGISTAR ANÁLISE</button>
         <button id="btn_solo_hist" onclick="switchSoloTab('solo_hist')">📈 HISTÓRICO DE SOLO</button>
         <button id="btn_solo_calc" onclick="switchSoloTab('solo_calc')">🧮 CALCULADORA DE NUTRIENTES</button>
     </div>
 
-    <!-- TELA 1: REGISTO (TODOS OS DADOS) -->
+    <!-- TELA 1: REGISTRO (TODOS OS DADOS DO LAUDO) -->
     <div id="solo_reg" class="sub-tab active">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <h3 style="color: var(--cor-solo); margin-top:0;">REGISTAR NOVA ANÁLISE DE SOLO</h3>
@@ -545,8 +544,7 @@
                 <div class="box-solo" style="display: flex; gap: 15px;">
                     <div style="flex:1"><label>Data da Análise:</label><input type="date" id="sl_data" required></div>
                     <div style="flex:1"><label>Talhão / Cultura:</label><input type="text" id="sl_talhao" list="lista-talhoes" placeholder="EX: CAFÉ 2022" required></div>
-                    <div style="flex:1"><label>Profundidade (cm):</label>
-                        <!-- CORREÇÃO: ADICIONADA OPÇÃO FOLIAR -->
+                    <div style="flex:1"><label>Profundidade / Tipo:</label>
                         <select id="sl_prof" required>
                             <option value="0-20">Camada 0 - 20 cm</option>
                             <option value="20-40">Camada 20 - 40 cm</option>
@@ -602,12 +600,12 @@
         </div>
     </div>
 
-    <!-- TELA 2: HISTÓRICO EM GRÁFICO (NOVO FORMATO EVOLUTIVO DE TODOS OS NUTRIENTES) -->
+    <!-- TELA 2: HISTÓRICO EM GRÁFICO (EVOLUÇÃO DOS NUTRIENTES) -->
     <div id="solo_hist" class="sub-tab">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
-            <div style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
+            <div class="no-print" style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
                 <div style="flex:1"><label>TALHÃO:</label><select id="hist_talhao" onchange="renderizarHistoricoSolo()"></select></div>
-                <div style="flex:1"><label>PROFUNDIDADE:</label>
+                <div style="flex:1"><label>PROFUNDIDADE / TIPO:</label>
                     <select id="hist_prof" onchange="renderizarHistoricoSolo()">
                         <option value="0-20">0 - 20 cm</option>
                         <option value="20-40">20 - 40 cm</option>
@@ -623,11 +621,11 @@
         </div>
     </div>
 
-    <!-- TELA 3: CALCULADORA COM AUTO-FILL -->
+    <!-- TELA 3: CALCULADORA -->
     <div id="solo_calc" class="sub-tab">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             
-            <div class="box-solo" style="border-color: var(--cor-solo); background: rgba(142, 68, 173, 0.05);">
+            <div class="box-solo no-print" style="border-color: var(--cor-solo); background: rgba(142, 68, 173, 0.05);">
                 <h4 style="color: var(--cor-solo);">1. SELECIONAR TALHÃO PARA CÁLCULO</h4>
                 <div style="display: flex; gap: 15px; align-items: flex-end;">
                     <div style="flex:2">
@@ -641,8 +639,7 @@
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
-                <!-- DADOS (AUTO-FILL) -->
-                <div>
+                <div class="no-print">
                     <div class="box-solo">
                         <h4>PARÂMETROS DA CULTURA</h4>
                         <div class="grid-solo">
@@ -669,7 +666,7 @@
                     <button class="btn-salvar-compacto" style="background: var(--cor-solo); padding: 15px; font-size: 15px;" onclick="calcularRecomendacao()">🧮 PROCESSAR RECOMENDAÇÃO</button>
                 </div>
 
-                <!-- RESULTADOS -->
+                <!-- RESULTADOS DA CALCULADORA (ÁREA IMPRESSA NO LAUDO) -->
                 <div>
                     <div class="box-solo" style="background: white;">
                         <h4 style="color: var(--cor-verde-fazenda);">NECESSIDADE TOTAL ANUAL</h4>
@@ -688,10 +685,10 @@
                         <table style="font-size: 12px;">
                             <thead>
                                 <tr>
-                                    <th style="background:#555; padding:8px;">MÊS</th>
-                                    <th style="background:#2E7D32; padding:8px; text-align: center;">UREIA (45% N)</th>
-                                    <th style="background:#E65100; padding:8px; text-align: center;">MAP (60% P)</th>
-                                    <th style="background:#1565C0; padding:8px; text-align: center;">KCl (60% K)</th>
+                                    <th class="th-calc">MÊS</th>
+                                    <th class="th-calc" style="text-align: center;">UREIA (45% N)</th>
+                                    <th class="th-calc" style="text-align: center;">MAP (60% P)</th>
+                                    <th class="th-calc" style="text-align: center;">KCl (60% K)</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody_cronograma_calc">
@@ -699,12 +696,21 @@
                             </tbody>
                         </table>
                     </div>
+                    
+                    <!-- BOTÕES DE INTEGRAÇÃO (NOVO) -->
+                    <div class="no-print" style="display:flex; gap:10px; margin-top: 15px;">
+                        <button class="btn-salvar-compacto" style="background: #555;" onclick="imprimirLaudo()">🖨️ IMPRIMIR LAUDO</button>
+                        <button class="btn-salvar-compacto" style="background: var(--cor-agri-app);" onclick="enviarParaAplicacoes()">📤 ENVIAR PARA APLICAÇÕES</button>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+
+<!-- MODAL DE EDIÇÃO -->
 <div id="modal-edicao">
     <div class="modal-content">
         <h3 style="margin-top: 0; color: var(--cor-texto); border-bottom: 2px solid #ccc; padding-bottom:10px;">✏️ EDITAR REGISTRO</h3>
@@ -720,7 +726,7 @@
 
 <script>
     /* =========================================================================
-       INICIALIZAÇÃO (BLINDADA CONTRA ERROS DE ESTRUTURA ANTIGA)
+       INICIALIZAÇÃO E COMUNICAÇÃO NUVEM
     ========================================================================= */
     const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxU-XxV63Eip3g636GkrVaV8zwnVPVomePZLIsZBV-ghCYJKxYUMtQoG2Kc903zeP4UoQ/exec";
 
@@ -729,7 +735,6 @@
     let estoque = [];
     let analisesSolo = []; 
     
-    // Opcões por defeito (sempre seguras)
     let opcoesDin = {
         talhoes: ["CAFÉ 2019", "CAFÉ 2022", "CAFÉ 2025", "MARACUJÁ"],
         tipos: ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "FUNGICIDA", "HERBICIDA", "INSETICIDA"],
@@ -738,7 +743,6 @@
     };
     
     let indiceEdicao = -1; let colOrdenacao = 'data'; let ordemAscendente = false; let filtroRapido = '';
-    
     let chartCaixaObj = null, chartPendenteObj = null;
     let chartS_Agri = null, chartT_Agri = null, chartTp_Agri = null, chartCS_Agri = null, chartCT_Agri = null;
     let chartHistSoloObj = null;
@@ -788,7 +792,6 @@
     }
     function obterSafraAtual() { return obterSafraGeral(new Date().toISOString().substring(0,10)); }
 
-    // --- COMUNICAÇÃO NUVEM ---
     async function carregarDadosNuvem(forcar = false) {
         const statusDiv = document.getElementById('status_conexao');
         statusDiv.innerHTML = '⏳ LENDO NUVEM...'; statusDiv.className = 'status-conexao aguardando';
@@ -801,7 +804,6 @@
             if (data.aplicacoes) agriRecords = normalizarDatas(data.aplicacoes);
             if (data.estoque) estoque = data.estoque;
             if (data.opcoes) {
-                // Fusão Inteligente: Protege contra ausência de campos novos (ex: Alvo) no banco antigo
                 opcoesDin.talhoes = data.opcoes.talhoes || opcoesDin.talhoes;
                 opcoesDin.tipos = data.opcoes.tipos || opcoesDin.tipos;
                 opcoesDin.formas = data.opcoes.formas || opcoesDin.formas;
@@ -829,7 +831,6 @@
         
         preencherSelectsLancamento(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); popularSeletorSolo();
         
-        // Renderiza apenas a aba ativa para não travar
         if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico();
         if(document.getElementById('relatorios_detalhados').classList.contains('active')) atualizarRelatoriosDetalhados();
         if(document.getElementById('movimentacoes').classList.contains('active')) { atualizarOpcoesFiltros(); aplicarFiltros(); }
@@ -936,7 +937,6 @@
             chartPendenteObj = new Chart(ctxPendente, { type: 'doughnut', data: { labels: ['A Receber', 'A Pagar'], datasets: [{ data: [aR, aP], backgroundColor: [gradARec, gradAPag], borderWidth: 0, hoverOffset: 12 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } }, layout: { padding: 15 } } });
         }
 
-        // Listas Top 5 Blindadas com encodeURIComponent
         let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
         arrRCat.forEach(x => { 
             let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0; 
@@ -1031,15 +1031,12 @@
             let vUnit = document.getElementById(prefix + 'v_unit').value;
             let valStr = document.getElementById(prefix + 'valor').value; let val = parseFloat(valStr);
 
-            if(!data || !cat || !loc || !qtd || !und || !vUnit || isNaN(val)) { alert("Preencha todos os campos."); return; }
-
             let setor = "-"; let desc = document.getElementById(prefix + 'descricao').value.trim().toUpperCase();
             let tipoFinal = 'Receita';
             
             if(tipoBase === 'Saida') {
                 tipoFinal = document.getElementById('d_natureza').value; 
                 setor = document.getElementById('d_setor').value.trim().toUpperCase();
-                if(!setor || !desc) { alert("Preencha Setor e Descrição."); return; }
             }
 
             transacoes.push({
@@ -1072,6 +1069,7 @@
                 tDesp += v;
             }
         });
+
         document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRec || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
         document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDesp || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
     }
@@ -1598,7 +1596,6 @@
         const html = Array.from(talhoesSet).sort().map(t => `<option value="${t}">${t}</option>`).join('');
         document.getElementById('hist_talhao').innerHTML = html;
         document.getElementById('calc_talhao').innerHTML = html;
-        document.getElementById('lista-talhoes-solo').innerHTML = html;
     }
 
     function salvarAnaliseSolo() {
@@ -1760,6 +1757,64 @@
             bodyHTML += `<tr style="background: white;"><td style="font-weight:900; color: #555;">${d.mes}</td><td style="font-weight:900; color:#2E7D32;">${(vol_ureia * frac).toFixed(2)}</td><td style="font-weight:900; color:#E65100;">${(vol_map * frac).toFixed(2)}</td><td style="font-weight:900; color:#1565C0;">${(vol_kcl * frac).toFixed(2)}</td></tr>`;
         });
         tabela.innerHTML = bodyHTML;
+    }
+
+    // --- FUNÇÕES DE EXPORTAÇÃO E INTEGRAÇÃO ---
+    function imprimirLaudo() {
+        document.body.classList.add('modo-laudo');
+        window.print();
+        document.body.classList.remove('modo-laudo');
+    }
+
+    function enviarParaAplicacoes() {
+        if (reqGeralCalc.n === 0 && reqGeralCalc.p === 0 && reqGeralCalc.k === 0) {
+            alert("Calcule a recomendação de nutrientes primeiro!"); return;
+        }
+        
+        if (!confirm("Deseja enviar este cronograma para a lista de Aplicações Planejadas?")) return;
+
+        const talhao = document.getElementById('calc_talhao').value;
+        const cultura = document.getElementById('calc_cultura').value;
+        const anoAtual = new Date().getFullYear();
+
+        let dist = [];
+        if (cultura === 'conilon') {
+            dist = [ { mes: "Agosto", pct: 5 }, { mes: "Setembro", pct: 8 }, { mes: "Outubro", pct: 12 }, { mes: "Novembro", pct: 15 }, { mes: "Dezembro", pct: 15 }, { mes: "Janeiro", pct: 15 }, { mes: "Fevereiro", pct: 12 }, { mes: "Março", pct: 10 }, { mes: "Abril", pct: 8 }, { mes: "Maio", pct: 0 }, { mes: "Junho", pct: 0 }, { mes: "Julho", pct: 0 } ];
+        } else {
+            dist = [ { mes: "Agosto", pct: 8 }, { mes: "Setembro", pct: 8 }, { mes: "Outubro", pct: 10 }, { mes: "Novembro", pct: 10 }, { mes: "Dezembro", pct: 10 }, { mes: "Janeiro", pct: 10 }, { mes: "Fevereiro", pct: 10 }, { mes: "Março", pct: 10 }, { mes: "Abril", pct: 8 }, { mes: "Maio", pct: 6 }, { mes: "Junho", pct: 5 }, { mes: "Julho", pct: 5 } ];
+        }
+
+        let vol_map = reqGeralCalc.p / 0.60; let n_from_map = vol_map * 0.12; 
+        let n_remaining = reqGeralCalc.n - n_from_map; let vol_ureia = n_remaining > 0 ? n_remaining / 0.45 : 0; 
+        let vol_kcl = reqGeralCalc.k / 0.60; 
+
+        dist.forEach(d => {
+            let frac = (d.pct / 100) / 3; 
+            if (frac === 0) return;
+
+            let mesNum = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"].indexOf(d.mes) + 1;
+            let ano = mesNum >= 8 ? anoAtual : anoAtual + 1;
+            let dataApp = `${ano}-${String(mesNum).padStart(2, '0')}-01`;
+
+            let adubos = [
+                { nome: "UREIA", qtd: vol_ureia * frac, tipo: "ADUBO" },
+                { nome: "MAP", qtd: vol_map * frac, tipo: "ADUBO" },
+                { nome: "KCL", qtd: vol_kcl * frac, tipo: "ADUBO" }
+            ];
+
+            adubos.forEach(adubo => {
+                if (adubo.qtd > 0) {
+                    agriRecords.push({
+                        data: dataApp, talhao: talhao, produto: adubo.nome, tipo: adubo.tipo, alvo: "MANUTENÇÃO",
+                        dosagem: `${adubo.qtd.toFixed(2)} KG`, dosagem_qtd: parseFloat(adubo.qtd.toFixed(2)), dosagem_un: "KG",
+                        forma: "FERTIRRIGAÇÃO", status: "PLANEJADO", custo_unit: 0, obs: "Gerado pela Calculadora"
+                    });
+                }
+            });
+        });
+
+        salvarDados(); aplicarFiltroSafraApp();
+        mostrarToast("Planejamento enviado para as Aplicações!");
     }
 
     // INIT
