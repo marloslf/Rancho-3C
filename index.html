@@ -43,6 +43,23 @@
             background-color: var(--cor-fundo); color: var(--cor-texto);
         }
 
+        /* --- MARCA D'ÁGUA DO RANCHO 3C --- */
+        .watermark-logo {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70vw;
+            height: 70vh;
+            background-image: url('https://i.imgur.com/jPLDeyi.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            opacity: 0.04; /* Opacidade super clara para não atrapalhar a leitura */
+            z-index: -1; /* Fica atrás de todos os elementos */
+            pointer-events: none; /* Impede que clique acidentalmente na imagem */
+        }
+
         /* --- CABEÇALHO --- */
         .header-container { 
             display: flex; justify-content: space-between; align-items: center; 
@@ -73,7 +90,7 @@
             box-shadow: var(--sombra-interna);
         }
 
-        /* BADGE DE ATENÇÃO (CONTAS ATRASADAS) */
+        /* BADGE DE ATENÇÃO */
         .badge-atrasadas {
             position: absolute; top: -8px; right: -8px;
             background: linear-gradient(135deg, #ef5350, #c62828); color: white; font-weight: 900; font-size: 11px;
@@ -98,7 +115,7 @@
         .status-conexao.aguardando { background: #FFF3E0; color: #E65100; border-color: #FFB74D; pointer-events: none;} 
 
         /* --- ABAS --- */
-        .tab { display: none; background: transparent; }
+        .tab { display: none; background: transparent; position: relative; min-height: 80vh; }
         .tab.active { display: block; animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -149,7 +166,7 @@
         
         .barra-grafico-receita { 
             height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1);
-            background: linear-gradient(to bottom, #81C784 0%, #2E7D32 50%, #1B5E20 100%);
+            background: linear-gradient(to bottom, #A5D6A7 0%, #4CAF50 40%, #2E7D32 100%);
             box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.3), 0 3px 6px rgba(46,125,50,0.4);
         }
         .barra-grafico-despesa { 
@@ -270,7 +287,7 @@
         <button id="btn_movimentacoes" onclick="showTab('movimentacoes')">📋 LANÇAMENTOS E EXTRATO</button>
         <button id="btn_relatorios_detalhados" onclick="showTab('relatorios_detalhados')">📈 RELATÓRIOS DETALHADOS</button>
         
-        <button id="btn_pendencias" onclick="showTab('pendencias')">
+        <button id="btn_pendencias" style="color: #E65100;" onclick="showTab('pendencias')">
             🔔 PENDÊNCIAS
             <span id="badge_atrasadas" class="badge-atrasadas" style="display: none;">0</span>
         </button>
@@ -281,6 +298,9 @@
 
     <!-- ABA 1: DASHBOARD DE RESUMO -->
     <div id="resumo" class="tab active">
+        
+        <!-- MARCA D'ÁGUA EXCLUSIVA -->
+        <div class="watermark-logo"></div>
         
         <div class="no-print" style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px; background: var(--cor-fundo); padding: 20px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <label style="font-weight: 900; color: var(--cor-madeira); text-transform: uppercase; font-size: 14px;">Filtrar Dashboard por Safra:</label>
@@ -316,7 +336,7 @@
         <div class="dashboard-inferior" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px;">
             <div class="grafico-container">
                 <h4 style="margin: 0 0 15px 0; color: var(--cor-madeira); font-size: 16px; font-weight: 900;">SAÍDAS EFETIVADAS (PAGAS)</h4>
-                <div style="width: 100%; height: 220px; position: relative;">
+                <div style="width: 100%; height: 220px; position: relative;" id="wrapper_caixa">
                     <canvas id="canvas_caixa"></canvas>
                 </div>
                 <div class="legenda-grafico">
@@ -327,7 +347,7 @@
             </div>
             <div class="grafico-container">
                 <h4 style="margin: 0 0 15px 0; color: #555; font-size: 16px; font-weight: 900;">PREVISÃO (PENDENTES)</h4>
-                <div style="width: 100%; height: 220px; position: relative;">
+                <div style="width: 100%; height: 220px; position: relative;" id="wrapper_pendente">
                     <canvas id="canvas_pendente"></canvas>
                 </div>
                 <div class="legenda-grafico">
@@ -352,12 +372,13 @@
     <!-- ABA EXTRA: VISÃO GERAL DETALHADA DA CATEGORIA (RAIO-X 2.0) -->
     <div id="visao_categoria" class="tab">
         <div style="background: var(--cor-fundo); padding: 30px; border-radius: 24px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
+            
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 3px solid white; padding-bottom: 15px;">
                 <div>
-                    <h3 id="titulo_raiox" style="margin: 0; font-size: 26px; color: var(--cor-texto); font-weight: 900; text-shadow: 1px 1px 2px white;">🔍 RAIO-X</h3>
+                    <h3 id="titulo_raiox" style="margin: 0; font-size: 26px; color: var(--cor-texto); font-weight: 900;">🔍 RAIO-X</h3>
                     <div id="valor_total_raiox" style="font-size: 32px; font-weight: 900; color: var(--cor-madeira); text-shadow: 1px 1px 2px white; margin-top: 5px;">R$ 0,00</div>
                 </div>
-                <button class="btn-limpar" style="background-color: #555; padding: 12px 25px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="showTab('resumo')">⬅️ VOLTAR AO DASHBOARD</button>
+                <button class="btn-limpar" style="background-color: #555; padding: 12px 25px; border-radius: 12px; box-shadow: var(--sombra-neumorfica); font-weight: 900;" onclick="showTab('resumo')">⬅️ VOLTAR AO DASHBOARD</button>
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
@@ -487,7 +508,6 @@
             </div>
         </div> 
 
-        <!-- TABELA PRINCIPAL ATUALIZADA (COM V. UNIT) -->
         <div class="table-container">
             <table class="tabela-larga">
                 <thead>
@@ -499,10 +519,7 @@
                         <th onclick="setOrdenacao('local')">LOCAL/PESSOA <span class="sort-icon" id="sort_icon_local"></span></th>
                         <th onclick="setOrdenacao('desc')">DESCRIÇÃO <span class="sort-icon" id="sort_icon_desc"></span></th>
                         <th onclick="setOrdenacao('qtd')">QTD <span class="sort-icon" id="sort_icon_qtd"></span></th>
-                        
-                        <!-- NOVA COLUNA ADICIONADA AQUI -->
                         <th onclick="setOrdenacao('v_unit')">V. UNIT <span class="sort-icon" id="sort_icon_v_unit"></span></th>
-                        
                         <th onclick="setOrdenacao('valor')">TOTAL (R$) <span class="sort-icon" id="sort_icon_valor"></span></th>
                         <th onclick="setOrdenacao('sit')" style="text-align: center;">SITUAÇÃO <span class="sort-icon" id="sort_icon_sit"></span></th>
                         <th class="no-print" style="text-align: center; width: 120px;">AÇÕES</th>
@@ -522,7 +539,6 @@
                         <th><select id="f_local" onchange="aplicarFiltros()"></select></th>
                         <th><select id="f_desc" onchange="aplicarFiltros()"></select></th>
                         <th></th>
-                        <!-- ESPAÇO EXTRA PARA A NOVA COLUNA NO FILTRO -->
                         <th></th>
                         <th></th>
                         <th><select id="f_sit" onchange="aplicarFiltros()"><option value="">TUDO</option><option value="pago">PAGO</option><option value="a pagar">A PAGAR</option><option value="a receber">A RECEBER</option></select></th>
@@ -657,18 +673,22 @@
         let chartCaixaObj = null;
         let chartPendenteObj = null;
 
-        const pluginSombra3D = {
-            id: 'pluginSombra3D',
-            beforeDatasetsDraw: (chart) => {
-                chart.ctx.save();
-                chart.ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-                chart.ctx.shadowBlur = 20;
-                chart.ctx.shadowOffsetX = 8;
-                chart.ctx.shadowOffsetY = 12;
-            },
-            afterDatasetsDraw: (chart) => { chart.ctx.restore(); }
-        };
-        Chart.register(pluginSombra3D);
+        // Armadura de segurança: Se o Chart.js carregar, registamos o plugin 3D. 
+        // Se falhar (offline), o código não trava.
+        if (typeof Chart !== 'undefined') {
+            const pluginSombra3D = {
+                id: 'pluginSombra3D',
+                beforeDatasetsDraw: (chart) => {
+                    chart.ctx.save();
+                    chart.ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+                    chart.ctx.shadowBlur = 15;
+                    chart.ctx.shadowOffsetX = 6;
+                    chart.ctx.shadowOffsetY = 10;
+                },
+                afterDatasetsDraw: (chart) => { chart.ctx.restore(); }
+            };
+            Chart.register(pluginSombra3D);
+        }
 
         const dCategoriasPadrao = ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "DIÁRIAS", "DIESEL", "FUNGICIDA", "GASOLINA", "HERBICIDA", "INSETICIDA", "INSUMOS", "INVESTIMENTO", "MANUTENÇÃO", "MERCADO", "PROLABORE", "RAÇÃO"];
         const dSetoresPadrao = ["ADMINISTRAÇÃO", "CÃES", "CAFÉ", "CAFÉ 01", "CAFÉ 02", "CAFÉ 03", "CASA", "CAVALOS", "COLHEITA", "DEFINIR", "FAZENDA", "FUNCIONÁRIOS", "GADO", "GALINHAS", "IRRIGAÇÃO", "LAVOURAS", "MARACUJÁ", "PEDRO MARINELLI", "PEIXES", "TORREFAÇÃO", "TRATOR"];
@@ -803,7 +823,7 @@
                 }
 
                 if(camposFaltando.length > 0) {
-                    alert("⚠️ IMPOSSÍVEL GRAVAR:\nPor favor, preencha os seguintes campos obrigatórios:\n\n- " + camposFaltando.join("\n- "));
+                    alert("⚠️️ IMPOSSÍVEL GRAVAR:\nPor favor, preencha os seguintes campos obrigatórios:\n\n- " + camposFaltando.join("\n- "));
                     return; 
                 }
 
@@ -847,7 +867,7 @@
                     totRecPend += v;
                 } else if ((t.tipo === 'Despesa' || t.tipo === 'Investimento') && sit.includes('pagar')) {
                     htmlDespPend += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:bold; color:#C62828; text-align:right;">${formatarMoeda(v)}</td>
-                        <td style="text-align: center;"><button class="btn-acao bg-pago" style="font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️️ PAGAR</button></td></tr>`;
+                        <td style="text-align: center;"><button class="btn-acao bg-pago" style="font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️ PAGAR</button></td></tr>`;
                     totDespPend += v;
                 }
             });
@@ -1222,6 +1242,154 @@
             tbody.innerHTML = linhasHTML.join('');
         }
 
+        // --- DASHBOARD E INTEGRAÇÃO CHART.JS ---
+        // A lógica do Chart.js só é executada se a biblioteca tiver carregado com sucesso.
+        function renderizarGraficos(tR, tD, tI, aR, aP) {
+            
+            // Se o utilizador estiver offline e não conseguir carregar o Chart.js, ocultamos a caixa branca vazia
+            if (typeof Chart === 'undefined') {
+                document.querySelectorAll('.grafico-container').forEach(el => el.style.display = 'none');
+                return;
+            } else {
+                document.querySelectorAll('.grafico-container').forEach(el => el.style.display = 'flex');
+            }
+
+            if (chartCaixaObj) chartCaixaObj.destroy();
+            if (chartPendenteObj) chartPendenteObj.destroy();
+
+            const ctxCaixa = document.getElementById('canvas_caixa').getContext('2d');
+            
+            let gradRec = ctxCaixa.createLinearGradient(0, 0, 0, 300);
+            gradRec.addColorStop(0, '#81C784'); gradRec.addColorStop(1, '#1B5E20');
+            
+            let gradDesp = ctxCaixa.createLinearGradient(0, 0, 0, 300);
+            gradDesp.addColorStop(0, '#FFB74D'); gradDesp.addColorStop(1, '#E65100');
+
+            let gradInv = ctxCaixa.createLinearGradient(0, 0, 0, 300);
+            gradInv.addColorStop(0, '#BA68C8'); gradInv.addColorStop(1, '#4A148C');
+
+            chartCaixaObj = new Chart(ctxCaixa, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Receitas', 'Custeio', 'Investimentos'],
+                    datasets: [{
+                        data: [tR, tD, tI],
+                        backgroundColor: [gradRec, gradDesp, gradInv],
+                        borderWidth: 0, hoverOffset: 12
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '75%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } }
+                    },
+                    layout: { padding: 15 }
+                }
+            });
+
+            const ctxPendente = document.getElementById('canvas_pendente').getContext('2d');
+            
+            let gradARec = ctxPendente.createLinearGradient(0, 0, 0, 300);
+            gradARec.addColorStop(0, '#64B5F6'); gradARec.addColorStop(1, '#0D47A1');
+            
+            let gradAPag = ctxPendente.createLinearGradient(0, 0, 0, 300);
+            gradAPag.addColorStop(0, '#E57373'); gradAPag.addColorStop(1, '#B71C1C');
+
+            chartPendenteObj = new Chart(ctxPendente, {
+                type: 'doughnut',
+                data: {
+                    labels: ['A Receber', 'A Pagar'],
+                    datasets: [{
+                        data: [aR, aP],
+                        backgroundColor: [gradARec, gradAPag],
+                        borderWidth: 0, hoverOffset: 12
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '75%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } }
+                    },
+                    layout: { padding: 15 }
+                }
+            });
+        }
+
+        function atualizarResumoEGrafico() {
+            let tR = 0, tD = 0, tI = 0, aR = 0, aP = 0, rCat = {}, dCat = {}, qtdAtrasadas = 0;
+            const hojeObj = new Date(); hojeObj.setHours(0,0,0,0);
+            
+            const filtroMesElement = document.getElementById('filtro_mes_dashboard');
+            const filtroMes = filtroMesElement ? filtroMesElement.value : '';
+            const filtroSafraElement = document.getElementById('filtro_safra_dashboard');
+            const filtroSafra = filtroSafraElement ? filtroSafraElement.value : '';
+
+            transacoes.forEach(t => {
+                if (filtroSafra) { if (obterSafra(t.data) !== filtroSafra) return; }
+                if (filtroMes) { if (!t.data || typeof t.data !== 'string' || !t.data.startsWith(filtroMes)) return; }
+
+                let v = parseFloat(t.valor) || 0; let sit = strSafe(t.sit).toLowerCase();
+                let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (t.tipo === 'Receita') ? strSafe(t.desc) : strSafe(t.setor); cat = cat.toUpperCase();
+                let tipo = String(t.tipo).toLowerCase();
+
+                if (tipo === 'receita') {
+                    if (sit.includes('pago')) { tR += v; rCat[cat] = (rCat[cat] || 0) + v; } 
+                    else if (sit.includes('receber') || sit.includes('pendente') || sit.includes('pagar')) aR += v;
+                } else if (tipo === 'despesa') {
+                    if (sit.includes('pago')) { tD += v; dCat[cat] = (dCat[cat] || 0) + v; } 
+                    else if (sit.includes('pagar') || sit.includes('pendente') || sit.includes('receber')) {
+                        aP += v; if(t.data && new Date(String(t.data) + 'T00:00:00') < hojeObj) qtdAtrasadas++;
+                    }
+                } else if (tipo === 'investimento') {
+                    if (sit.includes('pago')) { tI += v; dCat[cat] = (dCat[cat] || 0) + v; } 
+                    else if (sit.includes('pagar') || sit.includes('pendente') || sit.includes('receber')) {
+                        aP += v; if(t.data && new Date(String(t.data) + 'T00:00:00') < hojeObj) qtdAtrasadas++;
+                    }
+                }
+            });
+
+            const badgeElement = document.getElementById('badge_atrasadas');
+            if(qtdAtrasadas > 0) { badgeElement.innerText = qtdAtrasadas; badgeElement.style.display = 'inline-block'; } 
+            else { badgeElement.style.display = 'none'; }
+
+            document.getElementById('res_receitas').innerText = formatarMoeda(tR);
+            document.getElementById('res_despesas').innerText = formatarMoeda(tD);
+            document.getElementById('res_investimentos').innerText = formatarMoeda(tI);
+            
+            let saldoFinal = tR - tD - tI;
+            document.getElementById('res_saldo').innerText = formatarMoeda(saldoFinal);
+
+            renderizarGraficos(tR, tD, tI, aR, aP);
+
+            let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); 
+            let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
+            arrRCat.forEach(x => { 
+                let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0;
+                hR += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${x[0]}', 'Receita')" title="Clique para ver os detalhes">
+                        <div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div>
+                        <div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div>
+                       </li>`; 
+            });
+            document.getElementById('lista_top_receitas').innerHTML = hR || '<li class="item-lista-grafico" style="text-align:center;">Sem receitas pagas neste período</li>';
+
+            let arrDCat = Object.entries(dCat).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            let maxDCat = arrDCat.length > 0 ? arrDCat[0][1] : 0; let hD = '';
+            arrDCat.forEach(x => { 
+                let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0;
+                hD += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${x[0]}', 'Saida')" title="Clique para ver o detalhamento deste custo">
+                        <div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div>
+                        <div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div>
+                       </li>`; 
+            });
+            document.getElementById('lista_top_despesas').innerHTML = hD || '<li class="item-lista-grafico" style="text-align:center;">Sem saídas pagas neste período</li>';
+
+            atualizarRelatoriosDetalhados();
+        }
+
+        // INIT
+        window.onload = () => { carregarDadosNuvem(); };
     </script>
 </body>
 </html>
