@@ -358,7 +358,6 @@
                     <h4 id="subtitulo_raiox" style="color: #666; text-transform: uppercase; font-weight: 900; border-left: 4px solid var(--cor-madeira); padding-left: 10px;">Divisão Primária</h4>
                     <ul id="lista_raiox" class="raio-x-lista"></ul>
                 </div>
-                
                 <div>
                     <h4 style="color: #666; text-transform: uppercase; font-weight: 900; border-left: 4px solid #1565C0; padding-left: 10px;">Detalhamento por Descrição do Item</h4>
                     <ul id="lista_raiox_desc" class="raio-x-lista" style="background: white; padding: 20px; border-radius: 16px; box-shadow: var(--sombra-interna);"></ul>
@@ -640,10 +639,11 @@
         let filtroRapido = '';
         let filaXML = [];
         
+        // Instâncias Chart.js
         let chartCaixaObj = null;
         let chartPendenteObj = null;
 
-        // Armadura de segurança do Chart.js: impede erro se falhar o carregamento da biblioteca externa
+        // Plugin nativo Chart.js para criar sombras
         if (typeof Chart !== 'undefined') {
             const pluginSombra3D = {
                 id: 'pluginSombra3D',
@@ -708,7 +708,7 @@
             if(selRel) { selRel.innerHTML = htmlOptions; selRel.value = valRel; }
         }
 
-        // --- SISTEMA DE NAVEGAÇÃO DESACOPLADO (Resolve Bugs de Exibição) ---
+        // --- SISTEMA DE NAVEGAÇÃO OTIMIZADO ---
         function showTab(id) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
@@ -751,6 +751,7 @@
             atualizarOpcoesFiltros(); 
             aplicarFiltros(); 
             
+            // Atualiza apenas a aba que está aberta para evitar erros de renderização escondida
             if(document.getElementById('resumo').classList.contains('active')) { atualizarResumoEGrafico(); }
             if(document.getElementById('relatorios_detalhados').classList.contains('active')) { atualizarRelatoriosDetalhados(); }
             if(document.getElementById('pendencias').classList.contains('active')) { renderizarTabelasPendencias(); }
@@ -981,8 +982,7 @@
             let locs = new Set(), descs = new Set();
             
             transacoes.forEach(tr => {
-                let tipoT = String(t.tipo).toLowerCase();
-                let tipoTr = String(tr.tipo).toLowerCase();
+                let tipoT = String(t.tipo).toLowerCase(); let tipoTr = String(tr.tipo).toLowerCase();
                 let checkTipo = (tipoT === 'despesa' || tipoT === 'investimento') ? (tipoTr === 'despesa' || tipoTr === 'investimento') : (tipoTr === tipoT);
                 if(checkTipo) {
                     if(strSafe(tr.categoria) && strSafe(tr.categoria) !== '-') cats.add(strSafe(tr.categoria).toUpperCase());
@@ -1146,7 +1146,11 @@
             renderTabela(lista);
         }
 
-        function mudarSitTransacao(idx, novaSit) { transacoes[idx].sit = novaSit; salvarDados(); aplicarFiltros(); if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico(); if(document.getElementById('pendencias').classList.contains('active')) renderizarTabelasPendencias(); }
+        function mudarSitTransacao(idx, novaSit) { 
+            transacoes[idx].sit = novaSit; salvarDados(); aplicarFiltros(); 
+            if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico(); 
+            if(document.getElementById('pendencias').classList.contains('active')) renderizarTabelasPendencias(); 
+        }
 
         function renderTabela(lista) {
             const tbody = document.getElementById('tabela_relatorio');
@@ -1292,14 +1296,16 @@
 
             transacoes.forEach(t => {
                 let sit = strSafe(t.sit).toLowerCase();
+                // O Relatório Detalhado foca nas contas Pagas (para bater com o saldo do Dashboard)
                 if (!sit.includes('pago')) return; 
 
                 if (filtroSafra && obterSafra(t.data) !== filtroSafra) return;
                 if (filtroMes && (!t.data || !t.data.startsWith(filtroMes))) return;
 
                 let v = parseFloat(t.valor) || 0;
-                let tipo = String(t.tipo).toLowerCase();
+                let tipo = String(t.tipo).toLowerCase(); // Proteção contra maiúsculas do histórico
 
+                // Lógica de fallback garantida para a Categoria
                 let cat = strSafe(t.categoria).toUpperCase();
                 if (!cat || cat === '-' || cat === 'SEM CATEGORIA') {
                     cat = (tipo === 'receita') ? strSafe(t.desc).toUpperCase() : strSafe(t.setor).toUpperCase();
@@ -1344,6 +1350,79 @@
             renderTabelaRelatorio('tbody_receitas_local', recLocal, 'var(--cor-verde-escuro)');
         }
 
+        // --- DASHBOARD E INTEGRAÇÃO CHART.JS 3D ---
+        function renderizarGraficos(tR, tD, tI, aR, aP) {
+            // Previne erro se abrir a página offline sem a biblioteca de gráficos
+            if (typeof Chart === 'undefined') {
+                document.querySelectorAll('.grafico-container').forEach(el => el.style.display = 'none');
+                return;
+            } else {
+                document.querySelectorAll('.grafico-container').forEach(el => el.style.display = 'flex');
+            }
+
+            if (chartCaixaObj) chartCaixaObj.destroy();
+            if (chartPendenteObj) chartPendenteObj.destroy();
+
+            const ctxCaixa = document.getElementById('canvas_caixa').getContext('2d');
+            
+            let gradRec = ctxCaixa.createLinearGradient(0, 0, 0, 300);
+            gradRec.addColorStop(0, '#81C784'); gradRec.addColorStop(1, '#1B5E20');
+            
+            let gradDesp = ctxCaixa.createLinearGradient(0, 0, 0, 300);
+            gradDesp.addColorStop(0, '#FFB74D'); gradDesp.addColorStop(1, '#E65100');
+
+            let gradInv = ctxCaixa.createLinearGradient(0, 0, 0, 300);
+            gradInv.addColorStop(0, '#BA68C8'); gradInv.addColorStop(1, '#4A148C');
+
+            chartCaixaObj = new Chart(ctxCaixa, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Receitas', 'Custeio', 'Investimentos'],
+                    datasets: [{
+                        data: [tR, tD, tI],
+                        backgroundColor: [gradRec, gradDesp, gradInv],
+                        borderWidth: 0, hoverOffset: 12
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '75%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } }
+                    },
+                    layout: { padding: 15 }
+                }
+            });
+
+            const ctxPendente = document.getElementById('canvas_pendente').getContext('2d');
+            
+            let gradARec = ctxPendente.createLinearGradient(0, 0, 0, 300);
+            gradARec.addColorStop(0, '#64B5F6'); gradARec.addColorStop(1, '#0D47A1');
+            
+            let gradAPag = ctxPendente.createLinearGradient(0, 0, 0, 300);
+            gradAPag.addColorStop(0, '#E57373'); gradAPag.addColorStop(1, '#B71C1C');
+
+            chartPendenteObj = new Chart(ctxPendente, {
+                type: 'doughnut',
+                data: {
+                    labels: ['A Receber', 'A Pagar'],
+                    datasets: [{
+                        data: [aR, aP],
+                        backgroundColor: [gradARec, gradAPag],
+                        borderWidth: 0, hoverOffset: 12
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '75%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } }
+                    },
+                    layout: { padding: 15 }
+                }
+            });
+        }
+
         function atualizarResumoEGrafico() {
             let tR = 0, tD = 0, tI = 0, aR = 0, aP = 0, rCat = {}, dCat = {}, qtdAtrasadas = 0;
             const hojeObj = new Date(); hojeObj.setHours(0,0,0,0);
@@ -1358,7 +1437,7 @@
                 if (filtroMes) { if (!t.data || typeof t.data !== 'string' || !t.data.startsWith(filtroMes)) return; }
 
                 let v = parseFloat(t.valor) || 0; let sit = strSafe(t.sit).toLowerCase();
-                let tipo = String(t.tipo).toLowerCase();
+                let tipo = String(t.tipo).toLowerCase(); // Proteção extra contra texto do histórico
                 
                 let cat = strSafe(t.categoria); 
                 if (!cat || cat === '-') cat = (tipo === 'receita') ? strSafe(t.desc) : strSafe(t.setor); 
@@ -1392,35 +1471,9 @@
             document.getElementById('res_saldo').innerText = formatarMoeda(saldoFinal);
             document.getElementById('card_saldo_div').style.background = (saldoFinal >= 0) ? 'var(--cor-saldo-pos-grad)' : 'var(--cor-saldo-neg-grad)';
 
-            if (typeof Chart !== 'undefined') {
-                if (chartCaixaObj) chartCaixaObj.destroy();
-                if (chartPendenteObj) chartPendenteObj.destroy();
+            renderizarGraficos(tR, tD, tI, aR, aP);
 
-                const ctxCaixa = document.getElementById('canvas_caixa').getContext('2d');
-                let gradRec = ctxCaixa.createLinearGradient(0, 0, 0, 300); gradRec.addColorStop(0, '#81C784'); gradRec.addColorStop(1, '#1B5E20');
-                let gradDesp = ctxCaixa.createLinearGradient(0, 0, 0, 300); gradDesp.addColorStop(0, '#FFB74D'); gradDesp.addColorStop(1, '#E65100');
-                let gradInv = ctxCaixa.createLinearGradient(0, 0, 0, 300); gradInv.addColorStop(0, '#BA68C8'); gradInv.addColorStop(1, '#4A148C');
-
-                chartCaixaObj = new Chart(ctxCaixa, {
-                    type: 'doughnut',
-                    data: { labels: ['Receitas', 'Custeio', 'Investimentos'], datasets: [{ data: [tR, tD, tI], backgroundColor: [gradRec, gradDesp, gradInv], borderWidth: 0, hoverOffset: 12 }] },
-                    options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } } }, layout: { padding: 15 } }
-                });
-
-                const ctxPendente = document.getElementById('canvas_pendente').getContext('2d');
-                let gradARec = ctxPendente.createLinearGradient(0, 0, 0, 300); gradARec.addColorStop(0, '#64B5F6'); gradARec.addColorStop(1, '#0D47A1');
-                let gradAPag = ctxPendente.createLinearGradient(0, 0, 0, 300); gradAPag.addColorStop(0, '#E57373'); gradAPag.addColorStop(1, '#B71C1C');
-
-                chartPendenteObj = new Chart(ctxPendente, {
-                    type: 'doughnut',
-                    data: { labels: ['A Receber', 'A Pagar'], datasets: [{ data: [aR, aP], backgroundColor: [gradARec, gradAPag], borderWidth: 0, hoverOffset: 12 }] },
-                    options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } } }, layout: { padding: 15 } }
-                });
-            } else {
-                document.querySelectorAll('.grafico-container').forEach(el => el.style.display = 'none');
-            }
-
-            // GRÁFICOS DETALHADOS (RAIO-X SEGURO)
+            // GERAÇÃO DOS BARRAS 3D (COM LIMPEZA DE TEXTO PARA CLIQUE SEGURO)
             let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); 
             let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
             arrRCat.forEach(x => { 
