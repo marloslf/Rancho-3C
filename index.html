@@ -14,27 +14,24 @@
             --cor-verde-escuro: #1B5E20;
             --cor-madeira: #5D4037;
             
-            /* Fundo Neumórfico Suave */
             --cor-fundo: #e0e5ec; 
             --cor-texto: #2C3E50;
             
-            /* Sombras 3D High-Tech */
             --sombra-neumorfica: 9px 9px 16px rgba(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
             --sombra-interna: inset 6px 6px 10px rgba(163,177,198,0.5), inset -6px -6px 10px rgba(255,255,255, 0.8);
             
             --borda-raio: 16px;
             
-            /* Cores Financeiras */
             --cor-despesa: #E65100; 
             --cor-despesa-grad: linear-gradient(135deg, #FF9800, #E65100);
             --cor-receita: #2E7D32;
             --cor-receita-grad: linear-gradient(135deg, #66BB6A, #2E7D32);
             --cor-investimento: #6A1B9A;
             --cor-investimento-grad: linear-gradient(135deg, #AB47BC, #6A1B9A);
+
             --cor-saldo-pos-grad: linear-gradient(135deg, #42A5F5, #1565C0);
             --cor-saldo-neg-grad: linear-gradient(135deg, #EF5350, #C62828);
 
-            /* Cores Agrícolas Específicas */
             --cor-agri-app: #2980B9;
             --cor-agri-est: #F39C12;
         }
@@ -47,7 +44,6 @@
             background-color: var(--cor-fundo); color: var(--cor-texto);
         }
 
-        /* --- MARCA D'ÁGUA --- */
         .watermark-logo {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 70vw; height: 70vh;
@@ -56,7 +52,6 @@
             opacity: 0.04; z-index: -1; pointer-events: none; 
         }
 
-        /* --- CABEÇALHO --- */
         .header-container { 
             display: flex; justify-content: space-between; align-items: center; 
             background: var(--cor-fundo); padding: 10px 30px; border-radius: var(--borda-raio);
@@ -65,7 +60,6 @@
         .header-container img { max-width: 80px; filter: drop-shadow(4px 4px 6px rgba(0,0,0,0.1)); border-radius: 8px;}
         h2, h3 { color: var(--cor-verde-escuro); font-weight: 900; margin: 10px 0;}
 
-        /* --- MENU FIXO --- */
         .menu { 
             display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; 
             flex-wrap: wrap; align-items: center; position: sticky; top: 0; z-index: 1001; 
@@ -82,7 +76,6 @@
         }
         .menu button:hover { transform: translateY(-2px); color: var(--cor-madeira);}
         
-        /* Cores ativas por Módulo */
         .menu button.btn-ativo { box-shadow: var(--sombra-interna); }
         .menu button.btn-ativo[id^="btn_resumo"], .menu button.btn-ativo[id^="btn_movimentacoes"], .menu button.btn-ativo[id^="btn_relatorios"] { color: var(--cor-verde-fazenda); }
         .menu button.btn-ativo[id^="btn_agri"] { color: var(--cor-agri-app); }
@@ -111,12 +104,10 @@
         .status-conexao.conectado { background: #e8f5e9; color: #2e7d32; border-color: #66bb6a; }
         .status-conexao.aguardando { background: #FFF3E0; color: #E65100; border-color: #FFB74D; pointer-events: none;} 
 
-        /* --- ABAS --- */
         .tab { display: none; background: transparent; position: relative; min-height: 80vh; }
         .tab.active { display: block; animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- DASHBOARD & CARDS HIGH-TECH --- */
         .resumo-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; margin-bottom: 25px; }
         .card { 
             padding: 20px; border-radius: var(--borda-raio); text-align: center; color: white; position: relative; overflow: hidden; 
@@ -146,7 +137,6 @@
         .legenda-item { display: flex; align-items: center; gap: 6px; color: #555; }
         .ponto-cor { width: 14px; height: 14px; border-radius: 50%; display: inline-block; box-shadow: inset 2px 2px 4px rgba(255,255,255,0.5), 2px 2px 4px rgba(0,0,0,0.2);}
 
-        /* --- LAYOUT DE LANÇAMENTO E EXTRATO (NEUMORFISMO) --- */
         .area-fixa-topo { position: sticky; top: 80px; z-index: 100; background-color: var(--cor-fundo); padding-bottom: 10px; }
         .linha-lancamento { 
             padding: 20px; border-radius: 20px; margin-bottom: 20px; border: none; 
@@ -193,7 +183,6 @@
         .btn-filtro { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 800; transition: 0.3s; background: var(--cor-fundo); color: #555; box-shadow: var(--sombra-neumorfica);}
         .btn-filtro.ativo { background-color: var(--cor-verde-fazenda); color: white; box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2), inset -3px -3px 6px rgba(255,255,255,0.2);}
 
-        /* --- TABELAS --- */
         .table-container { overflow-x: auto; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5); background: white; max-height: 60vh;}
         table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; white-space: nowrap;}
         .tabela-larga { min-width: 1100px; } 
@@ -206,14 +195,12 @@
         td { border-bottom: 1px solid #f0f0f0; padding: 12px 10px; font-weight: 600; text-transform: uppercase; vertical-align: middle;}
         tr:hover td { background-color: rgba(0, 0, 0, 0.02); }
         
-        /* Status Badges */
         .bg-pago { background-color: #4caf50; color: white; font-weight: 800; border:none; border-radius: 6px; box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);}
         .bg-pendente { background-color: #ff9800; color: white; font-weight: 800; border:none; border-radius: 6px; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);}
         .status-planejado { background-color: #FFE082; color: #E65100; border: 1px solid #FFCA28; padding: 6px; border-radius: 6px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%;}
         .status-aplicado { background-color: #A5D6A7; color: #1B5E20; border: 1px solid #66BB6A; padding: 6px; border-radius: 6px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%;}
         .stock-warning { display: inline-block; margin-top: 4px; color: #D32F2F; background: #FFCDD2; padding: 3px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 900; border: 1px solid #EF5350; }
 
-        /* Cores de Linha Agrícola Claras */
         tr.linha-adubo { background-color: rgba(234, 242, 227, 0.6); }       
         tr.linha-inseticida { background-color: rgba(250, 222, 222, 0.6); }
         tr.linha-fungicida { background-color: rgba(251, 231, 198, 0.6); } 
@@ -227,7 +214,6 @@
         .btn-editar { background: #FFCA28; color: #3E2723; }
         .btn-excluir { background: #E53935; color: white; }
 
-        /* --- MODAIS E TOASTS --- */
         #modal-edicao { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px);}
         .modal-content { background: var(--cor-fundo); padding: 35px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3);}
         .form-group-modal { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
@@ -235,8 +221,42 @@
         #toast { visibility: hidden; min-width: 250px; background-color: var(--cor-verde-fazenda); color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: 800; opacity: 0; transition: opacity 0.4s, bottom 0.4s; box-shadow: 0 10px 30px rgba(0,0,0,0.3);}
         #toast.show { visibility: visible; opacity: 1; bottom: 50px;}
 
-        /* Área de Sincronização e Arquivos Agrícolas */
-        .painel-arquivos { display: flex; gap: 15px; margin-bottom: 15px; padding: 15px; background: var(--cor-fundo); border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5); align-items: center;}
+        /* --- LISTAS DE BARRAS 3D (TOP 5 / RAIO X) --- */
+        .top-graficos-box { 
+            background: var(--cor-fundo); padding: 25px; border-radius: 24px; 
+            box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6); flex: 1; min-width: 300px;
+        }
+        .item-lista-grafico { list-style: none; margin-bottom: 15px; font-size: 14px; font-weight: 800; text-transform: uppercase; color: var(--cor-texto); padding: 10px 15px; border-radius: 12px; transition: 0.3s;}
+        .item-lista-grafico.interativo:hover { background-color: white; transform: scale(1.02); box-shadow: 0 10px 20px rgba(0,0,0,0.08); cursor: pointer; }
+        
+        .barra-grafico-container { 
+            width: 100%; border-radius: 10px; margin-top: 8px; height: 14px; 
+            background: var(--cor-fundo); box-shadow: var(--sombra-interna); overflow: visible; position: relative;
+        }
+        .barra-grafico-receita { 
+            height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+            background: linear-gradient(to bottom, #A5D6A7 0%, #4CAF50 40%, #2E7D32 100%);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.3), 0 3px 6px rgba(46,125,50,0.4);
+        }
+        .barra-grafico-despesa { 
+            height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+            background: linear-gradient(to bottom, #FFCC80 0%, #FF9800 40%, #E65100 100%);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.3), 0 3px 6px rgba(230,81,0,0.4);
+        }
+
+        .raio-x-lista { padding-left: 0; margin-top: 15px; max-height: 450px; overflow-y: auto; padding-right: 15px; }
+        .raio-x-lista::-webkit-scrollbar { width: 6px; }
+        .raio-x-lista::-webkit-scrollbar-track { background: transparent; }
+        .raio-x-lista::-webkit-scrollbar-thumb { background: #bbb; border-radius: 10px; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; margin: 0; padding: 0; zoom: 100%; }
+            .tab, .table-container, .top-graficos-box, .grafico-container { box-shadow: none; border: 1px solid #ccc; }
+            .area-fixa-topo, .menu { position: static; }
+            .watermark-logo { opacity: 0.1; }
+            @page { margin: 1cm; size: landscape; }
+        }
     </style>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -255,7 +275,6 @@
 
     <!-- MENU UNIFICADO -->
     <div class="menu no-print">
-        <!-- FINANCEIRO -->
         <button id="btn_resumo" class="btn-ativo" onclick="showTab('resumo')">📊 DASH. FINANCEIRO</button>
         <button id="btn_movimentacoes" onclick="showTab('movimentacoes')">📋 CAIXA</button>
         <button id="btn_relatorios_detalhados" onclick="showTab('relatorios_detalhados')">📈 RELATÓRIOS</button>
@@ -266,7 +285,6 @@
         
         <div class="menu-divisor"></div>
         
-        <!-- AGRÍCOLA -->
         <button id="btn_agri_app" onclick="showTab('agri_app')">🚜 APLICAÇÕES</button>
         <button id="btn_agri_est" onclick="showTab('agri_est')">📦 ESTOQUE</button>
         <button id="btn_agri_dash" onclick="showTab('agri_dash')">📊 DASH. AGRÍCOLA</button>
@@ -274,14 +292,13 @@
         <div class="menu-divisor"></div>
 
         <button onclick="window.print()" title="Imprimir a aba atual">🖨️ PDF</button>
-        <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem(true)" title="Forçar a sincronização financeira">⏳ CARREGANDO...</button>
+        <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem(true)" title="Forçar a sincronização">⏳ CARREGANDO...</button>
     </div>
 
     <!-- ========================================== -->
     <!-- MÓDULO FINANCEIRO                          -->
     <!-- ========================================== -->
 
-    <!-- ABA 1: DASHBOARD FINANCEIRO -->
     <div id="resumo" class="tab active">
         <div class="no-print top-filtros" style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px; background: var(--cor-fundo); padding: 20px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <label style="font-weight: 900; color: var(--cor-madeira); font-size: 14px;">Filtrar Financeiro por Safra:</label>
@@ -295,8 +312,8 @@
 
         <div class="resumo-cards">
             <div class="card card-receita"><h4>RECEITAS TOTAIS</h4><span id="res_receitas">R$ 0,00</span></div>
-            <div class="card card-despesa" title="Gastos Operacionais"><h4>CUSTEIO (DESPESAS)</h4><span id="res_despesas">R$ 0,00</span></div>
-            <div class="card card-investimento" title="Gastos em Bens"><h4>INVESTIMENTOS</h4><span id="res_investimentos">R$ 0,00</span></div>
+            <div class="card card-despesa"><h4>CUSTEIO (DESPESAS)</h4><span id="res_despesas">R$ 0,00</span></div>
+            <div class="card card-investimento"><h4>INVESTIMENTOS</h4><span id="res_investimentos">R$ 0,00</span></div>
             <div class="card card-saldo" id="card_saldo_div"><h4>SALDO EM CAIXA</h4><span id="res_saldo">R$ 0,00</span></div>
         </div>
         
@@ -310,9 +327,19 @@
                 <div style="width: 100%; height: 220px; position: relative;"><canvas id="canvas_pendente"></canvas></div>
             </div>
         </div>
+
+        <div class="dashboard-inferior" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+            <div class="top-graficos-box">
+                <h4 style="color: var(--cor-receita); font-weight: 900; font-size: 16px; border-bottom: 2px solid var(--cor-receita); padding-bottom: 10px;">🌱 MAIORES RECEITAS</h4>
+                <ul id="lista_top_receitas" style="padding-left: 0; margin-top: 15px;"></ul>
+            </div>
+            <div class="top-graficos-box">
+                <h4 style="color: var(--cor-despesa); font-weight: 900; font-size: 16px; border-bottom: 2px solid var(--cor-despesa); padding-bottom: 10px;">🚜 MAIORES SAÍDAS</h4>
+                <ul id="lista_top_despesas" style="padding-left: 0; margin-top: 15px;"></ul>
+            </div>
+        </div>
     </div>
     
-    <!-- ABA: CAIXA E LANÇAMENTOS -->
     <div id="movimentacoes" class="tab">
         <div class="area-fixa-topo no-print">
             <div class="linha-lancamento linha-despesa" id="caixa_lancamento_saida">
@@ -354,11 +381,6 @@
                     <button onclick="addTransacao('Receita')" class="btn-salvar-compacto" style="background: var(--cor-receita);">💾 SALVAR</button>
                 </div>
             </div>
-            
-            <!-- Listas Compartilhadas Finanças -->
-            <datalist id="lista_d_categoria"></datalist><datalist id="lista_d_setor"></datalist>
-            <datalist id="lista_d_local"></datalist><datalist id="lista_d_descricao"></datalist>
-            <datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
 
             <div class="barra-pesquisa-relatorio">
                 <button class="btn-filtro ativo" id="btn_f_todos" onclick="setFiltroRapido('')">📋 TODOS</button>
@@ -403,7 +425,6 @@
         </div>
     </div>
 
-    <!-- ABA: RELATÓRIOS DETALHADOS FINANCEIROS -->
     <div id="relatorios_detalhados" class="tab">
         <div class="no-print top-filtros" style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px; background: var(--cor-fundo); padding: 20px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <label style="font-weight: 900; color: var(--cor-texto);">Filtrar por Safra:</label>
@@ -437,7 +458,30 @@
         </div>
     </div>
 
-    <!-- ABA: PENDÊNCIAS -->
+    <!-- RAIO X (FINANCEIRO) -->
+    <div id="visao_categoria" class="tab">
+        <div style="background: var(--cor-fundo); padding: 30px; border-radius: 24px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 3px solid white; padding-bottom: 15px;">
+                <div>
+                    <h3 id="titulo_raiox" style="margin: 0; font-size: 26px; color: var(--cor-texto); font-weight: 900; text-shadow: 1px 1px 2px white;">🔍 RAIO-X</h3>
+                    <div id="valor_total_raiox" style="font-size: 32px; font-weight: 900; color: var(--cor-madeira); margin-top: 5px;">R$ 0,00</div>
+                </div>
+                <button class="btn-limpar" style="background-color: #555; padding: 12px 25px; border-radius: 12px; font-weight: 900;" onclick="showTab('resumo')">⬅️ VOLTAR</button>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                <div>
+                    <h4 id="subtitulo_raiox" style="color: #666; text-transform: uppercase; font-weight: 900; border-left: 4px solid var(--cor-madeira); padding-left: 10px;">Divisão Primária</h4>
+                    <ul id="lista_raiox" class="raio-x-lista"></ul>
+                </div>
+                <div>
+                    <h4 style="color: #666; text-transform: uppercase; font-weight: 900; border-left: 4px solid #1565C0; padding-left: 10px;">Detalhamento por Descrição</h4>
+                    <ul id="lista_raiox_desc" class="raio-x-lista" style="background: white; padding: 20px; border-radius: 16px; box-shadow: var(--sombra-interna);"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PENDÊNCIAS COM CORES FORÇADAS -->
     <div id="pendencias" class="tab">
         <div style="background: var(--cor-fundo); padding: 30px; border-radius: 24px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <h3 style="text-align: center; font-size: 26px; margin-bottom: 30px;">🔔 CONTAS PENDENTES</h3>
@@ -447,10 +491,10 @@
                     <div class="table-container" style="max-height: 500px; border-radius: 0; box-shadow: none;">
                         <table>
                             <thead><tr>
-                                <th style="background: #1565C0 !important; color: white !important;">DATA</th>
-                                <th style="background: #1565C0 !important; color: white !important;">CLIENTE</th>
-                                <th style="background: #1565C0 !important; color: white !important; text-align: right;">VALOR</th>
-                                <th style="background: #1565C0 !important; color: white !important; text-align: center;">AÇÃO</th>
+                                <th style="background: #1565C0 !important; background-image: none !important; color: white !important;">DATA</th>
+                                <th style="background: #1565C0 !important; background-image: none !important; color: white !important;">CLIENTE</th>
+                                <th style="background: #1565C0 !important; background-image: none !important; color: white !important; text-align: right;">VALOR</th>
+                                <th style="background: #1565C0 !important; background-image: none !important; color: white !important; text-align: center;">AÇÃO</th>
                             </tr></thead>
                             <tbody id="tbody_receitas_pendentes"></tbody>
                         </table>
@@ -461,10 +505,10 @@
                     <div class="table-container" style="max-height: 500px; border-radius: 0; box-shadow: none;">
                         <table>
                             <thead><tr>
-                                <th style="background: #C62828 !important; color: white !important;">DATA</th>
-                                <th style="background: #C62828 !important; color: white !important;">FORNECEDOR</th>
-                                <th style="background: #C62828 !important; color: white !important; text-align: right;">VALOR</th>
-                                <th style="background: #C62828 !important; color: white !important; text-align: center;">AÇÃO</th>
+                                <th style="background: #C62828 !important; background-image: none !important; color: white !important;">DATA</th>
+                                <th style="background: #C62828 !important; background-image: none !important; color: white !important;">FORNECEDOR</th>
+                                <th style="background: #C62828 !important; background-image: none !important; color: white !important; text-align: right;">VALOR</th>
+                                <th style="background: #C62828 !important; background-image: none !important; color: white !important; text-align: center;">AÇÃO</th>
                             </tr></thead>
                             <tbody id="tbody_despesas_pendentes"></tbody>
                         </table>
@@ -476,42 +520,25 @@
 
 
     <!-- ========================================== -->
-    <!-- MÓDULO AGRÍCOLA (ADUBAÇÃO E ESTOQUE)       -->
+    <!-- MÓDULO AGRÍCOLA (NOVO DESIGN INTEGRADO)    -->
     <!-- ========================================== -->
-
-    <!-- Listas Agrícolas -->
-    <datalist id="lista-talhoes"></datalist>
-    <datalist id="lista-tipos"></datalist>
-    <datalist id="lista-formas"></datalist>
-    <datalist id="lista-alvos"></datalist>
-    <datalist id="lista-produtos-estoque"></datalist>
 
     <!-- ABA: APLICAÇÕES AGRÍCOLAS -->
     <div id="agri_app" class="tab">
-        <div class="painel-arquivos no-print">
-            <span style="font-weight: 900; color: var(--cor-agri-app);">DADOS LOCAIS (AGRÍCOLA):</span>
-            <button class="btn-acao-agri" onclick="carregarArquivoDrive()">📂 CARREGAR JSON</button>
-            <button class="btn-acao-agri" style="background:#F39C12;" onclick="backupDados()">💾 BACKUP JSON</button>
-            <span style="font-size: 12px; color: #777;">O sistema tenta guardar automaticamente na pasta vinculada.</span>
-        </div>
-
         <div class="area-fixa-topo no-print">
             <div class="linha-lancamento linha-agri-app">
                 <div style="font-size:14px; font-weight:900; color:var(--cor-agri-app); margin-bottom: 10px;">🚜 NOVO REGISTRO DE APLICAÇÃO</div>
                 <form id="appForm" class="grid-agri-app">
                     <input type="hidden" id="editIndex" value="-1">
-                    <input type="date" id="dataApp" required title="Data da Aplicação">
+                    <input type="date" id="dataApp" required title="Data">
                     <input type="text" id="talhao" list="lista-talhoes" placeholder="TALHÃO..." required autocomplete="off">
                     <input type="text" id="produto" list="lista-produtos-estoque" placeholder="PRODUTO..." required autocomplete="off" oninput="preencherTipoProduto()">
                     <input type="text" id="tipo" list="lista-tipos" placeholder="TIPO PRODUTO..." required autocomplete="off">
                     <input type="text" id="alvo" list="lista-alvos" placeholder="ALVO/FENOLOGIA..." autocomplete="off">
-                    
                     <input type="number" step="0.01" id="dosagem_qtd" placeholder="QTD" required>
                     <select id="dosagem_un" required><option value="L">LITROS</option><option value="KG">QUILOS</option></select>
-                    
                     <input type="text" id="forma" list="lista-formas" placeholder="FORMA APLIC..." required autocomplete="off">
                     <select id="status" required><option value="PLANEJADO">PLANEJADO</option><option value="APLICADO">APLICADO</option></select>
-                    
                     <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-agri-app);">💾 REGISTRAR</button>
                 </form>
             </div>
@@ -520,7 +547,7 @@
                 <h4 style="margin:0; color: var(--cor-agri-app);">CRONOGRAMA GERAL</h4>
                 <select id="safraSelector" onchange="aplicarFiltroSafraApp()" style="max-width: 200px;"></select>
                 <span style="flex-grow: 1;"></span>
-                <button onclick="limparFiltrosAgri()" class="btn-limpar">🧹 LIMPAR FILTROS TABELA</button>
+                <button onclick="limparFiltrosAgri()" class="btn-limpar">🧹 LIMPAR FILTROS</button>
             </div>
         </div>
 
@@ -567,10 +594,8 @@
                     <input type="text" id="est_produto" placeholder="NOME DO PRODUTO..." required autocomplete="off">
                     <input type="text" id="est_principio" placeholder="PRINCÍPIO ATIVO..." autocomplete="off">
                     <input type="text" id="est_tipo" list="lista-tipos" placeholder="TIPO..." required autocomplete="off">
-                    
                     <input type="number" step="0.01" id="est_qtd" placeholder="QTD" required>
                     <select id="est_un" required><option value="L">LITROS</option><option value="KG">QUILOS</option></select>
-                    
                     <input type="number" step="0.01" id="est_valor_unit" placeholder="$ UNIT" required>
                     <button type="submit" class="btn-salvar-compacto" style="background: #FF8F00;">💾 GUARDAR</button>
                 </form>
@@ -598,7 +623,7 @@
         </div>
     </div>
 
-    <!-- ABA: DASHBOARD AGRÍCOLA -->
+    <!-- ABA: DASHBOARD AGRÍCOLA (AUMENTADA E ALINHADA) -->
     <div id="agri_dash" class="tab">
         <div class="no-print top-filtros" style="margin-bottom: 25px; display: flex; align-items: center; justify-content:center; gap: 15px; background: var(--cor-fundo); padding: 20px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <label style="font-weight: 900; color: var(--cor-agri-app); font-size: 15px;">VISÃO GERAL DO TALHÃO:</label>
@@ -608,32 +633,32 @@
         <div class="resumo-cards">
             <div class="card card-agri1"><h4>TOTAL APLICADO</h4><span id="kpi-aplicado">R$ 0,00</span></div>
             <div class="card card-agri2"><h4>TOTAL PLANEJADO</h4><span id="kpi-planejado">R$ 0,00</span></div>
-            <div class="card" style="background: linear-gradient(135deg, #8E44AD, #4A235A);"><h4>PATRIMÔNIO EM ESTOQUE</h4><span id="kpi-estoque">R$ 0,00</span></div>
+            <div class="card" style="background: linear-gradient(135deg, #8E44AD, #4A235A);"><h4>PATRIMÔNIO ESTOQUE</h4><span id="kpi-estoque">R$ 0,00</span></div>
             <div class="card" style="background: linear-gradient(135deg, #00897B, #004D40);"><h4>REGISTROS NA SAFRA</h4><span id="kpi-registros">0</span></div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; padding-bottom: 25px;">
-            <div class="grafico-container wide">
-                <h4 style="color:var(--cor-texto);">DISTRIBUIÇÃO POR TALHÃO (VOL.)</h4>
-                <div style="width: 100%; height: 250px;"><canvas id="chartTalhao"></canvas></div>
+        <!-- GRÁFICOS MAIORES E ALINHADOS EM DUAS COLUNAS (COMO O FINANCEIRO) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; padding-bottom: 25px;">
+            <div class="grafico-container wide" style="width: 100%;">
+                <h4 style="margin: 0 0 15px 0; color:var(--cor-texto); font-weight: 900;">DISTRIBUIÇÃO POR TALHÃO (VOL.)</h4>
+                <div style="width: 100%; height: 350px; position: relative;"><canvas id="chartTalhao"></canvas></div>
             </div>
-            <div class="grafico-container wide">
-                <h4 style="color:var(--cor-texto);">TIPOS DE PRODUTO (VOL.)</h4>
-                <div style="width: 100%; height: 250px;"><canvas id="chartTipo"></canvas></div>
+            <div class="grafico-container wide" style="width: 100%;">
+                <h4 style="margin: 0 0 15px 0; color:var(--cor-texto); font-weight: 900;">TIPOS DE PRODUTO (VOL.)</h4>
+                <div style="width: 100%; height: 350px; position: relative;"><canvas id="chartTipo"></canvas></div>
             </div>
-            <div class="grafico-container wide">
-                <h4 style="color:var(--cor-texto);">CUSTO TOTAL POR SAFRA</h4>
-                <div style="width: 100%; height: 250px;"><canvas id="chartCustoSafra"></canvas></div>
+            <div class="grafico-container wide" style="width: 100%;">
+                <h4 style="margin: 0 0 15px 0; color:var(--cor-texto); font-weight: 900;">CUSTO TOTAL POR SAFRA</h4>
+                <div style="width: 100%; height: 350px; position: relative;"><canvas id="chartCustoSafra"></canvas></div>
             </div>
-            <div class="grafico-container wide">
-                <h4 style="color:var(--cor-texto);">CUSTO APLICADO POR TALHÃO</h4>
-                <div style="width: 100%; height: 250px;"><canvas id="chartCustoTalhao"></canvas></div>
+            <div class="grafico-container wide" style="width: 100%;">
+                <h4 style="margin: 0 0 15px 0; color:var(--cor-texto); font-weight: 900;">CUSTO APLICADO POR TALHÃO</h4>
+                <div style="width: 100%; height: 350px; position: relative;"><canvas id="chartCustoTalhao"></canvas></div>
             </div>
         </div>
     </div>
 
 
-    <!-- MODAL DE EDIÇÃO FINANCEIRA -->
     <div id="modal-edicao">
         <div class="modal-content">
             <h3 style="margin-top: 0; color: var(--cor-texto); border-bottom: 2px solid #ccc; padding-bottom:10px;">✏️ EDITAR REGISTRO</h3>
@@ -649,21 +674,28 @@
 
     <script>
         /* =========================================================================
-           LÓGICA FINANCEIRA (GOOGLE SHEETS)
+           LÓGICA UNIFICADA E SINCRONIZAÇÃO NA NUVEM (GOOGLE SHEETS)
         ========================================================================= */
         const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxU-XxV63Eip3g636GkrVaV8zwnVPVomePZLIsZBV-ghCYJKxYUMtQoG2Kc903zeP4UoQ/exec";
 
         let transacoes = [];
+        let agriRecords = [];
+        let estoque = [];
+        let opcoesDin = {
+            talhoes: ["CAFÉ 2019", "CAFÉ 2022", "CAFÉ 2025", "MARACUJÁ"],
+            tipos: ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "FUNGICIDA", "HERBICIDA", "INSETICIDA"],
+            formas: ["FERTIRRIGAÇÃO", "MANUAL", "PULVERIZAÇÃO"], alvos: ["BROCA-DO-CAFÉ", "BICHO-MINEIRO", "FERRUGEM", "FLORADA", "FRUTIFICAÇÃO", "MATO"]
+        };
+        
         let indiceEdicao = -1;
         let colOrdenacao = 'data';
         let ordemAscendente = false;
         let filtroRapido = '';
-        let filaXML = [];
         
-        let chartCaixaObj = null;
-        let chartPendenteObj = null;
+        // Instâncias Gráficas
+        let chartCaixaObj = null, chartPendenteObj = null;
+        let chartS_Agri = null, chartT_Agri = null, chartTp_Agri = null, chartCS_Agri = null, chartCT_Agri = null;
 
-        // Plugin Sombra 3D
         if (typeof Chart !== 'undefined') {
             const pluginSombra3D = {
                 id: 'pluginSombra3D',
@@ -703,7 +735,95 @@
             let anoInicio = mes >= 8 ? ano : ano - 1;
             return anoInicio.toString().slice(-2) + '/' + (anoInicio + 1).toString().slice(-2);
         }
+        function obterSafraAtual() { return obterSafraGeral(new Date().toISOString().substring(0,10)); }
 
+        async function carregarDadosNuvem(forcar = false) {
+            const statusDiv = document.getElementById('status_conexao');
+            statusDiv.innerHTML = '⏳ SINCRONIZANDO...'; statusDiv.className = 'status-conexao aguardando';
+            try {
+                const response = await fetch(URL_GOOGLE_SCRIPT);
+                if (!response.ok) throw new Error(`Erro API`);
+                const data = await response.json();
+                
+                // Agora recebe todas as 4 "gavetas" da nuvem
+                if (data.transacoes) transacoes = normalizarDatas(data.transacoes);
+                if (data.aplicacoes) agriRecords = normalizarDatas(data.aplicacoes);
+                if (data.estoque) estoque = data.estoque;
+                if (data.opcoes) opcoesDin = data.opcoes;
+                
+                statusDiv.innerHTML = '🟢 NUVEM SINCRONIZADA'; statusDiv.className = 'status-conexao conectado';
+                
+                localStorage.setItem('rancho3c_offline', JSON.stringify({ transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin }));
+            } catch (error) {
+                statusDiv.innerHTML = "🔴 MODO OFFLINE"; statusDiv.className = 'status-conexao';
+                const localData = JSON.parse(localStorage.getItem('rancho3c_offline') || '{}');
+                if(localData.transacoes) transacoes = normalizarDatas(localData.transacoes);
+                if(localData.aplicacoes) agriRecords = normalizarDatas(localData.aplicacoes);
+                if(localData.estoque) estoque = localData.estoque;
+                if(localData.opcoes) opcoesDin = localData.opcoes;
+            }
+            
+            // Popula listas e seletores
+            preencherSelectsLancamento(); 
+            preencherSelectsSafraFin(); 
+            renderDatalistsAgri();
+            popularSeletorSafraApp();
+            
+            // Atualiza apenas as abas ativas
+            if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico();
+            if(document.getElementById('relatorios_detalhados').classList.contains('active')) atualizarRelatoriosDetalhados();
+            if(document.getElementById('movimentacoes').classList.contains('active')) { atualizarOpcoesFiltros(); aplicarFiltros(); }
+            if(document.getElementById('pendencias').classList.contains('active')) renderizarTabelasPendencias();
+            
+            if(document.getElementById('agri_app').classList.contains('active')) { aplicarFiltroSafraApp(); }
+            if(document.getElementById('agri_est').classList.contains('active')) { saveAndRenderEstoque(); }
+            if(document.getElementById('agri_dash').classList.contains('active')) { renderAgriDashboard(); }
+        }
+
+        async function salvarDados() {
+            const statusDiv = document.getElementById('status_conexao');
+            statusDiv.innerHTML = '⏳ A GRAVAR...'; statusDiv.className = 'status-conexao aguardando';
+            
+            const payload = { transacoes: transacoes, aplicacoes: agriRecords, estoque: estoque, opcoes: opcoesDin };
+            localStorage.setItem('rancho3c_offline', JSON.stringify(payload));
+            
+            try {
+                const response = await fetch(URL_GOOGLE_SCRIPT, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+                const result = await response.json();
+                if(result.status === "sucesso") {
+                    statusDiv.innerHTML = `🟢 SINCRONIZADO`; statusDiv.className = 'status-conexao conectado';
+                } else throw new Error("Erro");
+            } catch (error) {
+                statusDiv.innerHTML = '🔴 GRAVADO LOCAL'; statusDiv.className = 'status-conexao';
+            }
+        }
+
+        function showTab(id) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
+            document.getElementById(id).classList.add('active');
+            
+            const btnMap = {
+                'resumo': 'btn_resumo', 'movimentacoes': 'btn_movimentacoes', 'relatorios_detalhados': 'btn_relatorios_detalhados',
+                'pendencias': 'btn_pendencias', 'agri_app': 'btn_agri_app', 'agri_est': 'btn_agri_est', 'agri_dash': 'btn_agri_dash'
+            };
+            if(btnMap[id]) document.getElementById(btnMap[id]).classList.add('btn-ativo');
+            
+            if(id === 'resumo') atualizarResumoEGrafico();
+            if(id === 'relatorios_detalhados') atualizarRelatoriosDetalhados();
+            if(id === 'movimentacoes') { atualizarOpcoesFiltros(); aplicarFiltros(); }
+            if(id === 'pendencias') renderizarTabelasPendencias();
+
+            if(id === 'agri_app') { aplicarFiltroSafraApp(); }
+            if(id === 'agri_est') { saveAndRenderEstoque(); }
+            if(id === 'agri_dash') { renderAgriDashboard(); }
+            
+            window.scrollTo(0, 0); 
+        }
+
+        /* -------------------------------------------------------------------------
+           BLOCO FINANCEIRO
+        ------------------------------------------------------------------------- */
         function preencherSelectsSafraFin() {
             let safras = new Set();
             transacoes.forEach(t => { if(t.data && t.data !== '-') safras.add(obterSafraGeral(t.data)); });
@@ -716,45 +836,6 @@
             let selRel = document.getElementById('filtro_safra_relatorios');
             if(selDash) { let v = selDash.value; selDash.innerHTML = htmlOptions; selDash.value = v; }
             if(selRel) { let v = selRel.value; selRel.innerHTML = htmlOptions; selRel.value = v; }
-        }
-
-        async function carregarDadosNuvem(forcar = false) {
-            const statusDiv = document.getElementById('status_conexao');
-            statusDiv.innerHTML = '⏳ SINCRONIZANDO...'; statusDiv.className = 'status-conexao aguardando';
-            try {
-                const response = await fetch(URL_GOOGLE_SCRIPT);
-                if (!response.ok) throw new Error(`Erro API`);
-                const data = await response.json();
-                if (data.transacoes) {
-                    transacoes = normalizarDatas(data.transacoes);
-                    statusDiv.innerHTML = '🟢 NUVEM SINCRONIZADA'; statusDiv.className = 'status-conexao conectado';
-                    localStorage.setItem('rancho3c_offline', JSON.stringify(transacoes));
-                }
-            } catch (error) {
-                statusDiv.innerHTML = "🔴 MODO OFFLINE"; statusDiv.className = 'status-conexao';
-                const localData = localStorage.getItem('rancho3c_offline');
-                if(localData) transacoes = normalizarDatas(JSON.parse(localData));
-            }
-            
-            preencherSelectsLancamento(); preencherSelectsSafraFin(); atualizarOpcoesFiltros(); aplicarFiltros();
-            if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico();
-            if(document.getElementById('relatorios_detalhados').classList.contains('active')) atualizarRelatoriosDetalhados();
-            if(document.getElementById('pendencias').classList.contains('active')) renderizarTabelasPendencias();
-        }
-
-        async function salvarDados() {
-            const statusDiv = document.getElementById('status_conexao');
-            statusDiv.innerHTML = '⏳ A GRAVAR...'; statusDiv.className = 'status-conexao aguardando';
-            localStorage.setItem('rancho3c_offline', JSON.stringify(transacoes));
-            try {
-                const response = await fetch(URL_GOOGLE_SCRIPT, { method: 'POST', body: JSON.stringify({ transacoes: transacoes }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-                const result = await response.json();
-                if(result.status === "sucesso") {
-                    statusDiv.innerHTML = `🟢 SINCRONIZADO`; statusDiv.className = 'status-conexao conectado';
-                } else throw new Error("Erro");
-            } catch (error) {
-                statusDiv.innerHTML = '🔴 GRAVADO LOCAL'; statusDiv.className = 'status-conexao';
-            }
         }
 
         function mudarTemaSaida() {
@@ -801,162 +882,6 @@
                 preencherSelectsSafraFin(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento();
                 mostrarToast(tipoFinal.toUpperCase() + ' GRAVADA!'); document.getElementById(prefix + 'data').focus();
             } catch (error) { alert("Erro ao gravar: " + error.message); }
-        }
-
-        function renderizarTabelasPendencias() {
-            let htmlRec = ''; let htmlDesp = ''; let tRec = 0; let tDesp = 0;
-            let pendentes = transacoes.map((t, i) => ({ item: t, idx: i })).filter(obj => { 
-                let sit = strSafe(obj.item.sit).toLowerCase(); return sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente'); 
-            }).sort((a, b) => new Date(a.item.data || 0) - new Date(b.item.data || 0));
-
-            pendentes.forEach(obj => {
-                let t = obj.item; let v = parseFloat(t.valor) || 0; let dF = formatarData(t.data); let tipoL = String(t.tipo).toLowerCase();
-                
-                if (tipoL === 'receita') {
-                    htmlRec += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:900; color:#1565C0; text-align:right;">${formatarMoeda(v)}</td>
-                        <td style="text-align: center;"><button class="btn-acao" style="background:#1565C0; color:white; font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${obj.idx}, 'Pago')">✔️ RECEBER</button></td></tr>`;
-                    tRec += v;
-                } else {
-                    htmlDesp += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:900; color:#C62828; text-align:right;">${formatarMoeda(v)}</td>
-                        <td style="text-align: center;"><button class="btn-acao" style="background:#C62828; color:white; font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${obj.idx}, 'Pago')">✔️ PAGAR</button></td></tr>`;
-                    tDesp += v;
-                }
-            });
-
-            document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRec || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
-            document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDesp || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
-        }
-
-        function mudarSitEAtualizarPendencias(idx, novaSit) { transacoes[idx].sit = novaSit; salvarDados(); aplicarFiltros(); renderizarTabelasPendencias(); mostrarToast("Liquidada!"); }
-
-        function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
-        function formatarData(dataISO) {
-            if(!dataISO || String(dataISO).toLowerCase() === 'nan') return '-';
-            const partes = String(dataISO).split('-'); return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : dataISO;
-        }
-        function strSafe(val) { return (val === null || val === undefined) ? '' : String(val).trim(); }
-
-        function showTab(id) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
-            document.getElementById(id).classList.add('active');
-            
-            // Ativar botões
-            const btnMap = {
-                'resumo': 'btn_resumo', 'movimentacoes': 'btn_movimentacoes', 'relatorios_detalhados': 'btn_relatorios_detalhados',
-                'pendencias': 'btn_pendencias', 'agri_app': 'btn_agri_app', 'agri_est': 'btn_agri_est', 'agri_dash': 'btn_agri_dash'
-            };
-            if(btnMap[id]) document.getElementById(btnMap[id]).classList.add('btn-ativo');
-            
-            // Lógicas Financeiras
-            if(id === 'resumo') atualizarResumoEGrafico();
-            if(id === 'relatorios_detalhados') atualizarRelatoriosDetalhados();
-            if(id === 'movimentacoes') { atualizarOpcoesFiltros(); preencherSelectsLancamento(); aplicarFiltros(); }
-            if(id === 'pendencias') renderizarTabelasPendencias();
-
-            // Lógicas Agrícolas
-            if(id === 'agri_app') saveAndRenderApp();
-            if(id === 'agri_est') saveAndRenderEstoque();
-            if(id === 'agri_dash') renderAgriDashboard();
-            
-            window.scrollTo(0, 0); 
-        }
-
-        function autoPreencherUnidade() {
-            const cat = document.getElementById('r_categoria').value.trim().toUpperCase();
-            if (unidadesReceita[cat]) document.getElementById('r_und').value = unidadesReceita[cat];
-        }
-
-        function preencherSelectsLancamento() {
-            let dCats = new Set(dCategoriasPadrao); let dSets = new Set(dSetoresPadrao);
-            let dLocais = new Set(), dDescs = new Set(); let rCats = new Set(rCategoriasPadrao); let rLocais = new Set();
-            transacoes.forEach(t => {
-                let tipoLower = String(t.tipo).toLowerCase();
-                if (tipoLower === 'despesa' || tipoLower === 'investimento') {
-                    if (strSafe(t.categoria)) dCats.add(strSafe(t.categoria).toUpperCase());
-                    if (strSafe(t.setor)) dSets.add(strSafe(t.setor).toUpperCase());
-                    if (strSafe(t.local)) dLocais.add(strSafe(t.local).toUpperCase());
-                    if (strSafe(t.desc)) dDescs.add(strSafe(t.desc).toUpperCase());
-                } else if(tipoLower === 'receita') {
-                    if (strSafe(t.categoria)) rCats.add(strSafe(t.categoria).toUpperCase());
-                    if (strSafe(t.local)) rLocais.add(strSafe(t.local).toUpperCase());
-                }
-            });
-            function buildDatalist(id, setVals) {
-                const dl = document.getElementById(id); if (dl) dl.innerHTML = Array.from(setVals).sort().map(v => `<option value="${v}">`).join('');
-            }
-            buildDatalist('lista_d_categoria', dCats); buildDatalist('lista_d_setor', dSets); buildDatalist('lista_d_local', dLocais); buildDatalist('lista_d_descricao', dDescs);
-            buildDatalist('lista_r_categoria', rCats); buildDatalist('lista_r_local', rLocais);
-        }
-
-        function calcularTotalReceita() {
-            let q = parseFloat(document.getElementById('r_qtd').value) || 0; let v = parseFloat(document.getElementById('r_v_unit').value) || 0;
-            if (q>0 && v>0) document.getElementById('r_valor').value = (q * v).toFixed(2);
-        }
-        function calcularTotalDespesa() {
-            let q = parseFloat(document.getElementById('d_qtd').value) || 0; let v = parseFloat(document.getElementById('d_v_unit').value) || 0;
-            if (q>0 && v>0) document.getElementById('d_valor').value = (q * v).toFixed(2);
-        }
-
-        function confirmarDuplicacao(idx) {
-            if(confirm('CLONAR lançamento?')) {
-                transacoes.push({ ...transacoes[idx] }); salvarDados(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
-                mostrarToast("DUPLICADO!");
-            }
-        }
-        function confirmarExclusao(idxOriginal) {
-            if(confirm('EXCLUIR lançamento?')) {
-                transacoes.splice(idxOriginal, 1); salvarDados(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
-                mostrarToast("REMOVIDO!");
-            }
-        }
-
-        function abrirModalEdicao(indexOriginal) {
-            indiceEdicao = indexOriginal; const t = transacoes[indexOriginal];
-            let vCat = strSafe(t.categoria).toUpperCase(); let vSet = strSafe(t.setor).toUpperCase();
-            let vLoc = strSafe(t.local).toUpperCase(); let vDesc = strSafe(t.desc).toUpperCase();
-            let tipoLowerT = String(t.tipo).toLowerCase();
-
-            let htmlSel = tipoLowerT === 'receita' ? `<input type="hidden" id="ed_tipo" value="Receita">` : `
-                <label>TIPO:</label><select id="ed_tipo">
-                    <option value="Despesa" ${tipoLowerT === 'despesa' ? 'selected' : ''}>CUSTEIO</option>
-                    <option value="Investimento" ${tipoLowerT === 'investimento' ? 'selected' : ''}>INVESTIMENTO</option>
-                </select>`;
-
-            document.getElementById('form-edicao').innerHTML = `
-                <label>DATA:</label> <input type="date" id="ed_data" value="${strSafe(t.data)}"> ${htmlSel}
-                <label>CATEGORIA:</label> <input type="text" id="ed_categoria" value="${vCat}">
-                <label>SETOR:</label> <input type="text" id="ed_setor" value="${vSet}">
-                <label>LOCAL:</label> <input type="text" id="ed_local" value="${vLoc}">
-                <label>DESCRIÇÃO:</label> <input type="text" id="ed_desc" value="${vDesc}">
-                <label>QTD:</label> <input type="number" id="ed_qtd" step="0.01" value="${parseFloat(t.qtd)||0}">
-                <label>UNID:</label> <input type="text" id="ed_und" value="${strSafe(t.und)}">
-                <label>VALOR TOTAL:</label> <input type="number" id="ed_valor" step="0.01" value="${parseFloat(t.valor)||0}">
-                <label>SITUAÇÃO:</label> <select id="ed_sit">
-                    <option value="Pago" ${strSafe(t.sit).toLowerCase() === 'pago' ? 'selected' : ''}>PAGO</option>
-                    <option value="A pagar" ${strSafe(t.sit).toLowerCase() === 'a pagar' ? 'selected' : ''}>A PAGAR / RECEBER</option>
-                </select>
-            `;
-            document.getElementById('modal-edicao').style.display = 'flex';
-        }
-
-        function fecharModal() { document.getElementById('modal-edicao').style.display = 'none'; }
-
-        function guardarEdicao() {
-            if (indiceEdicao > -1) {
-                transacoes[indiceEdicao].data = document.getElementById('ed_data').value;
-                transacoes[indiceEdicao].tipo = document.getElementById('ed_tipo').value;
-                transacoes[indiceEdicao].categoria = document.getElementById('ed_categoria').value.toUpperCase();
-                transacoes[indiceEdicao].setor = document.getElementById('ed_setor').value.toUpperCase();
-                transacoes[indiceEdicao].local = document.getElementById('ed_local').value.toUpperCase();
-                transacoes[indiceEdicao].desc = document.getElementById('ed_desc').value.toUpperCase();
-                transacoes[indiceEdicao].qtd = document.getElementById('ed_qtd').value;
-                transacoes[indiceEdicao].und = document.getElementById('ed_und').value.toUpperCase();
-                transacoes[indiceEdicao].valor = parseFloat(document.getElementById('ed_valor').value) || 0;
-                transacoes[indiceEdicao].sit = document.getElementById('ed_sit').value;
-                
-                salvarDados(); fecharModal(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); 
-            }
         }
 
         function atualizarOpcoesFiltros() {
@@ -1051,6 +976,33 @@
             document.getElementById('tabela_relatorio').innerHTML = linhasHTML.join('');
         }
 
+        function renderizarTabelasPendencias() {
+            let htmlRec = ''; let htmlDesp = ''; let tRec = 0; let tDesp = 0;
+            let pendentes = transacoes.map((t, i) => ({ item: t, idx: i })).filter(obj => { 
+                let sit = strSafe(obj.item.sit).toLowerCase(); return sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente'); 
+            }).sort((a, b) => new Date(a.item.data || 0) - new Date(b.item.data || 0));
+
+            pendentes.forEach(obj => {
+                let t = obj.item; let v = parseFloat(t.valor) || 0; let dF = formatarData(t.data); let tipoL = String(t.tipo).toLowerCase();
+                
+                if (tipoL === 'receita') {
+                    htmlRec += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:900; color:#1565C0; text-align:right;">${formatarMoeda(v)}</td>
+                        <td style="text-align: center;"><button class="btn-acao" style="background:#1565C0; color:white; font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${obj.idx}, 'Pago')">✔️ RECEBER</button></td></tr>`;
+                    tRec += v;
+                } else {
+                    htmlDesp += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:900; color:#C62828; text-align:right;">${formatarMoeda(v)}</td>
+                        <td style="text-align: center;"><button class="btn-acao" style="background:#C62828; color:white; font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${obj.idx}, 'Pago')">✔️ PAGAR</button></td></tr>`;
+                    tDesp += v;
+                }
+            });
+
+            document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRec || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
+            document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDesp || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
+        }
+
+        function mudarSitEAtualizarPendencias(idx, novaSit) { transacoes[idx].sit = novaSit; salvarDados(); aplicarFiltros(); renderizarTabelasPendencias(); mostrarToast("Liquidada!"); }
+        function mudarSitTransacao(idx, novaSit) { transacoes[idx].sit = novaSit; salvarDados(); aplicarFiltros(); if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico(); }
+
         function atualizarRelatoriosDetalhados() {
             let despSetor = {}; let despCat = {}; let invCat = {}; let recCat = {}; let recLocal = {};
             const filtroMes = document.getElementById('filtro_mes_relatorios') ? document.getElementById('filtro_mes_relatorios').value : '';
@@ -1105,7 +1057,7 @@
 
                 let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (tipoStr === 'receita') ? strSafe(t.desc) : strSafe(t.setor); 
 
-                if (checkTipo && cat.toUpperCase() === categoria.toUpperCase()) {
+                if (checkTipo && cat.trim().toUpperCase() === categoria.trim().toUpperCase()) {
                     let v = parseFloat(t.valor) || 0; valorTotal += v;
                     let chaveAgrupamento = tipoFiltro === 'Saida' ? strSafe(t.setor).toUpperCase() : strSafe(t.local).toUpperCase();
                     if (!chaveAgrupamento || chaveAgrupamento === '-') chaveAgrupamento = "NÃO INFORMADO";
@@ -1183,74 +1135,35 @@
 
             let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
             arrRCat.forEach(x => { 
-                let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0; let safeCatName = String(x[0]).replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                hR += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${safeCatName}', 'Receita')"><div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div></li>`; 
+                let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0; 
+                let encCat = encodeURIComponent(x[0]); // Segurança máxima contra aspas HTML
+                hR += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria(decodeURIComponent('${encCat}'), 'Receita')"><div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div></li>`; 
             });
             document.getElementById('lista_top_receitas').innerHTML = hR || '<li class="item-lista-grafico">Sem receitas</li>';
 
             let arrDCat = Object.entries(dCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxDCat = arrDCat.length > 0 ? arrDCat[0][1] : 0; let hD = '';
             arrDCat.forEach(x => { 
-                let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0; let safeCatName = String(x[0]).replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                hD += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${safeCatName}', 'Saida')"><div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div></li>`; 
+                let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0; 
+                let encCat = encodeURIComponent(x[0]); // Segurança máxima contra aspas HTML
+                hD += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria(decodeURIComponent('${encCat}'), 'Saida')"><div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div></li>`; 
             });
             document.getElementById('lista_top_despesas').innerHTML = hD || '<li class="item-lista-grafico">Sem saídas</li>';
         }
 
-
-        /* =========================================================================
-           LÓGICA AGRÍCOLA (ARQUIVO LOCAL / DRIVE)
-        ========================================================================= */
-        let agriRecords = JSON.parse(localStorage.getItem('adubacao_records_v4')) || [];
-        let estoque = JSON.parse(localStorage.getItem('adubacao_estoque_v3')) || [];
-        let opcoesDin = JSON.parse(localStorage.getItem('adubacao_opcoes_v1')) || {
-            talhoes: ["CAFÉ 2019", "CAFÉ 2022", "CAFÉ 2025", "MARACUJÁ"],
-            tipos: ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "FUNGICIDA", "HERBICIDA", "INSETICIDA"],
-            formas: ["FERTIRRIGAÇÃO", "MANUAL", "PULVERIZAÇÃO"], alvos: ["BROCA-DO-CAFÉ", "BICHO-MINEIRO", "FERRUGEM", "FLORADA", "FRUTIFICAÇÃO", "MATO"]
-        };
-        let arquivoHandle = null;
-
-        async function carregarArquivoDrive() {
-            if (window.showOpenFilePicker) {
-                try {
-                    [arquivoHandle] = await window.showOpenFilePicker({ types: [{ description: 'JSON', accept: {'application/json': ['.json']} }] });
-                    const file = await arquivoHandle.getFile(); const conteudo = await file.text();
-                    processarDadosAgri(conteudo); mostrarToast('✅ Arquivo Agrícola vinculado!');
-                } catch (erro) { console.log("Cancelado"); }
-            } else {
-                const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
-                input.onchange = e => {
-                    const reader = new FileReader();
-                    reader.onload = event => { processarDadosAgri(event.target.result); mostrarToast("✅ Dados Agrícolas carregados!"); };
-                    reader.readAsText(e.target.files[0]);
-                }; input.click();
-            }
+        function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+        function formatarData(dataISO) {
+            if(!dataISO || String(dataISO).toLowerCase() === 'nan') return '-';
+            const partes = String(dataISO).split('-'); return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : dataISO;
+        }
+        function strSafe(val) { return (val === null || val === undefined) ? '' : String(val).trim(); }
+        function mostrarToast(msg) {
+            const toast = document.getElementById("toast"); 
+            if(toast) { toast.innerText = msg; toast.className = "toast show"; setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000); }
         }
 
-        function processarDadosAgri(conteudo) {
-            try {
-                const dados = JSON.parse(conteudo);
-                if (dados.aplicacoes) agriRecords = dados.aplicacoes;
-                if (dados.estoque) estoque = dados.estoque;
-                if (dados.opcoes) opcoesDin = dados.opcoes;
-                renderDatalistsAgri(); popularSeletorSafraApp(); aplicarFiltroSafraApp();
-            } catch (e) { alert('Erro no JSON.'); }
-        }
-
-        async function autoSalvarNoDrive() {
-            if (!arquivoHandle) return; 
-            try {
-                const dados = { aplicacoes: agriRecords, estoque: estoque, opcoes: opcoesDin };
-                const writable = await arquivoHandle.createWritable();
-                await writable.write(JSON.stringify(dados, null, 2)); await writable.close();
-            } catch (erro) { console.log("Erro auto-save"); }
-        }
-
-        function backupDados() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ aplicacoes: agriRecords, estoque: estoque, opcoes: opcoesDin }));
-            const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", "BKP-AGRO-" + new Date().toISOString().slice(0,10) + ".json");
-            document.body.appendChild(a); a.click(); a.remove();
-        }
-
+        /* -------------------------------------------------------------------------
+           BLOCO AGRÍCOLA (Sincronizado via Nuvem e Integrado)
+        ------------------------------------------------------------------------- */
         function preencherTipoProduto() {
             const prod = document.getElementById('produto').value.toUpperCase();
             const item = estoque.find(e => e.produto === prod);
@@ -1260,8 +1173,8 @@
         function popularSeletorSafraApp() {
             const selector = document.getElementById('safraSelector');
             if(!selector) return;
-            const currentSelection = selector.value || obterSafraGeral(new Date().toISOString().substring(0,10));
-            const safras = new Set(); safras.add(obterSafraGeral(new Date().toISOString().substring(0,10)));
+            const currentSelection = selector.value || obterSafraAtual();
+            const safras = new Set(); safras.add(obterSafraAtual());
             agriRecords.forEach(rec => safras.add(obterSafraGeral(rec.data)));
             selector.innerHTML = '<option value="TODAS">TODAS AS SAFRAS</option>' + Array.from(safras).sort().reverse().map(s => `<option value="${s}">${s}</option>`).join('');
             selector.value = Array.from(safras).includes(currentSelection) ? currentSelection : "TODAS";
@@ -1284,8 +1197,7 @@
             let valor = valorStr.toUpperCase().trim();
             if (valor && valor !== '-' && !opcoesDin[categoria].includes(valor)) {
                 if (confirm(`Adicionar "${valor}" à lista de opções futuras?`)) {
-                    opcoesDin[categoria].push(valor); opcoesDin[categoria].sort();
-                    localStorage.setItem('adubacao_opcoes_v1', JSON.stringify(opcoesDin)); autoSalvarNoDrive(); renderDatalistsAgri();
+                    opcoesDin[categoria].push(valor); opcoesDin[categoria].sort(); salvarDados(); renderDatalistsAgri();
                 }
             } return valor || '-';
         }
@@ -1314,7 +1226,7 @@
                 }
             } else { agriRecords[editIndex] = record; document.getElementById('editIndex').value = "-1"; }
             
-            popularSeletorSafraApp(); document.getElementById('safraSelector').value = obterSafraGeral(record.data); aplicarFiltroSafraApp();
+            salvarDados(); popularSeletorSafraApp(); document.getElementById('safraSelector').value = obterSafraGeral(record.data); aplicarFiltroSafraApp();
             this.reset(); document.getElementById('status').value = 'PLANEJADO'; mostrarToast("Registro Agrícola Salvo!");
         });
 
@@ -1331,13 +1243,11 @@
                 if (itemIndex >= 0) estoque[itemIndex].qtd += modif;
                 else if (newStatus === 'APLICADO') estoque.push({ produto: rec.produto, principio: "", tipo: rec.tipo, qtd: modif, un: rec.dosagem_un, valor_unit: 0 });
             }
-            aplicarFiltroSafraApp();
+            salvarDados(); aplicarFiltroSafraApp();
         }
 
         function saveAndRenderApp() {
             agriRecords.sort((a, b) => new Date(a.data) - new Date(b.data));
-            localStorage.setItem('adubacao_records_v4', JSON.stringify(agriRecords)); autoSalvarNoDrive(); 
-
             const safraSelecionada = document.getElementById('safraSelector').value;
             const visibleRecords = safraSelecionada === "TODAS" ? agriRecords : agriRecords.filter(r => obterSafraGeral(r.data) === safraSelecionada);
 
@@ -1359,7 +1269,7 @@
                     <td>${rec.tipo}</td><td>${rec.alvo||'-'}</td><td>${rec.dosagem}</td><td>${rec.forma||'-'}</td>
                     <td>${formatarMoeda(custoTotal)}</td>
                     <td><div class="${statusClass}" onclick="toggleStatusApp(${vIdx})">${rec.status} 🔄</div></td>
-                    <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editAgriRecord(${vIdx})">✏️️</button><button class="btn-acao btn-excluir" onclick="deleteAgriRecord(${vIdx})">🗑️</button></td>
+                    <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editAgriRecord(${vIdx})">✏️</button><button class="btn-acao btn-excluir" onclick="deleteAgriRecord(${vIdx})">🗑️</button></td>
                 </tr>`;
             });
             document.getElementById('tableBodyAgri').innerHTML = html;
@@ -1380,12 +1290,11 @@
                 else estoque.push(estRecord);
             } else { estoque[editIndex] = estRecord; document.getElementById('editEstoqueIndex').value = "-1"; }
             
-            renderDatalistsAgri(); saveAndRenderEstoque(); saveAndRenderApp(); this.reset(); mostrarToast("Estoque Atualizado!");
+            salvarDados(); renderDatalistsAgri(); saveAndRenderEstoque(); saveAndRenderApp(); this.reset(); mostrarToast("Estoque Atualizado!");
         });
 
         function saveAndRenderEstoque() {
             estoque.sort((a, b) => a.produto.localeCompare(b.produto));
-            localStorage.setItem('adubacao_estoque_v3', JSON.stringify(estoque)); autoSalvarNoDrive();
             let html = ''; let somaTotal = 0;
             
             estoque.forEach((rec, index) => {
@@ -1410,8 +1319,6 @@
             document.getElementById('estoqueBody').innerHTML = html;
             document.getElementById('th-valor-total-est').innerHTML = `VALOR TOTAL<br><span style="font-size: 0.85em; color: #FFF;">${formatarMoeda(somaTotal)}</span>`;
         }
-
-        let chartS_Agri = null, chartT_Agri = null, chartTp_Agri = null, chartCS_Agri = null, chartCT_Agri = null;
 
         function renderAgriDashboard() {
             if (typeof Chart === 'undefined') return;
@@ -1450,15 +1357,14 @@
                 if(obj) obj.destroy();
                 const ctx = document.getElementById(ctxId).getContext('2d');
                 return new Chart(ctx, { type: type, data: { labels: labelsKeys.length ? labelsKeys : ['Sem Dados'], datasets: [
-                    { label: 'LITROS (L)', data: labelsKeys.map(k => ds1(k)), backgroundColor: color1, borderRadius: 4 },
-                    { label: 'QUILOS (KG)', data: labelsKeys.map(k => ds2(k)), backgroundColor: color2, borderRadius: 4 }
-                ]}, options: { responsive: true, maintainAspectRatio: false, plugins:{ legend:{position:'bottom'} } } });
+                    { label: 'LITROS (L)', data: labelsKeys.map(k => ds1(k)), backgroundColor: color1, borderRadius: 8 },
+                    { label: 'QUILOS (KG)', data: labelsKeys.map(k => ds2(k)), backgroundColor: color2, borderRadius: 8 }
+                ]}, options: { responsive: true, maintainAspectRatio: false, plugins:{ legend:{position:'bottom'} }, layout: { padding: 10 } } });
             }
 
             const safrasK = Object.keys(dS).sort();
-            chartS_Agri = genChart(chartS_Agri, 'chartCustoSafra', 'bar', Object.keys(dCS).sort(), k=>dCS[k], k=>0, '#8E44AD', 'transparent'); // Reusing logic roughly
-            chartS_Agri.data.datasets[0].label = 'CUSTO (R$)';
-            chartS_Agri.update();
+            chartS_Agri = genChart(chartS_Agri, 'chartCustoSafra', 'bar', Object.keys(dCS).sort(), k=>dCS[k], k=>0, '#8E44AD', 'transparent');
+            chartS_Agri.data.datasets[0].label = 'CUSTO (R$)'; chartS_Agri.update();
 
             const talhoesK = Object.keys(dT).sort();
             chartT_Agri = genChart(chartT_Agri, 'chartTalhao', 'bar', talhoesK, k=>dT[k].L, k=>dT[k].KG, '#4FC3F7', '#81C784');
@@ -1466,15 +1372,15 @@
             const tiposK = Object.keys(dTp).sort();
             if(chartTp_Agri) chartTp_Agri.destroy();
             chartTp_Agri = new Chart(document.getElementById('chartTipo').getContext('2d'), {
-                type: 'doughnut', data: { labels: tiposK.length ? tiposK : ['Sem Dados'], datasets: [{ data: tiposK.length ? tiposK.map(k => dTp[k].L + dTp[k].KG) : [1], borderWidth: 0, hoverOffset: 8, backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF'] }] },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '65%' }
+                type: 'doughnut', data: { labels: tiposK.length ? tiposK : ['Sem Dados'], datasets: [{ data: tiposK.length ? tiposK.map(k => dTp[k].L + dTp[k].KG) : [1], borderWidth: 0, hoverOffset: 12, backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF'] }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', layout: { padding: 15 } }
             });
 
             const costTalhoesK = Object.keys(dCT).sort();
             if(chartCT_Agri) chartCT_Agri.destroy();
             chartCT_Agri = new Chart(document.getElementById('chartCustoTalhao').getContext('2d'), {
-                type: 'bar', data: { labels: costTalhoesK.length ? costTalhoesK : ['Sem Dados'], datasets: [{ label: 'CUSTO (R$)', data: costTalhoesK.map(k => dCT[k]), backgroundColor: '#FF8F00', borderRadius: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false }
+                type: 'bar', data: { labels: costTalhoesK.length ? costTalhoesK : ['Sem Dados'], datasets: [{ label: 'CUSTO (R$)', data: costTalhoesK.map(k => dCT[k]), backgroundColor: '#FF8F00', borderRadius: 8 }] },
+                options: { responsive: true, maintainAspectRatio: false, layout: { padding: 10 } }
             });
         }
 
@@ -1492,7 +1398,7 @@
             if(confirm("EXCLUIR APLICAÇÃO?")) { 
                 const safra = document.getElementById('safraSelector').value;
                 const vis = safra === "TODAS" ? agriRecords : agriRecords.filter(r => obterSafraGeral(r.data) === safra);
-                agriRecords.splice(agriRecords.indexOf(vis[vIdx]), 1); aplicarFiltroSafraApp();
+                agriRecords.splice(agriRecords.indexOf(vis[vIdx]), 1); salvarDados(); aplicarFiltroSafraApp();
             } 
         }
         function editEstoque(idx) {
@@ -1501,7 +1407,7 @@
             document.getElementById('est_un').value = r.un; document.getElementById('est_valor_unit').value = r.valor_unit || 0;
             document.getElementById('editEstoqueIndex').value = idx;
         }
-        function deleteEstoque(idx) { if(confirm("EXCLUIR ITEM?")) { estoque.splice(idx, 1); renderDatalistsAgri(); aplicarFiltroSafraApp(); } }
+        function deleteEstoque(idx) { if(confirm("EXCLUIR ITEM?")) { estoque.splice(idx, 1); salvarDados(); renderDatalistsAgri(); aplicarFiltroSafraApp(); } }
 
         function updateFilterOptionsAgri(visibleRecords) {
             const filters = [ { id: 'f_agri_data', k: 'data', fmt: formatarData }, { id: 'f_agri_talhao', k: 'talhao' }, { id: 'f_agri_produto', k: 'produto' }, { id: 'f_agri_tipo', k: 'tipo' }, { id: 'f_agri_alvo', k: 'alvo' }, { id: 'f_agri_forma', k: 'forma' }, { id: 'f_agri_status', k: 'status' } ];
@@ -1538,12 +1444,7 @@
         }
 
         // INIT GERAL
-        window.onload = () => { 
-            carregarDadosNuvem(); 
-            renderDatalistsAgri(); 
-            popularSeletorSafraApp(); 
-            aplicarFiltroSafraApp();
-        };
+        window.onload = () => { carregarDadosNuvem(); };
     </script>
 </body>
 </html>
