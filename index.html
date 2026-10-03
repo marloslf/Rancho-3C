@@ -14,11 +14,9 @@
             --cor-verde-escuro: #1B5E20;
             --cor-madeira: #5D4037;
             
-            /* Fundo Neumórfico Suave e Moderno */
             --cor-fundo: #e0e5ec; 
             --cor-texto: #2C3E50;
             
-            /* Sombras 3D High-Tech */
             --sombra-neumorfica: 9px 9px 16px rgba(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
             --sombra-interna: inset 6px 6px 10px rgba(163,177,198,0.5), inset -6px -6px 10px rgba(255,255,255, 0.8);
             
@@ -43,29 +41,20 @@
             background-color: var(--cor-fundo); color: var(--cor-texto);
         }
 
-        /* --- MARCA D'ÁGUA DO RANCHO 3C --- */
+        /* --- MARCA D'ÁGUA --- */
         .watermark-logo {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 70vw;
-            height: 70vh;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 70vw; height: 70vh;
             background-image: url('https://i.imgur.com/jPLDeyi.png');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain;
-            opacity: 0.04; /* Opacidade super clara para não atrapalhar a leitura */
-            z-index: -1; /* Fica atrás de todos os elementos */
-            pointer-events: none; /* Impede que clique acidentalmente na imagem */
+            background-repeat: no-repeat; background-position: center; background-size: contain;
+            opacity: 0.04; z-index: -1; pointer-events: none; 
         }
 
         /* --- CABEÇALHO --- */
         .header-container { 
             display: flex; justify-content: space-between; align-items: center; 
             background: var(--cor-fundo); padding: 10px 30px; border-radius: var(--borda-raio);
-            box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.4);
-            margin-bottom: 25px;
+            box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.4); margin-bottom: 25px;
         }
         .header-container img { max-width: 80px; filter: drop-shadow(4px 4px 6px rgba(0,0,0,0.1)); border-radius: 8px;}
         h2, h3 { color: var(--cor-verde-escuro); font-weight: 900; margin: 10px 0;}
@@ -73,24 +62,17 @@
         /* --- MENU FIXO --- */
         .menu { 
             display: flex; justify-content: center; gap: 20px; margin-bottom: 25px; 
-            flex-wrap: wrap; align-items: center;
-            position: sticky; top: 0; z-index: 1001; 
-            background-color: var(--cor-fundo); 
-            padding: 15px 0; margin-top: -15px;
+            flex-wrap: wrap; align-items: center; position: sticky; top: 0; z-index: 1001; 
+            background-color: var(--cor-fundo); padding: 15px 0; margin-top: -15px;
         }
         .menu button { 
-            padding: 12px 24px; cursor: pointer; border: none; 
-            background: var(--cor-fundo); color: #666; border-radius: 30px; 
-            font-weight: 900; font-size: 14px; transition: all 0.3s ease; position: relative;
-            box-shadow: var(--sombra-neumorfica);
+            padding: 12px 24px; cursor: pointer; border: none; background: var(--cor-fundo); color: #666; 
+            border-radius: 30px; font-weight: 900; font-size: 14px; transition: all 0.3s ease; 
+            position: relative; box-shadow: var(--sombra-neumorfica);
         }
         .menu button:hover { transform: translateY(-2px); color: var(--cor-madeira);}
-        .menu button.btn-ativo { 
-            color: var(--cor-madeira); 
-            box-shadow: var(--sombra-interna);
-        }
+        .menu button.btn-ativo { color: var(--cor-madeira); box-shadow: var(--sombra-interna); }
 
-        /* BADGE DE ATENÇÃO */
         .badge-atrasadas {
             position: absolute; top: -8px; right: -8px;
             background: linear-gradient(135deg, #ef5350, #c62828); color: white; font-weight: 900; font-size: 11px;
@@ -123,8 +105,7 @@
         .resumo-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; margin-bottom: 25px; }
         .card { 
             padding: 20px; border-radius: var(--borda-raio); text-align: center; color: white; position: relative; overflow: hidden; 
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: var(--sombra-neumorfica);
+            border: 1px solid rgba(255,255,255,0.2); box-shadow: var(--sombra-neumorfica);
         }
         .card::after { 
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 50%;
@@ -147,23 +128,17 @@
         .legenda-item { display: flex; align-items: center; gap: 6px; color: #555; }
         .ponto-cor { width: 14px; height: 14px; border-radius: 50%; display: inline-block; box-shadow: inset 2px 2px 4px rgba(255,255,255,0.5), 2px 2px 4px rgba(0,0,0,0.2);}
 
-        /* --- GRÁFICOS DE BARRAS TUBULARES 3D --- */
         .top-graficos-box { 
             background: var(--cor-fundo); padding: 25px; border-radius: 24px; 
             box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6); flex: 1; min-width: 300px;
         }
         .item-lista-grafico { list-style: none; margin-bottom: 15px; font-size: 14px; font-weight: 800; text-transform: uppercase; color: var(--cor-texto); padding: 10px 15px; border-radius: 12px; transition: 0.3s;}
-        
-        .item-lista-grafico.interativo:hover { 
-            background-color: white; transform: scale(1.02); 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08); cursor: pointer; 
-        }
+        .item-lista-grafico.interativo:hover { background-color: white; transform: scale(1.02); box-shadow: 0 10px 20px rgba(0,0,0,0.08); cursor: pointer; }
         
         .barra-grafico-container { 
             width: 100%; border-radius: 10px; margin-top: 8px; height: 14px; 
             background: var(--cor-fundo); box-shadow: var(--sombra-interna); overflow: visible; position: relative;
         }
-        
         .barra-grafico-receita { 
             height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1);
             background: linear-gradient(to bottom, #A5D6A7 0%, #4CAF50 40%, #2E7D32 100%);
@@ -177,7 +152,6 @@
 
         /* --- LAYOUT DE LANÇAMENTO E EXTRATO --- */
         .area-fixa-topo { position: sticky; top: 75px; z-index: 100; background-color: var(--cor-fundo); padding-bottom: 10px; }
-        
         .linha-lancamento { 
             padding: 20px; border-radius: 20px; margin-bottom: 20px; border: none; 
             box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5);
@@ -190,11 +164,8 @@
         .grid-receita { display: grid; grid-template-columns: 110px 3.5fr 2fr 2fr 70px 60px 100px 110px 90px 140px; gap: 12px; align-items: center; }
 
         .grid-despesa input, .grid-receita input, .grid-despesa select, .grid-receita select, .filter-row input, .filter-row select {
-            padding: 10px; font-size: 13px; border: none;
-            border-radius: 8px; font-weight: 800; text-transform: uppercase;
-            width: 100%; 
-            background-color: rgba(255, 255, 255, 0.5); 
-            box-shadow: var(--sombra-interna); color: var(--cor-texto); transition: 0.2s;
+            padding: 10px; font-size: 13px; border: none; border-radius: 8px; font-weight: 800; text-transform: uppercase; width: 100%; 
+            background-color: rgba(255, 255, 255, 0.5); box-shadow: var(--sombra-interna); color: var(--cor-texto); transition: 0.2s;
         }
         .grid-despesa input:focus, .grid-receita input:focus, .filter-row input:focus {
             outline: none; box-shadow: inset 4px 4px 8px rgba(163,177,198,0.4), inset -4px -4px 8px rgba(255,255,255, 0.9), 0 0 0 2px var(--cor-verde-fazenda);
@@ -203,16 +174,14 @@
 
         .btn-salvar-compacto { 
             padding: 10px; font-size: 13px; font-weight: 800; border: none; border-radius: 8px; 
-            cursor: pointer; color: white; transition: 0.2s; 
-            box-shadow: 4px 4px 8px rgba(163,177,198,0.5), -4px -4px 8px rgba(255,255,255, 0.8);
+            cursor: pointer; color: white; transition: 0.2s; box-shadow: 4px 4px 8px rgba(163,177,198,0.5), -4px -4px 8px rgba(255,255,255, 0.8);
         }
         .btn-salvar-compacto:hover { filter: brightness(1.1); transform: translateY(-2px);}
         .btn-salvar-compacto:active { box-shadow: inset 4px 4px 8px rgba(0,0,0,0.2), inset -4px -4px 8px rgba(255,255,255,0.1); transform: translateY(1px);}
         
         .select-tipo-saida {
-            background-color: rgba(255, 255, 255, 0.6); border: none; border-radius: 8px;
-            padding: 4px 10px; font-weight: 900; color: var(--cor-despesa); margin-left: 10px;
-            font-size: 13px; cursor: pointer; transition: 0.3s; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            background-color: rgba(255, 255, 255, 0.6); border: none; border-radius: 8px; padding: 4px 10px; font-weight: 900; 
+            color: var(--cor-despesa); margin-left: 10px; font-size: 13px; cursor: pointer; transition: 0.3s; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
         }
 
         .barra-pesquisa-relatorio { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: var(--cor-fundo); padding: 15px 20px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5);}
@@ -264,6 +233,7 @@
             body { background: white; margin: 0; padding: 0; zoom: 100%; }
             .tab, .table-container, .top-graficos-box, .grafico-container { box-shadow: none; border: 1px solid #ccc; }
             .area-fixa-topo, .menu { position: static; }
+            .watermark-logo { opacity: 0.1; }
             @page { margin: 1cm; size: landscape; }
         }
     </style>
@@ -272,6 +242,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
+    <!-- MARCA D'ÁGUA EXCLUSIVA NO FUNDO -->
+    <div class="watermark-logo"></div>
 
     <div class="header-container no-print">
         <div style="width: 150px; text-align: left;">
@@ -287,7 +260,7 @@
         <button id="btn_movimentacoes" onclick="showTab('movimentacoes')">📋 LANÇAMENTOS E EXTRATO</button>
         <button id="btn_relatorios_detalhados" onclick="showTab('relatorios_detalhados')">📈 RELATÓRIOS DETALHADOS</button>
         
-        <button id="btn_pendencias" style="color: #E65100;" onclick="showTab('pendencias')">
+        <button id="btn_pendencias" onclick="showTab('pendencias')" style="color: #E65100;">
             🔔 PENDÊNCIAS
             <span id="badge_atrasadas" class="badge-atrasadas" style="display: none;">0</span>
         </button>
@@ -298,9 +271,6 @@
 
     <!-- ABA 1: DASHBOARD DE RESUMO -->
     <div id="resumo" class="tab active">
-        
-        <!-- MARCA D'ÁGUA EXCLUSIVA -->
-        <div class="watermark-logo"></div>
         
         <div class="no-print" style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px; background: var(--cor-fundo); padding: 20px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <label style="font-weight: 900; color: var(--cor-madeira); text-transform: uppercase; font-size: 14px;">Filtrar Dashboard por Safra:</label>
@@ -336,7 +306,7 @@
         <div class="dashboard-inferior" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px;">
             <div class="grafico-container">
                 <h4 style="margin: 0 0 15px 0; color: var(--cor-madeira); font-size: 16px; font-weight: 900;">SAÍDAS EFETIVADAS (PAGAS)</h4>
-                <div style="width: 100%; height: 220px; position: relative;" id="wrapper_caixa">
+                <div style="width: 100%; height: 220px; position: relative;">
                     <canvas id="canvas_caixa"></canvas>
                 </div>
                 <div class="legenda-grafico">
@@ -347,7 +317,7 @@
             </div>
             <div class="grafico-container">
                 <h4 style="margin: 0 0 15px 0; color: #555; font-size: 16px; font-weight: 900;">PREVISÃO (PENDENTES)</h4>
-                <div style="width: 100%; height: 220px; position: relative;" id="wrapper_pendente">
+                <div style="width: 100%; height: 220px; position: relative;">
                     <canvas id="canvas_pendente"></canvas>
                 </div>
                 <div class="legenda-grafico">
@@ -369,26 +339,23 @@
         </div>
     </div>
     
-    <!-- ABA EXTRA: VISÃO GERAL DETALHADA DA CATEGORIA (RAIO-X 2.0) -->
+    <!-- ABA EXTRA: VISÃO GERAL DETALHADA DA CATEGORIA (RAIO-X) -->
     <div id="visao_categoria" class="tab">
         <div style="background: var(--cor-fundo); padding: 30px; border-radius: 24px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 3px solid white; padding-bottom: 15px;">
                 <div>
                     <h3 id="titulo_raiox" style="margin: 0; font-size: 26px; color: var(--cor-texto); font-weight: 900;">🔍 RAIO-X</h3>
-                    <div id="valor_total_raiox" style="font-size: 32px; font-weight: 900; color: var(--cor-madeira); text-shadow: 1px 1px 2px white; margin-top: 5px;">R$ 0,00</div>
                 </div>
-                <button class="btn-limpar" style="background-color: #555; padding: 12px 25px; border-radius: 12px; box-shadow: var(--sombra-neumorfica); font-weight: 900;" onclick="showTab('resumo')">⬅️ VOLTAR AO DASHBOARD</button>
+                <button class="btn-limpar" style="background-color: var(--cor-madeira); padding: 12px 25px; border-radius: 12px; box-shadow: var(--sombra-neumorfica); font-weight: 900;" onclick="showTab('resumo')">⬅️ VOLTAR AO DASHBOARD</button>
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
-                <!-- Esquerda: Agrupamento Maior -->
                 <div>
                     <h4 id="subtitulo_raiox" style="color: #666; text-transform: uppercase; font-weight: 900; border-left: 4px solid var(--cor-madeira); padding-left: 10px;">Divisão Primária</h4>
                     <ul id="lista_raiox" class="raio-x-lista"></ul>
                 </div>
                 
-                <!-- Direita: Detalhamento Fino (Descrições) -->
                 <div>
                     <h4 style="color: #666; text-transform: uppercase; font-weight: 900; border-left: 4px solid #1565C0; padding-left: 10px;">Detalhamento por Descrição do Item</h4>
                     <ul id="lista_raiox_desc" class="raio-x-lista" style="background: white; padding: 20px; border-radius: 16px; box-shadow: var(--sombra-interna);"></ul>
@@ -673,17 +640,15 @@
         let chartCaixaObj = null;
         let chartPendenteObj = null;
 
-        // Armadura de segurança: Se o Chart.js carregar, registamos o plugin 3D. 
-        // Se falhar (offline), o código não trava.
         if (typeof Chart !== 'undefined') {
             const pluginSombra3D = {
                 id: 'pluginSombra3D',
                 beforeDatasetsDraw: (chart) => {
                     chart.ctx.save();
-                    chart.ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
-                    chart.ctx.shadowBlur = 15;
-                    chart.ctx.shadowOffsetX = 6;
-                    chart.ctx.shadowOffsetY = 10;
+                    chart.ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+                    chart.ctx.shadowBlur = 20;
+                    chart.ctx.shadowOffsetX = 8;
+                    chart.ctx.shadowOffsetY = 12;
                 },
                 afterDatasetsDraw: (chart) => { chart.ctx.restore(); }
             };
@@ -757,7 +722,12 @@
                 const localData = localStorage.getItem('rancho3c_offline');
                 if(localData) { transacoes = normalizarDatas(JSON.parse(localData)); }
             }
-            preencherSelectsLancamento(); preencherSelectsSafra(); atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico(); renderizarTabelasPendencias();
+            preencherSelectsLancamento(); preencherSelectsSafra(); atualizarOpcoesFiltros(); aplicarFiltros(); 
+            
+            // Só atualiza os gráficos no arranque se o Dashboard estiver aberto
+            if(document.getElementById('resumo').classList.contains('active')) {
+                atualizarResumoEGrafico(); 
+            }
         }
 
         async function salvarDados() {
@@ -823,7 +793,7 @@
                 }
 
                 if(camposFaltando.length > 0) {
-                    alert("⚠️️ IMPOSSÍVEL GRAVAR:\nPor favor, preencha os seguintes campos obrigatórios:\n\n- " + camposFaltando.join("\n- "));
+                    alert("⚠️ IMPOSSÍVEL GRAVAR:\nPor favor, preencha os seguintes campos obrigatórios:\n\n- " + camposFaltando.join("\n- "));
                     return; 
                 }
 
@@ -838,7 +808,7 @@
                     filaXML.shift(); 
                     if (filaXML.length > 0) {
                         mostrarToast('Item gravado! A carregar o próximo...'); carregarProximoItemXML();
-                        preencherSelectsSafra(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento(); atualizarResumoEGrafico(); renderizarTabelasPendencias();
+                        preencherSelectsSafra(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento(); 
                         return; 
                     } else {
                         document.getElementById('xml_contador').innerText = ''; document.getElementById('btn_cancelar_xml').style.display = 'none';
@@ -846,41 +816,11 @@
                     }
                 }
                 limparFormulario(tipoBase);
-                preencherSelectsSafra(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento(); atualizarResumoEGrafico(); renderizarTabelasPendencias();
+                preencherSelectsSafra(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento();
+                
                 if(filaXML.length === 0) { mostrarToast(tipoFinal.toUpperCase() + ' GRAVADA!'); document.getElementById(prefix + 'data').focus(); }
             } catch (error) { alert("Erro ao gravar: " + error.message); }
         }
-
-        function renderizarTabelasPendencias() {
-            let htmlRecPend = ''; let htmlDespPend = ''; let totRecPend = 0; let totDespPend = 0;
-            let pendentes = transacoes.map((t, i) => ({ item: t, indexOriginal: i }))
-                .filter(obj => { let sit = strSafe(obj.item.sit).toLowerCase(); return sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente'); });
-            pendentes.sort((a, b) => new Date(a.item.data || 0) - new Date(b.item.data || 0));
-
-            pendentes.forEach(obj => {
-                let t = obj.item; let idx = obj.indexOriginal; let sit = strSafe(t.sit).toLowerCase();
-                let v = parseFloat(t.valor) || 0; let dF = formatarData(t.data);
-                
-                if (t.tipo === 'Receita' && sit.includes('receber')) {
-                    htmlRecPend += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:bold; color:#1565C0; text-align:right;">${formatarMoeda(v)}</td>
-                        <td style="text-align: center;"><button class="btn-acao bg-pago" style="font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️ RECEBER</button></td></tr>`;
-                    totRecPend += v;
-                } else if ((t.tipo === 'Despesa' || t.tipo === 'Investimento') && sit.includes('pagar')) {
-                    htmlDespPend += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:bold; color:#C62828; text-align:right;">${formatarMoeda(v)}</td>
-                        <td style="text-align: center;"><button class="btn-acao bg-pago" style="font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️ PAGAR</button></td></tr>`;
-                    totDespPend += v;
-                }
-            });
-
-            if (htmlRecPend === '') htmlRecPend = '<tr><td colspan="4" style="text-align:center; padding: 15px;">🎉 Nenhuma receita pendente!</td></tr>';
-            else htmlRecPend += `<tr style="background-color:#e3f2fd;"><td colspan="2" style="font-weight:900;">TOTAL A RECEBER</td><td style="font-weight:900; color:#1565C0; text-align:right; font-size:15px;">${formatarMoeda(totRecPend)}</td><td></td></tr>`;
-            if (htmlDespPend === '') htmlDespPend = '<tr><td colspan="4" style="text-align:center; padding: 15px;">🎉 Nenhuma conta a pagar!</td></tr>';
-            else htmlDespPend += `<tr style="background-color:#ffebee;"><td colspan="2" style="font-weight:900;">TOTAL A PAGAR</td><td style="font-weight:900; color:#C62828; text-align:right; font-size:15px;">${formatarMoeda(totDespPend)}</td><td></td></tr>`;
-
-            document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRecPend; document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDespPend;
-        }
-
-        function mudarSitEAtualizarPendencias(idx, novaSit) { mudarSitTransacao(idx, novaSit); mostrarToast("Conta liquidada!"); }
 
         function processarXML(event) {
             const file = event.target.files[0]; if (!file) return;
@@ -931,6 +871,7 @@
         }
         function strSafe(val) { return (val === null || val === undefined || val === 'nan' || val === '-') ? '' : String(val).trim(); }
 
+        // --- SISTEMA DE NAVEGAÇÃO DESACOPLADO (Resolve o Bug do Chart.js) ---
         function showTab(id) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
@@ -940,7 +881,9 @@
             else if (id === 'pendencias') { document.getElementById('btn_pendencias').classList.add('btn-ativo'); }
             else if (id !== 'visao_categoria') { document.getElementById('btn_' + id).classList.add('btn-ativo'); }
             
-            if(id === 'resumo' || id === 'relatorios_detalhados') atualizarResumoEGrafico();
+            // Só executa o código que pertence a cada aba quando ela é aberta
+            if(id === 'resumo') { atualizarResumoEGrafico(); }
+            if(id === 'relatorios_detalhados') { atualizarRelatoriosDetalhados(); }
             if(id === 'movimentacoes') { atualizarOpcoesFiltros(); preencherSelectsLancamento(); aplicarFiltros(); }
             if(id === 'pendencias') { renderizarTabelasPendencias(); }
             
@@ -1001,7 +944,7 @@
         function confirmarDuplicacao(idx) {
             if(confirm('Deseja CLONAR este lançamento?')) {
                 let nova = { ...transacoes[idx] }; transacoes.push(nova); salvarDados();
-                preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico(); renderizarTabelasPendencias();
+                preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
                 mostrarToast("LANÇAMENTO DUPLICADO!");
             }
         }
@@ -1009,7 +952,7 @@
         function confirmarExclusao(idxOriginal) {
             if(confirm('Deseja EXCLUIR este lançamento?')) {
                 transacoes.splice(idxOriginal, 1); salvarDados();
-                preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico(); renderizarTabelasPendencias();
+                preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
                 mostrarToast("REMOVIDO!");
             }
         }
@@ -1099,7 +1042,7 @@
                 transacoes[indiceEdicao].valor = parseFloat(document.getElementById('ed_valor').value) || 0;
                 transacoes[indiceEdicao].sit = document.getElementById('ed_sit').value;
                 
-                salvarDados(); fecharModal(); preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); atualizarResumoEGrafico(); renderizarTabelasPendencias();
+                salvarDados(); fecharModal(); preencherSelectsSafra(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
             }
         }
 
@@ -1187,8 +1130,6 @@
             renderTabela(lista);
         }
 
-        function mudarSitTransacao(idx, novaSit) { transacoes[idx].sit = novaSit; salvarDados(); aplicarFiltros(); atualizarResumoEGrafico(); renderizarTabelasPendencias(); }
-
         function renderTabela(lista) {
             const tbody = document.getElementById('tabela_relatorio');
             let linhasHTML = [];
@@ -1242,79 +1183,201 @@
             tbody.innerHTML = linhasHTML.join('');
         }
 
-        // --- DASHBOARD E INTEGRAÇÃO CHART.JS ---
-        // A lógica do Chart.js só é executada se a biblioteca tiver carregado com sucesso.
+        function mudarSitTransacao(idx, novaSit) { transacoes[idx].sit = novaSit; salvarDados(); aplicarFiltros(); if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico(); if(document.getElementById('pendencias').classList.contains('active')) renderizarTabelasPendencias(); }
+
+        function renderizarTabelasPendencias() {
+            let htmlRecPend = ''; let htmlDespPend = ''; let totRecPend = 0; let totDespPend = 0;
+            let pendentes = transacoes.map((t, i) => ({ item: t, indexOriginal: i }))
+                .filter(obj => { let sit = strSafe(obj.item.sit).toLowerCase(); return sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente'); });
+            pendentes.sort((a, b) => new Date(a.item.data || 0) - new Date(b.item.data || 0));
+
+            pendentes.forEach(obj => {
+                let t = obj.item; let idx = obj.indexOriginal; let sit = strSafe(t.sit).toLowerCase();
+                let v = parseFloat(t.valor) || 0; let dF = formatarData(t.data);
+                
+                if (t.tipo === 'Receita' && sit.includes('receber')) {
+                    htmlRecPend += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:bold; color:#1565C0; text-align:right;">${formatarMoeda(v)}</td>
+                        <td style="text-align: center;"><button class="btn-acao bg-pago" style="font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️ RECEBER</button></td></tr>`;
+                    totRecPend += v;
+                } else if ((t.tipo === 'Despesa' || t.tipo === 'Investimento') && sit.includes('pagar')) {
+                    htmlDespPend += `<tr><td>${dF}</td><td>${strSafe(t.local)}</td><td style="font-weight:bold; color:#C62828; text-align:right;">${formatarMoeda(v)}</td>
+                        <td style="text-align: center;"><button class="btn-acao bg-pago" style="font-size:11px; width:100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" onclick="mudarSitEAtualizarPendencias(${idx}, 'Pago')" title="Dar baixa nesta conta">✔️ PAGAR</button></td></tr>`;
+                    totDespPend += v;
+                }
+            });
+
+            if (htmlRecPend === '') htmlRecPend = '<tr><td colspan="4" style="text-align:center; padding: 15px;">🎉 Nenhuma receita pendente!</td></tr>';
+            else htmlRecPend += `<tr style="background-color:#e3f2fd;"><td colspan="2" style="font-weight:900;">TOTAL A RECEBER</td><td style="font-weight:900; color:#1565C0; text-align:right; font-size:15px;">${formatarMoeda(totRecPend)}</td><td></td></tr>`;
+            if (htmlDespPend === '') htmlDespPend = '<tr><td colspan="4" style="text-align:center; padding: 15px;">🎉 Nenhuma conta a pagar!</td></tr>';
+            else htmlDespPend += `<tr style="background-color:#ffebee;"><td colspan="2" style="font-weight:900;">TOTAL A PAGAR</td><td style="font-weight:900; color:#C62828; text-align:right; font-size:15px;">${formatarMoeda(totDespPend)}</td><td></td></tr>`;
+
+            document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRecPend; document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDespPend;
+        }
+
+        function mudarSitEAtualizarPendencias(idx, novaSit) { mudarSitTransacao(idx, novaSit); mostrarToast("Conta liquidada!"); }
+
         function renderizarGraficos(tR, tD, tI, aR, aP) {
-            
-            // Se o utilizador estiver offline e não conseguir carregar o Chart.js, ocultamos a caixa branca vazia
-            if (typeof Chart === 'undefined') {
-                document.querySelectorAll('.grafico-container').forEach(el => el.style.display = 'none');
-                return;
-            } else {
-                document.querySelectorAll('.grafico-container').forEach(el => el.style.display = 'flex');
-            }
+            if (typeof Chart === 'undefined' || !document.getElementById('resumo').classList.contains('active')) return;
 
             if (chartCaixaObj) chartCaixaObj.destroy();
             if (chartPendenteObj) chartPendenteObj.destroy();
 
             const ctxCaixa = document.getElementById('canvas_caixa').getContext('2d');
-            
-            let gradRec = ctxCaixa.createLinearGradient(0, 0, 0, 300);
-            gradRec.addColorStop(0, '#81C784'); gradRec.addColorStop(1, '#1B5E20');
-            
-            let gradDesp = ctxCaixa.createLinearGradient(0, 0, 0, 300);
-            gradDesp.addColorStop(0, '#FFB74D'); gradDesp.addColorStop(1, '#E65100');
-
-            let gradInv = ctxCaixa.createLinearGradient(0, 0, 0, 300);
-            gradInv.addColorStop(0, '#BA68C8'); gradInv.addColorStop(1, '#4A148C');
+            let gradRec = ctxCaixa.createLinearGradient(0, 0, 0, 300); gradRec.addColorStop(0, '#81C784'); gradRec.addColorStop(1, '#1B5E20');
+            let gradDesp = ctxCaixa.createLinearGradient(0, 0, 0, 300); gradDesp.addColorStop(0, '#FFB74D'); gradDesp.addColorStop(1, '#E65100');
+            let gradInv = ctxCaixa.createLinearGradient(0, 0, 0, 300); gradInv.addColorStop(0, '#BA68C8'); gradInv.addColorStop(1, '#4A148C');
 
             chartCaixaObj = new Chart(ctxCaixa, {
                 type: 'doughnut',
-                data: {
-                    labels: ['Receitas', 'Custeio', 'Investimentos'],
-                    datasets: [{
-                        data: [tR, tD, tI],
-                        backgroundColor: [gradRec, gradDesp, gradInv],
-                        borderWidth: 0, hoverOffset: 12
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '75%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } }
-                    },
-                    layout: { padding: 15 }
-                }
+                data: { labels: ['Receitas', 'Custeio', 'Investimentos'], datasets: [{ data: [tR, tD, tI], backgroundColor: [gradRec, gradDesp, gradInv], borderWidth: 0, hoverOffset: 12 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } } }, layout: { padding: 15 } }
             });
 
             const ctxPendente = document.getElementById('canvas_pendente').getContext('2d');
-            
-            let gradARec = ctxPendente.createLinearGradient(0, 0, 0, 300);
-            gradARec.addColorStop(0, '#64B5F6'); gradARec.addColorStop(1, '#0D47A1');
-            
-            let gradAPag = ctxPendente.createLinearGradient(0, 0, 0, 300);
-            gradAPag.addColorStop(0, '#E57373'); gradAPag.addColorStop(1, '#B71C1C');
+            let gradARec = ctxPendente.createLinearGradient(0, 0, 0, 300); gradARec.addColorStop(0, '#64B5F6'); gradARec.addColorStop(1, '#0D47A1');
+            let gradAPag = ctxPendente.createLinearGradient(0, 0, 0, 300); gradAPag.addColorStop(0, '#E57373'); gradAPag.addColorStop(1, '#B71C1C');
 
             chartPendenteObj = new Chart(ctxPendente, {
                 type: 'doughnut',
-                data: {
-                    labels: ['A Receber', 'A Pagar'],
-                    datasets: [{
-                        data: [aR, aP],
-                        backgroundColor: [gradARec, gradAPag],
-                        borderWidth: 0, hoverOffset: 12
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '75%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } }
-                    },
-                    layout: { padding: 15 }
+                data: { labels: ['A Receber', 'A Pagar'], datasets: [{ data: [aR, aP], backgroundColor: [gradARec, gradAPag], borderWidth: 0, hoverOffset: 12 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatarMoeda(context.raw); } } } }, layout: { padding: 15 } }
+            });
+        }
+
+        // --- SISTEMA RAIO-X (VISÃO DETALHADA COM DESCRIÇÕES) ---
+        function abrirDetalheCategoria(categoria, tipoFiltro) {
+            const filtroMes = document.getElementById('filtro_mes_dashboard') ? document.getElementById('filtro_mes_dashboard').value : '';
+            const filtroSafra = document.getElementById('filtro_safra_dashboard') ? document.getElementById('filtro_safra_dashboard').value : '';
+            
+            let divisao = {}; let divisaoDesc = {}; let valorTotal = 0;
+
+            transacoes.forEach(t => {
+                let sit = strSafe(t.sit).toLowerCase();
+                if (!sit.includes('pago')) return;
+                if (filtroSafra && obterSafra(t.data) !== filtroSafra) return;
+                if (filtroMes && (!t.data || !t.data.startsWith(filtroMes))) return;
+
+                let checkTipo = false;
+                if (tipoFiltro === 'Saida') checkTipo = (t.tipo === 'Despesa' || t.tipo === 'Investimento');
+                else checkTipo = (t.tipo === 'Receita');
+
+                // Garante que o Match usa a mesma lógica do Dashboard
+                let cat = strSafe(t.categoria); 
+                if (!cat || cat === '-') cat = (t.tipo === 'Receita') ? strSafe(t.desc) : strSafe(t.setor); 
+                cat = cat.toUpperCase();
+
+                if (checkTipo && cat === categoria.toUpperCase()) {
+                    let v = parseFloat(t.valor) || 0;
+                    valorTotal += v;
+                    
+                    let chaveAgrupamento = tipoFiltro === 'Saida' ? strSafe(t.setor).toUpperCase() : strSafe(t.local).toUpperCase();
+                    if (!chaveAgrupamento || chaveAgrupamento === '-') chaveAgrupamento = "NÃO INFORMADO";
+                    divisao[chaveAgrupamento] = (divisao[chaveAgrupamento] || 0) + v;
+
+                    let chaveDesc = strSafe(t.desc).toUpperCase();
+                    if (!chaveDesc || chaveDesc === '-') chaveDesc = "SEM DESCRIÇÃO";
+                    divisaoDesc[chaveDesc] = (divisaoDesc[chaveDesc] || 0) + v;
                 }
             });
+
+            let arrDivisao = Object.entries(divisao).sort((a,b) => b[1] - a[1]);
+            let arrDesc = Object.entries(divisaoDesc).sort((a,b) => b[1] - a[1]);
+            
+            let etiqueta = tipoFiltro === 'Receita' ? 'RECEITA' : 'SAÍDA';
+            document.getElementById('titulo_raiox').innerHTML = `🔍 RAIO-X: ${categoria} <span style="font-size: 14px; background: white; color: var(--cor-texto); text-shadow: none; padding: 4px 8px; border-radius: 8px; margin-left: 10px; box-shadow: var(--sombra-neumorfica);">${etiqueta}</span>`;
+            document.getElementById('valor_total_raiox').innerHTML = formatarMoeda(valorTotal);
+            
+            let textoSubtitulo = tipoFiltro === 'Saida' ? "Divisão deste gasto por Setor" : "Divisão desta receita por Cliente/Local";
+            document.getElementById('subtitulo_raiox').innerHTML = textoSubtitulo;
+
+            let classeBarra = tipoFiltro === 'Saida' ? 'barra-grafico-despesa' : 'barra-grafico-receita';
+            
+            let htmlBarras = '';
+            let maxDivisao = arrDivisao.length > 0 ? arrDivisao[0][1] : 0;
+            arrDivisao.forEach(x => {
+                let perc = maxDivisao > 0 ? (x[1] / maxDivisao) * 100 : 0;
+                htmlBarras += `<li style="list-style: none; margin-bottom: 20px;">
+                        <div style="display:flex; justify-content:space-between; font-weight:900; font-size:14px; color: var(--cor-texto);">
+                            <span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span>
+                        </div>
+                        <div class="barra-grafico-container"><div class="${classeBarra}" style="width: ${perc}%;"></div></div>
+                       </li>`;
+            });
+            if (htmlBarras === '') htmlBarras = '<li style="list-style: none;">Nenhum dado encontrado para esta categoria.</li>';
+            document.getElementById('lista_raiox').innerHTML = htmlBarras;
+
+            let htmlDesc = '';
+            arrDesc.forEach(x => {
+                htmlDesc += `<li style="list-style: none; margin-bottom: 12px; border-bottom: 2px dashed #eee; padding-bottom: 10px;">
+                        <div style="display:flex; justify-content:space-between; font-size:14px; color: #555;">
+                            <span style="font-weight: 800; max-width: 65%;">${x[0]}</span> 
+                            <span style="font-weight: 900; color: var(--cor-texto); font-size: 15px;">${formatarMoeda(x[1])}</span>
+                        </div>
+                       </li>`;
+            });
+            document.getElementById('lista_raiox_desc').innerHTML = htmlDesc;
+
+            showTab('visao_categoria');
+        }
+
+        // --- CORREÇÃO DO RELATÓRIO DETALHADO ---
+        function atualizarRelatoriosDetalhados() {
+            let despSetor = {}; let despCat = {}; let invCat = {}; let recCat = {}; let recLocal = {};
+            
+            const filtroMes = document.getElementById('filtro_mes_relatorios') ? document.getElementById('filtro_mes_relatorios').value : '';
+            const filtroSafra = document.getElementById('filtro_safra_relatorios') ? document.getElementById('filtro_safra_relatorios').value : '';
+
+            transacoes.forEach(t => {
+                let sit = strSafe(t.sit).toLowerCase();
+                if (!sit.includes('pago')) return; 
+
+                if (filtroSafra && obterSafra(t.data) !== filtroSafra) return;
+                if (filtroMes && (!t.data || !t.data.startsWith(filtroMes))) return;
+
+                let v = parseFloat(t.valor) || 0;
+                let tipo = String(t.tipo).toLowerCase();
+
+                // Lógica de fallback garantida para o Categoria
+                let cat = strSafe(t.categoria).toUpperCase();
+                if (!cat || cat === '-' || cat === 'SEM CATEGORIA') {
+                    cat = (tipo === 'receita') ? strSafe(t.desc).toUpperCase() : strSafe(t.setor).toUpperCase();
+                }
+                if (!cat || cat === '-') cat = "SEM CATEGORIA";
+
+                let loc = strSafe(t.local).toUpperCase() || 'NÃO INFORMADO';
+                let setor = strSafe(t.setor).toUpperCase() || 'SEM SETOR';
+
+                if (tipo === 'despesa') {
+                    despSetor[setor] = (despSetor[setor] || 0) + v;
+                    despCat[cat] = (despCat[cat] || 0) + v;
+                } else if (tipo === 'investimento') {
+                    invCat[cat] = (invCat[cat] || 0) + v;
+                } else if (tipo === 'receita') {
+                    recCat[cat] = (recCat[cat] || 0) + v;
+                    recLocal[loc] = (recLocal[loc] || 0) + v;
+                }
+            });
+
+            function renderTabelaRelatorio(id, dadosObj, cor) {
+                let html = ''; let totalSoma = 0;
+                Object.entries(dadosObj).sort((a,b) => b[1] - a[1]).forEach(item => {
+                    html += `<tr><td>${item[0]}</td><td style="font-weight:bold; color:${cor}; text-align:right;">${formatarMoeda(item[1])}</td></tr>`;
+                    totalSoma += item[1];
+                });
+                if (html !== '') {
+                    html += `<tr style="background-color: #f5f5f5; border-top: 2px solid ${cor};">
+                                <td style="font-weight:900;">TOTAL PAGO/RECEBIDO</td>
+                                <td style="font-weight:900; color:${cor}; text-align:right; font-size: 15px;">${formatarMoeda(totalSoma)}</td>
+                             </tr>`;
+                } else { html = '<tr><td colspan="2" style="text-align:center;">Nenhum dado neste período</td></tr>'; }
+                document.getElementById(id).innerHTML = html;
+            }
+
+            renderTabelaRelatorio('tbody_gastos_setor', despSetor, 'var(--cor-despesa)');
+            renderTabelaRelatorio('tbody_gastos_categoria', despCat, '#F57C00');
+            renderTabelaRelatorio('tbody_investimentos_categoria', invCat, 'var(--cor-investimento)');
+            renderTabelaRelatorio('tbody_receitas_categoria', recCat, 'var(--cor-receita)');
+            renderTabelaRelatorio('tbody_receitas_local', recLocal, 'var(--cor-verde-escuro)');
         }
 
         function atualizarResumoEGrafico() {
@@ -1360,6 +1423,7 @@
             
             let saldoFinal = tR - tD - tI;
             document.getElementById('res_saldo').innerText = formatarMoeda(saldoFinal);
+            document.getElementById('card_saldo_div').style.background = (saldoFinal >= 0) ? 'var(--cor-saldo-pos-grad)' : 'var(--cor-saldo-neg-grad)';
 
             renderizarGraficos(tR, tD, tI, aR, aP);
 
@@ -1367,7 +1431,8 @@
             let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
             arrRCat.forEach(x => { 
                 let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0;
-                hR += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${x[0]}', 'Receita')" title="Clique para ver os detalhes">
+                let safeCatName = x[0].replace(/'/g, "\\'"); // Tratamento de segurança para cliques
+                hR += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${safeCatName}', 'Receita')" title="Clique para ver os detalhes">
                         <div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div>
                         <div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div>
                        </li>`; 
@@ -1378,14 +1443,13 @@
             let maxDCat = arrDCat.length > 0 ? arrDCat[0][1] : 0; let hD = '';
             arrDCat.forEach(x => { 
                 let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0;
-                hD += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${x[0]}', 'Saida')" title="Clique para ver o detalhamento deste custo">
+                let safeCatName = x[0].replace(/'/g, "\\'");
+                hD += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${safeCatName}', 'Saida')" title="Clique para ver o detalhamento deste custo">
                         <div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div>
                         <div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div>
                        </li>`; 
             });
             document.getElementById('lista_top_despesas').innerHTML = hD || '<li class="item-lista-grafico" style="text-align:center;">Sem saídas pagas neste período</li>';
-
-            atualizarRelatoriosDetalhados();
         }
 
         // INIT
