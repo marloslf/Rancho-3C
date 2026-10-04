@@ -112,7 +112,7 @@
         .barra-grafico-receita { height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); background: linear-gradient(to bottom, #A5D6A7 0%, #4CAF50 40%, #2E7D32 100%);}
         .barra-grafico-despesa { height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); background: linear-gradient(to bottom, #FFCC80 0%, #FF9800 40%, #E65100 100%);}
 
-        /* --- INPUTS --- */
+        /* --- INPUTS E CONTRASTE --- */
         input, select, .filter-row input, .filter-row select {
             padding: 10px; font-size: 13px; border: none; border-radius: 8px; font-weight: 900; text-transform: uppercase; width: 100%; 
             background-color: rgba(255, 255, 255, 0.85); box-shadow: var(--sombra-interna); color: #000; transition: 0.2s;
@@ -144,7 +144,7 @@
         .btn-filtro { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 800; transition: 0.3s; background: var(--cor-fundo); color: #555; box-shadow: var(--sombra-neumorfica);}
         .btn-filtro.ativo { background-color: var(--cor-verde-fazenda); color: white; box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2), inset -3px -3px 6px rgba(255,255,255,0.2);}
 
-        /* --- TABELAS --- */
+        /* --- TABELAS E BADGES --- */
         .table-container { overflow-x: auto; overflow-y: auto; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5); background: white; max-height: 65vh;}
         table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; white-space: nowrap;}
         .tabela-larga { min-width: 1100px; } 
@@ -155,11 +155,8 @@
         td { border-bottom: 1px solid #f0f0f0; padding: 10px 12px; font-weight: 600; text-transform: uppercase; vertical-align: middle;}
         tr:hover td { background-color: rgba(0, 0, 0, 0.02); }
         
-        /* Badges de Tipo na Lista */
         .badge-tipo { padding: 4px 8px; border-radius: 6px; font-weight: 900; font-size: 11px; color: white; text-align: center; display: inline-block; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.15);}
-        .badge-receita { background: var(--cor-receita); }
-        .badge-despesa { background: var(--cor-despesa); }
-        .badge-investimento { background: var(--cor-investimento); }
+        .badge-receita { background: var(--cor-receita); } .badge-despesa { background: var(--cor-despesa); } .badge-investimento { background: var(--cor-investimento); }
 
         .bg-pago { background-color: #4caf50; color: white; font-weight: 800; border:none; border-radius: 6px; padding: 6px; box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);}
         .bg-pendente { background-color: #ff9800; color: white; font-weight: 800; border:none; border-radius: 6px; padding: 6px; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);}
@@ -197,7 +194,6 @@
         .box-solo { background: rgba(255,255,255,0.5); padding: 15px; border-radius: 12px; box-shadow: var(--sombra-interna); border: 1px solid rgba(255,255,255,0.8); margin-bottom: 15px;}
         .box-solo h4 { margin-top: 0; margin-bottom: 10px; color: var(--cor-solo); border-bottom: 2px dashed #ccc; padding-bottom: 5px; font-size: 13px;}
 
-        /* --- ESTILOS DE IMPRESSÃO (LAUDO) --- */
         @media print {
             body { height: auto; overflow: visible; background: white !important; zoom: 100%; color: black;}
             .no-print, .menu, .area-fixa-topo, .watermark-logo, .sub-menu { display: none !important; }
@@ -222,7 +218,9 @@
     <div style="width: 150px;"></div>
 </div>
 
-<!-- MENU PRINCIPAL UNIFICADO -->
+<!-- ========================================== -->
+<!-- MENU PRINCIPAL UNIFICADO                   -->
+<!-- ========================================== -->
 <div class="menu no-print">
     <button id="btn_home" class="btn-ativo" onclick="showTab('home')">🏠 INÍCIO</button>
     <div class="menu-divisor"></div>
@@ -247,7 +245,7 @@
 </div>
 
 <!-- ========================================== -->
-<!-- TELA INICIAL (HOME LIMPA E MAIOR)          -->
+<!-- TELA INICIAL (HOME)                        -->
 <!-- ========================================== -->
 <div id="home" class="tab active">
     <div class="home-container">
@@ -256,7 +254,7 @@
 </div>
 
 <!-- ========================================== -->
-<!-- MÓDULO FINANCEIRO                          -->
+<!-- MÓDULO FINANCEIRO (ID ÚNICO)               -->
 <!-- ========================================== -->
 <div id="resumo" class="tab">
     <div class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; background: var(--cor-fundo); padding: 15px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
@@ -302,31 +300,36 @@
         <div class="linha-lancamento linha-despesa" id="caixa_lancamento_saida">
             <div style="display:flex; justify-content:space-between; margin-bottom: 6px; align-items: center;">
                 <span style="font-size:13px; font-weight:900; color:var(--cor-despesa);" id="titulo_saida">🚜 INSERIR SAÍDA:
-                    <select id="d_natureza" class="select-tipo-saida" onchange="mudarTemaSaida()"><option value="Despesa">CUSTEIO</option><option value="Investimento">INVESTIMENTO</option></select>
+                    <select id="d_natureza" class="select-tipo-saida" onchange="mudarTemaSaida()">
+                        <option value="Despesa">CUSTEIO</option>
+                        <option value="Investimento">INVESTIMENTO</option>
+                    </select>
                 </span>
             </div>
+            <!-- ONSUBMIT PROTEGIDO PARA CAIXA SAIDA -->
             <form class="grid-despesa" onsubmit="addTransacao(event, 'Saida')">
                 <input type="date" id="d_data" required>
-                <input list="lista_d_categoria" id="d_categoria" placeholder="CATEGORIA..." required>
-                <input list="lista_d_setor" id="d_setor" placeholder="SETOR..." required>
-                <input list="lista_d_local" id="d_local" placeholder="FORNECEDOR..." required>
-                <input list="lista_d_descricao" id="d_descricao" placeholder="DESCRIÇÃO" required>
+                <input list="lista_d_categoria" id="d_categoria" placeholder="CATEGORIA..." required autocomplete="off">
+                <input list="lista_d_setor" id="d_setor" placeholder="SETOR..." required autocomplete="off">
+                <input list="lista_d_local" id="d_local" placeholder="FORNECEDOR..." required autocomplete="off">
+                <input list="lista_d_descricao" id="d_descricao" placeholder="DESCRIÇÃO" required autocomplete="off">
                 <input type="number" id="d_qtd" placeholder="QTD" step="0.01" oninput="calcularTotalDespesa()">
                 <input type="text" id="d_und" placeholder="UNID.">
                 <input type="number" id="d_v_unit" placeholder="$ UNIT" step="0.01" oninput="calcularTotalDespesa()">
                 <input type="number" id="d_valor" placeholder="$ TOTAL" step="0.01" required>
                 <select id="d_sit"><option value="A pagar">A PAGAR</option><option value="Pago">PAGO</option></select>
-                <button type="submit" id="btn_salvar_saida" class="btn-salvar-compacto" style="background: var(--cor-despesa);">💾 SALVAR</button>
+                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-despesa);">💾 SALVAR</button>
             </form>
         </div>
 
         <div class="linha-lancamento linha-receita">
             <div style="font-size:13px; font-weight:900; color:var(--cor-receita); margin-bottom: 6px;">🌱 INSERIR RECEITA</div>
+            <!-- ONSUBMIT PROTEGIDO PARA CAIXA RECEITA -->
             <form class="grid-receita" onsubmit="addTransacao(event, 'Receita')">
                 <input type="date" id="r_data" required>
-                <input list="lista_r_categoria" id="r_categoria" placeholder="O QUE VENDEU?" required onblur="autoPreencherUnidade()">
-                <input list="lista_r_local" id="r_local" placeholder="CLIENTE?" required>
-                <input type="text" id="r_descricao" placeholder="DETALHES">
+                <input list="lista_r_categoria" id="r_categoria" placeholder="O QUE VENDEU?" required onblur="autoPreencherUnidade()" autocomplete="off">
+                <input list="lista_r_local" id="r_local" placeholder="CLIENTE?" required autocomplete="off">
+                <input type="text" id="r_descricao" placeholder="DETALHES" autocomplete="off">
                 <input type="number" id="r_qtd" placeholder="QTD" step="0.01" oninput="calcularTotalReceita()">
                 <input type="text" id="r_und" placeholder="UNID.">
                 <input type="number" id="r_v_unit" placeholder="$ UNIT" step="0.01" oninput="calcularTotalReceita()">
@@ -335,10 +338,6 @@
                 <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-receita);">💾 SALVAR</button>
             </form>
         </div>
-        
-        <datalist id="lista_d_categoria"></datalist><datalist id="lista_d_setor"></datalist>
-        <datalist id="lista_d_local"></datalist><datalist id="lista_d_descricao"></datalist>
-        <datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
 
         <div class="barra-pesquisa-relatorio">
             <button class="btn-filtro ativo" id="btn_f_todos" onclick="setFiltroRapido('')">📋 TODOS</button>
@@ -350,7 +349,7 @@
         </div>
     </div> 
 
-    <!-- APROVEITAMENTO DE TELA (max-height: 65vh) -->
+    <!-- ÁREA TOTALMENTE APROVEITADA NO ECRÃ -->
     <div class="table-container" style="max-height: 65vh;">
         <table class="tabela-larga">
             <thead>
@@ -393,31 +392,34 @@
         <button onclick="document.getElementById('filtro_safra_relatorios').value=''; document.getElementById('filtro_mes_relatorios').value=''; atualizarRelatoriosDetalhados()" class="btn-limpar">🧹 LIMPAR</button>
     </div>
 
-    <!-- ALTURA TOTAL DISPONÍVEL (max-height: 60vh para expandir mais) -->
+    <!-- REMOVIDO BLOQUEIO DE ALTURA PARA PREENCHER TELA -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px;">
         <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid var(--cor-receita);">
             <h3 style="color: var(--cor-receita); text-align: center;">🌱 RECEITAS / CATEGORIA</h3>
-            <div class="table-container" style="max-height: 60vh;"><table><tbody id="tbody_receitas_categoria"></tbody></table></div>
+            <div class="table-container" style="max-height: none;"><table><tbody id="tbody_receitas_categoria"></tbody></table></div>
         </div>
         <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid var(--cor-verde-escuro);">
             <h3 style="color: var(--cor-verde-escuro); text-align: center;">🤝 RECEITAS / CLIENTE</h3>
-            <div class="table-container" style="max-height: 60vh;"><table><tbody id="tbody_receitas_local"></tbody></table></div>
+            <div class="table-container" style="max-height: none;"><table><tbody id="tbody_receitas_local"></tbody></table></div>
         </div>
         <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid #F57C00;">
             <h3 style="color: #F57C00; text-align: center;">🏷️ DESPESAS / CATEGORIA</h3>
-            <div class="table-container" style="max-height: 60vh;"><table><tbody id="tbody_gastos_categoria"></tbody></table></div>
+            <div class="table-container" style="max-height: none;"><table><tbody id="tbody_gastos_categoria"></tbody></table></div>
         </div>
         <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid var(--cor-despesa);">
             <h3 style="color: var(--cor-despesa); text-align: center;">🚜 DESPESAS / SETOR</h3>
-            <div class="table-container" style="max-height: 60vh;"><table><tbody id="tbody_gastos_setor"></tbody></table></div>
+            <div class="table-container" style="max-height: none;"><table><tbody id="tbody_gastos_setor"></tbody></table></div>
         </div>
         <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid var(--cor-investimento);">
             <h3 style="color: var(--cor-investimento); text-align: center;">🏗️ INVESTIMENTOS</h3>
-            <div class="table-container" style="max-height: 60vh;"><table><tbody id="tbody_investimentos_categoria"></tbody></table></div>
+            <div class="table-container" style="max-height: none;"><table><tbody id="tbody_investimentos_categoria"></tbody></table></div>
         </div>
     </div>
 </div>
 
+<!-- ========================================== -->
+<!-- PENDÊNCIAS E RAIO-X                        -->
+<!-- ========================================== -->
 <div id="pendencias" class="tab">
     <div style="background: var(--cor-fundo); padding: 30px; border-radius: 24px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
         <h3 style="text-align: center; font-size: 26px; margin-bottom: 30px;">🔔 CONTAS PENDENTES</h3>
@@ -427,10 +429,10 @@
                 <div class="table-container" style="max-height: 500px; border-radius: 0; box-shadow: none;">
                     <table>
                         <thead><tr>
-                            <th style="background: #1565C0 !important; background-image: none !important; color: white !important;">DATA</th>
-                            <th style="background: #1565C0 !important; background-image: none !important; color: white !important;">CLIENTE</th>
-                            <th style="background: #1565C0 !important; background-image: none !important; color: white !important; text-align: right;">VALOR</th>
-                            <th style="background: #1565C0 !important; background-image: none !important; color: white !important; text-align: center;">AÇÃO</th>
+                            <th style="background: #1565C0 !important; color: white !important; border-bottom: none;">DATA</th>
+                            <th style="background: #1565C0 !important; color: white !important; border-bottom: none;">CLIENTE</th>
+                            <th style="background: #1565C0 !important; color: white !important; text-align: right; border-bottom: none;">VALOR</th>
+                            <th style="background: #1565C0 !important; color: white !important; text-align: center; border-bottom: none;">AÇÃO</th>
                         </tr></thead>
                         <tbody id="tbody_receitas_pendentes"></tbody>
                     </table>
@@ -441,10 +443,10 @@
                 <div class="table-container" style="max-height: 500px; border-radius: 0; box-shadow: none;">
                     <table>
                         <thead><tr>
-                            <th style="background: #C62828 !important; background-image: none !important; color: white !important;">DATA</th>
-                            <th style="background: #C62828 !important; background-image: none !important; color: white !important;">FORNECEDOR</th>
-                            <th style="background: #C62828 !important; background-image: none !important; color: white !important; text-align: right;">VALOR</th>
-                            <th style="background: #C62828 !important; background-image: none !important; color: white !important; text-align: center;">AÇÃO</th>
+                            <th style="background: #C62828 !important; color: white !important; border-bottom: none;">DATA</th>
+                            <th style="background: #C62828 !important; color: white !important; border-bottom: none;">FORNECEDOR</th>
+                            <th style="background: #C62828 !important; color: white !important; text-align: right; border-bottom: none;">VALOR</th>
+                            <th style="background: #C62828 !important; color: white !important; text-align: center; border-bottom: none;">AÇÃO</th>
                         </tr></thead>
                         <tbody id="tbody_despesas_pendentes"></tbody>
                     </table>
@@ -476,9 +478,8 @@
     </div>
 </div>
 
-
 <!-- ========================================== -->
-<!-- MÓDULO AGRÍCOLA (ALINHADO FIT-TO-SCREEN)   -->
+<!-- MÓDULO AGRÍCOLA (ID ÚNICOS GARANTIDOS)     -->
 <!-- ========================================== -->
 <div id="agri_dash" class="tab">
     <div class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; justify-content:center; gap: 15px; background: var(--cor-fundo); padding: 15px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
@@ -493,7 +494,7 @@
         <div class="card" style="background: linear-gradient(135deg, #00897B, #004D40);"><h4>REGISTROS NA SAFRA</h4><span id="kpi-registros">0</span></div>
     </div>
 
-    <!-- GRÁFICOS COMPACTOS (Altura controlada via height 22vh para caber num ecrã sem rolagem) -->
+    <!-- GRÁFICOS COMPACTOS (Altura controlada via height 22vh para caber num ecrã) -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="grafico-container wide" style="width: 100%; padding: 10px;">
             <h4 style="margin: 0 0 10px 0; color:var(--cor-texto); font-weight: 900; font-size: 13px;">DISTRIBUIÇÃO POR TALHÃO (VOL.)</h4>
@@ -518,6 +519,7 @@
     <div class="area-fixa-topo no-print">
         <div class="linha-lancamento linha-agri-app">
             <div style="font-size:14px; font-weight:900; color:var(--cor-agri-app); margin-bottom: 10px;">🚜 NOVO REGISTRO DE APLICAÇÃO</div>
+            <!-- ONSUBMIT PROTEGIDO -->
             <form id="appForm" class="grid-agri-app" onsubmit="addAgriApp(event)">
                 <input type="hidden" id="editIndex" value="-1">
                 <input type="date" id="dataApp" required title="Data">
@@ -565,6 +567,7 @@
     <div class="area-fixa-topo no-print">
         <div class="linha-lancamento linha-agri-est">
             <div style="font-size:14px; font-weight:900; color:#FF8F00; margin-bottom: 10px;">📦 ENTRADA DE ESTOQUE</div>
+            <!-- ONSUBMIT PROTEGIDO -->
             <form id="estoqueForm" class="grid-agri-est" onsubmit="addEstoque(event)">
                 <input type="hidden" id="editEstoqueIndex" value="-1">
                 <input type="text" id="est_produto" placeholder="NOME DO PRODUTO..." required autocomplete="off">
@@ -610,7 +613,7 @@
     <div id="solo_reg" class="sub-tab active">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <h3 style="color: var(--cor-solo); margin-top:0;">REGISTAR NOVA ANÁLISE DE SOLO</h3>
-            
+            <!-- ONSUBMIT PROTEGIDO -->
             <form id="formSolo" onsubmit="salvarAnaliseSolo(event)">
                 <div class="box-solo" style="display: flex; gap: 15px;">
                     <div style="flex:1"><label>Data da Análise:</label><input type="date" id="sl_data" required></div>
@@ -686,7 +689,7 @@
             </div>
             
             <div class="grafico-container wide" style="width: 100%; box-shadow: var(--sombra-interna);">
-                <h4 style="margin: 0 0 10px 0; color:var(--cor-texto);" id="titulo_hist_solo">EVOLUÇÃO DOS NUTRIENTES</h4>
+                <h4 style="margin: 0 0 10px 0; color:var(--cor-texto);" id="titulo_hist_solo">EVOLUÇÃO DOS NUTRIENTES (Lado a Lado)</h4>
                 <div style="width: 100%; height: 40vh; min-height: 350px; position: relative;"><canvas id="chartHistoricoSolo"></canvas></div>
             </div>
         </div>
@@ -772,13 +775,27 @@
                         <button class="btn-salvar-compacto" style="background: #555;" onclick="imprimirLaudo()">🖨 IMPRIMIR LAUDO</button>
                         <button class="btn-salvar-compacto" style="background: var(--cor-agri-app);" onclick="enviarParaAplicacoes()">📤 ENVIAR P/ APLICAÇÕES</button>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+
+<!-- GESTOR DE DATALISTS GLOBAIS (Não duplicar e manter no fundo) -->
+<datalist id="lista-talhoes"></datalist>
+<datalist id="lista-tipos"></datalist>
+<datalist id="lista-formas"></datalist>
+<datalist id="lista-alvos"></datalist>
+<datalist id="lista-produtos-estoque"></datalist>
+<datalist id="lista_d_categoria"></datalist>
+<datalist id="lista_d_setor"></datalist>
+<datalist id="lista_d_local"></datalist>
+<datalist id="lista_d_descricao"></datalist>
+<datalist id="lista_r_categoria"></datalist>
+<datalist id="lista_r_local"></datalist>
+
+<!-- MODAL DE EDIÇÃO -->
 <div id="modal-edicao">
     <div class="modal-content">
         <h3 style="margin-top: 0; color: var(--cor-texto); border-bottom: 2px solid #ccc; padding-bottom:10px;">✏️ EDITAR REGISTRO</h3>
@@ -794,21 +811,21 @@
 
 <script>
     /* =========================================================================
-       INICIALIZAÇÃO E LISTAS PADRÃO (BLINDAGEM RESTAURADA)
+       INICIALIZAÇÃO E COMUNICAÇÃO NUVEM (Motor Blindado)
     ========================================================================= */
     const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxU-XxV63Eip3g636GkrVaV8zwnVPVomePZLIsZBV-ghCYJKxYUMtQoG2Kc903zeP4UoQ/exec";
 
-    // Estas listas evitam o Erro "is not defined" quando a nuvem está vazia
+    // Constantes e Listas Padronizadas para garantir que nada falha no carregamento vazio
     const dCategoriasPadrao = ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "DIÁRIAS", "DIESEL", "FUNGICIDA", "GASOLINA", "HERBICIDA", "INSETICIDA", "INSUMOS", "INVESTIMENTO", "MANUTENÇÃO", "MERCADO", "PROLABORE", "RAÇÃO"];
     const dSetoresPadrao = ["ADMINISTRAÇÃO", "CÃES", "CAFÉ", "CAFÉ 01", "CAFÉ 02", "CAFÉ 03", "CASA", "CAVALOS", "COLHEITA", "DEFINIR", "FAZENDA", "FUNCIONÁRIOS", "GADO", "GALINHAS", "IRRIGAÇÃO", "LAVOURAS", "MARACUJÁ", "PEDRO MARINELLI", "PEIXES", "TORREFAÇÃO", "TRATOR"];
     const rCategoriasPadrao = ["ACEROLA - POLPA", "CAFÉ 250G", "CAFÉ 500G", "CAFÉ EM GRÃOS", "CAFÉ SACA", "CRÉDITO", "ESTACAS DE EUCALÍPTO", "GRAVIOLA - POLPA S/SEM.", "MARACUJÁ - FRUTO", "MARACUJÁ - POLPA C/SEM.", "MARACUJÁ - POLPA S/SEM.", "OVOS", "PASTO - ALUGUEL", "RENDIMENTOS"];
     const unidadesReceita = { "ACEROLA - POLPA": "KG", "CAFÉ 250G": "PCT", "CAFÉ 500G": "PCT", "CAFÉ EM GRÃOS": "PCT", "CAFÉ SACA": "SC", "CRÉDITO": "R$", "ESTACAS DE EUCALÍPTO": "UN", "GRAVIOLA - POLPA S/SEM.": "KG", "MARACUJÁ - FRUTO": "KG", "MARACUJÁ - POLPA C/SEM.": "KG", "MARACUJÁ - POLPA S/SEM.": "KG", "OVOS": "DZ", "PASTO - ALUGUEL": "MÊS", "RENDIMENTOS": "R$" };
 
+    // Bases de Dados na Memória RAM
     let transacoes = [];
     let agriRecords = [];
     let estoque = [];
     let analisesSolo = []; 
-    
     let opcoesDin = {
         talhoes: ["CAFÉ 2019", "CAFÉ 2022", "CAFÉ 2025", "MARACUJÁ"],
         tipos: ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "FUNGICIDA", "HERBICIDA", "INSETICIDA"],
@@ -866,6 +883,7 @@
     }
     function obterSafraAtual() { return obterSafraGeral(new Date().toISOString().substring(0,10)); }
 
+    // --- SINCRONIZAÇÃO INTELIGENTE COM TRADUÇÃO DE ESTRUTURA ANTIGA ---
     async function carregarDadosNuvem(forcar = false) {
         const statusDiv = document.getElementById('status_conexao');
         statusDiv.innerHTML = '⏳ LENDO NUVEM...'; statusDiv.className = 'status-conexao aguardando';
@@ -877,6 +895,7 @@
             if (!response.ok) throw new Error(`Erro API`);
             const data = await response.json();
             
+            // Fusão de Dados Legados (se for array simples = financeiro antigo)
             if (Array.isArray(data)) {
                 transacoes = normalizarDatas(data);
             } else {
@@ -884,10 +903,10 @@
                 if (data.aplicacoes) agriRecords = normalizarDatas(data.aplicacoes);
                 if (data.estoque) estoque = data.estoque;
                 if (data.opcoes) {
-                    opcoesDin.talhoes = data.opcoes.talhoes || opcoesDin.talhoes;
-                    opcoesDin.tipos = data.opcoes.tipos || opcoesDin.tipos;
-                    opcoesDin.formas = data.opcoes.formas || opcoesDin.formas;
-                    opcoesDin.alvos = data.opcoes.alvos || opcoesDin.alvos;
+                    opcoesDin.talhoes = [...new Set([...opcoesDin.talhoes, ...(data.opcoes.talhoes || [])])].sort();
+                    opcoesDin.tipos = [...new Set([...opcoesDin.tipos, ...(data.opcoes.tipos || [])])].sort();
+                    opcoesDin.formas = [...new Set([...opcoesDin.formas, ...(data.opcoes.formas || [])])].sort();
+                    opcoesDin.alvos = [...new Set([...opcoesDin.alvos, ...(data.opcoes.alvos || [])])].sort();
                 }
                 if (data.analises) analisesSolo = normalizarDatas(data.analises); 
             }
@@ -898,6 +917,7 @@
             statusDiv.innerHTML = "🔴 MODO OFFLINE"; statusDiv.className = 'status-conexao';
         }
         
+        // Backup Local e Fusão
         const localStr = localStorage.getItem('rancho3c_offline');
         if (localStr && !carregouNuvem) {
             const localData = JSON.parse(localStr);
@@ -908,20 +928,30 @@
                 if(localData.aplicacoes) agriRecords = normalizarDatas(localData.aplicacoes);
                 if(localData.estoque) estoque = localData.estoque;
                 if(localData.opcoes) {
-                    opcoesDin.talhoes = localData.opcoes.talhoes || opcoesDin.talhoes;
-                    opcoesDin.tipos = localData.opcoes.tipos || opcoesDin.tipos;
-                    opcoesDin.formas = localData.opcoes.formas || opcoesDin.formas;
-                    opcoesDin.alvos = localData.opcoes.alvos || opcoesDin.alvos;
+                    opcoesDin.talhoes = [...new Set([...opcoesDin.talhoes, ...(localData.opcoes.talhoes || [])])].sort();
+                    opcoesDin.tipos = [...new Set([...opcoesDin.tipos, ...(localData.opcoes.tipos || [])])].sort();
+                    opcoesDin.formas = [...new Set([...opcoesDin.formas, ...(localData.opcoes.formas || [])])].sort();
+                    opcoesDin.alvos = [...new Set([...opcoesDin.alvos, ...(localData.opcoes.alvos || [])])].sort();
                 }
                 if(localData.analises) analisesSolo = normalizarDatas(localData.analises);
             }
         }
 
+        // Puxa eventuais arquivos antigos do localStorage da adubação
+        if (agriRecords.length === 0) { const oldAgri = localStorage.getItem('adubacao_records_v4'); if (oldAgri) agriRecords = normalizarDatas(JSON.parse(oldAgri)); }
+        if (estoque.length === 0) { const oldEst = localStorage.getItem('adubacao_estoque_v3'); if (oldEst) estoque = JSON.parse(oldEst); }
+
         const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo };
         localStorage.setItem('rancho3c_offline', JSON.stringify(payload));
         
-        preencherSelectsLancamento(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); popularSeletorSolo();
+        // Renderiza listas mestre para todo o sistema
+        preencherSelectsLancamento(); 
+        preencherSelectsSafraFin(); 
+        renderDatalistsAgri(); 
+        popularSeletorSafraApp(); 
+        popularSeletorSolo();
         
+        // Atualiza a tela que estiver visível no momento do carregamento
         if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico();
         if(document.getElementById('relatorios_detalhados').classList.contains('active')) atualizarRelatoriosDetalhados();
         if(document.getElementById('movimentacoes').classList.contains('active')) { atualizarOpcoesFiltros(); aplicarFiltros(); }
@@ -949,6 +979,7 @@
         }
     }
 
+    // --- NAVEGADOR DE ABAS ---
     function showTab(id) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
@@ -960,6 +991,7 @@
         };
         if(btnMap[id]) document.getElementById(btnMap[id]).classList.add('btn-ativo');
         
+        // Chamadas otimizadas por módulo
         if(id === 'resumo') atualizarResumoEGrafico();
         if(id === 'relatorios_detalhados') atualizarRelatoriosDetalhados();
         if(id === 'movimentacoes') { atualizarOpcoesFiltros(); aplicarFiltros(); }
@@ -975,7 +1007,7 @@
     }
 
     /* =========================================================================
-       MÓDULO FINANCEIRO
+       MÓDULO FINANCEIRO: CAIXA, RELATÓRIOS E DASHBOARD
     ========================================================================= */
     function preencherSelectsSafraFin() {
         let safras = new Set(); transacoes.forEach(t => { if(t.data && t.data !== '-') safras.add(obterSafraGeral(t.data)); });
@@ -1028,18 +1060,17 @@
             chartPendenteObj = new Chart(ctxPendente, { type: 'doughnut', data: { labels: ['A Receber', 'A Pagar'], datasets: [{ data: [aR, aP], backgroundColor: [gradARec, gradAPag], borderWidth: 0, hoverOffset: 12 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } }, layout: { padding: 15 } } });
         }
 
+        // Listas Top 5 (Correção e Blindagem Completa)
         let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
         arrRCat.forEach(x => { 
-            let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0; 
-            let codeStr = encodeURIComponent(x[0]); 
+            let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0; let codeStr = encodeURIComponent(x[0]); 
             hR += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${codeStr}', 'Receita')"><div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div></li>`; 
         });
         document.getElementById('lista_top_receitas').innerHTML = hR || '<li class="item-lista-grafico">Nenhuma receita paga</li>';
 
         let arrDCat = Object.entries(dCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxDCat = arrDCat.length > 0 ? arrDCat[0][1] : 0; let hD = '';
         arrDCat.forEach(x => { 
-            let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0; 
-            let codeStr = encodeURIComponent(x[0]); 
+            let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0; let codeStr = encodeURIComponent(x[0]); 
             hD += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${codeStr}', 'Saida')"><div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div></li>`; 
         });
         document.getElementById('lista_top_despesas').innerHTML = hD || '<li class="item-lista-grafico">Nenhuma saída paga</li>';
@@ -1111,7 +1142,7 @@
     }
 
     function addTransacao(e, tipoBase) {
-        e.preventDefault();
+        e.preventDefault(); // Impede o ecrã de recarregar
         try {
             const prefix = tipoBase === 'Saida' ? 'd_' : 'r_';
             let data = document.getElementById(prefix + 'data').value;
@@ -1128,7 +1159,6 @@
             if(tipoBase === 'Saida') {
                 tipoFinal = document.getElementById('d_natureza').value; 
                 setor = document.getElementById('d_setor').value.trim().toUpperCase();
-                if(!setor || !desc) { alert("Preencha Setor e Descrição."); return; }
             }
 
             transacoes.push({
@@ -1161,7 +1191,6 @@
                 tDesp += v;
             }
         });
-
         document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRec || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
         document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDesp || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
     }
@@ -1324,6 +1353,7 @@
         lista.forEach(obj => {
             const t = obj.item; const idx = obj.indexOriginal;
             let tipoLower = String(t.tipo).toLowerCase();
+            
             let badgeTipo = tipoLower === 'despesa' ? 'badge-despesa' : (tipoLower === 'investimento' ? 'badge-investimento' : 'badge-receita');
             let sitTxt = strSafe(t.sit).toLowerCase(); let isPago = sitTxt.includes('pago');
             let btnSit = isPago 
@@ -1538,7 +1568,7 @@
             html += `<tr class="${cClass}">
                 <td><b>${rec.produto}</b>${aviso}</td><td>${rec.principio||'-'}</td><td>${rec.tipo}</td>
                 <td style="${corQtd}">${rec.qtd.toFixed(2)} ${rec.un}</td><td>${formatarMoeda(rec.valor_unit)}</td><td><b>${formatarMoeda(vTot)}</b></td>
-                <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editEstoque(${index})">✏️️</button><button class="btn-acao btn-excluir" onclick="deleteEstoque(${index})">🗑️</button></td>
+                <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editEstoque(${index})">✏️</button><button class="btn-acao btn-excluir" onclick="deleteEstoque(${index})">🗑️</button></td>
             </tr>`;
         });
         document.getElementById('estoqueBody').innerHTML = html;
