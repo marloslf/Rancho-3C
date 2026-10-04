@@ -27,9 +27,6 @@
             --cor-investimento: #6A1B9A;
             --cor-investimento-grad: linear-gradient(135deg, #AB47BC, #6A1B9A);
 
-            --cor-saldo-pos-grad: linear-gradient(135deg, #42A5F5, #1565C0);
-            --cor-saldo-neg-grad: linear-gradient(135deg, #EF5350, #C62828);
-
             --cor-agri-app: #0288D1;
             --cor-agri-est: #F39C12;
             --cor-solo: #8E44AD;
@@ -37,7 +34,7 @@
 
         * { font-family: 'Nunito', sans-serif; box-sizing: border-box; }
 
-        body { zoom: 75%; max-width: 98%; width: 100%; margin: auto; padding: 15px; background-color: var(--cor-fundo); color: var(--cor-texto); }
+        body { zoom: 85%; max-width: 100%; width: 100%; margin: 0; padding: 15px; background-color: var(--cor-fundo); color: var(--cor-texto); overflow-x: hidden;}
 
         .watermark-logo {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -64,7 +61,7 @@
         .menu button { 
             padding: 10px 15px; cursor: pointer; border: none; background: var(--cor-fundo); color: #666; 
             border-radius: 30px; font-weight: 900; font-size: 13px; transition: all 0.3s ease; box-shadow: var(--sombra-neumorfica);
-            position: relative !important; /* CORREÇÃO DO SELO DESLOCADO */
+            position: relative !important;
         }
         .menu button:hover { transform: translateY(-2px); color: var(--cor-madeira);}
         .menu button.btn-ativo { box-shadow: var(--sombra-interna); }
@@ -84,7 +81,6 @@
             display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: var(--sombra-neumorfica); transition: all 0.3s ease;
         }
         .status-conexao.conectado { background: #e8f5e9; color: #2e7d32; border-color: #66bb6a; }
-        .status-conexao.aguardando { background: #FFF3E0; color: #E65100; border-color: #FFB74D; pointer-events: none;} 
 
         /* --- ABAS GERAIS --- */
         .tab { display: none; background: transparent; position: relative; min-height: 80vh; }
@@ -92,7 +88,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- TELA INICIAL --- */
-        .home-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 70vh; text-align: center; }
+        .home-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 75vh; text-align: center; }
         .home-container img { width: 450px; max-width: 80vw; filter: drop-shadow(0px 15px 25px rgba(0,0,0,0.15)); margin-bottom: 30px; animation: float 6s ease-in-out infinite;}
         @keyframes float { 0% {transform: translateY(0px);} 50% {transform: translateY(-15px);} 100% {transform: translateY(0px);} }
 
@@ -146,24 +142,28 @@
         .btn-filtro { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 800; transition: 0.3s; background: var(--cor-fundo); color: #555; box-shadow: var(--sombra-neumorfica);}
         .btn-filtro.ativo { background-color: var(--cor-verde-fazenda); color: white; box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2), inset -3px -3px 6px rgba(255,255,255,0.2);}
 
-        /* --- TABELAS E BADGES --- */
-        .table-container { overflow-x: auto; overflow-y: auto; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5); background: white; max-height: 65vh;}
+        /* --- TABELAS EXPANDIDAS E BADGES --- */
+        /* Aumentada a altura útil de todas as tabelas */
+        .table-container { overflow-x: auto; overflow-y: auto; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5); background: white; max-height: 75vh;}
         table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; white-space: nowrap;}
-        .tabela-larga { min-width: 1100px; } 
+        .tabela-larga { min-width: 100%; } 
         th { background: linear-gradient(to right, #1B5E20, #2E7D32); color: white; font-weight: 800; padding: 12px; text-align: left; cursor: pointer; position: sticky; top: 0; z-index: 3;}
         .th-agri { background: linear-gradient(to right, #01579B, #0288D1); }
         .th-calc { background: linear-gradient(to right, #6A1B9A, #8E44AD); } 
         .filter-row th { background: #f1f8e9 !important; padding: 6px 5px; border-bottom: 2px solid var(--cor-verde-fazenda); top: 40px; z-index: 2;}
         td { border-bottom: 1px solid #f0f0f0; padding: 10px 12px; font-weight: 600; text-transform: uppercase; vertical-align: middle;}
-        tr:hover td { background-color: rgba(0, 0, 0, 0.02); }
+        tr:hover td { background-color: rgba(0, 0, 0, 0.03); }
         
-        .badge-tipo { padding: 4px 8px; border-radius: 6px; font-weight: 900; font-size: 11px; color: white; text-align: center; display: inline-block; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.15);}
-        .badge-receita { background: var(--cor-receita); } .badge-despesa { background: var(--cor-despesa); } .badge-investimento { background: var(--cor-investimento); }
+        /* Novas Etiquetas Coloridas para Diferenciar Lançamentos no Caixa */
+        .badge-tipo { padding: 6px 10px; border-radius: 6px; font-weight: 900; font-size: 11px; color: white; text-align: center; display: inline-block; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.15);}
+        .badge-receita { background: var(--cor-receita); } 
+        .badge-despesa { background: var(--cor-despesa); } 
+        .badge-investimento { background: var(--cor-investimento); }
 
-        .bg-pago { background-color: #4caf50; color: white; font-weight: 800; border:none; border-radius: 6px; padding: 6px; box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);}
-        .bg-pendente { background-color: #ff9800; color: white; font-weight: 800; border:none; border-radius: 6px; padding: 6px; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);}
-        .status-planejado { background-color: #FFE082; color: #E65100; border: 1px solid #FFCA28; padding: 6px; border-radius: 6px; font-weight: 800; cursor: pointer; width: 100%;}
-        .status-aplicado { background-color: #A5D6A7; color: #1B5E20; border: 1px solid #66BB6A; padding: 6px; border-radius: 6px; font-weight: 800; cursor: pointer; width: 100%;}
+        .bg-pago { background-color: #4caf50; color: white; font-weight: 800; border:none; border-radius: 6px; padding: 6px; box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3); width: 100%;}
+        .bg-pendente { background-color: #ff9800; color: white; font-weight: 800; border:none; border-radius: 6px; padding: 6px; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3); width: 100%;}
+        .status-planejado { background-color: #FFE082; color: #E65100; border: 1px solid #FFCA28; padding: 6px; border-radius: 6px; font-weight: 900; cursor: pointer; width: 100%;}
+        .status-aplicado { background-color: #A5D6A7; color: #1B5E20; border: 1px solid #66BB6A; padding: 6px; border-radius: 6px; font-weight: 900; cursor: pointer; width: 100%;}
         .stock-warning { display: inline-block; margin-top: 4px; color: #D32F2F; background: #FFCDD2; padding: 3px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 900; border: 1px solid #EF5350; }
 
         tr.linha-adubo { background-color: rgba(234, 242, 227, 0.6); }       
@@ -245,7 +245,9 @@
     <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem(true)" title="Forçar Sincronização">⏳ CARREGANDO...</button>
 </div>
 
-<!-- TELA INICIAL (HOME LIMPA) -->
+<!-- ========================================== -->
+<!-- TELA INICIAL (HOME LIMPA E MAIOR)          -->
+<!-- ========================================== -->
 <div id="home" class="tab active">
     <div class="home-container">
         <img src="https://i.imgur.com/jPLDeyi.png" alt="Rancho 3C Logo" referrerpolicy="no-referrer">
@@ -302,7 +304,7 @@
                     <select id="d_natureza" class="select-tipo-saida" onchange="mudarTemaSaida()"><option value="Despesa">CUSTEIO</option><option value="Investimento">INVESTIMENTO</option></select>
                 </span>
             </div>
-            <!-- ONSUBMIT PROTEGIDO PARA CAIXA SAIDA -->
+            <!-- ONSUBMIT BLINDADO (Sem recarregamento) -->
             <form class="grid-despesa" onsubmit="addTransacao(event, 'Saida')">
                 <input type="date" id="d_data" required>
                 <input list="lista_d_categoria" id="d_categoria" placeholder="CATEGORIA..." required autocomplete="off">
@@ -320,7 +322,7 @@
 
         <div class="linha-lancamento linha-receita">
             <div style="font-size:13px; font-weight:900; color:var(--cor-receita); margin-bottom: 6px;">🌱 INSERIR RECEITA</div>
-            <!-- ONSUBMIT PROTEGIDO PARA CAIXA RECEITA -->
+            <!-- ONSUBMIT BLINDADO -->
             <form class="grid-receita" onsubmit="addTransacao(event, 'Receita')">
                 <input type="date" id="r_data" required>
                 <input list="lista_r_categoria" id="r_categoria" placeholder="O QUE VENDEU?" required onblur="autoPreencherUnidade()" autocomplete="off">
@@ -345,8 +347,8 @@
         </div>
     </div> 
 
-    <!-- ÁREA TOTALMENTE APROVEITADA NO ECRÃ -->
-    <div class="table-container" style="max-height: 65vh;">
+    <!-- ÁREA TOTALMENTE APROVEITADA (max-height: 75vh) -->
+    <div class="table-container" style="max-height: 75vh;">
         <table class="tabela-larga">
             <thead>
                 <tr>
@@ -388,7 +390,7 @@
         <button onclick="document.getElementById('filtro_safra_relatorios').value=''; document.getElementById('filtro_mes_relatorios').value=''; atualizarRelatoriosDetalhados()" class="btn-limpar">🧹 LIMPAR</button>
     </div>
 
-    <!-- REMOVIDO BLOQUEIO DE ALTURA PARA PREENCHER TELA -->
+    <!-- REMOVIDO BLOQUEIO DE ALTURA PARA PREENCHER TELA DE RELATÓRIOS -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px;">
         <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid var(--cor-receita);">
             <h3 style="color: var(--cor-receita); text-align: center;">🌱 RECEITAS / CATEGORIA</h3>
@@ -475,7 +477,7 @@
 </div>
 
 <!-- ========================================== -->
-<!-- MÓDULO AGRÍCOLA (ID ÚNICOS GARANTIDOS)     -->
+<!-- MÓDULO AGRÍCOLA (ALINHADO FIT-TO-SCREEN)   -->
 <!-- ========================================== -->
 <div id="agri_dash" class="tab">
     <div class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; justify-content:center; gap: 15px; background: var(--cor-fundo); padding: 15px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
@@ -670,7 +672,7 @@
         </div>
     </div>
 
-    <!-- TELA 2: HISTÓRICO EM GRÁFICO (EVOLUÇÃO DOS NUTRIENTES) -->
+    <!-- TELA 2: HISTÓRICO EM GRÁFICO -->
     <div id="solo_hist" class="sub-tab">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <div class="no-print" style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
@@ -685,7 +687,7 @@
             </div>
             
             <div class="grafico-container wide" style="width: 100%; box-shadow: var(--sombra-interna);">
-                <h4 style="margin: 0 0 10px 0; color:var(--cor-texto);" id="titulo_hist_solo">EVOLUÇÃO DOS NUTRIENTES (Lado a Lado)</h4>
+                <h4 style="margin: 0 0 10px 0; color:var(--cor-texto);" id="titulo_hist_solo">EVOLUÇÃO DOS NUTRIENTES</h4>
                 <div style="width: 100%; height: 40vh; min-height: 350px; position: relative;"><canvas id="chartHistoricoSolo"></canvas></div>
             </div>
         </div>
@@ -736,7 +738,6 @@
                     <button class="btn-salvar-compacto" style="background: var(--cor-solo); padding: 15px; font-size: 15px;" onclick="calcularRecomendacao()">🧮 PROCESSAR RECOMENDAÇÃO</button>
                 </div>
 
-                <!-- RESULTADOS DA CALCULADORA (ÁREA IMPRESSA NO LAUDO) -->
                 <div>
                     <div class="box-solo" style="background: white;">
                         <h4 style="color: var(--cor-verde-fazenda);">NECESSIDADE TOTAL ANUAL</h4>
@@ -778,8 +779,21 @@
     </div>
 </div>
 
+<!-- ========================================== -->
+<!-- DATALISTS E MODAIS GLOBAIS                 -->
+<!-- ========================================== -->
+<datalist id="lista-talhoes"></datalist>
+<datalist id="lista-tipos"></datalist>
+<datalist id="lista-formas"></datalist>
+<datalist id="lista-alvos"></datalist>
+<datalist id="lista-produtos-estoque"></datalist>
+<datalist id="lista_d_categoria"></datalist>
+<datalist id="lista_d_setor"></datalist>
+<datalist id="lista_d_local"></datalist>
+<datalist id="lista_d_descricao"></datalist>
+<datalist id="lista_r_categoria"></datalist>
+<datalist id="lista_r_local"></datalist>
 
-<!-- MODAL DE EDIÇÃO -->
 <div id="modal-edicao">
     <div class="modal-content">
         <h3 style="margin-top: 0; color: var(--cor-texto); border-bottom: 2px solid #ccc; padding-bottom:10px;">✏️ EDITAR REGISTRO</h3>
@@ -793,10 +807,10 @@
 
 <div id="toast">Sucesso!</div>
 
+<!-- ========================================== -->
+<!-- SCRIPTS GERAIS (BLINDADOS)                 -->
+<!-- ========================================== -->
 <script>
-    /* =========================================================================
-       INICIALIZAÇÃO E COMUNICAÇÃO NUVEM (Motor Blindado)
-    ========================================================================= */
     const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxU-XxV63Eip3g636GkrVaV8zwnVPVomePZLIsZBV-ghCYJKxYUMtQoG2Kc903zeP4UoQ/exec";
 
     // Constantes e Listas Padronizadas para garantir que nada falha no carregamento vazio
@@ -871,7 +885,6 @@
     async function carregarDadosNuvem(forcar = false) {
         const statusDiv = document.getElementById('status_conexao');
         statusDiv.innerHTML = '⏳ LENDO NUVEM...'; statusDiv.className = 'status-conexao aguardando';
-        
         let carregouNuvem = false;
         
         try {
@@ -879,10 +892,8 @@
             if (!response.ok) throw new Error(`Erro API`);
             const data = await response.json();
             
-            // Fusão de Dados Legados (se for array simples = financeiro antigo)
-            if (Array.isArray(data)) {
-                transacoes = normalizarDatas(data);
-            } else {
+            if (Array.isArray(data)) { transacoes = normalizarDatas(data); } 
+            else {
                 if (data.transacoes) transacoes = normalizarDatas(data.transacoes);
                 if (data.aplicacoes) agriRecords = normalizarDatas(data.aplicacoes);
                 if (data.estoque) estoque = Array.isArray(data.estoque) ? data.estoque : Object.values(data.estoque || {});
@@ -894,21 +905,18 @@
                 }
                 if (data.analises) analisesSolo = normalizarDatas(data.analises); 
             }
-            
             statusDiv.innerHTML = '🟢 NUVEM SINCRONIZADA'; statusDiv.className = 'status-conexao conectado';
             carregouNuvem = true;
         } catch (error) {
             statusDiv.innerHTML = "🔴 MODO OFFLINE"; statusDiv.className = 'status-conexao';
         }
         
-        // Backup Local e Fusão
         const localStr = localStorage.getItem('rancho3c_offline');
         if (localStr && !carregouNuvem) {
             try {
                 const localData = JSON.parse(localStr);
-                if (Array.isArray(localData)) {
-                    transacoes = normalizarDatas(localData); 
-                } else {
+                if (Array.isArray(localData)) { transacoes = normalizarDatas(localData); } 
+                else {
                     if(localData.transacoes) transacoes = normalizarDatas(localData.transacoes);
                     if(localData.aplicacoes) agriRecords = normalizarDatas(localData.aplicacoes);
                     if(localData.estoque) estoque = Array.isArray(localData.estoque) ? localData.estoque : Object.values(localData.estoque || {});
@@ -923,27 +931,18 @@
             } catch(e) {}
         }
 
-        // Puxa eventuais arquivos antigos do localStorage da adubação e garante Array
-        if (!Array.isArray(agriRecords) || agriRecords.length === 0) { 
-            const oldAgri = localStorage.getItem('adubacao_records_v4'); 
-            if (oldAgri) { try { agriRecords = normalizarDatas(JSON.parse(oldAgri)); } catch(e){} } 
-        }
-        if (!Array.isArray(estoque) || estoque.length === 0) { 
-            const oldEst = localStorage.getItem('adubacao_estoque_v3'); 
-            if (oldEst) { try { let parsed = JSON.parse(oldEst); estoque = Array.isArray(parsed) ? parsed : Object.values(parsed); } catch(e){} } 
-        }
+        if (!Array.isArray(agriRecords) || agriRecords.length === 0) { const oldAgri = localStorage.getItem('adubacao_records_v4'); if (oldAgri) { try { agriRecords = normalizarDatas(JSON.parse(oldAgri)); } catch(e){} } }
+        if (!Array.isArray(estoque) || estoque.length === 0) { const oldEst = localStorage.getItem('adubacao_estoque_v3'); if (oldEst) { try { let parsed = JSON.parse(oldEst); estoque = Array.isArray(parsed) ? parsed : Object.values(parsed); } catch(e){} } }
 
         const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo };
         localStorage.setItem('rancho3c_offline', JSON.stringify(payload));
         
-        // Renderiza listas mestre para todo o sistema (COM PROTEÇÃO TRY-CATCH)
         try { preencherSelectsLancamento(); } catch(e){}
         try { preencherSelectsSafraFin(); } catch(e){}
         try { renderDatalistsAgri(); } catch(e){}
         try { popularSeletorSafraApp(); } catch(e){}
         try { popularSeletorSolo(); } catch(e){}
         
-        // Atualiza a tela que estiver visível no momento do carregamento
         if(document.getElementById('resumo').classList.contains('active')) try{atualizarResumoEGrafico();}catch(e){}
         if(document.getElementById('relatorios_detalhados').classList.contains('active')) try{atualizarRelatoriosDetalhados();}catch(e){}
         if(document.getElementById('movimentacoes').classList.contains('active')) { try{atualizarOpcoesFiltros(); aplicarFiltros();}catch(e){} }
@@ -971,7 +970,6 @@
         }
     }
 
-    // --- NAVEGADOR DE ABAS ---
     function showTab(id) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
@@ -983,7 +981,6 @@
         };
         if(btnMap[id]) document.getElementById(btnMap[id]).classList.add('btn-ativo');
         
-        // Chamadas otimizadas por módulo com proteção contra erros
         try {
             if(id === 'resumo') atualizarResumoEGrafico();
             if(id === 'relatorios_detalhados') atualizarRelatoriosDetalhados();
@@ -1001,7 +998,7 @@
     }
 
     /* =========================================================================
-       MÓDULO FINANCEIRO: CAIXA, RELATÓRIOS E DASHBOARD
+       MÓDULO FINANCEIRO
     ========================================================================= */
     function preencherSelectsSafraFin() {
         let safras = new Set(); transacoes.forEach(t => { if(t.data && t.data !== '-') safras.add(obterSafraGeral(t.data)); });
@@ -1054,19 +1051,16 @@
             chartPendenteObj = new Chart(ctxPendente, { type: 'doughnut', data: { labels: ['A Receber', 'A Pagar'], datasets: [{ data: [aR, aP], backgroundColor: [gradARec, gradAPag], borderWidth: 0, hoverOffset: 12 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } }, layout: { padding: 15 } } });
         }
 
-        // Listas Top 5 Blindadas (encodeURIComponent resolve bug de aspas no clique)
         let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
         arrRCat.forEach(x => { 
-            let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0; 
-            let codeStr = encodeURIComponent(x[0]); 
+            let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0; let codeStr = encodeURIComponent(x[0]); 
             hR += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${codeStr}', 'Receita')"><div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div></li>`; 
         });
         document.getElementById('lista_top_receitas').innerHTML = hR || '<li class="item-lista-grafico">Nenhuma receita paga</li>';
 
         let arrDCat = Object.entries(dCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxDCat = arrDCat.length > 0 ? arrDCat[0][1] : 0; let hD = '';
         arrDCat.forEach(x => { 
-            let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0; 
-            let codeStr = encodeURIComponent(x[0]); 
+            let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0; let codeStr = encodeURIComponent(x[0]); 
             hD += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${codeStr}', 'Saida')"><div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div></li>`; 
         });
         document.getElementById('lista_top_despesas').innerHTML = hD || '<li class="item-lista-grafico">Nenhuma saída paga</li>';
@@ -1127,18 +1121,18 @@
 
     function mudarTemaSaida() {
         const select = document.getElementById('d_natureza'); const caixa = document.getElementById('caixa_lancamento_saida');
-        const titulo = document.getElementById('titulo_saida');
+        const titulo = document.getElementById('titulo_saida'); 
         if(select.value === 'Investimento') {
             caixa.className = 'linha-lancamento linha-investimento-ativa';
-            titulo.style.color = 'var(--cor-investimento)';
+            titulo.style.color = 'var(--cor-investimento)'; 
         } else {
             caixa.className = 'linha-lancamento linha-despesa';
-            titulo.style.color = 'var(--cor-despesa)';
+            titulo.style.color = 'var(--cor-despesa)'; 
         }
     }
 
     function addTransacao(e, tipoBase) {
-        e.preventDefault();
+        e.preventDefault(); 
         try {
             const prefix = tipoBase === 'Saida' ? 'd_' : 'r_';
             let data = document.getElementById(prefix + 'data').value;
@@ -1149,15 +1143,12 @@
             let vUnit = document.getElementById(prefix + 'v_unit').value;
             let valStr = document.getElementById(prefix + 'valor').value; let val = parseFloat(valStr);
 
-            if(!data || !cat || !loc || !qtd || !und || !vUnit || isNaN(val)) { alert("Preencha todos os campos."); return; }
-
             let setor = "-"; let desc = document.getElementById(prefix + 'descricao').value.trim().toUpperCase();
             let tipoFinal = 'Receita';
             
             if(tipoBase === 'Saida') {
                 tipoFinal = document.getElementById('d_natureza').value; 
                 setor = document.getElementById('d_setor').value.trim().toUpperCase();
-                if(!setor || !desc) { alert("Preencha Setor e Descrição."); return; }
             }
 
             transacoes.push({
@@ -1170,97 +1161,6 @@
             preencherSelectsSafraFin(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento();
             mostrarToast(tipoFinal.toUpperCase() + ' GRAVADA!'); document.getElementById(prefix + 'data').focus();
         } catch (error) { alert("Erro ao gravar: " + error.message); }
-    }
-
-    function atualizarOpcoesFiltros() {
-        let cats = new Set(), sets = new Set(), locs = new Set(), descs = new Set();
-        transacoes.forEach(t => {
-            let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
-            if(cat && cat !== '-') cats.add(String(cat).toUpperCase());
-            if(strSafe(t.setor) && t.setor !== '-') sets.add(strSafe(t.setor).toUpperCase());
-            if(strSafe(t.local) && t.local !== '-') locs.add(strSafe(t.local).toUpperCase());
-            if(strSafe(t.desc) && t.desc !== '-') descs.add(strSafe(t.desc).toUpperCase());
-        });
-        function preencher(id, setVals) {
-            const sel = document.getElementById(id); if(sel) { const val = sel.value; sel.innerHTML = '<option value="">TUDO</option>' + Array.from(setVals).sort().map(v => `<option value="${v.toLowerCase()}">${v}</option>`).join(''); sel.value = val; }
-        }
-        preencher('f_cat', cats); preencher('f_setor', sets); preencher('f_local', locs); preencher('f_desc', descs);
-    }
-
-    function limparFiltros() { document.querySelectorAll('.barra-pesquisa-relatorio input:not([type="button"]), .filter-row input, .filter-row select').forEach(i => i.value = ''); setFiltroRapido(''); }
-
-    function setFiltroRapido(tipo) {
-        filtroRapido = tipo; document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
-        if(tipo === '') document.getElementById('btn_f_todos').classList.add('ativo');
-        if(tipo === 'pendentes') document.getElementById('btn_f_pendentes').classList.add('ativo');
-        if(tipo === 'entradas') document.getElementById('btn_f_entradas').classList.add('ativo');
-        if(tipo === 'safra') document.getElementById('btn_f_safra').classList.add('ativo');
-        aplicarFiltros();
-    }
-    function setOrdenacao(coluna) { colOrdenacao = coluna; ordemAscendente = !ordemAscendente; aplicarFiltros(); }
-
-    function aplicarFiltros() {
-        const pG = document.getElementById('pesquisa_global').value.toLowerCase();
-        const fD = document.getElementById('f_data').value, fT = document.getElementById('f_tipo').value.toLowerCase();
-        const fC = document.getElementById('f_cat').value.toLowerCase(), fSe = document.getElementById('f_setor').value.toLowerCase();
-        const fL = document.getElementById('f_local').value.toLowerCase(), fDe = document.getElementById('f_desc').value.toLowerCase();
-        const fSi = document.getElementById('f_sit').value.toLowerCase();
-
-        let lista = transacoes.map((item, idx) => ({ item, indexOriginal: idx })).filter(obj => {
-            let t = obj.item; let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
-            if(pG && !`${strSafe(t.desc)} ${strSafe(t.local)} ${cM} ${strSafe(t.setor)} ${t.tipo}`.toLowerCase().includes(pG)) return false;
-            if(fD && strSafe(t.data) !== fD) return false;
-            if(fT && String(t.tipo).toLowerCase() !== fT) return false;
-            if(fC && cM.toLowerCase() !== fC) return false;
-            if(fSe && strSafe(t.setor).toLowerCase() !== fSe) return false;
-            if(fL && strSafe(t.local).toLowerCase() !== fL) return false;
-            if(fDe && strSafe(t.desc).toLowerCase() !== fDe) return false;
-            if(fSi && strSafe(t.sit).toLowerCase() !== fSi) return false;
-            
-            let sitTxt = strSafe(t.sit).toLowerCase();
-            if (filtroRapido === 'pendentes' && sitTxt.includes('pago')) return false;
-            if (filtroRapido === 'entradas' && String(t.tipo).toLowerCase() !== 'receita') return false;
-            if (filtroRapido === 'safra' && obterSafraGeral(t.data) !== obterSafraAtual()) return false;
-            return true;
-        });
-
-        lista.sort((a, b) => {
-            let vA = a.item[colOrdenacao], vB = b.item[colOrdenacao];
-            if (colOrdenacao === 'categoria') { vA = vA === '-' ? a.item.desc : vA; vB = vB === '-' ? b.item.desc : vB; }
-            if(colOrdenacao === 'valor' || colOrdenacao === 'qtd' || colOrdenacao === 'v_unit') { vA = parseFloat(vA)||0; vB = parseFloat(vB)||0; } 
-            else if(colOrdenacao === 'data') { vA = new Date(strSafe(vA)).getTime()||0; vB = new Date(strSafe(vB)).getTime()||0; } 
-            else { vA = String(vA).toLowerCase(); vB = String(vB).toLowerCase(); }
-            if(vA < vB) return ordemAscendente ? -1 : 1; if(vA > vB) return ordemAscendente ? 1 : -1; return 0;
-        });
-        renderTabela(lista);
-    }
-
-    function renderTabela(lista) {
-        let linhasHTML = []; const hojeObj = new Date(); hojeObj.setHours(0,0,0,0);
-        lista.forEach(obj => {
-            const t = obj.item; const idx = obj.indexOriginal;
-            let tipoLower = String(t.tipo).toLowerCase();
-            let badgeTipo = tipoLower === 'despesa' ? 'badge-despesa' : (tipoLower === 'investimento' ? 'badge-investimento' : 'badge-receita');
-            let sitTxt = strSafe(t.sit).toLowerCase(); let isPago = sitTxt.includes('pago');
-            let btnSit = isPago 
-                ? `<button class="btn-acao bg-pago" style="width:100%; font-size:11px;" onclick="mudarSitTransacao(${idx}, '${tipoLower === 'receita'?'A receber':'A pagar'}')">✔️ PAGO</button>` 
-                : `<button class="btn-acao bg-pendente" style="width:100%; font-size:11px;" onclick="mudarSitTransacao(${idx}, 'Pago')">⏳ PENDENTE</button>`;
-            let isAtrasado = (!isPago) && (t.data && new Date(String(t.data) + 'T00:00:00') < hojeObj);
-            let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (tipoLower === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
-
-            linhasHTML.push(`
-                <tr class="${isAtrasado ? 'linha-atrasada' : ''}">
-                    <td>${formatarData(t.data)}</td><td><div class="badge-tipo ${badgeTipo}">${String(t.tipo).toUpperCase()}</div></td><td><b>${cM}</b></td>
-                    <td>${strSafe(t.setor)}</td><td>${strSafe(t.local)}</td><td>${strSafe(t.desc)}</td>
-                    <td>${strSafe(t.qtd)} ${strSafe(t.und)}</td><td>${formatarMoeda(t.v_unit)}</td>
-                    <td style="font-weight:900;">${formatarMoeda(t.valor)}</td><td style="text-align: center; width: 100px;">${btnSit}</td>
-                    <td class="no-print" style="text-align: center;">
-                        <button onclick="abrirModalEdicao(${idx})" class="btn-acao btn-editar">✏️</button>
-                        <button onclick="confirmarExclusao(${idx})" class="btn-acao btn-excluir">🗑️️</button>
-                    </td>
-                </tr>`);
-        });
-        document.getElementById('tabela_relatorio').innerHTML = linhasHTML.join('');
     }
 
     function renderizarTabelasPendencias() {
@@ -1281,6 +1181,7 @@
                 tDesp += v;
             }
         });
+
         document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRec || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
         document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDesp || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
     }
@@ -1375,6 +1276,99 @@
         }
     }
 
+    function atualizarOpcoesFiltros() {
+        let cats = new Set(), sets = new Set(), locs = new Set(), descs = new Set();
+        transacoes.forEach(t => {
+            let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
+            if(cat && cat !== '-') cats.add(String(cat).toUpperCase());
+            if(strSafe(t.setor) && t.setor !== '-') sets.add(strSafe(t.setor).toUpperCase());
+            if(strSafe(t.local) && t.local !== '-') locs.add(strSafe(t.local).toUpperCase());
+            if(strSafe(t.desc) && t.desc !== '-') descs.add(strSafe(t.desc).toUpperCase());
+        });
+        function preencher(id, setVals) {
+            const sel = document.getElementById(id); if(sel) { const val = sel.value; sel.innerHTML = '<option value="">TUDO</option>' + Array.from(setVals).sort().map(v => `<option value="${v.toLowerCase()}">${v}</option>`).join(''); sel.value = val; }
+        }
+        preencher('f_cat', cats); preencher('f_setor', sets); preencher('f_local', locs); preencher('f_desc', descs);
+    }
+
+    function limparFiltros() { document.querySelectorAll('.barra-pesquisa-relatorio input:not([type="button"]), .filter-row input, .filter-row select').forEach(i => i.value = ''); setFiltroRapido(''); }
+
+    function setFiltroRapido(tipo) {
+        filtroRapido = tipo; document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
+        if(tipo === '') document.getElementById('btn_f_todos').classList.add('ativo');
+        if(tipo === 'pendentes') document.getElementById('btn_f_pendentes').classList.add('ativo');
+        if(tipo === 'entradas') document.getElementById('btn_f_entradas').classList.add('ativo');
+        if(tipo === 'safra') document.getElementById('btn_f_safra').classList.add('ativo');
+        aplicarFiltros();
+    }
+    function setOrdenacao(coluna) { colOrdenacao = coluna; ordemAscendente = !ordemAscendente; aplicarFiltros(); }
+
+    function aplicarFiltros() {
+        const pG = document.getElementById('pesquisa_global').value.toLowerCase();
+        const fD = document.getElementById('f_data').value, fT = document.getElementById('f_tipo').value.toLowerCase();
+        const fC = document.getElementById('f_cat').value.toLowerCase(), fSe = document.getElementById('f_setor').value.toLowerCase();
+        const fL = document.getElementById('f_local').value.toLowerCase(), fDe = document.getElementById('f_desc').value.toLowerCase();
+        const fSi = document.getElementById('f_sit').value.toLowerCase();
+
+        let lista = transacoes.map((item, idx) => ({ item, indexOriginal: idx })).filter(obj => {
+            let t = obj.item; let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
+            if(pG && !`${strSafe(t.desc)} ${strSafe(t.local)} ${cM} ${strSafe(t.setor)} ${t.tipo}`.toLowerCase().includes(pG)) return false;
+            if(fD && strSafe(t.data) !== fD) return false;
+            if(fT && String(t.tipo).toLowerCase() !== fT) return false;
+            if(fC && cM.toLowerCase() !== fC) return false;
+            if(fSe && strSafe(t.setor).toLowerCase() !== fSe) return false;
+            if(fL && strSafe(t.local).toLowerCase() !== fL) return false;
+            if(fDe && strSafe(t.desc).toLowerCase() !== fDe) return false;
+            if(fSi && strSafe(t.sit).toLowerCase() !== fSi) return false;
+            
+            let sitTxt = strSafe(t.sit).toLowerCase();
+            if (filtroRapido === 'pendentes' && sitTxt.includes('pago')) return false;
+            if (filtroRapido === 'entradas' && String(t.tipo).toLowerCase() !== 'receita') return false;
+            if (filtroRapido === 'safra' && obterSafraGeral(t.data) !== obterSafraAtual()) return false;
+            return true;
+        });
+
+        lista.sort((a, b) => {
+            let vA = a.item[colOrdenacao], vB = b.item[colOrdenacao];
+            if (colOrdenacao === 'categoria') { vA = vA === '-' ? a.item.desc : vA; vB = vB === '-' ? b.item.desc : vB; }
+            if(colOrdenacao === 'valor' || colOrdenacao === 'qtd' || colOrdenacao === 'v_unit') { vA = parseFloat(vA)||0; vB = parseFloat(vB)||0; } 
+            else if(colOrdenacao === 'data') { vA = new Date(strSafe(vA)).getTime()||0; vB = new Date(strSafe(vB)).getTime()||0; } 
+            else { vA = String(vA).toLowerCase(); vB = String(vB).toLowerCase(); }
+            if(vA < vB) return ordemAscendente ? -1 : 1; if(vA > vB) return ordemAscendente ? 1 : -1; return 0;
+        });
+        renderTabela(lista);
+    }
+
+    function renderTabela(lista) {
+        let linhasHTML = []; const hojeObj = new Date(); hojeObj.setHours(0,0,0,0);
+        lista.forEach(obj => {
+            try {
+                const t = obj.item; const idx = obj.indexOriginal;
+                let tipoLower = String(t.tipo).toLowerCase();
+                let badgeTipo = tipoLower === 'despesa' ? 'badge-despesa' : (tipoLower === 'investimento' ? 'badge-investimento' : 'badge-receita');
+                let sitTxt = strSafe(t.sit).toLowerCase(); let isPago = sitTxt.includes('pago');
+                let btnSit = isPago 
+                    ? `<button class="btn-acao bg-pago" style="font-size:11px;" onclick="mudarSitTransacao(${idx}, '${tipoLower === 'receita'?'A receber':'A pagar'}')">✔️ PAGO</button>` 
+                    : `<button class="btn-acao bg-pendente" style="font-size:11px;" onclick="mudarSitTransacao(${idx}, 'Pago')">⏳ PENDENTE</button>`;
+                let isAtrasado = (!isPago) && (t.data && new Date(String(t.data) + 'T00:00:00') < hojeObj);
+                let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (tipoLower === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
+
+                linhasHTML.push(`
+                    <tr class="${isAtrasado ? 'linha-atrasada' : ''}">
+                        <td>${formatarData(t.data)}</td><td><div class="badge-tipo ${badgeTipo}">${String(t.tipo).toUpperCase()}</div></td><td><b>${cM}</b></td>
+                        <td>${strSafe(t.setor)}</td><td>${strSafe(t.local)}</td><td>${strSafe(t.desc)}</td>
+                        <td>${strSafe(t.qtd)} ${strSafe(t.und)}</td><td>${formatarMoeda(t.v_unit)}</td>
+                        <td style="font-weight:900;">${formatarMoeda(t.valor)}</td><td style="text-align: center; width: 100px;">${btnSit}</td>
+                        <td class="no-print" style="text-align: center;">
+                            <button onclick="abrirModalEdicao(${idx})" class="btn-acao btn-editar">✏️</button>
+                            <button onclick="confirmarExclusao(${idx})" class="btn-acao btn-excluir">🗑️</button>
+                        </td>
+                    </tr>`);
+            } catch(e) { console.error("Linha Fin ignorada", e); }
+        });
+        document.getElementById('tabela_relatorio').innerHTML = linhasHTML.join('') || '<tr><td colspan="11" style="text-align:center;">Sem lançamentos</td></tr>';
+    }
+
     function atualizarRelatoriosDetalhados() {
         let despSetor = {}; let despCat = {}; let invCat = {}; let recCat = {}; let recLocal = {};
         const filtroMes = document.getElementById('filtro_mes_relatorios') ? document.getElementById('filtro_mes_relatorios').value : '';
@@ -1447,7 +1441,7 @@
     }
 
     function verificarNovaOpcao(categoria, valorStr) {
-        let valor = valorStr.toUpperCase().trim();
+        let valor = String(valorStr||'').toUpperCase().trim();
         if(!opcoesDin[categoria]) opcoesDin[categoria] = [];
         if (valor && valor !== '-' && !opcoesDin[categoria].includes(valor)) {
             if (confirm(`Adicionar "${valor}" à lista de opções futuras?`)) {
@@ -1507,24 +1501,26 @@
 
         let html = '';
         visibleRecords.forEach((rec, vIdx) => {
-            let statusClass = rec.status === 'APLICADO' ? 'status-aplicado' : 'status-planejado';
-            let itemEstoque = estoque.find(e => e.produto === rec.produto && e.un === rec.dosagem_un);
-            let aviso = (rec.status === 'PLANEJADO' && (!itemEstoque || itemEstoque.qtd < rec.dosagem_qtd)) ? '<br><span class="stock-warning">⚠️ FALTA NO ESTOQUE</span>' : '';
-            let custoTotal = (parseFloat(rec.dosagem_qtd)||0) * (itemEstoque ? (itemEstoque.valor_unit || 0) : (rec.custo_unit || 0));
-            
-            let cClass = ''; let tStr = (rec.tipo||'').toUpperCase();
-            if (tStr.includes('ADUBO') || tStr.includes('FERTILIZANTE')) cClass = 'linha-adubo';
-            else if (tStr.includes('INSETICIDA')) cClass = 'linha-inseticida';
-            else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida';
-            else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
+            try {
+                let statusClass = rec.status === 'APLICADO' ? 'status-aplicado' : 'status-planejado';
+                let itemEstoque = estoque.find(e => e.produto === rec.produto && e.un === rec.dosagem_un);
+                let aviso = (rec.status === 'PLANEJADO' && (!itemEstoque || itemEstoque.qtd < rec.dosagem_qtd)) ? '<br><span class="stock-warning">⚠️ FALTA NO ESTOQUE</span>' : '';
+                let custoTotal = (parseFloat(rec.dosagem_qtd)||0) * (itemEstoque ? (itemEstoque.valor_unit || 0) : (rec.custo_unit || 0));
+                
+                let cClass = ''; let tStr = String(rec.tipo||'').toUpperCase();
+                if (tStr.includes('ADUBO') || tStr.includes('FERTILIZANTE')) cClass = 'linha-adubo';
+                else if (tStr.includes('INSETICIDA')) cClass = 'linha-inseticida';
+                else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida';
+                else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
 
-            html += `<tr class="${cClass}">
-                <td>${formatarData(rec.data)}</td><td>${strSafe(rec.talhao)}</td><td><b>${strSafe(rec.produto)}</b>${aviso}</td>
-                <td>${strSafe(rec.tipo)}</td><td>${strSafe(rec.alvo)||'-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strSafe(rec.forma)||'-'}</td>
-                <td>${formatarMoeda(custoTotal)}</td>
-                <td><div class="${statusClass}" onclick="toggleStatusApp(${vIdx})">${strSafe(rec.status)} 🔄</div></td>
-                <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editAgriRecord(${vIdx})">✏️</button><button class="btn-acao btn-excluir" onclick="deleteAgriRecord(${vIdx})">🗑️</button></td>
-            </tr>`;
+                html += `<tr class="${cClass}">
+                    <td>${formatarData(rec.data)}</td><td>${strSafe(rec.talhao)}</td><td><b>${strSafe(rec.produto)}</b>${aviso}</td>
+                    <td>${strSafe(rec.tipo)}</td><td>${strSafe(rec.alvo)||'-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strSafe(rec.forma)||'-'}</td>
+                    <td>${formatarMoeda(custoTotal)}</td>
+                    <td><button class="${statusClass}" onclick="toggleStatusApp(${vIdx})">${strSafe(rec.status)} 🔄</button></td>
+                    <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editAgriRecord(${vIdx})">✏️</button><button class="btn-acao btn-excluir" onclick="deleteAgriRecord(${vIdx})">🗑️</button></td>
+                </tr>`;
+            } catch(e) { console.error("Linha Agri ignorada", e); }
         });
         document.getElementById('tableBodyAgri').innerHTML = html || '<tr><td colspan="10" style="text-align:center;">Nenhuma aplicação</td></tr>';
         updateFilterOptionsAgri(visibleRecords);
@@ -1548,28 +1544,29 @@
     }
 
     function saveAndRenderEstoque() {
-        if(!Array.isArray(estoque)) estoque = [];
         estoque.sort((a, b) => String(a.produto||'').localeCompare(String(b.produto||'')));
         let html = ''; let somaTotal = 0;
         
         estoque.forEach((rec, index) => {
-            let demanda = 0; let mesAtual = new Date().toISOString().substring(0,7);
-            agriRecords.forEach(r => { if(r.status === 'PLANEJADO' && r.data.startsWith(mesAtual) && r.produto === rec.produto && r.dosagem_un === rec.un) demanda += parseFloat(r.dosagem_qtd)||0; });
-            
-            let corQtd = ''; let aviso = ''; let cClass = ''; let tStr = (rec.tipo||'').toUpperCase();
-            if (tStr.includes('ADUBO')) cClass = 'linha-adubo'; else if (tStr.includes('INSETICIDA')) cClass = 'linha-inseticida'; else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida'; else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
+            try {
+                let demanda = 0; let mesAtual = new Date().toISOString().substring(0,7);
+                agriRecords.forEach(r => { if(r && r.status === 'PLANEJADO' && r.data && String(r.data).startsWith(mesAtual) && r.produto === rec.produto && r.dosagem_un === rec.un) demanda += parseFloat(r.dosagem_qtd)||0; });
+                
+                let corQtd = ''; let aviso = ''; let cClass = ''; let tStr = String(rec.tipo||'').toUpperCase();
+                if (tStr.includes('ADUBO')) cClass = 'linha-adubo'; else if (tStr.includes('INSETICIDA')) cClass = 'linha-inseticida'; else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida'; else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
 
-            let qEstoque = parseFloat(rec.qtd)||0;
-            if(qEstoque < 0) { cClass = 'tr-alerta'; corQtd = 'color: #D32F2F; font-weight: 900;'; aviso = `<br><span class="stock-warning">⚠️ SALDO NEGATIVO</span>`; } 
-            else if (qEstoque < demanda) { cClass = 'tr-alerta'; corQtd = 'color: #D32F2F; font-weight: 900;'; aviso = `<br><span class="stock-warning">⚠️ PRECISA DE ${demanda.toFixed(2)} ${rec.un}</span>`; }
+                let qEstoque = parseFloat(rec.qtd)||0;
+                if(qEstoque < 0) { cClass = 'tr-alerta'; corQtd = 'color: #D32F2F; font-weight: 900;'; aviso = `<br><span class="stock-warning">⚠️ SALDO NEGATIVO</span>`; } 
+                else if (qEstoque < demanda) { cClass = 'tr-alerta'; corQtd = 'color: #D32F2F; font-weight: 900;'; aviso = `<br><span class="stock-warning">⚠️ PRECISA DE ${demanda.toFixed(2)} ${rec.un}</span>`; }
 
-            let vTot = qEstoque > 0 ? (qEstoque * (rec.valor_unit || 0)) : 0; somaTotal += vTot;
+                let vTot = qEstoque > 0 ? (qEstoque * (rec.valor_unit || 0)) : 0; somaTotal += vTot;
 
-            html += `<tr class="${cClass}">
-                <td><b>${strSafe(rec.produto)}</b>${aviso}</td><td>${strSafe(rec.principio)||'-'}</td><td>${strSafe(rec.tipo)}</td>
-                <td style="${corQtd}">${qEstoque.toFixed(2)} ${strSafe(rec.un)}</td><td>${formatarMoeda(rec.valor_unit)}</td><td><b>${formatarMoeda(vTot)}</b></td>
-                <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editEstoque(${index})">✏️</button><button class="btn-acao btn-excluir" onclick="deleteEstoque(${index})">🗑️</button></td>
-            </tr>`;
+                html += `<tr class="${cClass}">
+                    <td><b>${strSafe(rec.produto)}</b>${aviso}</td><td>${strSafe(rec.principio)||'-'}</td><td>${strSafe(rec.tipo)}</td>
+                    <td style="${corQtd}">${qEstoque.toFixed(2)} ${strSafe(rec.un)}</td><td>${formatarMoeda(rec.valor_unit)}</td><td><b>${formatarMoeda(vTot)}</b></td>
+                    <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editEstoque(${index})">✏️</button><button class="btn-acao btn-excluir" onclick="deleteEstoque(${index})">🗑️</button></td>
+                </tr>`;
+            } catch(e) { console.error("Linha Est ignorada", e); }
         });
         document.getElementById('estoqueBody').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">Estoque vazio</td></tr>';
         document.getElementById('th-valor-total-est').innerHTML = `VALOR TOTAL<br><span style="font-size: 0.85em; color: #FFF;">${formatarMoeda(somaTotal)}</span>`;
@@ -1618,7 +1615,7 @@
 
         const safrasK = Object.keys(dS).sort();
         chartS_Agri = genChart(chartS_Agri, 'chartCustoSafra', 'bar', Object.keys(dCS).sort(), k=>dCS[k], k=>0, '#8E44AD', 'transparent');
-        if(chartS_Agri.data.datasets[0]) chartS_Agri.data.datasets[0].label = 'CUSTO (R$)'; chartS_Agri.update();
+        if(chartS_Agri.data.datasets[0]) { chartS_Agri.data.datasets[0].label = 'CUSTO (R$)'; chartS_Agri.update(); }
 
         const talhoesK = Object.keys(dT).sort();
         chartT_Agri = genChart(chartT_Agri, 'chartTalhao', 'bar', talhoesK, k=>dT[k].L, k=>dT[k].KG, '#4FC3F7', '#81C784');
