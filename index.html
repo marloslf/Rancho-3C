@@ -64,6 +64,7 @@
         .menu button { 
             padding: 10px 15px; cursor: pointer; border: none; background: var(--cor-fundo); color: #666; 
             border-radius: 30px; font-weight: 900; font-size: 13px; transition: all 0.3s ease; box-shadow: var(--sombra-neumorfica);
+            position: relative !important; /* CORREÇÃO DO SELO DESLOCADO */
         }
         .menu button:hover { transform: translateY(-2px); color: var(--cor-madeira);}
         .menu button.btn-ativo { box-shadow: var(--sombra-interna); }
@@ -83,6 +84,7 @@
             display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: var(--sombra-neumorfica); transition: all 0.3s ease;
         }
         .status-conexao.conectado { background: #e8f5e9; color: #2e7d32; border-color: #66bb6a; }
+        .status-conexao.aguardando { background: #FFF3E0; color: #E65100; border-color: #FFB74D; pointer-events: none;} 
 
         /* --- ABAS GERAIS --- */
         .tab { display: none; background: transparent; position: relative; min-height: 80vh; }
@@ -112,7 +114,7 @@
         .barra-grafico-receita { height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); background: linear-gradient(to bottom, #A5D6A7 0%, #4CAF50 40%, #2E7D32 100%);}
         .barra-grafico-despesa { height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); background: linear-gradient(to bottom, #FFCC80 0%, #FF9800 40%, #E65100 100%);}
 
-        /* --- INPUTS E CONTRASTE --- */
+        /* --- INPUTS --- */
         input, select, .filter-row input, .filter-row select {
             padding: 10px; font-size: 13px; border: none; border-radius: 8px; font-weight: 900; text-transform: uppercase; width: 100%; 
             background-color: rgba(255, 255, 255, 0.85); box-shadow: var(--sombra-interna); color: #000; transition: 0.2s;
@@ -194,6 +196,7 @@
         .box-solo { background: rgba(255,255,255,0.5); padding: 15px; border-radius: 12px; box-shadow: var(--sombra-interna); border: 1px solid rgba(255,255,255,0.8); margin-bottom: 15px;}
         .box-solo h4 { margin-top: 0; margin-bottom: 10px; color: var(--cor-solo); border-bottom: 2px dashed #ccc; padding-bottom: 5px; font-size: 13px;}
 
+        /* --- ESTILOS DE IMPRESSÃO (LAUDO) --- */
         @media print {
             body { height: auto; overflow: visible; background: white !important; zoom: 100%; color: black;}
             .no-print, .menu, .area-fixa-topo, .watermark-logo, .sub-menu { display: none !important; }
@@ -218,9 +221,7 @@
     <div style="width: 150px;"></div>
 </div>
 
-<!-- ========================================== -->
-<!-- MENU PRINCIPAL UNIFICADO                   -->
-<!-- ========================================== -->
+<!-- MENU PRINCIPAL UNIFICADO -->
 <div class="menu no-print">
     <button id="btn_home" class="btn-ativo" onclick="showTab('home')">🏠 INÍCIO</button>
     <div class="menu-divisor"></div>
@@ -244,9 +245,7 @@
     <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem(true)" title="Forçar Sincronização">⏳ CARREGANDO...</button>
 </div>
 
-<!-- ========================================== -->
-<!-- TELA INICIAL (HOME)                        -->
-<!-- ========================================== -->
+<!-- TELA INICIAL (HOME LIMPA) -->
 <div id="home" class="tab active">
     <div class="home-container">
         <img src="https://i.imgur.com/jPLDeyi.png" alt="Rancho 3C Logo" referrerpolicy="no-referrer">
@@ -254,7 +253,7 @@
 </div>
 
 <!-- ========================================== -->
-<!-- MÓDULO FINANCEIRO (ID ÚNICO)               -->
+<!-- MÓDULO FINANCEIRO                          -->
 <!-- ========================================== -->
 <div id="resumo" class="tab">
     <div class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; background: var(--cor-fundo); padding: 15px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
@@ -300,10 +299,7 @@
         <div class="linha-lancamento linha-despesa" id="caixa_lancamento_saida">
             <div style="display:flex; justify-content:space-between; margin-bottom: 6px; align-items: center;">
                 <span style="font-size:13px; font-weight:900; color:var(--cor-despesa);" id="titulo_saida">🚜 INSERIR SAÍDA:
-                    <select id="d_natureza" class="select-tipo-saida" onchange="mudarTemaSaida()">
-                        <option value="Despesa">CUSTEIO</option>
-                        <option value="Investimento">INVESTIMENTO</option>
-                    </select>
+                    <select id="d_natureza" class="select-tipo-saida" onchange="mudarTemaSaida()"><option value="Despesa">CUSTEIO</option><option value="Investimento">INVESTIMENTO</option></select>
                 </span>
             </div>
             <!-- ONSUBMIT PROTEGIDO PARA CAIXA SAIDA -->
@@ -775,25 +771,13 @@
                         <button class="btn-salvar-compacto" style="background: #555;" onclick="imprimirLaudo()">🖨 IMPRIMIR LAUDO</button>
                         <button class="btn-salvar-compacto" style="background: var(--cor-agri-app);" onclick="enviarParaAplicacoes()">📤 ENVIAR P/ APLICAÇÕES</button>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- GESTOR DE DATALISTS GLOBAIS (Não duplicar e manter no fundo) -->
-<datalist id="lista-talhoes"></datalist>
-<datalist id="lista-tipos"></datalist>
-<datalist id="lista-formas"></datalist>
-<datalist id="lista-alvos"></datalist>
-<datalist id="lista-produtos-estoque"></datalist>
-<datalist id="lista_d_categoria"></datalist>
-<datalist id="lista_d_setor"></datalist>
-<datalist id="lista_d_local"></datalist>
-<datalist id="lista_d_descricao"></datalist>
-<datalist id="lista_r_categoria"></datalist>
-<datalist id="lista_r_local"></datalist>
 
 <!-- MODAL DE EDIÇÃO -->
 <div id="modal-edicao">
@@ -901,7 +885,7 @@
             } else {
                 if (data.transacoes) transacoes = normalizarDatas(data.transacoes);
                 if (data.aplicacoes) agriRecords = normalizarDatas(data.aplicacoes);
-                if (data.estoque) estoque = data.estoque;
+                if (data.estoque) estoque = Array.isArray(data.estoque) ? data.estoque : Object.values(data.estoque || {});
                 if (data.opcoes) {
                     opcoesDin.talhoes = [...new Set([...opcoesDin.talhoes, ...(data.opcoes.talhoes || [])])].sort();
                     opcoesDin.tipos = [...new Set([...opcoesDin.tipos, ...(data.opcoes.tipos || [])])].sort();
@@ -920,45 +904,53 @@
         // Backup Local e Fusão
         const localStr = localStorage.getItem('rancho3c_offline');
         if (localStr && !carregouNuvem) {
-            const localData = JSON.parse(localStr);
-            if (Array.isArray(localData)) {
-                transacoes = normalizarDatas(localData); 
-            } else {
-                if(localData.transacoes) transacoes = normalizarDatas(localData.transacoes);
-                if(localData.aplicacoes) agriRecords = normalizarDatas(localData.aplicacoes);
-                if(localData.estoque) estoque = localData.estoque;
-                if(localData.opcoes) {
-                    opcoesDin.talhoes = [...new Set([...opcoesDin.talhoes, ...(localData.opcoes.talhoes || [])])].sort();
-                    opcoesDin.tipos = [...new Set([...opcoesDin.tipos, ...(localData.opcoes.tipos || [])])].sort();
-                    opcoesDin.formas = [...new Set([...opcoesDin.formas, ...(localData.opcoes.formas || [])])].sort();
-                    opcoesDin.alvos = [...new Set([...opcoesDin.alvos, ...(localData.opcoes.alvos || [])])].sort();
+            try {
+                const localData = JSON.parse(localStr);
+                if (Array.isArray(localData)) {
+                    transacoes = normalizarDatas(localData); 
+                } else {
+                    if(localData.transacoes) transacoes = normalizarDatas(localData.transacoes);
+                    if(localData.aplicacoes) agriRecords = normalizarDatas(localData.aplicacoes);
+                    if(localData.estoque) estoque = Array.isArray(localData.estoque) ? localData.estoque : Object.values(localData.estoque || {});
+                    if(localData.opcoes) {
+                        opcoesDin.talhoes = [...new Set([...opcoesDin.talhoes, ...(localData.opcoes.talhoes || [])])].sort();
+                        opcoesDin.tipos = [...new Set([...opcoesDin.tipos, ...(localData.opcoes.tipos || [])])].sort();
+                        opcoesDin.formas = [...new Set([...opcoesDin.formas, ...(localData.opcoes.formas || [])])].sort();
+                        opcoesDin.alvos = [...new Set([...opcoesDin.alvos, ...(localData.opcoes.alvos || [])])].sort();
+                    }
+                    if(localData.analises) analisesSolo = normalizarDatas(localData.analises);
                 }
-                if(localData.analises) analisesSolo = normalizarDatas(localData.analises);
-            }
+            } catch(e) {}
         }
 
-        // Puxa eventuais arquivos antigos do localStorage da adubação
-        if (agriRecords.length === 0) { const oldAgri = localStorage.getItem('adubacao_records_v4'); if (oldAgri) agriRecords = normalizarDatas(JSON.parse(oldAgri)); }
-        if (estoque.length === 0) { const oldEst = localStorage.getItem('adubacao_estoque_v3'); if (oldEst) estoque = JSON.parse(oldEst); }
+        // Puxa eventuais arquivos antigos do localStorage da adubação e garante Array
+        if (!Array.isArray(agriRecords) || agriRecords.length === 0) { 
+            const oldAgri = localStorage.getItem('adubacao_records_v4'); 
+            if (oldAgri) { try { agriRecords = normalizarDatas(JSON.parse(oldAgri)); } catch(e){} } 
+        }
+        if (!Array.isArray(estoque) || estoque.length === 0) { 
+            const oldEst = localStorage.getItem('adubacao_estoque_v3'); 
+            if (oldEst) { try { let parsed = JSON.parse(oldEst); estoque = Array.isArray(parsed) ? parsed : Object.values(parsed); } catch(e){} } 
+        }
 
         const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo };
         localStorage.setItem('rancho3c_offline', JSON.stringify(payload));
         
-        // Renderiza listas mestre para todo o sistema
-        preencherSelectsLancamento(); 
-        preencherSelectsSafraFin(); 
-        renderDatalistsAgri(); 
-        popularSeletorSafraApp(); 
-        popularSeletorSolo();
+        // Renderiza listas mestre para todo o sistema (COM PROTEÇÃO TRY-CATCH)
+        try { preencherSelectsLancamento(); } catch(e){}
+        try { preencherSelectsSafraFin(); } catch(e){}
+        try { renderDatalistsAgri(); } catch(e){}
+        try { popularSeletorSafraApp(); } catch(e){}
+        try { popularSeletorSolo(); } catch(e){}
         
         // Atualiza a tela que estiver visível no momento do carregamento
-        if(document.getElementById('resumo').classList.contains('active')) atualizarResumoEGrafico();
-        if(document.getElementById('relatorios_detalhados').classList.contains('active')) atualizarRelatoriosDetalhados();
-        if(document.getElementById('movimentacoes').classList.contains('active')) { atualizarOpcoesFiltros(); aplicarFiltros(); }
-        if(document.getElementById('pendencias').classList.contains('active')) renderizarTabelasPendencias();
-        if(document.getElementById('agri_app').classList.contains('active')) { aplicarFiltroSafraApp(); }
-        if(document.getElementById('agri_est').classList.contains('active')) { saveAndRenderEstoque(); }
-        if(document.getElementById('agri_dash').classList.contains('active')) { renderAgriDashboard(); }
+        if(document.getElementById('resumo').classList.contains('active')) try{atualizarResumoEGrafico();}catch(e){}
+        if(document.getElementById('relatorios_detalhados').classList.contains('active')) try{atualizarRelatoriosDetalhados();}catch(e){}
+        if(document.getElementById('movimentacoes').classList.contains('active')) { try{atualizarOpcoesFiltros(); aplicarFiltros();}catch(e){} }
+        if(document.getElementById('pendencias').classList.contains('active')) try{renderizarTabelasPendencias();}catch(e){}
+        if(document.getElementById('agri_app').classList.contains('active')) { try{aplicarFiltroSafraApp();}catch(e){} }
+        if(document.getElementById('agri_est').classList.contains('active')) { try{saveAndRenderEstoque();}catch(e){} }
+        if(document.getElementById('agri_dash').classList.contains('active')) { try{renderAgriDashboard();}catch(e){} }
     }
 
     async function salvarDados() {
@@ -991,17 +983,19 @@
         };
         if(btnMap[id]) document.getElementById(btnMap[id]).classList.add('btn-ativo');
         
-        // Chamadas otimizadas por módulo
-        if(id === 'resumo') atualizarResumoEGrafico();
-        if(id === 'relatorios_detalhados') atualizarRelatoriosDetalhados();
-        if(id === 'movimentacoes') { atualizarOpcoesFiltros(); aplicarFiltros(); }
-        if(id === 'pendencias') renderizarTabelasPendencias();
+        // Chamadas otimizadas por módulo com proteção contra erros
+        try {
+            if(id === 'resumo') atualizarResumoEGrafico();
+            if(id === 'relatorios_detalhados') atualizarRelatoriosDetalhados();
+            if(id === 'movimentacoes') { atualizarOpcoesFiltros(); aplicarFiltros(); }
+            if(id === 'pendencias') renderizarTabelasPendencias();
 
-        if(id === 'agri_app') { aplicarFiltroSafraApp(); }
-        if(id === 'agri_est') { saveAndRenderEstoque(); }
-        if(id === 'agri_dash') { renderAgriDashboard(); }
-        
-        if(id === 'solo_main') { popularSeletorSolo(); renderizarHistoricoSolo(); }
+            if(id === 'agri_app') { aplicarFiltroSafraApp(); }
+            if(id === 'agri_est') { saveAndRenderEstoque(); }
+            if(id === 'agri_dash') { renderAgriDashboard(); }
+            
+            if(id === 'solo_main') { popularSeletorSolo(); renderizarHistoricoSolo(); }
+        } catch(e) { console.error("Erro ao desenhar tela: ", e); }
         
         window.scrollTo(0, 0); 
     }
@@ -1060,17 +1054,19 @@
             chartPendenteObj = new Chart(ctxPendente, { type: 'doughnut', data: { labels: ['A Receber', 'A Pagar'], datasets: [{ data: [aR, aP], backgroundColor: [gradARec, gradAPag], borderWidth: 0, hoverOffset: 12 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } }, layout: { padding: 15 } } });
         }
 
-        // Listas Top 5 (Correção e Blindagem Completa)
+        // Listas Top 5 Blindadas (encodeURIComponent resolve bug de aspas no clique)
         let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
         arrRCat.forEach(x => { 
-            let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0; let codeStr = encodeURIComponent(x[0]); 
+            let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0; 
+            let codeStr = encodeURIComponent(x[0]); 
             hR += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${codeStr}', 'Receita')"><div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div></li>`; 
         });
         document.getElementById('lista_top_receitas').innerHTML = hR || '<li class="item-lista-grafico">Nenhuma receita paga</li>';
 
         let arrDCat = Object.entries(dCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxDCat = arrDCat.length > 0 ? arrDCat[0][1] : 0; let hD = '';
         arrDCat.forEach(x => { 
-            let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0; let codeStr = encodeURIComponent(x[0]); 
+            let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0; 
+            let codeStr = encodeURIComponent(x[0]); 
             hD += `<li class="item-lista-grafico interativo" onclick="abrirDetalheCategoria('${codeStr}', 'Saida')"><div style="display:flex; justify-content:space-between;"><span>${x[0]}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div></li>`; 
         });
         document.getElementById('lista_top_despesas').innerHTML = hD || '<li class="item-lista-grafico">Nenhuma saída paga</li>';
@@ -1131,18 +1127,18 @@
 
     function mudarTemaSaida() {
         const select = document.getElementById('d_natureza'); const caixa = document.getElementById('caixa_lancamento_saida');
-        const titulo = document.getElementById('titulo_saida'); const btn = document.getElementById('btn_salvar_saida');
+        const titulo = document.getElementById('titulo_saida');
         if(select.value === 'Investimento') {
             caixa.className = 'linha-lancamento linha-investimento-ativa';
-            titulo.style.color = 'var(--cor-investimento)'; btn.style.background = 'var(--cor-investimento)';
+            titulo.style.color = 'var(--cor-investimento)';
         } else {
             caixa.className = 'linha-lancamento linha-despesa';
-            titulo.style.color = 'var(--cor-despesa)'; btn.style.background = 'var(--cor-despesa)';
+            titulo.style.color = 'var(--cor-despesa)';
         }
     }
 
     function addTransacao(e, tipoBase) {
-        e.preventDefault(); // Impede o ecrã de recarregar
+        e.preventDefault();
         try {
             const prefix = tipoBase === 'Saida' ? 'd_' : 'r_';
             let data = document.getElementById(prefix + 'data').value;
@@ -1153,12 +1149,15 @@
             let vUnit = document.getElementById(prefix + 'v_unit').value;
             let valStr = document.getElementById(prefix + 'valor').value; let val = parseFloat(valStr);
 
+            if(!data || !cat || !loc || !qtd || !und || !vUnit || isNaN(val)) { alert("Preencha todos os campos."); return; }
+
             let setor = "-"; let desc = document.getElementById(prefix + 'descricao').value.trim().toUpperCase();
             let tipoFinal = 'Receita';
             
             if(tipoBase === 'Saida') {
                 tipoFinal = document.getElementById('d_natureza').value; 
                 setor = document.getElementById('d_setor').value.trim().toUpperCase();
+                if(!setor || !desc) { alert("Preencha Setor e Descrição."); return; }
             }
 
             transacoes.push({
@@ -1171,6 +1170,97 @@
             preencherSelectsSafraFin(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento();
             mostrarToast(tipoFinal.toUpperCase() + ' GRAVADA!'); document.getElementById(prefix + 'data').focus();
         } catch (error) { alert("Erro ao gravar: " + error.message); }
+    }
+
+    function atualizarOpcoesFiltros() {
+        let cats = new Set(), sets = new Set(), locs = new Set(), descs = new Set();
+        transacoes.forEach(t => {
+            let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
+            if(cat && cat !== '-') cats.add(String(cat).toUpperCase());
+            if(strSafe(t.setor) && t.setor !== '-') sets.add(strSafe(t.setor).toUpperCase());
+            if(strSafe(t.local) && t.local !== '-') locs.add(strSafe(t.local).toUpperCase());
+            if(strSafe(t.desc) && t.desc !== '-') descs.add(strSafe(t.desc).toUpperCase());
+        });
+        function preencher(id, setVals) {
+            const sel = document.getElementById(id); if(sel) { const val = sel.value; sel.innerHTML = '<option value="">TUDO</option>' + Array.from(setVals).sort().map(v => `<option value="${v.toLowerCase()}">${v}</option>`).join(''); sel.value = val; }
+        }
+        preencher('f_cat', cats); preencher('f_setor', sets); preencher('f_local', locs); preencher('f_desc', descs);
+    }
+
+    function limparFiltros() { document.querySelectorAll('.barra-pesquisa-relatorio input:not([type="button"]), .filter-row input, .filter-row select').forEach(i => i.value = ''); setFiltroRapido(''); }
+
+    function setFiltroRapido(tipo) {
+        filtroRapido = tipo; document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
+        if(tipo === '') document.getElementById('btn_f_todos').classList.add('ativo');
+        if(tipo === 'pendentes') document.getElementById('btn_f_pendentes').classList.add('ativo');
+        if(tipo === 'entradas') document.getElementById('btn_f_entradas').classList.add('ativo');
+        if(tipo === 'safra') document.getElementById('btn_f_safra').classList.add('ativo');
+        aplicarFiltros();
+    }
+    function setOrdenacao(coluna) { colOrdenacao = coluna; ordemAscendente = !ordemAscendente; aplicarFiltros(); }
+
+    function aplicarFiltros() {
+        const pG = document.getElementById('pesquisa_global').value.toLowerCase();
+        const fD = document.getElementById('f_data').value, fT = document.getElementById('f_tipo').value.toLowerCase();
+        const fC = document.getElementById('f_cat').value.toLowerCase(), fSe = document.getElementById('f_setor').value.toLowerCase();
+        const fL = document.getElementById('f_local').value.toLowerCase(), fDe = document.getElementById('f_desc').value.toLowerCase();
+        const fSi = document.getElementById('f_sit').value.toLowerCase();
+
+        let lista = transacoes.map((item, idx) => ({ item, indexOriginal: idx })).filter(obj => {
+            let t = obj.item; let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
+            if(pG && !`${strSafe(t.desc)} ${strSafe(t.local)} ${cM} ${strSafe(t.setor)} ${t.tipo}`.toLowerCase().includes(pG)) return false;
+            if(fD && strSafe(t.data) !== fD) return false;
+            if(fT && String(t.tipo).toLowerCase() !== fT) return false;
+            if(fC && cM.toLowerCase() !== fC) return false;
+            if(fSe && strSafe(t.setor).toLowerCase() !== fSe) return false;
+            if(fL && strSafe(t.local).toLowerCase() !== fL) return false;
+            if(fDe && strSafe(t.desc).toLowerCase() !== fDe) return false;
+            if(fSi && strSafe(t.sit).toLowerCase() !== fSi) return false;
+            
+            let sitTxt = strSafe(t.sit).toLowerCase();
+            if (filtroRapido === 'pendentes' && sitTxt.includes('pago')) return false;
+            if (filtroRapido === 'entradas' && String(t.tipo).toLowerCase() !== 'receita') return false;
+            if (filtroRapido === 'safra' && obterSafraGeral(t.data) !== obterSafraAtual()) return false;
+            return true;
+        });
+
+        lista.sort((a, b) => {
+            let vA = a.item[colOrdenacao], vB = b.item[colOrdenacao];
+            if (colOrdenacao === 'categoria') { vA = vA === '-' ? a.item.desc : vA; vB = vB === '-' ? b.item.desc : vB; }
+            if(colOrdenacao === 'valor' || colOrdenacao === 'qtd' || colOrdenacao === 'v_unit') { vA = parseFloat(vA)||0; vB = parseFloat(vB)||0; } 
+            else if(colOrdenacao === 'data') { vA = new Date(strSafe(vA)).getTime()||0; vB = new Date(strSafe(vB)).getTime()||0; } 
+            else { vA = String(vA).toLowerCase(); vB = String(vB).toLowerCase(); }
+            if(vA < vB) return ordemAscendente ? -1 : 1; if(vA > vB) return ordemAscendente ? 1 : -1; return 0;
+        });
+        renderTabela(lista);
+    }
+
+    function renderTabela(lista) {
+        let linhasHTML = []; const hojeObj = new Date(); hojeObj.setHours(0,0,0,0);
+        lista.forEach(obj => {
+            const t = obj.item; const idx = obj.indexOriginal;
+            let tipoLower = String(t.tipo).toLowerCase();
+            let badgeTipo = tipoLower === 'despesa' ? 'badge-despesa' : (tipoLower === 'investimento' ? 'badge-investimento' : 'badge-receita');
+            let sitTxt = strSafe(t.sit).toLowerCase(); let isPago = sitTxt.includes('pago');
+            let btnSit = isPago 
+                ? `<button class="btn-acao bg-pago" style="width:100%; font-size:11px;" onclick="mudarSitTransacao(${idx}, '${tipoLower === 'receita'?'A receber':'A pagar'}')">✔️ PAGO</button>` 
+                : `<button class="btn-acao bg-pendente" style="width:100%; font-size:11px;" onclick="mudarSitTransacao(${idx}, 'Pago')">⏳ PENDENTE</button>`;
+            let isAtrasado = (!isPago) && (t.data && new Date(String(t.data) + 'T00:00:00') < hojeObj);
+            let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (tipoLower === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
+
+            linhasHTML.push(`
+                <tr class="${isAtrasado ? 'linha-atrasada' : ''}">
+                    <td>${formatarData(t.data)}</td><td><div class="badge-tipo ${badgeTipo}">${String(t.tipo).toUpperCase()}</div></td><td><b>${cM}</b></td>
+                    <td>${strSafe(t.setor)}</td><td>${strSafe(t.local)}</td><td>${strSafe(t.desc)}</td>
+                    <td>${strSafe(t.qtd)} ${strSafe(t.und)}</td><td>${formatarMoeda(t.v_unit)}</td>
+                    <td style="font-weight:900;">${formatarMoeda(t.valor)}</td><td style="text-align: center; width: 100px;">${btnSit}</td>
+                    <td class="no-print" style="text-align: center;">
+                        <button onclick="abrirModalEdicao(${idx})" class="btn-acao btn-editar">✏️</button>
+                        <button onclick="confirmarExclusao(${idx})" class="btn-acao btn-excluir">🗑️️</button>
+                    </td>
+                </tr>`);
+        });
+        document.getElementById('tabela_relatorio').innerHTML = linhasHTML.join('');
     }
 
     function renderizarTabelasPendencias() {
@@ -1283,98 +1373,6 @@
             transacoes[indiceEdicao].sit = document.getElementById('ed_sit').value;
             salvarDados(); fecharModal(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); 
         }
-    }
-
-    function atualizarOpcoesFiltros() {
-        let cats = new Set(), sets = new Set(), locs = new Set(), descs = new Set();
-        transacoes.forEach(t => {
-            let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
-            if(cat && cat !== '-') cats.add(String(cat).toUpperCase());
-            if(strSafe(t.setor) && t.setor !== '-') sets.add(strSafe(t.setor).toUpperCase());
-            if(strSafe(t.local) && t.local !== '-') locs.add(strSafe(t.local).toUpperCase());
-            if(strSafe(t.desc) && t.desc !== '-') descs.add(strSafe(t.desc).toUpperCase());
-        });
-        function preencher(id, setVals) {
-            const sel = document.getElementById(id); if(sel) { const val = sel.value; sel.innerHTML = '<option value="">TUDO</option>' + Array.from(setVals).sort().map(v => `<option value="${v.toLowerCase()}">${v}</option>`).join(''); sel.value = val; }
-        }
-        preencher('f_cat', cats); preencher('f_setor', sets); preencher('f_local', locs); preencher('f_desc', descs);
-    }
-
-    function limparFiltros() { document.querySelectorAll('.barra-pesquisa-relatorio input:not([type="button"]), .filter-row input, .filter-row select').forEach(i => i.value = ''); setFiltroRapido(''); }
-
-    function setFiltroRapido(tipo) {
-        filtroRapido = tipo; document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
-        if(tipo === '') document.getElementById('btn_f_todos').classList.add('ativo');
-        if(tipo === 'pendentes') document.getElementById('btn_f_pendentes').classList.add('ativo');
-        if(tipo === 'entradas') document.getElementById('btn_f_entradas').classList.add('ativo');
-        if(tipo === 'safra') document.getElementById('btn_f_safra').classList.add('ativo');
-        aplicarFiltros();
-    }
-    function setOrdenacao(coluna) { colOrdenacao = coluna; ordemAscendente = !ordemAscendente; aplicarFiltros(); }
-
-    function aplicarFiltros() {
-        const pG = document.getElementById('pesquisa_global').value.toLowerCase();
-        const fD = document.getElementById('f_data').value, fT = document.getElementById('f_tipo').value.toLowerCase();
-        const fC = document.getElementById('f_cat').value.toLowerCase(), fSe = document.getElementById('f_setor').value.toLowerCase();
-        const fL = document.getElementById('f_local').value.toLowerCase(), fDe = document.getElementById('f_desc').value.toLowerCase();
-        const fSi = document.getElementById('f_sit').value.toLowerCase();
-
-        let lista = transacoes.map((item, idx) => ({ item, indexOriginal: idx })).filter(obj => {
-            let t = obj.item; let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
-            if(pG && !`${strSafe(t.desc)} ${strSafe(t.local)} ${cM} ${strSafe(t.setor)} ${t.tipo}`.toLowerCase().includes(pG)) return false;
-            if(fD && strSafe(t.data) !== fD) return false;
-            if(fT && String(t.tipo).toLowerCase() !== fT) return false;
-            if(fC && cM.toLowerCase() !== fC) return false;
-            if(fSe && strSafe(t.setor).toLowerCase() !== fSe) return false;
-            if(fL && strSafe(t.local).toLowerCase() !== fL) return false;
-            if(fDe && strSafe(t.desc).toLowerCase() !== fDe) return false;
-            if(fSi && strSafe(t.sit).toLowerCase() !== fSi) return false;
-            
-            let sitTxt = strSafe(t.sit).toLowerCase();
-            if (filtroRapido === 'pendentes' && sitTxt.includes('pago')) return false;
-            if (filtroRapido === 'entradas' && String(t.tipo).toLowerCase() !== 'receita') return false;
-            if (filtroRapido === 'safra' && obterSafraGeral(t.data) !== obterSafraAtual()) return false;
-            return true;
-        });
-
-        lista.sort((a, b) => {
-            let vA = a.item[colOrdenacao], vB = b.item[colOrdenacao];
-            if (colOrdenacao === 'categoria') { vA = vA === '-' ? a.item.desc : vA; vB = vB === '-' ? b.item.desc : vB; }
-            if(colOrdenacao === 'valor' || colOrdenacao === 'qtd' || colOrdenacao === 'v_unit') { vA = parseFloat(vA)||0; vB = parseFloat(vB)||0; } 
-            else if(colOrdenacao === 'data') { vA = new Date(strSafe(vA)).getTime()||0; vB = new Date(strSafe(vB)).getTime()||0; } 
-            else { vA = String(vA).toLowerCase(); vB = String(vB).toLowerCase(); }
-            if(vA < vB) return ordemAscendente ? -1 : 1; if(vA > vB) return ordemAscendente ? 1 : -1; return 0;
-        });
-        renderTabela(lista);
-    }
-
-    function renderTabela(lista) {
-        let linhasHTML = []; const hojeObj = new Date(); hojeObj.setHours(0,0,0,0);
-        lista.forEach(obj => {
-            const t = obj.item; const idx = obj.indexOriginal;
-            let tipoLower = String(t.tipo).toLowerCase();
-            
-            let badgeTipo = tipoLower === 'despesa' ? 'badge-despesa' : (tipoLower === 'investimento' ? 'badge-investimento' : 'badge-receita');
-            let sitTxt = strSafe(t.sit).toLowerCase(); let isPago = sitTxt.includes('pago');
-            let btnSit = isPago 
-                ? `<button class="btn-acao bg-pago" style="width:100%; font-size:11px;" onclick="mudarSitTransacao(${idx}, '${tipoLower === 'receita'?'A receber':'A pagar'}')">✔️ PAGO</button>` 
-                : `<button class="btn-acao bg-pendente" style="width:100%; font-size:11px;" onclick="mudarSitTransacao(${idx}, 'Pago')">⏳ PENDENTE</button>`;
-            let isAtrasado = (!isPago) && (t.data && new Date(String(t.data) + 'T00:00:00') < hojeObj);
-            let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (tipoLower === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
-
-            linhasHTML.push(`
-                <tr class="${isAtrasado ? 'linha-atrasada' : ''}">
-                    <td>${formatarData(t.data)}</td><td><div class="badge-tipo ${badgeTipo}">${String(t.tipo).toUpperCase()}</div></td><td><b>${cM}</b></td>
-                    <td>${strSafe(t.setor)}</td><td>${strSafe(t.local)}</td><td>${strSafe(t.desc)}</td>
-                    <td>${strSafe(t.qtd)} ${strSafe(t.und)}</td><td>${formatarMoeda(t.v_unit)}</td>
-                    <td style="font-weight:900;">${formatarMoeda(t.valor)}</td><td style="text-align: center; width: 100px;">${btnSit}</td>
-                    <td class="no-print" style="text-align: center;">
-                        <button onclick="abrirModalEdicao(${idx})" class="btn-acao btn-editar">✏️</button>
-                        <button onclick="confirmarExclusao(${idx})" class="btn-acao btn-excluir">🗑️</button>
-                    </td>
-                </tr>`);
-        });
-        document.getElementById('tabela_relatorio').innerHTML = linhasHTML.join('');
     }
 
     function atualizarRelatoriosDetalhados() {
@@ -1503,7 +1501,7 @@
     }
 
     function saveAndRenderApp() {
-        agriRecords.sort((a, b) => new Date(a.data) - new Date(b.data));
+        agriRecords.sort((a, b) => new Date(a.data||0) - new Date(b.data||0));
         const safraSelecionada = document.getElementById('safraSelector').value;
         const visibleRecords = safraSelecionada === "TODAS" ? agriRecords : agriRecords.filter(r => obterSafraGeral(r.data) === safraSelecionada);
 
@@ -1512,7 +1510,7 @@
             let statusClass = rec.status === 'APLICADO' ? 'status-aplicado' : 'status-planejado';
             let itemEstoque = estoque.find(e => e.produto === rec.produto && e.un === rec.dosagem_un);
             let aviso = (rec.status === 'PLANEJADO' && (!itemEstoque || itemEstoque.qtd < rec.dosagem_qtd)) ? '<br><span class="stock-warning">⚠️ FALTA NO ESTOQUE</span>' : '';
-            let custoTotal = rec.dosagem_qtd * (itemEstoque ? (itemEstoque.valor_unit || 0) : (rec.custo_unit || 0));
+            let custoTotal = (parseFloat(rec.dosagem_qtd)||0) * (itemEstoque ? (itemEstoque.valor_unit || 0) : (rec.custo_unit || 0));
             
             let cClass = ''; let tStr = (rec.tipo||'').toUpperCase();
             if (tStr.includes('ADUBO') || tStr.includes('FERTILIZANTE')) cClass = 'linha-adubo';
@@ -1521,14 +1519,14 @@
             else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
 
             html += `<tr class="${cClass}">
-                <td>${formatarData(rec.data)}</td><td>${rec.talhao}</td><td><b>${rec.produto}</b>${aviso}</td>
-                <td>${rec.tipo}</td><td>${rec.alvo||'-'}</td><td>${rec.dosagem}</td><td>${rec.forma||'-'}</td>
+                <td>${formatarData(rec.data)}</td><td>${strSafe(rec.talhao)}</td><td><b>${strSafe(rec.produto)}</b>${aviso}</td>
+                <td>${strSafe(rec.tipo)}</td><td>${strSafe(rec.alvo)||'-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strSafe(rec.forma)||'-'}</td>
                 <td>${formatarMoeda(custoTotal)}</td>
-                <td><div class="${statusClass}" onclick="toggleStatusApp(${vIdx})">${rec.status} 🔄</div></td>
+                <td><div class="${statusClass}" onclick="toggleStatusApp(${vIdx})">${strSafe(rec.status)} 🔄</div></td>
                 <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editAgriRecord(${vIdx})">✏️</button><button class="btn-acao btn-excluir" onclick="deleteAgriRecord(${vIdx})">🗑️</button></td>
             </tr>`;
         });
-        document.getElementById('tableBodyAgri').innerHTML = html;
+        document.getElementById('tableBodyAgri').innerHTML = html || '<tr><td colspan="10" style="text-align:center;">Nenhuma aplicação</td></tr>';
         updateFilterOptionsAgri(visibleRecords);
     }
 
@@ -1550,28 +1548,30 @@
     }
 
     function saveAndRenderEstoque() {
-        estoque.sort((a, b) => a.produto.localeCompare(b.produto));
+        if(!Array.isArray(estoque)) estoque = [];
+        estoque.sort((a, b) => String(a.produto||'').localeCompare(String(b.produto||'')));
         let html = ''; let somaTotal = 0;
         
         estoque.forEach((rec, index) => {
             let demanda = 0; let mesAtual = new Date().toISOString().substring(0,7);
-            agriRecords.forEach(r => { if(r.status === 'PLANEJADO' && r.data.startsWith(mesAtual) && r.produto === rec.produto && r.dosagem_un === rec.un) demanda += r.dosagem_qtd; });
+            agriRecords.forEach(r => { if(r.status === 'PLANEJADO' && r.data.startsWith(mesAtual) && r.produto === rec.produto && r.dosagem_un === rec.un) demanda += parseFloat(r.dosagem_qtd)||0; });
             
             let corQtd = ''; let aviso = ''; let cClass = ''; let tStr = (rec.tipo||'').toUpperCase();
             if (tStr.includes('ADUBO')) cClass = 'linha-adubo'; else if (tStr.includes('INSETICIDA')) cClass = 'linha-inseticida'; else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida'; else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
 
-            if(rec.qtd < 0) { cClass = 'tr-alerta'; corQtd = 'color: #D32F2F; font-weight: 900;'; aviso = `<br><span class="stock-warning">⚠️ SALDO NEGATIVO</span>`; } 
-            else if (rec.qtd < demanda) { cClass = 'tr-alerta'; corQtd = 'color: #D32F2F; font-weight: 900;'; aviso = `<br><span class="stock-warning">⚠️ PRECISA DE ${demanda.toFixed(2)} ${rec.un}</span>`; }
+            let qEstoque = parseFloat(rec.qtd)||0;
+            if(qEstoque < 0) { cClass = 'tr-alerta'; corQtd = 'color: #D32F2F; font-weight: 900;'; aviso = `<br><span class="stock-warning">⚠️ SALDO NEGATIVO</span>`; } 
+            else if (qEstoque < demanda) { cClass = 'tr-alerta'; corQtd = 'color: #D32F2F; font-weight: 900;'; aviso = `<br><span class="stock-warning">⚠️ PRECISA DE ${demanda.toFixed(2)} ${rec.un}</span>`; }
 
-            let vTot = rec.qtd > 0 ? (rec.qtd * (rec.valor_unit || 0)) : 0; somaTotal += vTot;
+            let vTot = qEstoque > 0 ? (qEstoque * (rec.valor_unit || 0)) : 0; somaTotal += vTot;
 
             html += `<tr class="${cClass}">
-                <td><b>${rec.produto}</b>${aviso}</td><td>${rec.principio||'-'}</td><td>${rec.tipo}</td>
-                <td style="${corQtd}">${rec.qtd.toFixed(2)} ${rec.un}</td><td>${formatarMoeda(rec.valor_unit)}</td><td><b>${formatarMoeda(vTot)}</b></td>
+                <td><b>${strSafe(rec.produto)}</b>${aviso}</td><td>${strSafe(rec.principio)||'-'}</td><td>${strSafe(rec.tipo)}</td>
+                <td style="${corQtd}">${qEstoque.toFixed(2)} ${strSafe(rec.un)}</td><td>${formatarMoeda(rec.valor_unit)}</td><td><b>${formatarMoeda(vTot)}</b></td>
                 <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editEstoque(${index})">✏️</button><button class="btn-acao btn-excluir" onclick="deleteEstoque(${index})">🗑️</button></td>
             </tr>`;
         });
-        document.getElementById('estoqueBody').innerHTML = html;
+        document.getElementById('estoqueBody').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">Estoque vazio</td></tr>';
         document.getElementById('th-valor-total-est').innerHTML = `VALOR TOTAL<br><span style="font-size: 0.85em; color: #FFF;">${formatarMoeda(somaTotal)}</span>`;
     }
 
@@ -1582,7 +1582,7 @@
         
         let dS = {}, dT = {}, dTp = {}, dCS = {}, dCT = {};
         let tApp = 0, tPlan = 0, count = 0;
-        let patrim = estoque.reduce((acc, curr) => acc + (curr.qtd > 0 ? (curr.qtd * (curr.valor_unit || 0)) : 0), 0);
+        let patrim = estoque.reduce((acc, curr) => acc + (parseFloat(curr.qtd) > 0 ? (parseFloat(curr.qtd) * (curr.valor_unit || 0)) : 0), 0);
         document.getElementById('kpi-estoque').innerText = formatarMoeda(patrim);
 
         agriRecords.forEach(rec => {
@@ -1618,7 +1618,7 @@
 
         const safrasK = Object.keys(dS).sort();
         chartS_Agri = genChart(chartS_Agri, 'chartCustoSafra', 'bar', Object.keys(dCS).sort(), k=>dCS[k], k=>0, '#8E44AD', 'transparent');
-        chartS_Agri.data.datasets[0].label = 'CUSTO (R$)'; chartS_Agri.update();
+        if(chartS_Agri.data.datasets[0]) chartS_Agri.data.datasets[0].label = 'CUSTO (R$)'; chartS_Agri.update();
 
         const talhoesK = Object.keys(dT).sort();
         chartT_Agri = genChart(chartT_Agri, 'chartTalhao', 'bar', talhoesK, k=>dT[k].L, k=>dT[k].KG, '#4FC3F7', '#81C784');
