@@ -27,9 +27,6 @@
             --cor-investimento: #6A1B9A;
             --cor-investimento-grad: linear-gradient(135deg, #AB47BC, #6A1B9A);
 
-            --cor-saldo-pos-grad: linear-gradient(135deg, #42A5F5, #1565C0);
-            --cor-saldo-neg-grad: linear-gradient(135deg, #EF5350, #C62828);
-
             --cor-agri-app: #0288D1;
             --cor-agri-est: #F39C12;
             --cor-solo: #8E44AD;
@@ -37,7 +34,6 @@
 
         * { font-family: 'Nunito', sans-serif; box-sizing: border-box; }
 
-        /* Melhoria de CSS: 'zoom: 85%' removido por questões de compatibilidade cross-browser. Ajustado usando font-size base. */
         body { font-size: 85%; max-width: 100%; width: 100%; margin: 0; padding: 15px; background-color: var(--cor-fundo); color: var(--cor-texto); overflow-x: hidden;}
 
         .watermark-logo {
@@ -221,29 +217,29 @@
 </div>
 
 <!-- ========================================== -->
-<!-- MENU PRINCIPAL UNIFICADO                   -->
+<!-- MENU PRINCIPAL (REFATORADO COM DATA-TAB)   -->
 <!-- ========================================== -->
-<div class="menu no-print">
-    <button id="btn_home" class="btn-ativo" onclick="showTab('home')">🏠 INÍCIO</button>
+<div class="menu no-print" id="menu-principal">
+    <button id="btn_home" class="btn-ativo" data-tab="home">🏠 INÍCIO</button>
     <div class="menu-divisor"></div>
     
-    <button id="btn_resumo" onclick="showTab('resumo')">📊 DASH. FINANÇAS</button>
-    <button id="btn_movimentacoes" onclick="showTab('movimentacoes')">📋 CAIXA</button>
-    <button id="btn_relatorios_detalhados" onclick="showTab('relatorios_detalhados')">📈 RELATÓRIOS</button>
-    <button id="btn_pendencias" onclick="showTab('pendencias')" style="color: #E65100;">
+    <button id="btn_resumo" data-tab="resumo">📊 DASH. FINANÇAS</button>
+    <button id="btn_movimentacoes" data-tab="movimentacoes">📋 CAIXA</button>
+    <button id="btn_relatorios_detalhados" data-tab="relatorios_detalhados">📈 RELATÓRIOS</button>
+    <button id="btn_pendencias" data-tab="pendencias" style="color: #E65100;">
         🔔 PENDÊNCIAS <span id="badge_atrasadas" class="badge-atrasadas" style="display: none;">0</span>
     </button>
     <div class="menu-divisor"></div>
     
-    <button id="btn_agri_dash" onclick="showTab('agri_dash')">📊 DASH. AGRÍCOLA</button>
-    <button id="btn_agri_app" onclick="showTab('agri_app')">🚜 APLICAÇÕES</button>
-    <button id="btn_agri_est" onclick="showTab('agri_est')">📦 ESTOQUE</button>
+    <button id="btn_agri_dash" data-tab="agri_dash">📊 DASH. AGRÍCOLA</button>
+    <button id="btn_agri_app" data-tab="agri_app">🚜 APLICAÇÕES</button>
+    <button id="btn_agri_est" data-tab="agri_est">📦 ESTOQUE</button>
     <div class="menu-divisor"></div>
     
-    <button id="btn_solo" onclick="showTab('solo_main')">🧪 SOLO & NUTRIÇÃO</button>
+    <button id="btn_solo" data-tab="solo_main">🧪 SOLO & NUTRIÇÃO</button>
     <div class="menu-divisor"></div>
 
-    <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem(true)" title="Forçar Sincronização">⏳ CARREGANDO...</button>
+    <button id="status_conexao" class="status-conexao aguardando" title="Forçar Sincronização">⏳ CARREGANDO...</button>
 </div>
 
 <!-- ========================================== -->
@@ -785,7 +781,7 @@
 
 <div id="modal-edicao">
     <div class="modal-content">
-        <h3 style="margin-top: 0; color: var(--cor-texto); border-bottom: 2px solid #ccc; padding-bottom:10px;">✏️ EDITAR REGISTRO</h3>
+        <h3 style="margin-top: 0; color: var(--cor-texto); border-bottom: 2px solid #ccc; padding-bottom:10px;">✏️️ EDITAR REGISTRO</h3>
         <div class="form-group-modal" id="form-edicao"></div>
         <div style="display:flex; gap:10px;">
             <button class="btn-salvar-compacto" style="background: var(--cor-verde-fazenda); flex: 1;" onclick="guardarEdicao()">💾 SALVAR</button>
@@ -797,7 +793,7 @@
 <div id="toast">Sucesso!</div>
 
 <!-- ========================================== -->
-<!-- SCRIPTS DE LÓGICA E NUVEM (BLINDADOS)      -->
+<!-- SCRIPTS DE LÓGICA E NUVEM                  -->
 <!-- ========================================== -->
 <script>
     const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxU-XxV63Eip3g636GkrVaV8zwnVPVomePZLIsZBV-ghCYJKxYUMtQoG2Kc903zeP4UoQ/exec";
@@ -808,7 +804,7 @@
     const rCategoriasPadrao = ["ACEROLA - POLPA", "CAFÉ 250G", "CAFÉ 500G", "CAFÉ EM GRÃOS", "CAFÉ SACA", "CRÉDITO", "ESTACAS DE EUCALÍPTO", "GRAVIOLA - POLPA S/SEM.", "MARACUJÁ - FRUTO", "MARACUJÁ - POLPA C/SEM.", "MARACUJÁ - POLPA S/SEM.", "OVOS", "PASTO - ALUGUEL", "RENDIMENTOS"];
     const unidadesReceita = { "ACEROLA - POLPA": "KG", "CAFÉ 250G": "PCT", "CAFÉ 500G": "PCT", "CAFÉ EM GRÃOS": "PCT", "CAFÉ SACA": "SC", "CRÉDITO": "R$", "ESTACAS DE EUCALÍPTO": "UN", "GRAVIOLA - POLPA S/SEM.": "KG", "MARACUJÁ - FRUTO": "KG", "MARACUJÁ - POLPA C/SEM.": "KG", "MARACUJÁ - POLPA S/SEM.": "KG", "OVOS": "DZ", "PASTO - ALUGUEL": "MÊS", "RENDIMENTOS": "R$" };
 
-    // Bases de Dados na Memória (Tipadas Forçadamente)
+    // Bases de Dados e Fila
     let transacoes = [];
     let agriRecords = [];
     let estoque = [];
@@ -819,6 +815,7 @@
         formas: ["FERTIRRIGAÇÃO", "MANUAL", "PULVERIZAÇÃO"], 
         alvos: ["BROCA-DO-CAFÉ", "BICHO-MINEIRO", "FERRUGEM", "FLORADA", "FRUTIFICAÇÃO", "MATO"]
     };
+    let filaSincronizacao = JSON.parse(localStorage.getItem('rancho3c_fila')) || [];
     
     let indiceEdicao = -1; let colOrdenacao = 'data'; let ordemAscendente = false; let filtroRapido = '';
     let chartCaixaObj = null, chartPendenteObj = null;
@@ -839,7 +836,30 @@
         Chart.register(pluginSombra3D);
     }
 
-    // --- SEGURANÇA: FUNÇÃO strSafe ATUALIZADA (XSS PREVENTION) ---
+    // --- EVENTOS MODERNOS (DOM LOADED) ---
+    document.addEventListener("DOMContentLoaded", () => {
+        // Interceção de cliques do Menu Principal via data-tab
+        document.querySelectorAll(".menu button[data-tab]").forEach(botao => {
+            botao.addEventListener("click", (e) => {
+                const targetTab = e.currentTarget.getAttribute("data-tab");
+                if (targetTab) showTab(targetTab);
+            });
+        });
+
+        // Evento de Forçar Sincronização
+        const btnStatus = document.getElementById("status_conexao");
+        if (btnStatus) {
+            btnStatus.addEventListener("click", () => carregarDadosNuvem(true));
+        }
+
+        // Arranque Inicial
+        carregarDadosNuvem();
+        
+        // Timer de retentativa da fila offline a cada 30 segundos
+        setInterval(processarFila, 30000); 
+    });
+
+    // --- SEGURANÇA: SANITIZAÇÃO (XSS PREVENTION) ---
     function strSafe(val) { 
         if (val === null || val === undefined) return ''; 
         const str = String(val).trim();
@@ -952,49 +972,64 @@
         if(document.getElementById('agri_dash').classList.contains('active')) { try{renderAgriDashboard();}catch(e){} }
     }
 
-    /* 
-    ====================================================================================
-    NOTA DE ARQUITETURA PARA O FUTURO:
-    A função abaixo envia a BASE INTEIRA (payload completo) para o Google Script toda 
-    vez que há uma pequena alteração. Isso causará conflito de concorrência.
-    Para o futuro, sugerimos a criação da lógica "Delta":
-    
-    // Função Modelo para o Futuro (Requer ajuste no Código.gs):
-    async function enviarNovoRegistroDelta(acao, tabela, registroUnico) {
-        const payloadDelta = { acao: acao, tabela: tabela, dados: registroUnico };
-        try {
-            const resposta = await fetch(URL_GOOGLE_SCRIPT, { method: 'POST', body: JSON.stringify(payloadDelta) });
-            // Atualizar UI apenas no sucesso...
-        } catch (e) { ... }
-    }
-    ==================================================================================== 
-    */
-    async function salvarDados() {
-        const statusDiv = document.getElementById('status_conexao');
-        statusDiv.innerHTML = '⏳ A GRAVAR...'; statusDiv.className = 'status-conexao aguardando';
-        
+    // --- FILA DE SINCRONIZAÇÃO OFFLINE ---
+    function salvarDados() {
         const payload = { transacoes: transacoes, aplicacoes: agriRecords, estoque: estoque, opcoes: opcoesDin, analises: analisesSolo };
-        // Salva localmente primeiro para proteção imediata
+        
+        // 1. Guarda imediatamente no armazenamento local (protege o utilizador)
         localStorage.setItem('rancho3c_offline', JSON.stringify(payload));
         
+        // 2. Adiciona o snapshot à fila de envio
+        filaSincronizacao.push(payload);
+        localStorage.setItem('rancho3c_fila', JSON.stringify(filaSincronizacao));
+        
+        // 3. Dispara o processo assíncrono
+        processarFila();
+    }
+
+    async function processarFila() {
+        if (filaSincronizacao.length === 0) return;
+
+        const statusDiv = document.getElementById('status_conexao');
+        statusDiv.innerHTML = `⏳ A GRAVAR (${filaSincronizacao.length})...`;
+        statusDiv.className = 'status-conexao aguardando';
+
+        const itemAtual = filaSincronizacao[0];
+
         try {
-            const response = await fetch(URL_GOOGLE_SCRIPT, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+            const response = await fetch(URL_GOOGLE_SCRIPT, { 
+                method: 'POST', 
+                body: JSON.stringify(itemAtual), 
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
+            });
             const result = await response.json();
+            
             if(result.status === "sucesso") {
-                statusDiv.innerHTML = `🟢 SINCRONIZADO`; statusDiv.className = 'status-conexao conectado';
+                filaSincronizacao.shift(); // Remove da fila o envio completado
+                localStorage.setItem('rancho3c_fila', JSON.stringify(filaSincronizacao));
+                
+                if (filaSincronizacao.length > 0) {
+                    processarFila();
+                } else {
+                    statusDiv.innerHTML = `🟢 SINCRONIZADO`; 
+                    statusDiv.className = 'status-conexao conectado';
+                }
             } else {
                 throw new Error("Erro no retorno do script");
             }
         } catch (error) {
-            console.error("Falha ao salvar na nuvem:", error);
-            statusDiv.innerHTML = '🔴 GRAVADO LOCAL'; statusDiv.className = 'status-conexao';
+            console.error("Falha ao salvar na nuvem (ficará em fila):", error);
+            statusDiv.innerHTML = `🔴 OFFLINE (${filaSincronizacao.length} NA FILA)`; 
+            statusDiv.className = 'status-conexao';
         }
     }
 
     function showTab(id) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
-        document.getElementById(id).classList.add('active');
+        
+        const alvo = document.getElementById(id);
+        if(alvo) alvo.classList.add('active');
         
         const btnMap = {
             'home': 'btn_home', 'resumo': 'btn_resumo', 'movimentacoes': 'btn_movimentacoes', 'relatorios_detalhados': 'btn_relatorios_detalhados',
@@ -1013,7 +1048,7 @@
             if(id === 'agri_dash') { renderAgriDashboard(); }
             
             if(id === 'solo_main') { popularSeletorSolo(); renderizarHistoricoSolo(); }
-        } catch(e) { console.error("Erro na mudança de tela", e); }
+        } catch(e) { console.error("Erro na mudança de ecrã", e); }
         window.scrollTo(0, 0); 
     }
 
@@ -1953,9 +1988,6 @@
         salvarDados(); aplicarFiltroSafraApp();
         mostrarToast("Planejamento enviado para as Aplicações!");
     }
-
-    // INIT
-    window.onload = () => { carregarDadosNuvem(); };
 </script>
 </body>
 </html>
