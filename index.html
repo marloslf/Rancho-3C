@@ -27,6 +27,9 @@
             --cor-investimento: #6A1B9A;
             --cor-investimento-grad: linear-gradient(135deg, #AB47BC, #6A1B9A);
 
+            --cor-saldo-pos-grad: linear-gradient(135deg, #42A5F5, #1565C0);
+            --cor-saldo-neg-grad: linear-gradient(135deg, #EF5350, #C62828);
+
             --cor-agri-app: #0288D1;
             --cor-agri-est: #F39C12;
             --cor-solo: #8E44AD;
@@ -133,7 +136,6 @@
 
         .btn-salvar-compacto { padding: 10px; font-size: 13px; font-weight: 800; border: none; border-radius: 8px; cursor: pointer; color: white; transition: 0.2s; box-shadow: 4px 4px 8px rgba(163,177,198,0.5), -4px -4px 8px rgba(255,255,255, 0.8); width: 100%;}
         .btn-salvar-compacto:hover { filter: brightness(1.1); transform: translateY(-2px);}
-        .btn-salvar-compacto:active { box-shadow: inset 4px 4px 8px rgba(0,0,0,0.2), inset -4px -4px 8px rgba(255,255,255,0.1); transform: translateY(1px);}
         .select-tipo-saida { background-color: rgba(255, 255, 255, 0.6); border: none; border-radius: 8px; padding: 4px 10px; font-weight: 900; color: var(--cor-despesa); margin-left: 10px; font-size: 13px; cursor: pointer; }
 
         .barra-pesquisa-relatorio { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: var(--cor-fundo); padding: 15px 20px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5);}
@@ -142,8 +144,7 @@
         .btn-filtro { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 800; transition: 0.3s; background: var(--cor-fundo); color: #555; box-shadow: var(--sombra-neumorfica);}
         .btn-filtro.ativo { background-color: var(--cor-verde-fazenda); color: white; box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2), inset -3px -3px 6px rgba(255,255,255,0.2);}
 
-        /* --- TABELAS EXPANDIDAS E BADGES --- */
-        /* Aumentada a altura útil de todas as tabelas */
+        /* --- TABELAS E BADGES --- */
         .table-container { overflow-x: auto; overflow-y: auto; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5); background: white; max-height: 75vh;}
         table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; white-space: nowrap;}
         .tabela-larga { min-width: 100%; } 
@@ -154,11 +155,8 @@
         td { border-bottom: 1px solid #f0f0f0; padding: 10px 12px; font-weight: 600; text-transform: uppercase; vertical-align: middle;}
         tr:hover td { background-color: rgba(0, 0, 0, 0.03); }
         
-        /* Novas Etiquetas Coloridas para Diferenciar Lançamentos no Caixa */
         .badge-tipo { padding: 6px 10px; border-radius: 6px; font-weight: 900; font-size: 11px; color: white; text-align: center; display: inline-block; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.15);}
-        .badge-receita { background: var(--cor-receita); } 
-        .badge-despesa { background: var(--cor-despesa); } 
-        .badge-investimento { background: var(--cor-investimento); }
+        .badge-receita { background: var(--cor-receita); } .badge-despesa { background: var(--cor-despesa); } .badge-investimento { background: var(--cor-investimento); }
 
         .bg-pago { background-color: #4caf50; color: white; font-weight: 800; border:none; border-radius: 6px; padding: 6px; box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3); width: 100%;}
         .bg-pendente { background-color: #ff9800; color: white; font-weight: 800; border:none; border-radius: 6px; padding: 6px; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3); width: 100%;}
@@ -221,7 +219,9 @@
     <div style="width: 150px;"></div>
 </div>
 
-<!-- MENU PRINCIPAL UNIFICADO -->
+<!-- ========================================== -->
+<!-- MENU PRINCIPAL UNIFICADO                   -->
+<!-- ========================================== -->
 <div class="menu no-print">
     <button id="btn_home" class="btn-ativo" onclick="showTab('home')">🏠 INÍCIO</button>
     <div class="menu-divisor"></div>
@@ -246,7 +246,7 @@
 </div>
 
 <!-- ========================================== -->
-<!-- TELA INICIAL (HOME LIMPA E MAIOR)          -->
+<!-- TELA INICIAL (HOME)                        -->
 <!-- ========================================== -->
 <div id="home" class="tab active">
     <div class="home-container">
@@ -301,10 +301,12 @@
         <div class="linha-lancamento linha-despesa" id="caixa_lancamento_saida">
             <div style="display:flex; justify-content:space-between; margin-bottom: 6px; align-items: center;">
                 <span style="font-size:13px; font-weight:900; color:var(--cor-despesa);" id="titulo_saida">🚜 INSERIR SAÍDA:
-                    <select id="d_natureza" class="select-tipo-saida" onchange="mudarTemaSaida()"><option value="Despesa">CUSTEIO</option><option value="Investimento">INVESTIMENTO</option></select>
+                    <select id="d_natureza" class="select-tipo-saida" onchange="mudarTemaSaida()">
+                        <option value="Despesa">CUSTEIO</option>
+                        <option value="Investimento">INVESTIMENTO</option>
+                    </select>
                 </span>
             </div>
-            <!-- ONSUBMIT BLINDADO (Sem recarregamento) -->
             <form class="grid-despesa" onsubmit="addTransacao(event, 'Saida')">
                 <input type="date" id="d_data" required>
                 <input list="lista_d_categoria" id="d_categoria" placeholder="CATEGORIA..." required autocomplete="off">
@@ -322,7 +324,6 @@
 
         <div class="linha-lancamento linha-receita">
             <div style="font-size:13px; font-weight:900; color:var(--cor-receita); margin-bottom: 6px;">🌱 INSERIR RECEITA</div>
-            <!-- ONSUBMIT BLINDADO -->
             <form class="grid-receita" onsubmit="addTransacao(event, 'Receita')">
                 <input type="date" id="r_data" required>
                 <input list="lista_r_categoria" id="r_categoria" placeholder="O QUE VENDEU?" required onblur="autoPreencherUnidade()" autocomplete="off">
@@ -347,8 +348,8 @@
         </div>
     </div> 
 
-    <!-- ÁREA TOTALMENTE APROVEITADA (max-height: 75vh) -->
-    <div class="table-container" style="max-height: 75vh;">
+    <!-- ÁREA EXPANDIDA -->
+    <div class="table-container">
         <table class="tabela-larga">
             <thead>
                 <tr>
@@ -390,7 +391,7 @@
         <button onclick="document.getElementById('filtro_safra_relatorios').value=''; document.getElementById('filtro_mes_relatorios').value=''; atualizarRelatoriosDetalhados()" class="btn-limpar">🧹 LIMPAR</button>
     </div>
 
-    <!-- REMOVIDO BLOQUEIO DE ALTURA PARA PREENCHER TELA DE RELATÓRIOS -->
+    <!-- REMOVIDO BLOQUEIO DE ALTURA -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px;">
         <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid var(--cor-receita);">
             <h3 style="color: var(--cor-receita); text-align: center;">🌱 RECEITAS / CATEGORIA</h3>
@@ -409,15 +410,12 @@
             <div class="table-container" style="max-height: none;"><table><tbody id="tbody_gastos_setor"></tbody></table></div>
         </div>
         <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid var(--cor-investimento);">
-            <h3 style="color: var(--cor-investimento); text-align: center;">🏗️ INVESTIMENTOS</h3>
+            <h3 style="color: var(--cor-investimento); text-align: center;">🏗️️ INVESTIMENTOS</h3>
             <div class="table-container" style="max-height: none;"><table><tbody id="tbody_investimentos_categoria"></tbody></table></div>
         </div>
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- PENDÊNCIAS E RAIO-X                        -->
-<!-- ========================================== -->
 <div id="pendencias" class="tab">
     <div style="background: var(--cor-fundo); padding: 30px; border-radius: 24px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
         <h3 style="text-align: center; font-size: 26px; margin-bottom: 30px;">🔔 CONTAS PENDENTES</h3>
@@ -477,7 +475,7 @@
 </div>
 
 <!-- ========================================== -->
-<!-- MÓDULO AGRÍCOLA (ALINHADO FIT-TO-SCREEN)   -->
+<!-- MÓDULO AGRÍCOLA                            -->
 <!-- ========================================== -->
 <div id="agri_dash" class="tab">
     <div class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; justify-content:center; gap: 15px; background: var(--cor-fundo); padding: 15px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
@@ -492,7 +490,6 @@
         <div class="card" style="background: linear-gradient(135deg, #00897B, #004D40);"><h4>REGISTROS NA SAFRA</h4><span id="kpi-registros">0</span></div>
     </div>
 
-    <!-- GRÁFICOS COMPACTOS (Altura controlada via height 22vh para caber num ecrã) -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="grafico-container wide" style="width: 100%; padding: 10px;">
             <h4 style="margin: 0 0 10px 0; color:var(--cor-texto); font-weight: 900; font-size: 13px;">DISTRIBUIÇÃO POR TALHÃO (VOL.)</h4>
@@ -517,7 +514,6 @@
     <div class="area-fixa-topo no-print">
         <div class="linha-lancamento linha-agri-app">
             <div style="font-size:14px; font-weight:900; color:var(--cor-agri-app); margin-bottom: 10px;">🚜 NOVO REGISTRO DE APLICAÇÃO</div>
-            <!-- ONSUBMIT PROTEGIDO -->
             <form id="appForm" class="grid-agri-app" onsubmit="addAgriApp(event)">
                 <input type="hidden" id="editIndex" value="-1">
                 <input type="date" id="dataApp" required title="Data">
@@ -540,7 +536,7 @@
         </div>
     </div>
 
-    <div class="table-container" style="max-height: 65vh;">
+    <div class="table-container">
         <table class="tabela-larga">
             <thead>
                 <tr>
@@ -565,7 +561,6 @@
     <div class="area-fixa-topo no-print">
         <div class="linha-lancamento linha-agri-est">
             <div style="font-size:14px; font-weight:900; color:#FF8F00; margin-bottom: 10px;">📦 ENTRADA DE ESTOQUE</div>
-            <!-- ONSUBMIT PROTEGIDO -->
             <form id="estoqueForm" class="grid-agri-est" onsubmit="addEstoque(event)">
                 <input type="hidden" id="editEstoqueIndex" value="-1">
                 <input type="text" id="est_produto" placeholder="NOME DO PRODUTO..." required autocomplete="off">
@@ -607,11 +602,9 @@
         <button id="btn_solo_calc" onclick="switchSoloTab('solo_calc')">🧮 CALCULADORA DE NUTRIENTES</button>
     </div>
 
-    <!-- TELA 1: REGISTRO -->
     <div id="solo_reg" class="sub-tab active">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <h3 style="color: var(--cor-solo); margin-top:0;">REGISTAR NOVA ANÁLISE DE SOLO</h3>
-            <!-- ONSUBMIT PROTEGIDO -->
             <form id="formSolo" onsubmit="salvarAnaliseSolo(event)">
                 <div class="box-solo" style="display: flex; gap: 15px;">
                     <div style="flex:1"><label>Data da Análise:</label><input type="date" id="sl_data" required></div>
@@ -666,13 +659,11 @@
                         <div><label>Argila (g/kg)</label><input type="number" step="1" id="sl_argila" value="0"></div>
                     </div>
                 </div>
-                
                 <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-solo);">💾 SALVAR ANÁLISE NA NUVEM</button>
             </form>
         </div>
     </div>
 
-    <!-- TELA 2: HISTÓRICO EM GRÁFICO -->
     <div id="solo_hist" class="sub-tab">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <div class="no-print" style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
@@ -685,7 +676,6 @@
                     </select>
                 </div>
             </div>
-            
             <div class="grafico-container wide" style="width: 100%; box-shadow: var(--sombra-interna);">
                 <h4 style="margin: 0 0 10px 0; color:var(--cor-texto);" id="titulo_hist_solo">EVOLUÇÃO DOS NUTRIENTES</h4>
                 <div style="width: 100%; height: 40vh; min-height: 350px; position: relative;"><canvas id="chartHistoricoSolo"></canvas></div>
@@ -693,7 +683,6 @@
         </div>
     </div>
 
-    <!-- TELA 3: CALCULADORA -->
     <div id="solo_calc" class="sub-tab">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             
@@ -780,7 +769,7 @@
 </div>
 
 <!-- ========================================== -->
-<!-- DATALISTS E MODAIS GLOBAIS                 -->
+<!-- DATALISTS GLOBAIS E MODAIS                 -->
 <!-- ========================================== -->
 <datalist id="lista-talhoes"></datalist>
 <datalist id="lista-tipos"></datalist>
@@ -808,18 +797,18 @@
 <div id="toast">Sucesso!</div>
 
 <!-- ========================================== -->
-<!-- SCRIPTS GERAIS (BLINDADOS)                 -->
+<!-- SCRIPTS DE LÓGICA E NUVEM (BLINDADOS)      -->
 <!-- ========================================== -->
 <script>
     const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxU-XxV63Eip3g636GkrVaV8zwnVPVomePZLIsZBV-ghCYJKxYUMtQoG2Kc903zeP4UoQ/exec";
 
-    // Constantes e Listas Padronizadas para garantir que nada falha no carregamento vazio
+    // Constantes e Listas Seguras
     const dCategoriasPadrao = ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "DIÁRIAS", "DIESEL", "FUNGICIDA", "GASOLINA", "HERBICIDA", "INSETICIDA", "INSUMOS", "INVESTIMENTO", "MANUTENÇÃO", "MERCADO", "PROLABORE", "RAÇÃO"];
     const dSetoresPadrao = ["ADMINISTRAÇÃO", "CÃES", "CAFÉ", "CAFÉ 01", "CAFÉ 02", "CAFÉ 03", "CASA", "CAVALOS", "COLHEITA", "DEFINIR", "FAZENDA", "FUNCIONÁRIOS", "GADO", "GALINHAS", "IRRIGAÇÃO", "LAVOURAS", "MARACUJÁ", "PEDRO MARINELLI", "PEIXES", "TORREFAÇÃO", "TRATOR"];
     const rCategoriasPadrao = ["ACEROLA - POLPA", "CAFÉ 250G", "CAFÉ 500G", "CAFÉ EM GRÃOS", "CAFÉ SACA", "CRÉDITO", "ESTACAS DE EUCALÍPTO", "GRAVIOLA - POLPA S/SEM.", "MARACUJÁ - FRUTO", "MARACUJÁ - POLPA C/SEM.", "MARACUJÁ - POLPA S/SEM.", "OVOS", "PASTO - ALUGUEL", "RENDIMENTOS"];
     const unidadesReceita = { "ACEROLA - POLPA": "KG", "CAFÉ 250G": "PCT", "CAFÉ 500G": "PCT", "CAFÉ EM GRÃOS": "PCT", "CAFÉ SACA": "SC", "CRÉDITO": "R$", "ESTACAS DE EUCALÍPTO": "UN", "GRAVIOLA - POLPA S/SEM.": "KG", "MARACUJÁ - FRUTO": "KG", "MARACUJÁ - POLPA C/SEM.": "KG", "MARACUJÁ - POLPA S/SEM.": "KG", "OVOS": "DZ", "PASTO - ALUGUEL": "MÊS", "RENDIMENTOS": "R$" };
 
-    // Bases de Dados na Memória RAM
+    // Bases de Dados na Memória (Tipadas Forçadamente)
     let transacoes = [];
     let agriRecords = [];
     let estoque = [];
@@ -881,10 +870,11 @@
     }
     function obterSafraAtual() { return obterSafraGeral(new Date().toISOString().substring(0,10)); }
 
-    // --- SINCRONIZAÇÃO INTELIGENTE COM TRADUÇÃO DE ESTRUTURA ANTIGA ---
+    // --- COMUNICAÇÃO NUVEM ---
     async function carregarDadosNuvem(forcar = false) {
         const statusDiv = document.getElementById('status_conexao');
         statusDiv.innerHTML = '⏳ LENDO NUVEM...'; statusDiv.className = 'status-conexao aguardando';
+        
         let carregouNuvem = false;
         
         try {
@@ -892,8 +882,9 @@
             if (!response.ok) throw new Error(`Erro API`);
             const data = await response.json();
             
-            if (Array.isArray(data)) { transacoes = normalizarDatas(data); } 
-            else {
+            if (Array.isArray(data)) {
+                transacoes = normalizarDatas(data);
+            } else {
                 if (data.transacoes) transacoes = normalizarDatas(data.transacoes);
                 if (data.aplicacoes) agriRecords = normalizarDatas(data.aplicacoes);
                 if (data.estoque) estoque = Array.isArray(data.estoque) ? data.estoque : Object.values(data.estoque || {});
@@ -905,6 +896,7 @@
                 }
                 if (data.analises) analisesSolo = normalizarDatas(data.analises); 
             }
+            
             statusDiv.innerHTML = '🟢 NUVEM SINCRONIZADA'; statusDiv.className = 'status-conexao conectado';
             carregouNuvem = true;
         } catch (error) {
@@ -915,8 +907,9 @@
         if (localStr && !carregouNuvem) {
             try {
                 const localData = JSON.parse(localStr);
-                if (Array.isArray(localData)) { transacoes = normalizarDatas(localData); } 
-                else {
+                if (Array.isArray(localData)) {
+                    transacoes = normalizarDatas(localData); 
+                } else {
                     if(localData.transacoes) transacoes = normalizarDatas(localData.transacoes);
                     if(localData.aplicacoes) agriRecords = normalizarDatas(localData.aplicacoes);
                     if(localData.estoque) estoque = Array.isArray(localData.estoque) ? localData.estoque : Object.values(localData.estoque || {});
@@ -930,9 +923,6 @@
                 }
             } catch(e) {}
         }
-
-        if (!Array.isArray(agriRecords) || agriRecords.length === 0) { const oldAgri = localStorage.getItem('adubacao_records_v4'); if (oldAgri) { try { agriRecords = normalizarDatas(JSON.parse(oldAgri)); } catch(e){} } }
-        if (!Array.isArray(estoque) || estoque.length === 0) { const oldEst = localStorage.getItem('adubacao_estoque_v3'); if (oldEst) { try { let parsed = JSON.parse(oldEst); estoque = Array.isArray(parsed) ? parsed : Object.values(parsed); } catch(e){} } }
 
         const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo };
         localStorage.setItem('rancho3c_offline', JSON.stringify(payload));
@@ -992,8 +982,7 @@
             if(id === 'agri_dash') { renderAgriDashboard(); }
             
             if(id === 'solo_main') { popularSeletorSolo(); renderizarHistoricoSolo(); }
-        } catch(e) { console.error("Erro ao desenhar tela: ", e); }
-        
+        } catch(e) { console.error("Erro na tela", e); }
         window.scrollTo(0, 0); 
     }
 
@@ -1121,18 +1110,16 @@
 
     function mudarTemaSaida() {
         const select = document.getElementById('d_natureza'); const caixa = document.getElementById('caixa_lancamento_saida');
-        const titulo = document.getElementById('titulo_saida'); 
+        const titulo = document.getElementById('titulo_saida');
         if(select.value === 'Investimento') {
-            caixa.className = 'linha-lancamento linha-investimento-ativa';
-            titulo.style.color = 'var(--cor-investimento)'; 
+            caixa.className = 'linha-lancamento linha-investimento-ativa'; titulo.style.color = 'var(--cor-investimento)'; 
         } else {
-            caixa.className = 'linha-lancamento linha-despesa';
-            titulo.style.color = 'var(--cor-despesa)'; 
+            caixa.className = 'linha-lancamento linha-despesa'; titulo.style.color = 'var(--cor-despesa)'; 
         }
     }
 
     function addTransacao(e, tipoBase) {
-        e.preventDefault(); 
+        e.preventDefault();
         try {
             const prefix = tipoBase === 'Saida' ? 'd_' : 'r_';
             let data = document.getElementById(prefix + 'data').value;
@@ -1181,7 +1168,6 @@
                 tDesp += v;
             }
         });
-
         document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRec || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
         document.getElementById('tbody_despesas_pendentes').innerHTML = htmlDesp || '<tr><td colspan="4" style="text-align:center;">Nenhuma pendência!</td></tr>';
     }
@@ -1364,7 +1350,7 @@
                             <button onclick="confirmarExclusao(${idx})" class="btn-acao btn-excluir">🗑️</button>
                         </td>
                     </tr>`);
-            } catch(e) { console.error("Linha Fin ignorada", e); }
+            } catch(e) {}
         });
         document.getElementById('tabela_relatorio').innerHTML = linhasHTML.join('') || '<tr><td colspan="11" style="text-align:center;">Sem lançamentos</td></tr>';
     }
@@ -1517,10 +1503,10 @@
                     <td>${formatarData(rec.data)}</td><td>${strSafe(rec.talhao)}</td><td><b>${strSafe(rec.produto)}</b>${aviso}</td>
                     <td>${strSafe(rec.tipo)}</td><td>${strSafe(rec.alvo)||'-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strSafe(rec.forma)||'-'}</td>
                     <td>${formatarMoeda(custoTotal)}</td>
-                    <td><button class="${statusClass}" onclick="toggleStatusApp(${vIdx})">${strSafe(rec.status)} 🔄</button></td>
+                    <td><div class="${statusClass}" onclick="toggleStatusApp(${vIdx})">${strSafe(rec.status)} 🔄</div></td>
                     <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editAgriRecord(${vIdx})">✏️</button><button class="btn-acao btn-excluir" onclick="deleteAgriRecord(${vIdx})">🗑️</button></td>
                 </tr>`;
-            } catch(e) { console.error("Linha Agri ignorada", e); }
+            } catch(e) {}
         });
         document.getElementById('tableBodyAgri').innerHTML = html || '<tr><td colspan="10" style="text-align:center;">Nenhuma aplicação</td></tr>';
         updateFilterOptionsAgri(visibleRecords);
@@ -1544,6 +1530,7 @@
     }
 
     function saveAndRenderEstoque() {
+        if(!Array.isArray(estoque)) estoque = [];
         estoque.sort((a, b) => String(a.produto||'').localeCompare(String(b.produto||'')));
         let html = ''; let somaTotal = 0;
         
@@ -1564,9 +1551,9 @@
                 html += `<tr class="${cClass}">
                     <td><b>${strSafe(rec.produto)}</b>${aviso}</td><td>${strSafe(rec.principio)||'-'}</td><td>${strSafe(rec.tipo)}</td>
                     <td style="${corQtd}">${qEstoque.toFixed(2)} ${strSafe(rec.un)}</td><td>${formatarMoeda(rec.valor_unit)}</td><td><b>${formatarMoeda(vTot)}</b></td>
-                    <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editEstoque(${index})">✏️</button><button class="btn-acao btn-excluir" onclick="deleteEstoque(${index})">🗑️</button></td>
+                    <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editEstoque(${index})">✏️</button><button class="btn-acao btn-excluir" onclick="deleteEstoque(${index})">🗑️️</button></td>
                 </tr>`;
-            } catch(e) { console.error("Linha Est ignorada", e); }
+            } catch(e) {}
         });
         document.getElementById('estoqueBody').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">Estoque vazio</td></tr>';
         document.getElementById('th-valor-total-est').innerHTML = `VALOR TOTAL<br><span style="font-size: 0.85em; color: #FFF;">${formatarMoeda(somaTotal)}</span>`;
