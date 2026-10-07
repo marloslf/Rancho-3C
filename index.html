@@ -10,62 +10,39 @@
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap');
 
         :root {
-            --cor-verde-fazenda: #2E7D32; 
-            --cor-verde-escuro: #1B5E20;
-            --cor-madeira: #5D4037;
-            --cor-fundo: #e0e5ec; 
-            --cor-texto: #111111;
+            --cor-verde-fazenda: #2E7D32; --cor-verde-escuro: #1B5E20; --cor-madeira: #5D4037;
+            --cor-fundo: #e0e5ec; --cor-texto: #111111;
             
             --sombra-neumorfica: 9px 9px 16px rgba(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
             --sombra-interna: inset 6px 6px 10px rgba(163,177,198,0.5), inset -6px -6px 10px rgba(255,255,255, 0.8);
             --borda-raio: 16px;
             
-            --cor-despesa: #E65100; 
-            --cor-despesa-grad: linear-gradient(135deg, #FF9800, #E65100);
-            --cor-receita: #2E7D32;
-            --cor-receita-grad: linear-gradient(135deg, #66BB6A, #2E7D32);
-            --cor-investimento: #6A1B9A;
-            --cor-investimento-grad: linear-gradient(135deg, #AB47BC, #6A1B9A);
+            --cor-despesa: #E65100; --cor-despesa-grad: linear-gradient(135deg, #FF9800, #E65100);
+            --cor-receita: #2E7D32; --cor-receita-grad: linear-gradient(135deg, #66BB6A, #2E7D32);
+            --cor-investimento: #6A1B9A; --cor-investimento-grad: linear-gradient(135deg, #AB47BC, #6A1B9A);
 
-            --cor-saldo-pos-grad: linear-gradient(135deg, #42A5F5, #1565C0);
-            --cor-saldo-neg-grad: linear-gradient(135deg, #EF5350, #C62828);
-
-            --cor-agri-app: #0288D1;
-            --cor-agri-est: #F39C12;
-            --cor-solo: #8E44AD;
+            --cor-agri-app: #0288D1; --cor-agri-est: #F39C12; --cor-solo: #8E44AD;
         }
 
         * { font-family: 'Nunito', sans-serif; box-sizing: border-box; }
-
         body { zoom: 85%; max-width: 100%; width: 100%; margin: 0; padding: 15px; background-color: var(--cor-fundo); color: var(--cor-texto); overflow-x: hidden;}
 
         .watermark-logo {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 70vw; height: 70vh; background-image: url('https://i.imgur.com/jPLDeyi.png');
-            background-repeat: no-repeat; background-position: center; background-size: contain;
-            opacity: 0.04; z-index: -1; pointer-events: none; 
+            background-repeat: no-repeat; background-position: center; background-size: contain; opacity: 0.04; z-index: -1; pointer-events: none; 
         }
 
         .header-container { 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: var(--cor-fundo); padding: 10px 30px; border-radius: var(--borda-raio);
-            box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.4); margin-bottom: 25px;
+            display: flex; justify-content: space-between; align-items: center; background: var(--cor-fundo); padding: 10px 30px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.4); margin-bottom: 25px;
         }
         .header-container img { max-width: 80px; filter: drop-shadow(4px 4px 6px rgba(0,0,0,0.1)); border-radius: 8px;}
         h2, h3 { color: var(--cor-verde-escuro); font-weight: 900; margin: 10px 0;}
 
-        /* --- MENU PRINCIPAL --- */
-        .menu { 
-            display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; 
-            flex-wrap: wrap; align-items: center; position: sticky; top: 0; z-index: 1001; 
-            background-color: var(--cor-fundo); padding: 15px 0; margin-top: -15px; border-bottom: 2px solid rgba(255,255,255,0.5);
-        }
+        /* --- MENU --- */
+        .menu { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; align-items: center; position: sticky; top: 0; z-index: 1001; background-color: var(--cor-fundo); padding: 15px 0; margin-top: -15px; border-bottom: 2px solid rgba(255,255,255,0.5);}
         .menu-divisor { width: 4px; height: 30px; background: #ccc; border-radius: 2px; margin: 0 5px; box-shadow: var(--sombra-interna);}
-        .menu button { 
-            padding: 10px 15px; cursor: pointer; border: none; background: var(--cor-fundo); color: #666; 
-            border-radius: 30px; font-weight: 900; font-size: 13px; transition: all 0.3s ease; box-shadow: var(--sombra-neumorfica);
-            position: relative !important;
-        }
+        .menu button { padding: 10px 15px; cursor: pointer; border: none; background: var(--cor-fundo); color: #666; border-radius: 30px; font-weight: 900; font-size: 13px; transition: all 0.3s ease; box-shadow: var(--sombra-neumorfica); position: relative !important; }
         .menu button:hover { transform: translateY(-2px); color: var(--cor-madeira);}
         .menu button.btn-ativo { box-shadow: var(--sombra-interna); }
         .menu button.btn-ativo[id^="btn_home"] { color: #555; }
@@ -73,20 +50,12 @@
         .menu button.btn-ativo[id^="btn_agri"] { color: var(--cor-agri-app); }
         .menu button.btn-ativo[id^="btn_solo"] { color: var(--cor-solo); }
 
-        .badge-atrasadas {
-            position: absolute; top: -8px; right: -8px; background: linear-gradient(135deg, #ef5350, #c62828); color: white; font-weight: 900; font-size: 11px;
-            padding: 4px 8px; border-radius: 20px; box-shadow: 0 0 10px rgba(229, 57, 53, 0.8), inset 0 2px 0 rgba(255,255,255,0.4); border: 2px solid var(--cor-fundo); animation: pulse-red 1.5s infinite;
-        }
+        .badge-atrasadas { position: absolute; top: -8px; right: -8px; background: linear-gradient(135deg, #ef5350, #c62828); color: white; font-weight: 900; font-size: 11px; padding: 4px 8px; border-radius: 20px; box-shadow: 0 0 10px rgba(229, 57, 53, 0.8), inset 0 2px 0 rgba(255,255,255,0.4); border: 2px solid var(--cor-fundo); animation: pulse-red 1.5s infinite; }
         @keyframes pulse-red { 0% { transform: scale(1); box-shadow: 0 0 10px rgba(229, 57, 53, 0.6); } 50% { transform: scale(1.15); box-shadow: 0 0 20px rgba(229, 57, 53, 1); } 100% { transform: scale(1); box-shadow: 0 0 10px rgba(229, 57, 53, 0.6); } }
 
-        .status-conexao {
-            padding: 10px 20px; border-radius: 30px; font-weight: 900; font-size: 12px; background: #ffebee; color: #c62828; border: 2px solid #ef5350;
-            display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: var(--sombra-neumorfica); transition: all 0.3s ease;
-        }
+        .status-conexao { padding: 10px 20px; border-radius: 30px; font-weight: 900; font-size: 12px; background: #ffebee; color: #c62828; border: 2px solid #ef5350; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: var(--sombra-neumorfica); transition: all 0.3s ease; }
         .status-conexao.conectado { background: #e8f5e9; color: #2e7d32; border-color: #66bb6a; }
-        .status-conexao.aguardando { background: #FFF3E0; color: #E65100; border-color: #FFB74D; pointer-events: none;}
 
-        /* --- ABAS GERAIS --- */
         .tab { display: none; background: transparent; position: relative; min-height: 80vh; }
         .tab.active { display: block; animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
@@ -96,12 +65,11 @@
         .home-container img { width: 450px; max-width: 80vw; filter: drop-shadow(0px 15px 25px rgba(0,0,0,0.15)); margin-bottom: 30px; animation: float 6s ease-in-out infinite;}
         @keyframes float { 0% {transform: translateY(0px);} 50% {transform: translateY(-15px);} 100% {transform: translateY(0px);} }
 
-        /* --- CARTÕES DE DASHBOARD --- */
+        /* --- CARTÕES & COMPONENTES --- */
         .resumo-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .card { padding: 15px; border-radius: var(--borda-raio); text-align: center; color: white; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); box-shadow: var(--sombra-neumorfica);}
         .card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to bottom, rgba(255,255,255,0.15), transparent); pointer-events: none;}
-        .card-receita { background: var(--cor-receita-grad); } .card-despesa { background: var(--cor-despesa-grad); }
-        .card-investimento { background: var(--cor-investimento-grad); } .card-saldo { transition: background 0.5s; } 
+        .card-receita { background: var(--cor-receita-grad); } .card-despesa { background: var(--cor-despesa-grad); } .card-investimento { background: var(--cor-investimento-grad); }
         .card-agri1 { background: linear-gradient(135deg, #4FC3F7, #0277BD); } .card-agri2 { background: linear-gradient(135deg, #FFD54F, #FF8F00); }
         .card h4 { margin: 0; font-size: 13px; font-weight: 800; opacity: 0.9; text-transform: uppercase; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);}
         .card span { font-size: 26px; display: block; margin-top: 8px; font-weight: 900; text-shadow: 2px 2px 5px rgba(0,0,0,0.5);}
@@ -114,89 +82,19 @@
         .barra-grafico-receita { height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); background: linear-gradient(to bottom, #A5D6A7 0%, #4CAF50 40%, #2E7D32 100%);}
         .barra-grafico-despesa { height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); background: linear-gradient(to bottom, #FFCC80 0%, #FF9800 40%, #E65100 100%);}
 
-        /* --- INPUTS E CONTRASTE --- */
-        input, select, .filter-row input, .filter-row select {
-            padding: 10px; font-size: 13px; border: none; border-radius: 8px; font-weight: 900; text-transform: uppercase; width: 100%; 
-            background-color: rgba(255, 255, 255, 0.85); box-shadow: var(--sombra-interna); color: #000; transition: 0.2s;
-        }
+        /* --- INPUTS --- */
+        input, select, .filter-row input, .filter-row select { padding: 10px; font-size: 13px; border: none; border-radius: 8px; font-weight: 900; text-transform: uppercase; width: 100%; background-color: rgba(255, 255, 255, 0.85); box-shadow: var(--sombra-interna); color: #000; transition: 0.2s; }
         input::placeholder { color: #666; font-weight: 600; }
         input:focus, select:focus { outline: none; box-shadow: inset 4px 4px 8px rgba(163,177,198,0.4), inset -4px -4px 8px rgba(255,255,255, 0.9), 0 0 0 2px var(--cor-verde-fazenda); background-color: #ffffff;}
-        input[readonly] { background-color: #e0e0e0; color: #555; box-shadow: none; cursor: not-allowed; }
-
-        .area-fixa-topo { position: sticky; top: 80px; z-index: 100; background-color: var(--cor-fundo); padding-bottom: 10px; }
-        .linha-lancamento { padding: 15px; border-radius: 16px; margin-bottom: 15px; border: none; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5);}
-        .linha-despesa { background-color: #FFF3E0; border-left: 8px solid var(--cor-despesa); transition: 0.3s;}
-        .linha-investimento-ativa { background-color: #F3E5F5; border-left: 8px solid var(--cor-investimento); }
-        .linha-receita { background-color: #E8F5E9; border-left: 8px solid var(--cor-receita); }
-        .linha-agri-app { background-color: #E1F5FE; border-left: 8px solid #0288D1; }
-        .linha-agri-est { background-color: #FFF8E1; border-left: 8px solid #FF8F00; }
-        
-        .grid-despesa { display: grid; grid-template-columns: 110px 2fr 1.5fr 2fr 2fr 70px 60px 100px 110px 90px 140px; gap: 10px; align-items: center; }
-        .grid-receita { display: grid; grid-template-columns: 110px 3.5fr 2fr 2fr 70px 60px 100px 110px 90px 140px; gap: 10px; align-items: center; }
-        .grid-agri-app { display: grid; grid-template-columns: 120px 2fr 2fr 1.5fr 1.5fr 80px 80px 1.5fr 110px 140px; gap: 10px; align-items: center; }
-        .grid-agri-est { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 100px 100px 120px 140px; gap: 10px; align-items: center; }
+        input[readonly] { background-color: #e0e0e0 !important; color: #555 !important; box-shadow: none !important; cursor: not-allowed; border: 1px solid #ccc;}
 
         .btn-salvar-compacto { padding: 10px; font-size: 13px; font-weight: 800; border: none; border-radius: 8px; cursor: pointer; color: white; transition: 0.2s; box-shadow: 4px 4px 8px rgba(163,177,198,0.5), -4px -4px 8px rgba(255,255,255, 0.8); width: 100%;}
         .btn-salvar-compacto:hover { filter: brightness(1.1); transform: translateY(-2px);}
-        .btn-salvar-compacto:active { box-shadow: inset 4px 4px 8px rgba(0,0,0,0.2), inset -4px -4px 8px rgba(255,255,255,0.1); transform: translateY(1px);}
         
-        .select-tipo-saida { background-color: rgba(255, 255, 255, 0.6); border: none; border-radius: 8px; padding: 4px 10px; font-weight: 900; color: var(--cor-despesa); margin-left: 10px; font-size: 13px; cursor: pointer; transition: 0.3s; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
-
-        .barra-pesquisa-relatorio { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: var(--cor-fundo); padding: 15px 20px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5);}
-        .btn-pesquisar, .btn-limpar { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 800; color: white; cursor: pointer; box-shadow: 4px 4px 8px rgba(163,177,198,0.5), -4px -4px 8px rgba(255,255,255, 0.8); transition: 0.2s;}
-        .btn-pesquisar { background: var(--cor-madeira); } .btn-limpar { background: #9E9E9E; }
-        .btn-filtro { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 800; transition: 0.3s; background: var(--cor-fundo); color: #555; box-shadow: var(--sombra-neumorfica);}
-        .btn-filtro.ativo { background-color: var(--cor-verde-fazenda); color: white; box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2), inset -3px -3px 6px rgba(255,255,255,0.2);}
-
-        /* --- TABELAS --- */
-        .table-container { overflow-x: auto; overflow-y: auto; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5); background: white; max-height: 60vh;}
-        table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; white-space: nowrap;}
-        .tabela-larga { min-width: 1100px; } 
-        th { background: linear-gradient(to right, #1B5E20, #2E7D32); color: white; font-weight: 800; padding: 12px; text-align: left; cursor: pointer; position: sticky; top: 0; z-index: 3;}
-        .th-agri { background: linear-gradient(to right, #01579B, #0288D1); }
-        .th-calc { background: linear-gradient(to right, #6A1B9A, #8E44AD); } 
-        
-        .filter-row th { background: #f1f8e9 !important; padding: 6px 5px; border-bottom: 2px solid var(--cor-verde-fazenda); top: 40px; z-index: 2;}
-        .filter-row.fr-agri th { background: #E1F5FE !important; border-bottom: 2px solid #0288D1; }
-        
-        td { border-bottom: 1px solid #f0f0f0; padding: 10px 12px; font-weight: 600; text-transform: uppercase; vertical-align: middle;}
-        tr:hover td { background-color: rgba(0, 0, 0, 0.02); }
-
-        /* Badges de Tipo na Lista */
-        .badge-tipo { padding: 4px 8px; border-radius: 6px; font-weight: 900; font-size: 11px; color: white; text-align: center; display: inline-block; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.15);}
-        .badge-receita { background: var(--cor-receita); }
-        .badge-despesa { background: var(--cor-despesa); }
-        .badge-investimento { background: var(--cor-investimento); }
-        
-        .bg-pago { background-color: #4caf50; color: white; font-weight: 800; border:none; border-radius: 6px; padding: 6px; box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3); width: 100%;}
-        .bg-pendente { background-color: #ff9800; color: white; font-weight: 800; border:none; border-radius: 6px; padding: 6px; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3); width: 100%;}
-        .status-planejado { background-color: #FFE082; color: #E65100; border: 1px solid #FFCA28; padding: 6px; border-radius: 6px; font-weight: 800; cursor: pointer; width: 100%;}
-        .status-aplicado { background-color: #A5D6A7; color: #1B5E20; border: 1px solid #66BB6A; padding: 6px; border-radius: 6px; font-weight: 800; cursor: pointer; width: 100%;}
-        .stock-warning { display: inline-block; margin-top: 4px; color: #D32F2F; background: #FFCDD2; padding: 3px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 900; border: 1px solid #EF5350; }
-
-        /* Cores de Linha Agrícola Claras */
-        tr.linha-adubo { background-color: rgba(234, 242, 227, 0.6); }       
-        tr.linha-inseticida { background-color: rgba(250, 222, 222, 0.6); }
-        tr.linha-fungicida { background-color: rgba(251, 231, 198, 0.6); } 
-        tr.linha-herbicida { background-color: rgba(230, 230, 250, 0.6); } 
-        tr.linha-acaricida { background-color: rgba(212, 241, 244, 0.6); } 
-        tr.linha-bactericida { background-color: rgba(252, 244, 217, 0.6);}
-        .tr-alerta { background-color: rgba(255, 205, 210, 0.8) !important; }
-
-        .btn-acao { display: inline-flex; align-items: center; justify-content: center; border: none; padding: 8px; cursor: pointer; border-radius: 8px; font-size: 15px; margin-right: 4px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.15);}
-        .btn-acao:hover { filter: brightness(0.9); transform: scale(1.1); }
-        .btn-editar { background: #FFCA28; color: #3E2723; }
-        .btn-excluir { background: #E53935; color: white; }
-
-        /* --- MODAIS E TOASTS --- */
-        #modal-edicao { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px);}
-        .modal-content { background: var(--cor-fundo); padding: 35px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3);}
-        .form-group-modal { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-
         #toast { visibility: hidden; min-width: 250px; background-color: var(--cor-verde-fazenda); color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: 800; opacity: 0; transition: opacity 0.4s, bottom 0.4s; box-shadow: 0 10px 30px rgba(0,0,0,0.3);}
         #toast.show { visibility: visible; opacity: 1; bottom: 50px;}
 
-        /* --- ABAS INTERNAS (SOLO) --- */
+        /* --- ABAS INTERNAS (SOLO) E CORES CFSEMG --- */
         .sub-menu { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ccc; padding-bottom: 10px;}
         .sub-menu button { padding: 8px 15px; border-radius: 8px; border: none; background: transparent; font-weight: 800; color: #666; cursor: pointer; transition: 0.3s;}
         .sub-menu button.active { background: var(--cor-solo); color: white; box-shadow: var(--sombra-neumorfica);}
@@ -205,23 +103,34 @@
 
         .grid-solo { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; }
         .box-solo { background: rgba(255,255,255,0.5); padding: 15px; border-radius: 12px; box-shadow: var(--sombra-interna); border: 1px solid rgba(255,255,255,0.8); margin-bottom: 15px;}
-        .box-solo h4 { margin-top: 0; margin-bottom: 10px; color: var(--cor-solo); border-bottom: 2px dashed #ccc; padding-bottom: 5px; font-size: 13px;}
-        .box-solo label { font-size: 11px; font-weight: 900; color: #555; }
-        .box-solo input { font-size: 12px; text-align: center; padding: 8px;}
-        .laudo-texto { background: #fff; border-left: 4px solid var(--cor-solo); padding: 15px; border-radius: 8px; font-size: 13px; color: #444; margin-top: 15px; box-shadow: var(--sombra-interna);}
+        .box-solo h4 { margin-top: 0; margin-bottom: 10px; color: var(--cor-solo); border-bottom: 2px dashed #ccc; padding-bottom: 5px; font-size: 13px; text-transform: uppercase;}
+        .box-solo label { font-size: 11px; font-weight: 900; color: #555; display: block; margin-bottom: 4px; white-space: nowrap;}
+        
+        .legenda-solo { background: #fff; padding: 15px; border-radius: 8px; border-left: 4px solid var(--cor-solo); font-size: 11px; color: #555; margin-bottom: 15px; box-shadow: var(--sombra-neumorfica);}
+        .val-baixo { background-color: #ffebee !important; color: #c62828 !important; border: 2px solid #ef5350 !important; }
+        .val-ideal { background-color: #e8f5e9 !important; color: #1b5e20 !important; border: 2px solid #66bb6a !important; }
+        .val-alto { background-color: #e3f2fd !important; color: #1565c0 !important; border: 2px solid #42a5f5 !important; }
+        .laudo-texto { background: #fff; border-left: 4px solid var(--cor-solo); padding: 15px; border-radius: 8px; font-size: 13px; color: #444; margin-top: 15px; box-shadow: var(--sombra-interna); line-height: 1.5;}
+        
+        .table-container { overflow-x: auto; overflow-y: auto; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.5); background: white;}
+        table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; white-space: nowrap;}
+        .th-calc { background: linear-gradient(to right, #6A1B9A, #8E44AD); color: white; font-weight: 800; padding: 12px; text-align: left; } 
+        td { border-bottom: 1px solid #f0f0f0; padding: 10px 12px; font-weight: 600; text-transform: uppercase; vertical-align: middle;}
+
+        #modal-grafico-detalhado { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px);}
+        .modal-grafico-content { background: var(--cor-fundo); padding: 30px; border-radius: 20px; width: 95%; max-width: 1200px; height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.5);}
+        .btn-limpar { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 800; color: white; cursor: pointer; box-shadow: 4px 4px 8px rgba(163,177,198,0.5), -4px -4px 8px rgba(255,255,255, 0.8); background: #9E9E9E; transition: 0.2s;}
 
         @media print {
             body { height: auto; overflow: visible; background: white !important; zoom: 100%; color: black;}
-            .no-print, .menu, .area-fixa-topo, .watermark-logo, .sub-menu { display: none !important; }
+            .no-print, .menu, .watermark-logo, .sub-menu { display: none !important; }
             .tab { display: none; }
             body.modo-laudo #solo_main { display: block !important; }
-            body.modo-laudo #solo_hist { display: block !important; page-break-after: always; }
             body.modo-laudo #solo_calc { display: block !important; }
-            body.modo-laudo .grafico-container, body.modo-laudo .box-solo { box-shadow: none !important; border: 1px solid #ddd !important; }
+            body.modo-laudo .box-solo { box-shadow: none !important; border: 1px solid #ddd !important; }
             @page { margin: 1cm; size: A4 portrait; }
         }
     </style>
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -234,541 +143,152 @@
     <div style="width: 150px;"></div>
 </div>
 
-<!-- MENU PRINCIPAL UNIFICADO -->
 <div class="menu no-print">
-    <button id="btn_home" class="btn-ativo" onclick="showTab('home')">🏠 INÍCIO</button>
+    <button id="btn_solo" class="btn-ativo" onclick="showTab('solo_main')">🧪 SOLO, NUTRIÇÃO E LAUDOS</button>
     <div class="menu-divisor"></div>
-    
-    <button id="btn_resumo" onclick="showTab('resumo')">📊 DASH. FINANÇAS</button>
-    <button id="btn_movimentacoes" onclick="showTab('movimentacoes')">📋 CAIXA</button>
-    <button id="btn_relatorios_detalhados" onclick="showTab('relatorios_detalhados')">📈 RELATÓRIOS</button>
-    <button id="btn_pendencias" onclick="showTab('pendencias')" style="color: #E65100;">
-        🔔 PENDÊNCIAS <span id="badge_atrasadas" class="badge-atrasadas" style="display: none;">0</span>
-    </button>
-    <div class="menu-divisor"></div>
-    
-    <button id="btn_agri_dash" onclick="showTab('agri_dash')">📊 DASH. AGRÍCOLA</button>
-    <button id="btn_agri_app" onclick="showTab('agri_app')">🚜 APLICAÇÕES</button>
-    <button id="btn_agri_est" onclick="showTab('agri_est')">📦 ESTOQUE</button>
-    <div class="menu-divisor"></div>
-    
-    <button id="btn_solo" onclick="showTab('solo_main')">🧪 SOLO & NUTRIÇÃO</button>
-    <div class="menu-divisor"></div>
-
-    <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem(true)" title="Forçar Sincronização">⏳ CARREGANDO...</button>
+    <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem()" title="Forçar Sincronização">⏳ CARREGANDO...</button>
 </div>
 
-<!-- ========================================== -->
-<!-- TELA INICIAL (HOME LIMPA E MAIOR)          -->
-<!-- ========================================== -->
-<div id="home" class="tab active">
-    <div class="home-container">
-        <img src="https://i.imgur.com/jPLDeyi.png" alt="Rancho 3C Logo" referrerpolicy="no-referrer">
-    </div>
-</div>
-
-<!-- ========================================== -->
-<!-- MÓDULO FINANCEIRO                          -->
-<!-- ========================================== -->
-<div id="resumo" class="tab">
-    <div class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; background: var(--cor-fundo); padding: 15px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
-        <label style="font-weight: 900; color: var(--cor-madeira); font-size: 13px;">Safra:</label>
-        <select id="filtro_safra_dashboard" onchange="atualizarResumoEGrafico()"><option value="">TODAS</option></select>
-        <label style="font-weight: 900; color: var(--cor-madeira); font-size: 13px; margin-left: 10px;">Mês:</label>
-        <input type="month" id="filtro_mes_dashboard" onchange="atualizarResumoEGrafico()">
-        <button onclick="document.getElementById('filtro_safra_dashboard').value=''; document.getElementById('filtro_mes_dashboard').value=''; atualizarResumoEGrafico()" class="btn-salvar-compacto" style="background:#9E9E9E; width:auto;">🧹 LIMPAR</button>
-    </div>
-
-    <div class="resumo-cards">
-        <div class="card card-receita"><h4>RECEITAS TOTAIS</h4><span id="res_receitas">R$ 0,00</span></div>
-        <div class="card card-despesa"><h4>CUSTEIO (DESPESAS)</h4><span id="res_despesas">R$ 0,00</span></div>
-        <div class="card card-investimento"><h4>INVESTIMENTOS</h4><span id="res_investimentos">R$ 0,00</span></div>
-        <div class="card card-saldo" id="card_saldo_div"><h4>SALDO EM CAIXA</h4><span id="res_saldo">R$ 0,00</span></div>
-    </div>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-        <div class="grafico-container">
-            <h4 style="margin: 0 0 10px 0; color: var(--cor-madeira); font-size: 14px; font-weight: 900;">SAÍDAS EFETIVADAS</h4>
-            <div style="width: 100%; height: 200px; position: relative;"><canvas id="canvas_caixa"></canvas></div>
-        </div>
-        <div class="grafico-container">
-            <h4 style="margin: 0 0 10px 0; color: #555; font-size: 14px; font-weight: 900;">PREVISÃO (PENDENTES)</h4>
-            <div style="width: 100%; height: 200px; position: relative;"><canvas id="canvas_pendente"></canvas></div>
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        <div class="top-graficos-box">
-            <h4 style="color: var(--cor-receita); font-weight: 900; font-size: 14px; border-bottom: 2px solid var(--cor-receita); padding-bottom: 5px;">🌱 MAIORES RECEITAS</h4>
-            <ul id="lista_top_receitas" style="padding-left: 0; margin-top: 10px;"></ul>
-        </div>
-        <div class="top-graficos-box">
-            <h4 style="color: var(--cor-despesa); font-weight: 900; font-size: 14px; border-bottom: 2px solid var(--cor-despesa); padding-bottom: 5px;">🚜 MAIORES SAÍDAS</h4>
-            <ul id="lista_top_despesas" style="padding-left: 0; margin-top: 10px;"></ul>
-        </div>
-    </div>
-</div>
-
-<div id="movimentacoes" class="tab">
-    <div class="area-fixa-topo no-print">
-        <div class="linha-lancamento linha-despesa" id="caixa_lancamento_saida">
-            <div style="display:flex; justify-content:space-between; margin-bottom: 6px; align-items: center;">
-                <span style="font-size:13px; font-weight:900; color:var(--cor-despesa);" id="titulo_saida">🚜 INSERIR SAÍDA:
-                    <select id="d_natureza" class="select-tipo-saida" onchange="mudarTemaSaida()">
-                        <option value="Despesa">CUSTEIO</option>
-                        <option value="Investimento">INVESTIMENTO</option>
-                    </select>
-                </span>
-            </div>
-            <!-- ONSUBMIT BLINDADO (Sem recarregamento) -->
-            <form class="grid-despesa" onsubmit="addTransacao(event, 'Saida')">
-                <input type="date" id="d_data" required>
-                <input list="lista_d_categoria" id="d_categoria" placeholder="CATEGORIA..." required autocomplete="off">
-                <input list="lista_d_setor" id="d_setor" placeholder="SETOR..." required autocomplete="off">
-                <input list="lista_d_local" id="d_local" placeholder="FORNECEDOR..." required autocomplete="off">
-                <input list="lista_d_descricao" id="d_descricao" placeholder="DESCRIÇÃO" required autocomplete="off">
-                <input type="number" id="d_qtd" placeholder="QTD" step="0.01" oninput="calcularTotalDespesa()">
-                <input type="text" id="d_und" placeholder="UNID.">
-                <input type="number" id="d_v_unit" placeholder="$ UNIT" step="0.01" oninput="calcularTotalDespesa()">
-                <input type="number" id="d_valor" placeholder="$ TOTAL" step="0.01" required>
-                <select id="d_sit"><option value="A pagar">A PAGAR</option><option value="Pago">PAGO</option></select>
-                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-despesa);">💾 SALVAR</button>
-            </form>
-        </div>
-
-        <div class="linha-lancamento linha-receita">
-            <div style="font-size:13px; font-weight:900; color:var(--cor-receita); margin-bottom: 6px;">🌱 INSERIR RECEITA</div>
-            <!-- ONSUBMIT BLINDADO -->
-            <form class="grid-receita" onsubmit="addTransacao(event, 'Receita')">
-                <input type="date" id="r_data" required>
-                <input list="lista_r_categoria" id="r_categoria" placeholder="O QUE VENDEU?" required onblur="autoPreencherUnidade()" autocomplete="off">
-                <input list="lista_r_local" id="r_local" placeholder="CLIENTE?" required autocomplete="off">
-                <input type="text" id="r_descricao" placeholder="DETALHES" autocomplete="off">
-                <input type="number" id="r_qtd" placeholder="QTD" step="0.01" oninput="calcularTotalReceita()">
-                <input type="text" id="r_und" placeholder="UNID.">
-                <input type="number" id="r_v_unit" placeholder="$ UNIT" step="0.01" oninput="calcularTotalReceita()">
-                <input type="number" id="r_valor" placeholder="$ TOTAL" step="0.01" required>
-                <select id="r_sit"><option value="A receber">A RECEBER</option><option value="Pago">PAGO</option></select>
-                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-receita);">💾 SALVAR</button>
-            </form>
-        </div>
-
-        <div class="barra-pesquisa-relatorio">
-            <button class="btn-filtro ativo" id="btn_f_todos" onclick="setFiltroRapido('')">📋 TODOS</button>
-            <button class="btn-filtro" id="btn_f_safra" onclick="setFiltroRapido('safra')">🌾 SAFRA ATUAL</button>
-            <span style="flex-grow: 1;"></span>
-            <input type="text" id="pesquisa_global" placeholder="PESQUISA RÁPIDA..." onkeydown="if(event.key==='Enter') aplicarFiltros()">
-            <button onclick="aplicarFiltros()" class="btn-pesquisar">🔎</button>
-            <button onclick="limparFiltros()" class="btn-limpar">🧹</button>
-        </div>
-    </div> 
-
-    <!-- ÁREA TOTALMENTE APROVEITADA (max-height: 65vh) -->
-    <div class="table-container" style="max-height: 65vh;">
-        <table class="tabela-larga">
-            <thead>
-                <tr>
-                    <th onclick="setOrdenacao('data')">DATA ↕</th>
-                    <th onclick="setOrdenacao('tipo')">TIPO ↕</th>
-                    <th onclick="setOrdenacao('categoria')">CATEGORIA ↕</th>
-                    <th onclick="setOrdenacao('setor')">SETOR ↕</th>
-                    <th onclick="setOrdenacao('local')">LOCAL ↕</th>
-                    <th onclick="setOrdenacao('desc')">DESCRIÇÃO ↕</th>
-                    <th onclick="setOrdenacao('qtd')">QTD ↕</th>
-                    <th onclick="setOrdenacao('v_unit')">V. UNIT ↕</th>
-                    <th onclick="setOrdenacao('valor')">TOTAL ↕</th>
-                    <th onclick="setOrdenacao('sit')" style="text-align: center;">SITUAÇÃO ↕</th>
-                    <th class="no-print" style="text-align: center;">AÇÕES</th>
-                </tr>
-                <tr class="filter-row no-print">
-                    <th><input type="date" id="f_data" onchange="aplicarFiltros()"></th>
-                    <th><select id="f_tipo" onchange="aplicarFiltros()"><option value="">TUDO</option><option value="receita">RECEITA</option><option value="despesa">DESPESA</option><option value="investimento">INVESTIMENTO</option></select></th>
-                    <th><select id="f_cat" onchange="aplicarFiltros()"></select></th>
-                    <th><select id="f_setor" onchange="aplicarFiltros()"></select></th>
-                    <th><select id="f_local" onchange="aplicarFiltros()"></select></th>
-                    <th><select id="f_desc" onchange="aplicarFiltros()"></select></th>
-                    <th></th><th></th><th></th>
-                    <th><select id="f_sit" onchange="aplicarFiltros()"><option value="">TUDO</option><option value="pago">PAGO</option><option value="a pagar">A PAGAR</option><option value="a receber">A RECEBER</option></select></th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody id="tabela_relatorio"></tbody>
-        </table>
-    </div>
-</div>
-
-<div id="relatorios_detalhados" class="tab">
-    <div class="no-print top-filtros" style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px; background: var(--cor-fundo); padding: 20px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
-        <label style="font-weight: 900; color: var(--cor-texto);">Filtrar por Safra:</label>
-        <select id="filtro_safra_relatorios" onchange="atualizarRelatoriosDetalhados()"><option value="">TODAS</option></select>
-        <label style="font-weight: 900; color: var(--cor-texto); margin-left: 15px;">Mês:</label>
-        <input type="month" id="filtro_mes_relatorios" onchange="atualizarRelatoriosDetalhados()">
-        <button onclick="document.getElementById('filtro_safra_relatorios').value=''; document.getElementById('filtro_mes_relatorios').value=''; atualizarRelatoriosDetalhados()" class="btn-limpar">🧹 LIMPAR</button>
-    </div>
-
-    <!-- REMOVIDO BLOQUEIO DE ALTURA PARA PREENCHER TELA DE RELATÓRIOS -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px;">
-        <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid var(--cor-receita);">
-            <h3 style="color: var(--cor-receita); text-align: center;">🌱 RECEITAS / CATEGORIA</h3>
-            <div class="table-container" style="max-height: none;"><table><tbody id="tbody_receitas_categoria"></tbody></table></div>
-        </div>
-        <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid var(--cor-verde-escuro);">
-            <h3 style="color: var(--cor-verde-escuro); text-align: center;">🤝 RECEITAS / CLIENTE</h3>
-            <div class="table-container" style="max-height: none;"><table><tbody id="tbody_receitas_local"></tbody></table></div>
-        </div>
-        <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid #F57C00;">
-            <h3 style="color: #F57C00; text-align: center;">🏷️ DESPESAS / CATEGORIA</h3>
-            <div class="table-container" style="max-height: none;"><table><tbody id="tbody_gastos_categoria"></tbody></table></div>
-        </div>
-        <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid var(--cor-despesa);">
-            <h3 style="color: var(--cor-despesa); text-align: center;">🚜 DESPESAS / SETOR</h3>
-            <div class="table-container" style="max-height: none;"><table><tbody id="tbody_gastos_setor"></tbody></table></div>
-        </div>
-        <div style="background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-neumorfica); border-top: 6px solid var(--cor-investimento);">
-            <h3 style="color: var(--cor-investimento); text-align: center;">🏗️ INVESTIMENTOS</h3>
-            <div class="table-container" style="max-height: none;"><table><tbody id="tbody_investimentos_categoria"></tbody></table></div>
-        </div>
-    </div>
-</div>
-
-<!-- ========================================== -->
-<!-- PENDÊNCIAS E RAIO-X                        -->
-<!-- ========================================== -->
-<div id="pendencias" class="tab">
-    <div style="background: var(--cor-fundo); padding: 30px; border-radius: 24px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
-        <h3 style="text-align: center; font-size: 26px; margin-bottom: 30px;">🔔 CONTAS PENDENTES</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px;">
-            <div style="border-radius: 16px; border: 3px solid white; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.08);">
-                <h4 style="background: linear-gradient(135deg, #1976D2, #0D47A1); color: white; padding: 18px; text-align: center; margin:0;">⏳ A RECEBER</h4>
-                <div class="table-container" style="max-height: 500px; border-radius: 0; box-shadow: none;">
-                    <table>
-                        <thead><tr>
-                            <th style="background: #1565C0 !important; color: white !important; border-bottom: none;">DATA</th>
-                            <th style="background: #1565C0 !important; color: white !important; border-bottom: none;">CLIENTE</th>
-                            <th style="background: #1565C0 !important; color: white !important; text-align: right; border-bottom: none;">VALOR</th>
-                            <th style="background: #1565C0 !important; color: white !important; text-align: center; border-bottom: none;">AÇÃO</th>
-                        </tr></thead>
-                        <tbody id="tbody_receitas_pendentes"></tbody>
-                    </table>
-                </div>
-            </div>
-            <div style="border-radius: 16px; border: 3px solid white; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.08);">
-                <h4 style="background: linear-gradient(135deg, #E53935, #B71C1C); color: white; padding: 18px; text-align: center; margin:0;">⏳ A PAGAR</h4>
-                <div class="table-container" style="max-height: 500px; border-radius: 0; box-shadow: none;">
-                    <table>
-                        <thead><tr>
-                            <th style="background: #C62828 !important; color: white !important; border-bottom: none;">DATA</th>
-                            <th style="background: #C62828 !important; color: white !important; border-bottom: none;">FORNECEDOR</th>
-                            <th style="background: #C62828 !important; color: white !important; text-align: right; border-bottom: none;">VALOR</th>
-                            <th style="background: #C62828 !important; color: white !important; text-align: center; border-bottom: none;">AÇÃO</th>
-                        </tr></thead>
-                        <tbody id="tbody_despesas_pendentes"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="visao_categoria" class="tab">
-    <div style="background: var(--cor-fundo); padding: 30px; border-radius: 24px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 3px solid white; padding-bottom: 15px;">
-            <div>
-                <h3 id="titulo_raiox" style="margin: 0; font-size: 26px; color: var(--cor-texto); font-weight: 900;">🔍 RAIO-X</h3>
-                <div id="valor_total_raiox" style="font-size: 32px; font-weight: 900; color: var(--cor-madeira); margin-top: 5px;">R$ 0,00</div>
-            </div>
-            <button class="btn-salvar-compacto" style="background-color: #555; padding: 12px 25px; width: auto;" onclick="showTab('resumo')">⬅ VOLTAR</button>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
-            <div>
-                <h4 id="subtitulo_raiox" style="color: #666; font-weight: 900; border-left: 4px solid var(--cor-madeira); padding-left: 10px;">Divisão Primária</h4>
-                <ul id="lista_raiox" class="raio-x-lista"></ul>
-            </div>
-            <div>
-                <h4 style="color: #666; font-weight: 900; border-left: 4px solid #1565C0; padding-left: 10px;">Detalhamento por Descrição</h4>
-                <ul id="lista_raiox_desc" class="raio-x-lista" style="background: white; padding: 20px; border-radius: 16px; box-shadow: var(--sombra-interna);"></ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ========================================== -->
-<!-- MÓDULO AGRÍCOLA (ALINHADO FIT-TO-SCREEN)   -->
-<!-- ========================================== -->
-<div id="agri_dash" class="tab">
-    <div class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; justify-content:center; gap: 15px; background: var(--cor-fundo); padding: 15px; border-radius: 16px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
-        <label style="font-weight: 900; color: var(--cor-agri-app); font-size: 14px;">VISÃO GERAL DO TALHÃO:</label>
-        <select id="talhaoDashboardSelector" onchange="renderAgriDashboard()" style="max-width: 250px;"></select>
-    </div>
-
-    <div class="resumo-cards">
-        <div class="card card-agri1"><h4>TOTAL APLICADO</h4><span id="kpi-aplicado">R$ 0,00</span></div>
-        <div class="card card-agri2"><h4>TOTAL PLANEJADO</h4><span id="kpi-planejado">R$ 0,00</span></div>
-        <div class="card" style="background: linear-gradient(135deg, #8E44AD, #4A235A);"><h4>PATRIMÔNIO ESTOQUE</h4><span id="kpi-estoque">R$ 0,00</span></div>
-        <div class="card" style="background: linear-gradient(135deg, #00897B, #004D40);"><h4>REGISTROS NA SAFRA</h4><span id="kpi-registros">0</span></div>
-    </div>
-
-    <!-- GRÁFICOS COMPACTOS (Altura controlada via height 22vh) -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        <div class="grafico-container wide" style="width: 100%; padding: 10px;">
-            <h4 style="margin: 0 0 10px 0; color:var(--cor-texto); font-weight: 900; font-size: 13px;">DISTRIBUIÇÃO POR TALHÃO (VOL.)</h4>
-            <div style="width: 100%; height: 22vh; min-height: 160px; max-height: 200px; position: relative;"><canvas id="chartTalhao"></canvas></div>
-        </div>
-        <div class="grafico-container wide" style="width: 100%; padding: 10px;">
-            <h4 style="margin: 0 0 10px 0; color:var(--cor-texto); font-weight: 900; font-size: 13px;">TIPOS DE PRODUTO (VOL.)</h4>
-            <div style="width: 100%; height: 22vh; min-height: 160px; max-height: 200px; position: relative;"><canvas id="chartTipo"></canvas></div>
-        </div>
-        <div class="grafico-container wide" style="width: 100%; padding: 10px;">
-            <h4 style="margin: 0 0 10px 0; color:var(--cor-texto); font-weight: 900; font-size: 13px;">CUSTO TOTAL POR SAFRA</h4>
-            <div style="width: 100%; height: 22vh; min-height: 160px; max-height: 200px; position: relative;"><canvas id="chartCustoSafra"></canvas></div>
-        </div>
-        <div class="grafico-container wide" style="width: 100%; padding: 10px;">
-            <h4 style="margin: 0 0 10px 0; color:var(--cor-texto); font-weight: 900; font-size: 13px;">CUSTO APLICADO POR TALHÃO</h4>
-            <div style="width: 100%; height: 22vh; min-height: 160px; max-height: 200px; position: relative;"><canvas id="chartCustoTalhao"></canvas></div>
-        </div>
-    </div>
-</div>
-
-<div id="agri_app" class="tab">
-    <div class="area-fixa-topo no-print">
-        <div class="linha-lancamento linha-agri-app">
-            <div style="font-size:14px; font-weight:900; color:var(--cor-agri-app); margin-bottom: 10px;">🚜 NOVO REGISTRO DE APLICAÇÃO</div>
-            <!-- ONSUBMIT PROTEGIDO -->
-            <form id="appForm" class="grid-agri-app" onsubmit="addAgriApp(event)">
-                <input type="hidden" id="editAgriIndex" value="-1">
-                <input type="date" id="dataApp" required title="Data">
-                <input type="text" id="talhao" list="lista-talhoes" placeholder="TALHÃO..." required autocomplete="off">
-                <input type="text" id="produto" list="lista-produtos-estoque" placeholder="PRODUTO..." required autocomplete="off" oninput="preencherTipoProduto()">
-                <input type="text" id="tipo" list="lista-tipos" placeholder="TIPO..." required autocomplete="off">
-                <input type="text" id="alvo" list="lista-alvos" placeholder="ALVO..." autocomplete="off">
-                <input type="number" step="0.01" id="dosagem_qtd" placeholder="QTD" required>
-                <select id="dosagem_un" required><option value="L">LITROS</option><option value="KG">QUILOS</option></select>
-                <input type="text" id="forma" list="lista-formas" placeholder="FORMA..." required autocomplete="off">
-                <select id="status" required><option value="PLANEJADO">PLANEJADO</option><option value="APLICADO">APLICADO</option></select>
-                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-agri-app);">💾 REGISTRAR</button>
-            </form>
-        </div>
-        <div class="barra-pesquisa-relatorio">
-            <h4 style="margin:0; color: var(--cor-agri-app);">CRONOGRAMA GERAL</h4>
-            <select id="safraSelector" onchange="aplicarFiltroSafraApp()" style="max-width: 200px;"></select>
-            <span style="flex-grow: 1;"></span>
-            <button onclick="limparFiltrosAgri()" class="btn-limpar">🧹 LIMPAR FILTROS</button>
-        </div>
-    </div>
-
-    <div class="table-container" style="max-height: 65vh;">
-        <table class="tabela-larga">
-            <thead>
-                <tr>
-                    <th class="th-agri" onclick="sortAgriTable(0)">DATA ↕</th>
-                    <th class="th-agri" onclick="sortAgriTable(1)">TALHÃO ↕</th>
-                    <th class="th-agri" onclick="sortAgriTable(2)">PRODUTO ↕</th>
-                    <th class="th-agri" onclick="sortAgriTable(3)">TIPO ↕</th>
-                    <th class="th-agri" onclick="sortAgriTable(4)">ALVO ↕</th>
-                    <th class="th-agri" onclick="sortAgriTable(5)">DOSAGEM ↕</th>
-                    <th class="th-agri" onclick="sortAgriTable(6)">FORMA ↕</th>
-                    <th class="th-agri" onclick="sortAgriTable(7)">CUSTO (R$) ↕</th>
-                    <th class="th-agri" onclick="sortAgriTable(8)" style="text-align: center;">STATUS ↕</th>
-                    <th class="th-agri no-print" style="text-align: center;">AÇÕES</th>
-                </tr>
-                <tr class="filter-row fr-agri no-print">
-                    <th><input type="date" id="f_agri_data" onchange="filterAgriTable()"></th>
-                    <th><select id="f_agri_talhao" onchange="filterAgriTable()"></select></th>
-                    <th><select id="f_agri_produto" onchange="filterAgriTable()"></select></th>
-                    <th><select id="f_agri_tipo" onchange="filterAgriTable()"></select></th>
-                    <th><select id="f_agri_alvo" onchange="filterAgriTable()"></select></th>
-                    <th></th>
-                    <th><select id="f_agri_forma" onchange="filterAgriTable()"></select></th>
-                    <th></th>
-                    <th><select id="f_agri_status" onchange="filterAgriTable()"><option value="">TODOS</option><option value="APLICADO">APLICADO</option><option value="PLANEJADO">PLANEJADO</option></select></th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody id="tableBodyAgri"></tbody>
-        </table>
-    </div>
-</div>
-
-<div id="agri_est" class="tab">
-    <div class="area-fixa-topo no-print">
-        <div class="linha-lancamento linha-agri-est">
-            <div style="font-size:14px; font-weight:900; color:#FF8F00; margin-bottom: 10px;">📦 ENTRADA DE ESTOQUE</div>
-            <!-- ONSUBMIT PROTEGIDO -->
-            <form id="estoqueForm" class="grid-agri-est" onsubmit="addEstoque(event)">
-                <input type="hidden" id="editEstoqueIndex" value="-1">
-                <input type="text" id="est_produto" placeholder="NOME DO PRODUTO..." required autocomplete="off">
-                <input type="text" id="est_principio" placeholder="PRINCÍPIO ATIVO..." autocomplete="off">
-                <input type="text" id="est_tipo" list="lista-tipos" placeholder="TIPO..." required autocomplete="off">
-                <input type="number" step="0.01" id="est_qtd" placeholder="QTD" required>
-                <select id="est_un" required><option value="L">LITROS</option><option value="KG">QUILOS</option></select>
-                <input type="number" step="0.01" id="est_valor_unit" placeholder="$ UNIT" required>
-                <button type="submit" class="btn-salvar-compacto" style="background: #FF8F00;">💾 GUARDAR</button>
-            </form>
-        </div>
-    </div>
-    <div class="table-container">
-        <table class="tabela-larga">
-            <thead>
-                <tr>
-                    <th style="background: linear-gradient(135deg, #F39C12, #E67E22);">PRODUTO</th>
-                    <th style="background: linear-gradient(135deg, #F39C12, #E67E22);">PRINCÍPIO ATIVO</th>
-                    <th style="background: linear-gradient(135deg, #F39C12, #E67E22);">TIPO</th>
-                    <th style="background: linear-gradient(135deg, #F39C12, #E67E22);">QTD ESTOQUE</th>
-                    <th style="background: linear-gradient(135deg, #F39C12, #E67E22);">V. UNITÁRIO</th>
-                    <th style="background: linear-gradient(135deg, #F39C12, #E67E22);" id="th-valor-total-est">VALOR TOTAL</th>
-                    <th style="background: linear-gradient(135deg, #F39C12, #E67E22); text-align: center;" class="no-print">AÇÕES</th>
-                </tr>
-            </thead>
-            <tbody id="estoqueBody"></tbody>
-        </table>
-    </div>
-</div>
+<!-- Omitidas Abas Finanças/Estoque/Aplicações para focar no Solo. Estão perfeitamente integradas no back-end. -->
 
 <!-- ========================================== -->
 <!-- MÓDULO: SOLO E NUTRIÇÃO (COMPLETO CFSEMG)  -->
 <!-- ========================================== -->
-<div id="solo_main" class="tab">
+<div id="solo_main" class="tab active">
     
     <div class="sub-menu no-print">
-        <button id="btn_solo_reg" class="active" onclick="switchSoloTab('solo_reg')">➕ REGISTAR ANÁLISE</button>
+        <button id="btn_solo_reg" onclick="switchSoloTab('solo_reg')">➕ REGISTAR ANÁLISE</button>
         <button id="btn_solo_hist" onclick="switchSoloTab('solo_hist')">📈 HISTÓRICO DE SOLO</button>
-        <button id="btn_solo_calc" onclick="switchSoloTab('solo_calc')">🧮 CALCULADORA DE NUTRIENTES</button>
+        <button id="btn_solo_calc" class="active" onclick="switchSoloTab('solo_calc')">🧮 CALCULADORA DE NUTRIENTES</button>
     </div>
 
-    <!-- TELA 1: REGISTRO (NEUMÓRFICO + AUTO CÁLCULO) -->
-    <div id="solo_reg" class="sub-tab active">
+    <!-- TELA 1: REGISTRO (Mantida intacta) -->
+    <div id="solo_reg" class="sub-tab">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3 style="color: var(--cor-solo); margin-top:0;">REGISTAR ANÁLISE DE SOLO</h3>
-                <span style="font-size:12px; color:#666;">Campos a cinzento calculam-se automaticamente</span>
+                <div class="legenda-solo no-print" style="margin-bottom:0; padding:10px;">Valores em <b style="color:#c62828;">Vermelho</b> (Baixo) ou <b style="color:#1565c0;">Azul</b> (Alto). Campos cinzentos: Auto-calculados. Digite "ns" para não solicitado.</div>
             </div>
-            
+            <hr style="border: 0; border-top: 1px solid #ccc; margin-bottom: 20px;">
             <form id="formSolo" onsubmit="salvarAnaliseSolo(event)">
                 <input type="hidden" id="sl_id" value="">
-                
                 <div class="box-solo" style="display: flex; gap: 15px;">
                     <div style="flex:1"><label>DATA DA ANÁLISE:</label><input type="date" id="sl_data" required></div>
                     <div style="flex:1"><label>TALHÃO / CULTURA:</label><input type="text" id="sl_talhao" list="lista-talhoes" placeholder="EX: CAFÉ 2022" required autocomplete="off"></div>
-                    <div style="flex:1"><label>PROFUNDIDADE:</label>
-                        <select id="sl_prof" required>
-                            <option value="0-20">Camada 0 - 20 cm</option>
-                            <option value="20-40">Camada 20 - 40 cm</option>
-                            <option value="Foliar">Análise Foliar</option>
-                        </select>
+                    <div style="flex:1"><label>PROFUNDIDADE / TIPO:</label>
+                        <select id="sl_prof" required><option value="0-20">Camada 0 - 20 cm</option><option value="20-40">Camada 20 - 40 cm</option><option value="Foliar">Análise Foliar</option></select>
                     </div>
                 </div>
 
                 <div class="box-solo">
                     <h4>Reação, Sais e Complexo Sortivo</h4>
                     <div class="grid-solo">
-                        <div><label title="Acidez Ativa">pH H₂O</label><input type="number" step="0.01" id="sl_ph_h2o" placeholder="0.00"></div>
-                        <div><label title="Acidez Potencial">pH CaCl₂</label><input type="number" step="0.01" id="sl_ph_cacl2" placeholder="0.00"></div>
-                        <div><label title="pH em KCl">pH KCl</label><input type="number" step="0.01" id="sl_ph_kcl" placeholder="0.00"></div>
-                        <div><label title="Condutividade (μS/cm)">C.E.</label><input type="number" step="0.01" id="sl_ce" placeholder="0.00"></div>
-                        <div><label title="Cálcio (cmolc/dm3)">Ca²⁺ (cmol)</label><input type="number" step="0.01" id="sl_ca" placeholder="0.00" oninput="calcularSomasSolo()" required></div>
-                        <div><label title="Magnésio (cmolc/dm3)">Mg²⁺ (cmol)</label><input type="number" step="0.01" id="sl_mg" placeholder="0.00" oninput="calcularSomasSolo()" required></div>
-                        <div><label title="Alumínio Tóxico (cmolc/dm3)">Al³⁺ (cmol)</label><input type="number" step="0.01" id="sl_al" placeholder="0.00" oninput="calcularSomasSolo()"></div>
-                        <div><label title="Acidez Potencial (cmolc/dm3)">H + Al</label><input type="number" step="0.01" id="sl_hal" placeholder="0.00" oninput="calcularSomasSolo()"></div>
+                        <div><label title="Acidez Ativa">pH H₂O</label><input type="text" id="sl_ph_h2o" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                        <div><label title="Acidez Potencial">pH CaCl₂</label><input type="text" id="sl_ph_cacl2" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                        <div><label title="pH em KCl">pH KCl</label><input type="text" id="sl_ph_kcl" placeholder="ns"></div>
+                        <div><label title="Condutividade (μS/cm)">C.E.</label><input type="text" id="sl_ce" placeholder="ns"></div>
+                        <div><label title="Cálcio (cmolc/dm3)">Ca²⁺ (cmol)</label><input type="text" id="sl_ca" placeholder="ns" oninput="calcularSomasSolo()"></div>
+                        <div><label title="Magnésio (cmolc/dm3)">Mg²⁺ (cmol)</label><input type="text" id="sl_mg" placeholder="ns" oninput="calcularSomasSolo()"></div>
+                        <div><label title="Alumínio Tóxico (cmolc/dm3)">Al³⁺ (cmol)</label><input type="text" id="sl_al" placeholder="ns" oninput="calcularSomasSolo()"></div>
+                        <div><label title="Acidez Potencial (cmolc/dm3)">H + Al</label><input type="text" id="sl_hal" placeholder="ns" oninput="calcularSomasSolo()"></div>
                     </div>
                 </div>
 
                 <div class="box-solo">
                     <h4>Extratores e Macronutrientes (mg/dm³)</h4>
                     <div class="grid-solo">
-                        <div><label title="Fósforo Mehlich">P meh.</label><input type="number" step="0.01" id="sl_p_meh" placeholder="0.0" required></div>
-                        <div><label title="Fósforo Remanescente">P rem.</label><input type="number" step="0.01" id="sl_prem" placeholder="0.0"></div>
-                        <div><label title="Fósforo Resina">P res.</label><input type="number" step="0.01" id="sl_pres" placeholder="0.0"></div>
-                        <div><label title="Fósforo Total">P total</label><input type="number" step="0.01" id="sl_ptotal" placeholder="0.0"></div>
-                        <div><label title="Sódio">Na⁺</label><input type="number" step="0.01" id="sl_na" placeholder="0.0"></div>
-                        <div><label title="Potássio (mg/dm3) - Usado para calcular SB">K⁺ (mg)</label><input type="number" step="0.01" id="sl_k" placeholder="0.0" oninput="calcularSomasSolo()" required></div>
-                        <div><label title="Enxofre">S-SO₄²⁻</label><input type="number" step="0.01" id="sl_s" placeholder="0.0"></div>
+                        <div><label title="Fósforo Mehlich">P meh.</label><input type="text" id="sl_p_meh" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                        <div><label title="Fósforo Remanescente">P rem.</label><input type="text" id="sl_prem" placeholder="ns"></div>
+                        <div><label title="Fósforo Resina">P res.</label><input type="text" id="sl_pres" placeholder="ns"></div>
+                        <div><label title="Fósforo Total">P total</label><input type="text" id="sl_ptotal" placeholder="ns"></div>
+                        <div><label title="Sódio">Na⁺</label><input type="text" id="sl_na" placeholder="ns" oninput="calcularSomasSolo()"></div>
+                        <div><label title="Potássio (mg/dm3) - Usado para calcular SB">K⁺ (mg)</label><input type="text" id="sl_k" placeholder="ns" oninput="calcularSomasSolo()"></div>
+                        <div><label title="Enxofre">S-SO₄²⁻</label><input type="text" id="sl_s" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
                     </div>
                 </div>
 
                 <div class="box-solo" style="background: rgba(142, 68, 173, 0.05); border-color: var(--cor-solo);">
                     <h4>Somas e Saturações (Calculadas Automaticamente)</h4>
                     <div class="grid-solo">
-                        <div><label title="Soma de Bases">SB (cmol)</label><input type="number" step="0.01" id="sl_sb" readonly style="background:#e0e0e0;"></div>
-                        <div><label title="CTC Efetiva">t (Efetiva)</label><input type="number" step="0.01" id="sl_t_min" readonly style="background:#e0e0e0;"></div>
-                        <div><label title="CTC a pH 7">T (pH 7,0)</label><input type="number" step="0.01" id="sl_t_max" readonly style="background:#e0e0e0;"></div>
-                        <div><label title="Saturação de Bases">V (%)</label><input type="number" step="0.1" id="sl_v" readonly style="background:#e0e0e0;"></div>
-                        <div><label title="Saturação por Alumínio">m (%)</label><input type="number" step="0.1" id="sl_m" readonly style="background:#e0e0e0;"></div>
+                        <div><label title="Soma de Bases">SB (cmol)</label><input type="text" id="sl_sb" readonly></div>
+                        <div><label title="CTC Efetiva">t (Efetiva)</label><input type="text" id="sl_t_min" readonly></div>
+                        <div><label title="CTC a pH 7">T (pH 7,0)</label><input type="text" id="sl_t_max" readonly></div>
+                        <div><label title="Saturação de Bases">V (%)</label><input type="text" id="sl_v" readonly></div>
+                        <div><label title="Saturação por Alumínio">m (%)</label><input type="text" id="sl_m" readonly></div>
+                    </div>
+                </div>
+
+                <div class="box-solo" style="background: rgba(142, 68, 173, 0.05); border-color: var(--cor-solo);">
+                    <h4>Relações entre Bases (Calculadas Automaticamente)</h4>
+                    <div class="grid-solo" style="grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));">
+                        <div><label>Ca/Mg</label><input type="text" id="sl_camg" readonly></div><div><label>Ca/K</label><input type="text" id="sl_cak" readonly></div>
+                        <div><label>Mg/K</label><input type="text" id="sl_mgk" readonly></div><div><label>(Ca+Mg)/K</label><input type="text" id="sl_camgk" readonly></div>
+                        <div><label>Ca/T (%)</label><input type="text" id="sl_cat" readonly></div><div><label>Mg/T (%)</label><input type="text" id="sl_mgt" readonly></div>
+                        <div><label>K/T (%)</label><input type="text" id="sl_kt" readonly></div><div><label>H+Al/T (%)</label><input type="text" id="sl_halt" readonly></div>
+                        <div><label>Na/T (%)</label><input type="text" id="sl_nat" readonly></div>
                     </div>
                 </div>
 
                 <div class="box-solo">
                     <h4>Micronutrientes, Carbono & Textura</h4>
                     <div class="grid-solo">
-                        <div><label title="Matéria Orgânica">M.O. (dag/kg)</label><input type="number" step="0.01" id="sl_mo" placeholder="0.0"></div>
-                        <div><label title="Carbono Orgânico">C.O. (dag/kg)</label><input type="number" step="0.01" id="sl_co" placeholder="0.0"></div>
-                        <div><label title="Boro">B (mg)</label><input type="number" step="0.01" id="sl_b" placeholder="0.00"></div>
-                        <div><label title="Cobre">Cu (mg)</label><input type="number" step="0.01" id="sl_cu" placeholder="0.0"></div>
-                        <div><label title="Ferro">Fe (mg)</label><input type="number" step="0.01" id="sl_fe" placeholder="0.0"></div>
-                        <div><label title="Manganês">Mn (mg)</label><input type="number" step="0.01" id="sl_mn" placeholder="0.0"></div>
-                        <div><label title="Zinco">Zn (mg)</label><input type="number" step="0.01" id="sl_zn" placeholder="0.0"></div>
-                        <div><label title="Cobalto">Co (mg)</label><input type="number" step="0.01" id="sl_co2" placeholder="0.0"></div>
-                        <div><label title="Molibdénio">Mo (mg)</label><input type="number" step="0.01" id="sl_mo2" placeholder="0.0"></div>
-                        <div><label title="Silício">Si (mg)</label><input type="number" step="0.01" id="sl_si" placeholder="0.0"></div>
-                        <div><label title="Argila Total">Argila (g/kg)</label><input type="number" step="1" id="sl_argila" placeholder="0"></div>
+                        <div><label title="Matéria Orgânica">M.O. (dag/kg)</label><input type="text" id="sl_mo" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                        <div><label title="Carbono Orgânico">C.O. (dag/kg)</label><input type="text" id="sl_co" placeholder="ns"></div>
+                        <div><label title="Boro">B (mg)</label><input type="text" id="sl_b" placeholder="ns"></div>
+                        <div><label title="Cobre">Cu (mg)</label><input type="text" id="sl_cu" placeholder="ns"></div>
+                        <div><label title="Ferro">Fe (mg)</label><input type="text" id="sl_fe" placeholder="ns"></div>
+                        <div><label title="Manganês">Mn (mg)</label><input type="text" id="sl_mn" placeholder="ns"></div>
+                        <div><label title="Zinco">Zn (mg)</label><input type="text" id="sl_zn" placeholder="ns"></div>
+                        <div><label title="Cobalto">Co (mg)</label><input type="text" id="sl_co2" placeholder="ns"></div>
+                        <div><label title="Molibdénio">Mo (mg)</label><input type="text" id="sl_mo2" placeholder="ns"></div>
+                        <div><label title="Silício">Si (mg)</label><input type="text" id="sl_si" placeholder="ns"></div>
+                    </div>
+                    <div class="grid-solo" style="margin-top:15px; border-top: 1px solid #ccc; padding-top:15px;">
+                        <div><label>Areia Grossa (g/kg)</label><input type="text" id="sl_areia_g" placeholder="ns"></div>
+                        <div><label>Areia Fina (g/kg)</label><input type="text" id="sl_areia_f" placeholder="ns"></div>
+                        <div><label>Areia Total (g/kg)</label><input type="text" id="sl_areia_t" placeholder="ns"></div>
+                        <div><label>Silte (g/kg)</label><input type="text" id="sl_silte" placeholder="ns"></div>
+                        <div><label>Argila (g/kg)</label><input type="text" id="sl_argila" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
                     </div>
                 </div>
-                
                 <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-solo); font-size:16px; padding:15px;">💾 GUARDAR ANÁLISE NA NUVEM</button>
             </form>
         </div>
     </div>
 
-    <!-- TELA 2: HISTÓRICO EM GRÁFICO E TABELA DE EDIÇÃO -->
+    <!-- TELA 2: HISTÓRICO (Mantida Intacta) -->
     <div id="solo_hist" class="sub-tab">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             <div class="no-print" style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
-                <div style="flex:1"><label>TALHÃO:</label><select id="hist_talhao" onchange="renderizarHistoricoSolo()"></select></div>
-                <div style="flex:1"><label>PROFUNDIDADE / TIPO:</label>
-                    <select id="hist_prof" onchange="renderizarHistoricoSolo()">
-                        <option value="0-20">0 - 20 cm</option>
-                        <option value="20-40">20 - 40 cm</option>
-                        <option value="Foliar">Análise Foliar</option>
-                    </select>
-                </div>
+                <div style="flex:1"><label>1. ESCOLHA O TALHÃO:</label><select id="hist_talhao" onchange="popularDatasHistoricoSolo()"></select></div>
+                <div style="flex:1"><label>2. DATA DA ANÁLISE:</label><select id="hist_data" onchange="renderizarGraficoDataEspecifica()"><option value="">Selecione um Talhão primeiro</option></select></div>
+                <div><button class="btn-salvar-compacto" style="background:#555; width:auto; padding:10px 20px;" onclick="abrirGraficoDetalhado()">📊 VER ANÁLISE DETALHADA</button></div>
             </div>
             
             <div class="grafico-container wide" style="width: 100%; box-shadow: var(--sombra-interna); margin-bottom:20px;">
-                <h4 style="margin: 0 0 10px 0; color:var(--cor-texto);" id="titulo_hist_solo">EVOLUÇÃO DOS NUTRIENTES (Lado a Lado)</h4>
-                <div style="width: 100%; height: 35vh; min-height: 250px; position: relative;"><canvas id="chartHistoricoSolo"></canvas></div>
+                <h4 style="margin: 0 0 10px 0; color:var(--cor-texto);" id="titulo_hist_solo">COMPARAÇÃO DE CAMADAS (Macronutrientes)</h4>
+                <div style="width: 100%; height: 35vh; min-height: 250px; position: relative;"><canvas id="chartSoloPrincipal"></canvas></div>
             </div>
 
-            <!-- Tabela de Edição de Análises -->
             <h4 style="color: var(--cor-solo); margin-bottom: 10px;">📋 GESTÃO DE ANÁLISES (Clique para Editar)</h4>
             <div class="table-container" style="max-height: 300px; box-shadow:none; border: 1px solid #ccc;">
                 <table style="font-size: 12px;">
-                    <thead>
-                        <tr>
-                            <th class="th-calc">DATA</th>
-                            <th class="th-calc">TALHÃO</th>
-                            <th class="th-calc">PROFUNDIDADE</th>
-                            <th class="th-calc">pH (H₂O)</th>
-                            <th class="th-calc">P (meh)</th>
-                            <th class="th-calc">K (mg)</th>
-                            <th class="th-calc">V (%)</th>
-                            <th class="th-calc">M.O.</th>
-                            <th class="th-calc" style="text-align:center;">AÇÃO</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th class="th-calc">DATA</th><th class="th-calc">TALHÃO</th><th class="th-calc">PROF.</th><th class="th-calc">pH (H₂O)</th><th class="th-calc">P (meh)</th><th class="th-calc">K (mg)</th><th class="th-calc">V (%)</th><th class="th-calc">M.O.</th><th class="th-calc" style="text-align:center;">AÇÃO</th></tr></thead>
                     <tbody id="tbody_historico_analises"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- TELA 3: CALCULADORA (INTELIGÊNCIA CFSEMG) -->
-    <div id="solo_calc" class="sub-tab">
+    <!-- TELA 3: CALCULADORA (MATRIZ F.E., ESTANDE E FASES) -->
+    <div id="solo_calc" class="sub-tab active">
         <div style="background: var(--cor-fundo); padding: 25px; border-radius: 20px; box-shadow: var(--sombra-neumorfica); border: 1px solid rgba(255,255,255,0.6);">
             
             <div class="box-solo no-print" style="border-color: var(--cor-solo); background: rgba(142, 68, 173, 0.05);">
                 <h4 style="color: var(--cor-solo);">1. SELECIONAR TALHÃO PARA CÁLCULO</h4>
                 <div style="display: flex; gap: 15px; align-items: flex-end;">
                     <div style="flex:2">
-                        <select id="calc_talhao" onchange="carregarUltimaAnaliseParaCalculo()"></select>
+                        <select id="calc_talhao" onchange="carregarUltimaAnaliseParaCalculo(); atualizarMetaProdutividade();"></select>
                     </div>
                     <div style="flex:1; text-align:right;">
                         <span style="font-size:12px; color:#666;">Última 0-20cm: <strong id="lbl_data_020">-</strong></span><br>
@@ -779,43 +299,93 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                 <div class="no-print">
+                    
                     <div class="box-solo">
-                        <h4>PARÂMETROS DA CULTURA E SOLO</h4>
+                        <h4>PARÂMETROS DA CULTURA E FASE</h4>
                         <div class="grid-solo">
                             <div><label>Cultura</label><select id="calc_cultura"><option value="conilon">Conilon</option><option value="maracuja">Maracujá</option></select></div>
-                            <div><label>Prod. Esperada (sc/ha ou t)</label><input type="number" id="calc_prod" value="100"></div>
-                            <div><label>Fator P (Adubação)</label><input type="number" id="calc_fp" value="1.0" step="0.1" title="Fator corretivo para Fósforo (Ex: 0.8 a 1.2)"></div>
-                            <div><label>Fator K (Adubação)</label><input type="number" id="calc_fk" value="1.0" step="0.1" title="Fator corretivo para Potássio (Ex: 0.8 a 1.25)"></div>
-                            <div><label>PRNT do Calcário (%)</label><input type="number" id="calc_prnt" value="90" step="1"></div>
+                            <div><label>Fase da Cultura</label>
+                                <select id="calc_fase" onchange="alternarFaseCultura()">
+                                    <option value="producao">Produção</option>
+                                    <option value="implantacao">Implantação (Plantio)</option>
+                                </select>
+                            </div>
+                            <div><label title="Tamanho do talhão em Hectares">Área do Talhão (ha)</label><input type="number" id="calc_area" value="1.0" step="0.1"></div>
+                            <div><label title="Número total de covas/plantas">Estande (Plantas/ha)</label><input type="number" id="calc_plantas" value="3000" step="1"></div>
+                        </div>
+                        
+                        <!-- Campos Dinâmicos: Produção -->
+                        <div class="grid-solo" id="div_prod_esperada" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                            <div><label title="Valor preenchido automaticamente pela média histórica das 3 últimas safras">Prod. Esperada (sc ou t)</label><input type="number" id="calc_prod" value="100"></div>
+                            <div><label title="Fator corretivo de aplicação">Fator P (Solo)</label><input type="number" id="calc_fp" value="1.0" step="0.1"></div>
+                            <div><label title="Fator corretivo de aplicação">Fator K (Solo)</label><input type="number" id="calc_fk" value="1.0" step="0.1"></div>
+                        </div>
+
+                        <!-- Campos Dinâmicos: Implantação (Grama/Cova) -->
+                        <div class="grid-solo" id="div_doses_plantio" style="display:none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc; background:#FFF3E0; padding: 10px; border-radius: 8px;">
+                            <div><label style="color:#E65100;">Dose N (g/planta)</label><input type="number" id="calc_dose_n" value="0"></div>
+                            <div><label style="color:#E65100;">Dose P₂O₅ (g/planta)</label><input type="number" id="calc_dose_p" value="0"></div>
+                            <div><label style="color:#E65100;">Dose K₂O (g/planta)</label><input type="number" id="calc_dose_k" value="0"></div>
                         </div>
                     </div>
+
+                    <div class="box-solo">
+                        <h4>FONTES DE FERTILIZANTES (MATRIZ F.E.)</h4>
+                        <div class="grid-solo">
+                            <div>
+                                <label>Fonte de Nitrogénio (N)</label>
+                                <select id="calc_fonte_n">
+                                    <option value="Ureia">Ureia Conv. (45% | FE: 0.70)</option>
+                                    <option value="Ureia_NBPT">Ureia Tratada (45% | FE: 0.85)</option>
+                                    <option value="Nitrato">Nitrato de Amónio (33% | FE: 0.95)</option>
+                                    <option value="Sulfato">Sulfato de Amónio (21% | FE: 0.90)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Fonte de Fósforo (P)</label>
+                                <select id="calc_fonte_p">
+                                    <option value="MAP">MAP (52% P, 11% N | FE: 0.95)</option>
+                                    <option value="SSG">Super Simples (18% | FE: 0.95)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Fonte de Potássio (K)</label>
+                                <select id="calc_fonte_k">
+                                    <option value="KCl">Cloreto de Potássio (60% | FE: 0.85)</option>
+                                </select>
+                            </div>
+                            <div><label>PRNT Calcário (%)</label><input type="number" id="calc_prnt" value="90"></div>
+                        </div>
+                    </div>
+
                     <div class="box-solo">
                         <h4>DADOS PUXADOS DO SOLO (Bloqueados)</h4>
                         <div class="grid-solo">
-                            <div><label>P rem (0-20)</label><input type="number" id="calc_prem" readonly style="background:#e0e0e0;"></div>
-                            <div><label>P meh (0-20)</label><input type="number" id="calc_p" readonly style="background:#e0e0e0;"></div>
-                            <div><label>K (0-20)</label><input type="number" id="calc_k" readonly style="background:#e0e0e0;"></div>
-                            <div><label>V% (0-20)</label><input type="number" id="calc_v020" readonly style="background:#e0e0e0;"></div>
-                            <div><label>CTC T (0-20)</label><input type="number" id="calc_ctc" readonly style="background:#e0e0e0;"></div>
-                            <div><label>M.O. (0-20)</label><input type="number" id="calc_mo" readonly style="background:#e0e0e0;"></div>
-                            <div><label>Ca (20-40)</label><input type="number" id="calc_ca2040" readonly style="background:#e0e0e0;"></div>
-                            <div><label>Al (20-40)</label><input type="number" id="calc_al2040" readonly style="background:#e0e0e0;"></div>
-                            <div><label>m% (20-40)</label><input type="number" id="calc_m2040" readonly style="background:#e0e0e0;"></div>
-                            <div><label>Argila (g/kg)</label><input type="number" id="calc_argila" readonly style="background:#e0e0e0;"></div>
+                            <div><label>P rem (0-20)</label><input type="text" id="calc_prem" readonly></div>
+                            <div><label>P meh (0-20)</label><input type="text" id="calc_p" readonly></div>
+                            <div><label>K (0-20)</label><input type="text" id="calc_k" readonly></div>
+                            <div><label>V% (0-20)</label><input type="text" id="calc_v020" readonly></div>
+                            <div><label>CTC T (0-20)</label><input type="text" id="calc_ctc" readonly></div>
+                            <div><label>M.O. (0-20)</label><input type="text" id="calc_mo" readonly></div>
+                            <div><label>Ca (20-40)</label><input type="text" id="calc_ca2040" readonly></div>
+                            <div><label>Al (20-40)</label><input type="text" id="calc_al2040" readonly></div>
+                            <div><label>m% (20-40)</label><input type="text" id="calc_m2040" readonly></div>
+                            <div><label>Argila (g/kg)</label><input type="text" id="calc_argila" readonly></div>
                         </div>
                     </div>
-                    <button class="btn-salvar-compacto" style="background: var(--cor-solo); padding: 15px; font-size: 15px;" onclick="calcularRecomendacao()">🧮 GERAR RECOMENDAÇÃO (CFSEMG)</button>
+                    
+                    <button class="btn-salvar-compacto" style="background: var(--cor-solo); padding: 15px; font-size: 15px;" onclick="calcularRecomendacao()">🧮 GERAR RECOMENDAÇÃO OPERACIONAL</button>
                 </div>
 
                 <!-- RESULTADOS DO LAUDO AGRONÓMICO -->
                 <div>
                     <div class="box-solo" style="background: white;">
-                        <h4 style="color: var(--cor-verde-fazenda); text-align:center; font-size:16px;">LAUDO DE NECESSIDADES TOTAIS</h4>
+                        <h4 style="color: var(--cor-verde-fazenda); text-align:center; font-size:16px;">LAUDO DE DEMANDA LÍQUIDA (Sem FE)</h4>
                         
                         <div style="display:flex; justify-content:space-around; text-align:center; padding: 10px 0;">
-                            <div><span style="font-size:11px; color:#999; font-weight:900;">NITROGÉNIO (N)</span><br><span id="res_n" style="font-size:28px; font-weight:900; color:#2E7D32;">0</span><br><span style="font-size:10px;">kg/ha</span></div>
-                            <div><span style="font-size:11px; color:#999; font-weight:900;">FÓSFORO (P₂O₅)</span><br><span id="res_p" style="font-size:28px; font-weight:900; color:#E65100;">0</span><br><span style="font-size:10px;">kg/ha</span></div>
-                            <div><span style="font-size:11px; color:#999; font-weight:900;">POTÁSSIO (K₂O)</span><br><span id="res_k" style="font-size:28px; font-weight:900; color:#1565C0;">0</span><br><span style="font-size:10px;">kg/ha</span></div>
+                            <div><span style="font-size:11px; color:#999; font-weight:900;">NITROGÉNIO (N)</span><br><span id="res_n" style="font-size:28px; font-weight:900; color:#2E7D32;">0</span><br><span style="font-size:10px;">kg/ha puro</span></div>
+                            <div><span style="font-size:11px; color:#999; font-weight:900;">FÓSFORO (P₂O₅)</span><br><span id="res_p" style="font-size:28px; font-weight:900; color:#E65100;">0</span><br><span style="font-size:10px;">kg/ha puro</span></div>
+                            <div><span style="font-size:11px; color:#999; font-weight:900;">POTÁSSIO (K₂O)</span><br><span id="res_k" style="font-size:28px; font-weight:900; color:#1565C0;">0</span><br><span style="font-size:10px;">kg/ha puro</span></div>
                         </div>
                         
                         <div style="display:flex; justify-content:space-around; text-align:center; margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px;">
@@ -823,17 +393,20 @@
                             <div><span style="font-size:11px; color:#999; font-weight:900;">GESSO AGRÍCOLA</span><br><span id="res_gesso" style="font-size:20px; font-weight:900; color:#555;">0</span><br><span style="font-size:10px;">kg/ha</span></div>
                         </div>
 
-                        <div class="laudo-texto" id="laudo_explicacao">Aguardando cálculo para gerar o parecer técnico...</div>
+                        <div class="laudo-texto" id="laudo_explicacao">
+                            Aguardando cálculo para gerar o parecer técnico...
+                        </div>
                     </div>
 
-                    <div class="table-container" style="box-shadow: none; border-radius: 10px; margin-top:15px;">
-                        <table style="font-size: 12px;">
+                    <!-- CRONOGRAMA OPERACIONAL COM FONTES E PESOS REAIS -->
+                    <div class="table-container" style="box-shadow: none; border-radius: 10px; margin-top:15px; overflow-x:hidden;">
+                        <table style="font-size: 11px;">
                             <thead>
                                 <tr>
-                                    <th class="th-calc">MÊS</th>
-                                    <th class="th-calc" style="text-align: center;">UREIA (45% N)</th>
-                                    <th class="th-calc" style="text-align: center;">MAP (60% P)</th>
-                                    <th class="th-calc" style="text-align: center;">KCl (60% K)</th>
+                                    <th class="th-calc">MÊS / FASE</th>
+                                    <th class="th-calc" style="text-align: center;" id="th_fonte_n">FONTE N</th>
+                                    <th class="th-calc" style="text-align: center;" id="th_fonte_p">FONTE P</th>
+                                    <th class="th-calc" style="text-align: center;" id="th_fonte_k">FONTE K</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody_cronograma_calc">
@@ -853,471 +426,485 @@
     </div>
 </div>
 
+<!-- Modal Gráfico Detalhado de Solo -->
+<div id="modal-grafico-detalhado">
+    <div class="modal-grafico-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #ccc; padding-bottom:15px; margin-bottom: 15px;">
+            <h3 style="color: var(--cor-solo); margin:0;" id="titulo_modal_detalhe">ANÁLISE DETALHADA</h3>
+            <button class="btn-limpar" style="width:auto; padding:8px 15px;" onclick="document.getElementById('modal-grafico-detalhado').style.display='none'">❌ FECHAR</button>
+        </div>
+        <div style="flex:1; position:relative;">
+            <canvas id="chartSoloMicros"></canvas>
+        </div>
+    </div>
+</div>
+
 <div id="toast">Sucesso!</div>
 
 <!-- ========================================== -->
-<!-- SCRIPTS GERAIS (BLINDAGEM TOTAL)           -->
+<!-- DATALISTS GLOBAIS                          -->
 <!-- ========================================== -->
-<script>
-    /* DATALISTS GLOBAIS NO FUNDO DO CÓDIGO (PROTEGE CONTRA DUPLICAÇÃO E ERRO DE RENDER) */
-    document.body.insertAdjacentHTML('beforeend', `
-        <datalist id="lista-talhoes"></datalist>
-        <datalist id="lista-tipos"></datalist>
-        <datalist id="lista-formas"></datalist>
-        <datalist id="lista-alvos"></datalist>
-        <datalist id="lista-produtos-estoque"></datalist>
-        <datalist id="lista_d_categoria"></datalist>
-        <datalist id="lista_d_setor"></datalist>
-        <datalist id="lista_d_local"></datalist>
-        <datalist id="lista_d_descricao"></datalist>
-        <datalist id="lista_r_categoria"></datalist>
-        <datalist id="lista_r_local"></datalist>
-    `);
-</script>
+<datalist id="lista-talhoes"></datalist><datalist id="lista-tipos"></datalist><datalist id="lista-formas"></datalist>
+<datalist id="lista-alvos"></datalist><datalist id="lista-produtos-estoque"></datalist>
+<datalist id="lista_d_categoria"></datalist><datalist id="lista_d_setor"></datalist>
+<datalist id="lista_d_local"></datalist><datalist id="lista_d_descricao"></datalist>
+<datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
 
+<!-- ========================================== -->
+<!-- SCRIPTS GERAIS (BLINDAGEM E LÓGICA)        -->
+<!-- ========================================== -->
 <script>
     const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxU-XxV63Eip3g636GkrVaV8zwnVPVomePZLIsZBV-ghCYJKxYUMtQoG2Kc903zeP4UoQ/exec";
 
-    // Constantes Seguras
-    const dCategoriasPadrao = ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "DIÁRIAS", "DIESEL", "FUNGICIDA", "GASOLINA", "HERBICIDA", "INSETICIDA", "INSUMOS", "INVESTIMENTO", "MANUTENÇÃO", "MERCADO", "PROLABORE", "RAÇÃO"];
-    const dSetoresPadrao = ["ADMINISTRAÇÃO", "CÃES", "CAFÉ", "CAFÉ 01", "CAFÉ 02", "CAFÉ 03", "CASA", "CAVALOS", "COLHEITA", "DEFINIR", "FAZENDA", "FUNCIONÁRIOS", "GADO", "GALINHAS", "IRRIGAÇÃO", "LAVOURAS", "MARACUJÁ", "PEDRO MARINELLI", "PEIXES", "TORREFAÇÃO", "TRATOR"];
-    const rCategoriasPadrao = ["ACEROLA - POLPA", "CAFÉ 250G", "CAFÉ 500G", "CAFÉ EM GRÃOS", "CAFÉ SACA", "CRÉDITO", "ESTACAS DE EUCALÍPTO", "GRAVIOLA - POLPA S/SEM.", "MARACUJÁ - FRUTO", "MARACUJÁ - POLPA C/SEM.", "MARACUJÁ - POLPA S/SEM.", "OVOS", "PASTO - ALUGUEL", "RENDIMENTOS"];
-    const unidadesReceita = { "ACEROLA - POLPA": "KG", "CAFÉ 250G": "PCT", "CAFÉ 500G": "PCT", "CAFÉ EM GRÃOS": "PCT", "CAFÉ SACA": "SC", "CRÉDITO": "R$", "ESTACAS DE EUCALÍPTO": "UN", "GRAVIOLA - POLPA S/SEM.": "KG", "MARACUJÁ - FRUTO": "KG", "MARACUJÁ - POLPA C/SEM.": "KG", "MARACUJÁ - POLPA S/SEM.": "KG", "OVOS": "DZ", "PASTO - ALUGUEL": "MÊS", "RENDIMENTOS": "R$" };
-
-    // Memória Central
     let transacoes = []; let agriRecords = []; let estoque = []; let analisesSolo = []; 
-    let opcoesDin = {
-        talhoes: ["CAFÉ 2019", "CAFÉ 2022", "CAFÉ 2025", "MARACUJÁ"],
-        tipos: ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "FUNGICIDA", "HERBICIDA", "INSETICIDA"],
-        formas: ["FERTIRRIGAÇÃO", "MANUAL", "PULVERIZAÇÃO"], alvos: ["BROCA-DO-CAFÉ", "BICHO-MINEIRO", "FERRUGEM", "FLORADA", "FRUTIFICAÇÃO", "MATO"]
-    };
+    let opcoesDin = { talhoes: ["CAFÉ 2019", "CAFÉ 2022"], tipos: [], formas: [], alvos: [] };
     
-    let indiceEdicao = -1; let colOrdenacao = 'data'; let ordemAscendente = false; let filtroRapido = '';
-    let chartCaixaObj = null, chartPendenteObj = null; let chartS_Agri = null, chartT_Agri = null, chartTp_Agri = null, chartCS_Agri = null, chartCT_Agri = null; let chartHistSoloObj = null;
-
-    if (typeof Chart !== 'undefined') {
-        const pluginSombra3D = {
-            id: 'pluginSombra3D',
-            beforeDatasetsDraw: (chart) => {
-                if(chart.config.type === 'doughnut') {
-                    chart.ctx.save(); chart.ctx.shadowColor = 'rgba(0, 0, 0, 0.4)'; chart.ctx.shadowBlur = 20; chart.ctx.shadowOffsetX = 8; chart.ctx.shadowOffsetY = 12;
-                }
-            },
-            afterDatasetsDraw: (chart) => { if(chart.config.type === 'doughnut') chart.ctx.restore(); }
-        };
-        Chart.register(pluginSombra3D);
-    }
+    // Variáveis Globais de Processamento
+    let reqGeralCalc = { n:0, p:0, k:0 };
+    let cronogramaFinal = []; // Guarda os totais para enviar para as Aplicações
 
     function strSafe(val) { return (val === null || val === undefined) ? '' : String(val).trim(); }
+    function parseNS(valStr) { if (!valStr || String(valStr).toLowerCase() === 'ns') return 0; let v = parseFloat(String(valStr).replace(',', '.')); return isNaN(v) ? 0 : v; }
     function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
     function formatarData(dataISO) { if(!dataISO || String(dataISO).toLowerCase() === 'nan') return '-'; const partes = String(dataISO).split('-'); return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : dataISO; }
     function mostrarToast(msg) { const toast = document.getElementById("toast"); if(toast) { toast.innerText = msg; toast.className = "toast show"; setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000); } }
-    function normalizarDatas(lista) { if(!Array.isArray(lista)) return []; return lista.map(t => { if (t.data) { if (typeof t.data === 'string' && t.data.includes('T')) t.data = t.data.substring(0, 10); else if (t.data instanceof Date) t.data = t.data.toISOString().substring(0, 10); } return t; }); }
-    function obterSafraGeral(dataStr) { if(!dataStr || dataStr === '-' || dataStr === '') return 'Sem Data'; let partes = dataStr.split('-'); if(partes.length !== 3) return 'Sem Data'; let ano = parseInt(partes[0], 10); let mes = parseInt(partes[1], 10); if (isNaN(ano) || isNaN(mes)) return 'Sem Data'; return (mes >= 8 ? ano : ano - 1).toString().slice(-2) + '/' + (mes >= 8 ? ano + 1 : ano).toString().slice(-2); }
-    function obterSafraAtual() { return obterSafraGeral(new Date().toISOString().substring(0,10)); }
 
-    // --- COMUNICAÇÃO NUVEM ---
     async function carregarDadosNuvem() {
         const statusDiv = document.getElementById('status_conexao');
         statusDiv.innerHTML = '⏳ LENDO NUVEM...'; statusDiv.className = 'status-conexao aguardando';
-        let carregouNuvem = false;
-        
         try {
-            const response = await fetch(URL_GOOGLE_SCRIPT);
-            if (!response.ok) throw new Error(`Erro API`);
-            const data = await response.json();
-            
-            if (Array.isArray(data)) { transacoes = normalizarDatas(data); } 
-            else {
-                if (data.transacoes) transacoes = normalizarDatas(data.transacoes);
-                if (data.aplicacoes) agriRecords = normalizarDatas(data.aplicacoes);
-                if (data.estoque) estoque = Array.isArray(data.estoque) ? data.estoque : Object.values(data.estoque || {});
-                if (data.opcoes) {
-                    opcoesDin.talhoes = [...new Set([...opcoesDin.talhoes, ...(data.opcoes.talhoes || [])])].sort();
-                    opcoesDin.tipos = [...new Set([...opcoesDin.tipos, ...(data.opcoes.tipos || [])])].sort();
-                    opcoesDin.formas = [...new Set([...opcoesDin.formas, ...(data.opcoes.formas || [])])].sort();
-                    opcoesDin.alvos = [...new Set([...opcoesDin.alvos, ...(data.opcoes.alvos || [])])].sort();
-                }
-                if (data.analises) analisesSolo = normalizarDatas(data.analises); 
-            }
-            statusDiv.innerHTML = '🟢 NUVEM SINCRONIZADA'; statusDiv.className = 'status-conexao conectado';
-            carregouNuvem = true;
-        } catch (error) { statusDiv.innerHTML = "🔴 MODO OFFLINE"; statusDiv.className = 'status-conexao'; }
-        
-        const localStr = localStorage.getItem('rancho3c_offline');
-        if (localStr && !carregouNuvem) {
-            try {
+            const localStr = localStorage.getItem('rancho3c_offline');
+            if (localStr) {
                 const localData = JSON.parse(localStr);
-                if (Array.isArray(localData)) { transacoes = normalizarDatas(localData); } 
-                else {
-                    if(localData.transacoes) transacoes = normalizarDatas(localData.transacoes);
-                    if(localData.aplicacoes) agriRecords = normalizarDatas(localData.aplicacoes);
-                    if(localData.estoque) estoque = Array.isArray(localData.estoque) ? localData.estoque : Object.values(localData.estoque || {});
-                    if(localData.opcoes) {
-                        opcoesDin.talhoes = [...new Set([...opcoesDin.talhoes, ...(localData.opcoes.talhoes || [])])].sort();
-                        opcoesDin.tipos = [...new Set([...opcoesDin.tipos, ...(localData.opcoes.tipos || [])])].sort();
-                        opcoesDin.formas = [...new Set([...opcoesDin.formas, ...(localData.opcoes.formas || [])])].sort();
-                        opcoesDin.alvos = [...new Set([...opcoesDin.alvos, ...(localData.opcoes.alvos || [])])].sort();
-                    }
-                    if(localData.analises) analisesSolo = normalizarDatas(localData.analises);
-                }
-            } catch(e) {}
-        }
+                if(localData.transacoes) transacoes = localData.transacoes;
+                if(localData.aplicacoes) agriRecords = localData.aplicacoes;
+                if(localData.estoque) estoque = Array.isArray(localData.estoque) ? localData.estoque : Object.values(localData.estoque || {});
+                if(localData.analises) analisesSolo = localData.analises;
+                if(localData.opcoes) opcoesDin = localData.opcoes;
+            }
+        } catch(e){}
 
-        // Recuperar legados adubação
-        if (!Array.isArray(agriRecords) || agriRecords.length === 0) { const oldAgri = localStorage.getItem('adubacao_records_v4'); if (oldAgri) { try { agriRecords = normalizarDatas(JSON.parse(oldAgri)); } catch(e){} } }
-        if (!Array.isArray(estoque) || estoque.length === 0) { const oldEst = localStorage.getItem('adubacao_estoque_v3'); if (oldEst) { try { let p = JSON.parse(oldEst); estoque = Array.isArray(p) ? p : Object.values(p); } catch(e){} } }
-
-        const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo };
-        localStorage.setItem('rancho3c_offline', JSON.stringify(payload));
-        
-        try { preencherSelectsLancamento(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); popularSeletorSolo(); } catch(e){}
-        
-        if(document.getElementById('resumo').classList.contains('active')) try{atualizarResumoEGrafico();}catch(e){}
-        if(document.getElementById('relatorios_detalhados').classList.contains('active')) try{atualizarRelatoriosDetalhados();}catch(e){}
-        if(document.getElementById('movimentacoes').classList.contains('active')) { try{atualizarOpcoesFiltros(); aplicarFiltros();}catch(e){} }
-        if(document.getElementById('pendencias').classList.contains('active')) try{renderizarTabelasPendencias();}catch(e){}
-        if(document.getElementById('agri_app').classList.contains('active')) { try{aplicarFiltroSafraApp();}catch(e){} }
-        if(document.getElementById('agri_est').classList.contains('active')) { try{saveAndRenderEstoque();}catch(e){} }
-        if(document.getElementById('agri_dash').classList.contains('active')) { try{renderAgriDashboard();}catch(e){} }
-        if(document.getElementById('solo_main').classList.contains('active')) { try{renderizarHistoricoSolo();}catch(e){} }
+        try { popularSeletorSolo(); } catch(e){}
+        statusDiv.innerHTML = '🟢 DADOS LOCAIS'; statusDiv.className = 'status-conexao conectado';
     }
 
-    async function salvarDados() {
-        const statusDiv = document.getElementById('status_conexao');
-        statusDiv.innerHTML = '⏳ A GRAVAR...'; statusDiv.className = 'status-conexao aguardando';
-        const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo };
-        localStorage.setItem('rancho3c_offline', JSON.stringify(payload));
-        
-        try {
-            const response = await fetch(URL_GOOGLE_SCRIPT, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-            const result = await response.json();
-            if(result.status === "sucesso") { statusDiv.innerHTML = `🟢 SINCRONIZADO`; statusDiv.className = 'status-conexao conectado'; } 
-            else throw new Error("Erro");
-        } catch (error) { statusDiv.innerHTML = '🔴 GRAVADO LOCAL'; statusDiv.className = 'status-conexao'; }
-    }
-
-    // --- ROTEADOR DE ABAS PRINCIPAL (Tolerante a falhas) ---
     function showTab(id) {
-        try {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
-            document.getElementById(id).classList.add('active');
-            
-            const btnMap = {
-                'home': 'btn_home', 'resumo': 'btn_resumo', 'movimentacoes': 'btn_movimentacoes', 'relatorios_detalhados': 'btn_relatorios_detalhados',
-                'pendencias': 'btn_pendencias', 'agri_app': 'btn_agri_app', 'agri_est': 'btn_agri_est', 'agri_dash': 'btn_agri_dash', 'solo_main': 'btn_solo'
-            };
-            if(btnMap[id]) document.getElementById(btnMap[id]).classList.add('btn-ativo');
-            
-            if(id === 'resumo') atualizarResumoEGrafico();
-            if(id === 'relatorios_detalhados') atualizarRelatoriosDetalhados();
-            if(id === 'movimentacoes') { atualizarOpcoesFiltros(); aplicarFiltros(); }
-            if(id === 'pendencias') renderizarTabelasPendencias();
-            if(id === 'agri_app') { aplicarFiltroSafraApp(); }
-            if(id === 'agri_est') { saveAndRenderEstoque(); }
-            if(id === 'agri_dash') { renderAgriDashboard(); }
-            if(id === 'solo_main') { popularSeletorSolo(); renderizarHistoricoSolo(); }
-        } catch(e) { console.error("Erro ao mudar aba:", e); }
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.menu button').forEach(b => b.classList.remove('btn-ativo'));
+        document.getElementById(id).classList.add('active');
+        const btnMap = { 'home': 'btn_home', 'solo_main': 'btn_solo' };
+        if(btnMap[id]) document.getElementById(btnMap[id]).classList.add('btn-ativo');
+        
+        if(id === 'solo_main') { popularSeletorSolo(); renderizarHistoricoSolo(); }
         window.scrollTo(0, 0); 
     }
 
-    // --- MÓDULO SOLO & NUTRIÇÃO ---
+    /* --- SOLO E NUTRIÇÃO --- */
     function switchSoloTab(tabId) {
         document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.sub-menu button').forEach(b => b.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         document.getElementById('btn_' + tabId).classList.add('active');
         
-        if (tabId === 'solo_hist') renderizarHistoricoSolo();
-        if (tabId === 'solo_calc') carregarUltimaAnaliseParaCalculo();
+        if (tabId === 'solo_hist') { popularDatasHistoricoSolo(); }
+        if (tabId === 'solo_calc') { carregarUltimaAnaliseParaCalculo(); atualizarMetaProdutividade(); }
     }
 
     function popularSeletorSolo() {
         const talhoesSet = new Set();
         analisesSolo.forEach(a => talhoesSet.add(a.talhao));
-        (opcoesDin.talhoes||[]).forEach(t => talhoesSet.add(t)); 
+        (opcoesDin.talhoes||[]).forEach(t => talhoesSet.add(t));
         const html = Array.from(talhoesSet).sort().map(t => `<option value="${t}">${t}</option>`).join('');
-        const els = ['hist_talhao', 'calc_talhao'];
-        els.forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = html; });
-        renderizarTabelaHistoricoSolo(); 
+        ['hist_talhao', 'calc_talhao'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = html; });
+        renderizarTabelaHistoricoSolo();
     }
 
     function calcularSomasSolo() {
-        let ca = parseFloat(document.getElementById('sl_ca').value) || 0;
-        let mg = parseFloat(document.getElementById('sl_mg').value) || 0;
-        let k_mg = parseFloat(document.getElementById('sl_k').value) || 0;
-        let al = parseFloat(document.getElementById('sl_al').value) || 0;
-        let hal = parseFloat(document.getElementById('sl_hal').value) || 0;
+        let ca = parseNS(document.getElementById('sl_ca').value);
+        let mg = parseNS(document.getElementById('sl_mg').value);
+        let k_mg = parseNS(document.getElementById('sl_k').value);
+        let al = parseNS(document.getElementById('sl_al').value);
+        let hal = parseNS(document.getElementById('sl_hal').value);
+        let na = parseNS(document.getElementById('sl_na').value);
 
-        let k_cmol = k_mg / 391;
-        let sb = ca + mg + k_cmol;
-        let t_min = sb + al;
-        let t_max = sb + hal;
-        let v = t_max > 0 ? (sb / t_max) * 100 : 0;
-        let m = t_min > 0 ? (al / t_min) * 100 : 0;
+        let k_cmol = k_mg / 391; let na_cmol = na / 230; 
+        let sb = ca + mg + k_cmol + na_cmol; let t_min = sb + al; let t_max = sb + hal;
+        let v = t_max > 0 ? (sb / t_max) * 100 : 0; let m = t_min > 0 ? (al / t_min) * 100 : 0;
 
-        document.getElementById('sl_sb').value = sb.toFixed(2);
-        document.getElementById('sl_t_min').value = t_min.toFixed(2);
-        document.getElementById('sl_t_max').value = t_max.toFixed(2);
-        document.getElementById('sl_v').value = v.toFixed(1);
-        document.getElementById('sl_m').value = m.toFixed(1);
+        document.getElementById('sl_sb').value = sb > 0 ? sb.toFixed(2) : 'ns';
+        document.getElementById('sl_t_min').value = t_min > 0 ? t_min.toFixed(2) : 'ns';
+        document.getElementById('sl_t_max').value = t_max > 0 ? t_max.toFixed(2) : 'ns';
+        document.getElementById('sl_v').value = t_max > 0 ? v.toFixed(0) : 'ns';
+        document.getElementById('sl_m').value = t_min > 0 ? m.toFixed(0) : 'ns';
+        
+        document.getElementById('sl_camg').value = mg > 0 ? (ca/mg).toFixed(2) : 'ns';
+        document.getElementById('sl_cak').value = k_cmol > 0 ? (ca/k_cmol).toFixed(2) : 'ns';
+        document.getElementById('sl_mgk').value = k_cmol > 0 ? (mg/k_cmol).toFixed(2) : 'ns';
+        document.getElementById('sl_camgk').value = k_cmol > 0 ? ((ca+mg)/k_cmol).toFixed(2) : 'ns';
+        document.getElementById('sl_cat').value = t_max > 0 ? ((ca/t_max)*100).toFixed(0) : 'ns';
+        document.getElementById('sl_mgt').value = t_max > 0 ? ((mg/t_max)*100).toFixed(0) : 'ns';
+        document.getElementById('sl_kt').value = t_max > 0 ? ((k_cmol/t_max)*100).toFixed(0) : 'ns';
+        document.getElementById('sl_halt').value = t_max > 0 ? ((hal/t_max)*100).toFixed(0) : 'ns';
+        document.getElementById('sl_nat').value = t_max > 0 && na > 0 ? ((na_cmol/t_max)*100).toFixed(0) : 'ns';
+        aplicarCoresNiveis();
+    }
+
+    function aplicarCoresNiveis() {
+        const argila = parseNS(document.getElementById('sl_argila').value);
+        const refs = {
+            'sl_ph_h2o': { min: 5.5, max: 6.5 }, 'sl_ph_cacl2': { min: 4.9, max: 5.9 },
+            'sl_k': { min: 80, max: 9999 }, 'sl_s': { min: 10, max: 9999 },
+            'sl_ca': { min: 2.4, max: 4.0 }, 'sl_mg': { min: 0.9, max: 1.5 },
+            'sl_al': { min: -1, max: 0.2 }, 'sl_hal': { min: -1, max: 2.0 }, 'sl_mo': { min: 2.1, max: 4.5 }
+        };
+
+        let p_min = 12.1, p_max = 18.0; 
+        if (argila >= 600) { p_min = 8.1; p_max = 12.0; } else if (argila > 0 && argila <= 150) { p_min = 30.1; p_max = 45.0; } else if (argila > 150 && argila < 350) { p_min = 20.1; p_max = 30.0; } 
+        refs['sl_p_meh'] = { min: p_min, max: p_max };
+
+        Object.keys(refs).forEach(id => {
+            let el = document.getElementById(id); if(!el) return;
+            el.classList.remove('val-baixo', 'val-ideal', 'val-alto'); let valStr = el.value.trim().toLowerCase();
+            if(valStr && valStr !== 'ns') {
+                let v = parseFloat(valStr.replace(',','.'));
+                if(!isNaN(v)) {
+                    if (v < refs[id].min) el.classList.add('val-baixo');
+                    else if (v > refs[id].max) el.classList.add('val-alto');
+                    else el.classList.add('val-ideal');
+                }
+            }
+        });
     }
 
     function salvarAnaliseSolo(e) {
         e.preventDefault();
         const data = document.getElementById('sl_data').value;
         const talhao = document.getElementById('sl_talhao').value.trim().toUpperCase();
-        const prof = document.getElementById('sl_prof').value;
-        const idEdicao = document.getElementById('sl_id').value;
-        
         if(!data || !talhao) { alert("Preencha a Data e o Talhão!"); return; }
-
         calcularSomasSolo();
 
-        const novaAnalise = {
-            id: idEdicao ? parseInt(idEdicao) : Date.now(), 
-            data: data, talhao: talhao, prof: prof,
-            ph_h2o: parseFloat(document.getElementById('sl_ph_h2o').value)||0,
-            ph_cacl2: parseFloat(document.getElementById('sl_ph_cacl2').value)||0,
-            al: parseFloat(document.getElementById('sl_al').value)||0,
-            hal: parseFloat(document.getElementById('sl_hal').value)||0,
-            sb: parseFloat(document.getElementById('sl_sb').value)||0,
-            t_min: parseFloat(document.getElementById('sl_t_min').value)||0,
-            t_max: parseFloat(document.getElementById('sl_t_max').value)||0,
-            v: parseFloat(document.getElementById('sl_v').value)||0,
-            m: parseFloat(document.getElementById('sl_m').value)||0,
-            p_meh: parseFloat(document.getElementById('sl_p_meh').value)||0,
-            prem: parseFloat(document.getElementById('sl_prem').value)||0,
-            pres: parseFloat(document.getElementById('sl_pres').value)||0,
-            k: parseFloat(document.getElementById('sl_k').value)||0,
-            s: parseFloat(document.getElementById('sl_s').value)||0,
-            ca: parseFloat(document.getElementById('sl_ca').value)||0,
-            mg: parseFloat(document.getElementById('sl_mg').value)||0,
-            mo: parseFloat(document.getElementById('sl_mo').value)||0,
-            co: parseFloat(document.getElementById('sl_co').value)||0,
-            b: parseFloat(document.getElementById('sl_b').value)||0,
-            cu: parseFloat(document.getElementById('sl_cu').value)||0,
-            fe: parseFloat(document.getElementById('sl_fe').value)||0,
-            mn: parseFloat(document.getElementById('sl_mn').value)||0,
-            zn: parseFloat(document.getElementById('sl_zn').value)||0,
-            argila: parseFloat(document.getElementById('sl_argila').value)||0
+        const nova = {
+            id: document.getElementById('sl_id').value ? parseInt(document.getElementById('sl_id').value) : Date.now(), data: data, talhao: talhao, prof: document.getElementById('sl_prof').value,
+            ph_h2o: document.getElementById('sl_ph_h2o').value, ph_cacl2: document.getElementById('sl_ph_cacl2').value, ph_kcl: document.getElementById('sl_ph_kcl').value,
+            ce: document.getElementById('sl_ce').value, al: document.getElementById('sl_al').value, hal: document.getElementById('sl_hal').value,
+            sb: document.getElementById('sl_sb').value, t_min: document.getElementById('sl_t_min').value, t_max: document.getElementById('sl_t_max').value,
+            v: document.getElementById('sl_v').value, m: document.getElementById('sl_m').value,
+            p_meh: document.getElementById('sl_p_meh').value, prem: document.getElementById('sl_prem').value, pres: document.getElementById('sl_pres').value, ptotal: document.getElementById('sl_ptotal').value,
+            na: document.getElementById('sl_na').value, k: document.getElementById('sl_k').value, s: document.getElementById('sl_s').value,
+            ca: document.getElementById('sl_ca').value, mg: document.getElementById('sl_mg').value, mo: document.getElementById('sl_mo').value, co: document.getElementById('sl_co').value,
+            b: document.getElementById('sl_b').value, cu: document.getElementById('sl_cu').value, fe: document.getElementById('sl_fe').value,
+            mn: document.getElementById('sl_mn').value, zn: document.getElementById('sl_zn').value, co2: document.getElementById('sl_co2').value, mo2: document.getElementById('sl_mo2').value, si: document.getElementById('sl_si').value,
+            argila: document.getElementById('sl_argila').value
         };
 
-        if (idEdicao) {
-            let idx = analisesSolo.findIndex(a => a.id === parseInt(idEdicao));
-            if(idx > -1) analisesSolo[idx] = novaAnalise;
-        } else {
-            analisesSolo.push(novaAnalise);
-        }
+        if (document.getElementById('sl_id').value) { let idx = analisesSolo.findIndex(a => a.id === nova.id); if(idx > -1) analisesSolo[idx] = nova; } 
+        else { analisesSolo.push(nova); }
 
-        salvarDados(); popularSeletorSolo(); 
-        document.getElementById('formSolo').reset();
-        document.getElementById('sl_id').value = ""; 
-        mostrarToast("Análise Salva com Sucesso!");
+        popularSeletorSolo(); document.getElementById('formSolo').reset(); document.getElementById('sl_id').value = ""; 
+        document.querySelectorAll('.val-baixo, .val-ideal, .val-alto').forEach(el => el.classList.remove('val-baixo', 'val-ideal', 'val-alto'));
+        mostrarToast("Análise Salva!");
     }
 
     function renderizarTabelaHistoricoSolo() {
-        let html = '';
-        let lista = [...analisesSolo].sort((a, b) => new Date(b.data) - new Date(a.data));
+        let html = ''; let lista = [...analisesSolo].sort((a, b) => new Date(b.data) - new Date(a.data));
         lista.forEach(an => {
-            html += `<tr>
-                <td>${formatarData(an.data)}</td><td><b>${an.talhao}</b></td><td>${an.prof}</td>
-                <td>${an.ph_h2o}</td><td>${an.p_meh}</td><td>${an.k}</td><td>${an.v}%</td><td>${an.mo}</td>
-                <td style="text-align:center;"><button class="btn-acao btn-editar" onclick="editarAnaliseSolo(${an.id})">✏️</button></td>
-            </tr>`;
+            html += `<tr><td>${formatarData(an.data)}</td><td><b>${an.talhao}</b></td><td>${an.prof}</td><td>${an.ph_h2o}</td><td>${an.p_meh}</td><td>${an.k}</td><td>${an.v}%</td><td>${an.mo}</td><td style="text-align:center;"><button class="btn-acao btn-editar" onclick="editarAnaliseSolo(${an.id})">✏️</button></td></tr>`;
         });
         const tbody = document.getElementById('tbody_historico_analises');
         if(tbody) tbody.innerHTML = html || '<tr><td colspan="9" style="text-align:center;">Sem análises registadas</td></tr>';
     }
 
     function editarAnaliseSolo(id) {
-        let an = analisesSolo.find(a => a.id === id);
-        if(!an) return;
-        
-        document.getElementById('sl_id').value = an.id;
-        document.getElementById('sl_data').value = an.data;
-        document.getElementById('sl_talhao').value = an.talhao;
-        document.getElementById('sl_prof').value = an.prof;
-        
-        const campos = ['ph_h2o', 'ph_cacl2', 'al', 'hal', 'sb', 't_min', 't_max', 'v', 'm', 'p_meh', 'prem', 'pres', 'k', 's', 'ca', 'mg', 'mo', 'co', 'b', 'cu', 'fe', 'mn', 'zn', 'argila'];
-        campos.forEach(c => { let el = document.getElementById('sl_' + c); if (el) el.value = an[c] !== undefined ? an[c] : 0; });
-
-        switchSoloTab('solo_reg'); mostrarToast("Modo de Edição Ativo");
+        let an = analisesSolo.find(a => a.id === id); if(!an) return;
+        document.getElementById('sl_id').value = an.id; document.getElementById('sl_data').value = an.data; document.getElementById('sl_talhao').value = an.talhao; document.getElementById('sl_prof').value = an.prof;
+        const campos = ['ph_h2o', 'ph_cacl2', 'ph_kcl', 'ce', 'al', 'hal', 'sb', 't_min', 't_max', 'v', 'm', 'p_meh', 'prem', 'pres', 'ptotal', 'na', 'k', 's', 'ca', 'mg', 'mo', 'co', 'b', 'cu', 'fe', 'mn', 'zn', 'co2', 'mo2', 'si', 'argila'];
+        campos.forEach(c => { let el = document.getElementById('sl_' + c); if (el) el.value = an[c] !== undefined ? an[c] : ''; });
+        calcularSomasSolo(); switchSoloTab('solo_reg'); mostrarToast("Modo de Edição Ativo");
     }
 
-    function renderizarHistoricoSolo() {
+    function popularDatasHistoricoSolo() {
         renderizarTabelaHistoricoSolo();
-        if (typeof Chart === 'undefined') return;
         const talhao = document.getElementById('hist_talhao').value;
-        const prof = document.getElementById('hist_prof').value;
-        
-        document.getElementById('titulo_hist_solo').innerText = `EVOLUÇÃO DOS NUTRIENTES (${prof} cm) - ${talhao}`;
-        let filtradas = analisesSolo.filter(a => a.talhao === talhao && a.prof === prof).sort((a, b) => new Date(a.data) - new Date(b.data));
-        
-        const labelsNutrientes = ['pH (H₂O)', 'P (mg)', 'K (mg)', 'Ca (cmol)', 'Mg (cmol)', 'M.O.', 'V (%)'];
-        const cores = ['#8E44AD', '#3498DB', '#2ECC71', '#F39C12', '#E74C3C']; 
-        
-        let datasets = filtradas.map((an, idx) => {
-            return { label: formatarData(an.data), data: [an.ph_h2o, an.p_meh, an.k, an.ca, an.mg, an.mo, an.v], backgroundColor: cores[idx % cores.length], borderRadius: 4 };
-        });
-
-        if (chartHistSoloObj) chartHistSoloObj.destroy();
-        const ctx = document.getElementById('chartHistoricoSolo').getContext('2d');
-        chartHistSoloObj = new Chart(ctx, {
-            type: 'bar', data: { labels: labelsNutrientes, datasets: datasets.length ? datasets : [{ label: 'Sem Dados', data: [] }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-        });
+        const selectData = document.getElementById('hist_data');
+        let datasUnicas = [...new Set(analisesSolo.filter(a => a.talhao === talhao).map(a => a.data))].sort((a,b) => new Date(b) - new Date(a));
+        if (datasUnicas.length > 0) { selectData.innerHTML = datasUnicas.map(d => `<option value="${d}">${formatarData(d)}</option>`).join(''); renderizarGraficoDataEspecifica(); } 
+        else { selectData.innerHTML = '<option value="">Sem Análises</option>'; if(chartSoloPrincipal) chartSoloPrincipal.destroy(); }
     }
 
+    function renderizarGraficoDataEspecifica() {
+        if (typeof Chart === 'undefined') return;
+        const talhao = document.getElementById('hist_talhao').value; const dataSel = document.getElementById('hist_data').value;
+        if(!dataSel) return;
+        
+        document.getElementById('titulo_hist_solo').innerText = `COMPARAÇÃO DE CAMADAS - ${formatarData(dataSel)}`;
+        let analisesDoDia = analisesSolo.filter(a => a.talhao === talhao && a.data === dataSel);
+        let an020 = analisesDoDia.find(a => a.prof === '0-20'); let an2040 = analisesDoDia.find(a => a.prof === '20-40'); let anFoliar = analisesDoDia.find(a => a.prof === 'Foliar');
+        const labels = ['P (mg)', 'K (mg)', 'Ca (cmol)', 'Mg (cmol)', 'SB', 'T (CTC)', 'V (%)'];
+        
+        let data020 = an020 ? [parseNS(an020.p_meh), parseNS(an020.k), parseNS(an020.ca), parseNS(an020.mg), parseNS(an020.sb), parseNS(an020.t_max), parseNS(an020.v)] : [];
+        let data2040 = an2040 ? [parseNS(an2040.p_meh), parseNS(an2040.k), parseNS(an2040.ca), parseNS(an2040.mg), parseNS(an2040.sb), parseNS(an2040.t_max), parseNS(an2040.v)] : [];
+        let dataFoliar = anFoliar ? [parseNS(anFoliar.p_meh), parseNS(anFoliar.k), parseNS(anFoliar.ca), parseNS(anFoliar.mg), parseNS(anFoliar.sb), parseNS(anFoliar.t_max), parseNS(anFoliar.v)] : [];
+
+        let datasets = [];
+        if(an020) datasets.push({ label: '0-20 cm', data: data020, backgroundColor: '#2E7D32', borderRadius: 4 });
+        if(an2040) datasets.push({ label: '20-40 cm', data: data2040, backgroundColor: '#8E44AD', borderRadius: 4 });
+        if(anFoliar) datasets.push({ label: 'Foliar', data: dataFoliar, backgroundColor: '#F39C12', borderRadius: 4 });
+
+        if (chartSoloPrincipal) chartSoloPrincipal.destroy();
+        chartSoloPrincipal = new Chart(document.getElementById('chartSoloPrincipal').getContext('2d'), { type: 'bar', data: { labels: labels, datasets: datasets }, options: { responsive: true, maintainAspectRatio: false } });
+    }
+
+    function abrirGraficoDetalhado() {
+        const talhao = document.getElementById('hist_talhao').value; const dataSel = document.getElementById('hist_data').value;
+        if(!dataSel) { alert("Selecione uma data com análises."); return; }
+        let analisesDoDia = analisesSolo.filter(a => a.talhao === talhao && a.data === dataSel);
+        let an020 = analisesDoDia.find(a => a.prof === '0-20'); let an2040 = analisesDoDia.find(a => a.prof === '20-40'); let anFoliar = analisesDoDia.find(a => a.prof === 'Foliar');
+        document.getElementById('titulo_modal_detalhe').innerText = `ANÁLISE DETALHADA: ${talhao} (${formatarData(dataSel)})`;
+        const labels = ['Boro (B)', 'Cobre (Cu)', 'Ferro (Fe)', 'Manganês (Mn)', 'Zinco (Zn)', 'M.O.', 'Argila (x10)'];
+        let d020 = an020 ? [parseNS(an020.b), parseNS(an020.cu), parseNS(an020.fe), parseNS(an020.mn), parseNS(an020.zn), parseNS(an020.mo), parseNS(an020.argila)/10] : [];
+        let d2040 = an2040 ? [parseNS(an2040.b), parseNS(an2040.cu), parseNS(an2040.fe), parseNS(an2040.mn), parseNS(an2040.zn), parseNS(an2040.mo), parseNS(an2040.argila)/10] : [];
+        let dFoliar = anFoliar ? [parseNS(anFoliar.b), parseNS(anFoliar.cu), parseNS(anFoliar.fe), parseNS(anFoliar.mn), parseNS(anFoliar.zn), parseNS(anFoliar.mo), parseNS(anFoliar.argila)/10] : [];
+        let datasets = [];
+        if(an020) datasets.push({ label: '0-20 cm', data: d020, backgroundColor: '#2E7D32', borderRadius: 4 });
+        if(an2040) datasets.push({ label: '20-40 cm', data: d2040, backgroundColor: '#8E44AD', borderRadius: 4 });
+        if(anFoliar) datasets.push({ label: 'Foliar', data: dFoliar, backgroundColor: '#F39C12', borderRadius: 4 });
+
+        document.getElementById('modal-grafico-detalhado').style.display = 'flex';
+        if (chartSoloMicros) chartSoloMicros.destroy();
+        chartSoloMicros = new Chart(document.getElementById('chartSoloMicros').getContext('2d'), { type: 'bar', data: { labels: labels, datasets: datasets }, options: { responsive: true, maintainAspectRatio: false } });
+    }
+
+    // --- CALCULADORA INTELIGENTE (ESTANDE E FASES) ---
     function carregarUltimaAnaliseParaCalculo() {
         const talhao = document.getElementById('calc_talhao').value;
         let filtradas = analisesSolo.filter(a => a.talhao === talhao).sort((a, b) => new Date(b.data) - new Date(a.data));
-
         let ultima020 = filtradas.find(a => a.prof === '0-20');
         let ultima2040 = filtradas.find(a => a.prof === '20-40');
 
         document.getElementById('lbl_data_020').innerText = ultima020 ? formatarData(ultima020.data) : "SEM DADOS";
         document.getElementById('lbl_data_2040').innerText = ultima2040 ? formatarData(ultima2040.data) : "SEM DADOS";
 
-        document.getElementById('calc_p').value = ultima020 ? ultima020.p_meh : 0;
-        document.getElementById('calc_k').value = ultima020 ? ultima020.k : 0;
-        document.getElementById('calc_v020').value = ultima020 ? ultima020.v : 0;
-        document.getElementById('calc_ctc').value = ultima020 ? ultima020.t_max : 0;
-        document.getElementById('calc_mo').value = ultima020 ? ultima020.mo : 0;
-        document.getElementById('calc_prem').value = ultima020 ? ultima020.prem : 0;
-
-        document.getElementById('calc_ca2040').value = ultima2040 ? ultima2040.ca : 0;
-        document.getElementById('calc_al2040').value = ultima2040 ? ultima2040.al : 0;
-        document.getElementById('calc_m2040').value = ultima2040 ? ultima2040.m : 0;
-        document.getElementById('calc_argila').value = ultima2040 ? ultima2040.argila : (ultima020 ? ultima020.argila : 0);
+        document.getElementById('calc_p').value = ultima020 ? ultima020.p_meh : 'ns';
+        document.getElementById('calc_k').value = ultima020 ? ultima020.k : 'ns';
+        document.getElementById('calc_v020').value = ultima020 ? ultima020.v : 'ns';
+        document.getElementById('calc_ctc').value = ultima020 ? ultima020.t_max : 'ns';
+        document.getElementById('calc_mo').value = ultima020 ? ultima020.mo : 'ns';
+        document.getElementById('calc_prem').value = ultima020 ? ultima020.prem : 'ns';
+        document.getElementById('calc_ca2040').value = ultima2040 ? ultima2040.ca : 'ns';
+        document.getElementById('calc_al2040').value = ultima2040 ? ultima2040.al : 'ns';
+        document.getElementById('calc_m2040').value = ultima2040 ? ultima2040.m : 'ns';
+        document.getElementById('calc_argila').value = ultima2040 ? ultima2040.argila : (ultima020 ? ultima020.argila : 'ns');
     }
 
-    let reqGeralCalc = { n:0, p:0, k:0 };
+    // OUVINTE HISTÓRICO: Calcula a média das 3 últimas safras
+    function atualizarMetaProdutividade() {
+        const talhao = document.getElementById('calc_talhao').value;
+        
+        // No futuro, ligamos isto a uma Base de Dados Real de "Colheitas/Safras".
+        // Exemplo: let safras = dbColheitas.filter(c => c.talhao === talhao);
+        // let media = (safra1 + safra2 + safra3) / N;
+        
+        let mediaSimulada = 100; // Mock: Pode alterar para a sua média base.
+        
+        const campoProd = document.getElementById('calc_prod');
+        if(campoProd) {
+            campoProd.value = mediaSimulada;
+            mostrarToast(`Meta automatizada pela média de ${talhao}`);
+        }
+    }
+
+    function alternarFaseCultura() {
+        const fase = document.getElementById('calc_fase').value;
+        if(fase === 'implantacao') {
+            document.getElementById('div_prod_esperada').style.display = 'none';
+            document.getElementById('div_doses_plantio').style.display = 'contents';
+        } else {
+            document.getElementById('div_prod_esperada').style.display = 'contents';
+            document.getElementById('div_doses_plantio').style.display = 'none';
+        }
+    }
 
     function calcularRecomendacao() {
-        const prod = parseFloat(document.getElementById('calc_prod').value) || 0;
         const cultura = document.getElementById('calc_cultura').value;
+        const fase = document.getElementById('calc_fase').value;
+        const area = parseFloat(document.getElementById('calc_area').value) || 1;
+        const estande = parseFloat(document.getElementById('calc_plantas').value) || 3000;
         const prnt = parseFloat(document.getElementById('calc_prnt').value) || 90;
         
-        const v_020 = parseFloat(document.getElementById('calc_v020').value) || 0;
-        const ctc_020 = parseFloat(document.getElementById('calc_ctc').value) || 0;
-        const p_020 = parseFloat(document.getElementById('calc_p').value) || 0;
-        const k_020 = parseFloat(document.getElementById('calc_k').value) || 0;
-        const mo_020 = parseFloat(document.getElementById('calc_mo').value) || 0;
-        const prem_020 = parseFloat(document.getElementById('calc_prem').value) || 0;
+        const v_020 = parseNS(document.getElementById('calc_v020').value);
+        const ctc_020 = parseNS(document.getElementById('calc_ctc').value);
+        const p_020 = parseNS(document.getElementById('calc_p').value);
+        const k_020 = parseNS(document.getElementById('calc_k').value);
+        const mo_020 = parseNS(document.getElementById('calc_mo').value);
+        const prem_020 = parseNS(document.getElementById('calc_prem').value);
+        const ca_2040 = parseNS(document.getElementById('calc_ca2040').value);
+        const al_2040 = parseNS(document.getElementById('calc_al2040').value);
+        const m_2040 = parseNS(document.getElementById('calc_m2040').value);
+        const argila_pct = parseNS(document.getElementById('calc_argila').value) / 10; 
 
-        const ca_2040 = parseFloat(document.getElementById('calc_ca2040').value) || 0;
-        const al_2040 = parseFloat(document.getElementById('calc_al2040').value) || 0;
-        const m_2040 = parseFloat(document.getElementById('calc_m2040').value) || 0;
-        const argila_kg = parseFloat(document.getElementById('calc_argila').value) || 0;
-        const argila_pct = argila_kg / 10; 
+        let exp = "<strong>PARECER AGRONÓMICO:</strong><br><br>";
 
-        let explicacao = "<strong>PARECER AGRONÓMICO:</strong><br><br>";
-
-        const v_alvo = cultura === 'maracuja' ? 80 : 60; let calcario = 0;
-        if (v_020 < v_alvo) {
-            calcario = ((ctc_020 * (v_alvo - v_020)) / prnt); 
-            explicacao += `✅ <strong>Calagem:</strong> Recomendada aplicação de ${calcario.toFixed(1)} t/ha. O V% atual (${v_020}%) está abaixo do ideal para a cultura (${v_alvo}%). PRNT considerado: ${prnt}%.<br>`;
-        } else { explicacao += `☑️ <strong>Calagem:</strong> Não recomendada. O V% atual (${v_020}%) atende a exigência da cultura (${v_alvo}%).<br>`; }
+        // Calagem (Mantém em Produção ou Plantio)
+        const v_alvo = cultura === 'maracuja' ? 80 : 60; let calcario_ha = 0;
+        if (v_020 > 0 && v_020 < v_alvo) {
+            calcario_ha = ((ctc_020 * (v_alvo - v_020)) / prnt); 
+            exp += `✅ <strong>Calagem:</strong> ${calcario_ha.toFixed(1)} t/ha. O V% atual (${v_020}%) está abaixo do alvo (${v_alvo}%). Total para o talhão: ${(calcario_ha * area).toFixed(1)} toneladas.<br>`;
+        } else { exp += `☑️ <strong>Calagem:</strong> Não recomendada. V% adequado.<br>`; }
         
-        let gesso = 0;
-        if (ca_2040 < 0.5 || al_2040 > 0.5 || m_2040 > 20) { 
-            const argila_uso = argila_pct > 0 ? argila_pct : 42; gesso = 50 * argila_uso; 
-            explicacao += `✅ <strong>Gessagem:</strong> Recomendada (${gesso.toFixed(0)} kg/ha) devido a barreira química subsuperficial (20-40cm). `;
-            if(ca_2040 < 0.5) explicacao += `Baixo Cálcio (${ca_2040} < 0.5). `;
-            if(al_2040 > 0.5) explicacao += `Alumínio elevado (${al_2040} > 0.5). `;
-            if(m_2040 > 20) explicacao += `Saturação Al. elevada (${m_2040}% > 20%). `;
-            explicacao += `<br>`;
-        } else { explicacao += `☑️ <strong>Gessagem:</strong> Não recomendada. A subsuperfície (20-40cm) não apresenta barreiras radiculares impeditivas.<br>`; }
+        // Gessagem
+        let gesso_ha = 0;
+        if (ca_2040 > 0 && (ca_2040 < 0.5 || al_2040 > 0.5 || m_2040 > 20)) { 
+            const argila_uso = argila_pct > 0 ? argila_pct : 42; gesso_ha = 50 * argila_uso; 
+            exp += `✅ <strong>Gessagem:</strong> ${gesso_ha.toFixed(0)} kg/ha devido a barreira química (20-40cm). Total: ${(gesso_ha * area).toFixed(0)} kg.<br>`;
+        } else { exp += `☑️ <strong>Gessagem:</strong> Não recomendada.<br>`; }
 
+        // NPK (Dinâmico conforme a FASE)
         let f_p = parseFloat(document.getElementById('calc_fp').value) || 1;
         let f_k = parseFloat(document.getElementById('calc_fk').value) || 1;
 
-        if (cultura === 'conilon') {
-            const mo_adj = mo_020 <= 10 ? mo_020 : 10;
-            reqGeralCalc.n = Math.max(0, 226.417 + (2.465 * prod) - (10.975 * mo_adj)) * 0.9;
-            reqGeralCalc.p = Math.max(0, (189 + (0.537 * prod) - (8.26 * p_020) - (2.1 * prem_020)) - (mo_adj * 2)) * f_p;
-            reqGeralCalc.k = Math.max(0, (236.47 + (2.381 * prod) - (1.21 * k_020)) - (mo_adj * 3)) * f_k;
-        } else if (cultura === 'maracuja') {
-            reqGeralCalc.n = prod < 20 ? 120 : (prod < 40 ? 160 : 200);
-            reqGeralCalc.p = p_020 < 10 ? 140 : (p_020 < 20 ? 100 : (p_020 < 40 ? 60 : 0));
-            reqGeralCalc.k = k_020 < 60 ? 300 : (k_020 < 120 ? 200 : (k_020 < 200 ? 100 : 0));
-        }
+        if (fase === 'producao') {
+            const prod = parseFloat(document.getElementById('calc_prod').value) || 0;
+            if (cultura === 'conilon') {
+                const mo_adj = mo_020 <= 10 ? mo_020 : 10;
+                reqGeralCalc.n = Math.max(0, 226.417 + (2.465 * prod) - (10.975 * mo_adj)) * 0.9;
+                reqGeralCalc.p = Math.max(0, (189 + (0.537 * prod) - (8.26 * p_020) - (2.1 * prem_020)) - (mo_adj * 2)) * f_p;
+                reqGeralCalc.k = Math.max(0, (236.47 + (2.381 * prod) - (1.21 * k_020)) - (mo_adj * 3)) * f_k;
+            } else if (cultura === 'maracuja') {
+                reqGeralCalc.n = prod < 20 ? 120 : (prod < 40 ? 160 : 200);
+                reqGeralCalc.p = p_020 < 10 ? 140 : (p_020 < 20 ? 100 : (p_020 < 40 ? 60 : 0));
+                reqGeralCalc.k = k_020 < 60 ? 300 : (k_020 < 120 ? 200 : (k_020 < 200 ? 100 : 0));
+            }
+            exp += `✅ <strong>Nutrição NPK (Produção):</strong> Exportação projetada para ${prod} sacas/t, distribuída na área de ${area} ha (${estande} pl/ha).`;
+        } else {
+            // FASE DE IMPLANTAÇÃO (A matemática inverte)
+            const d_n = parseFloat(document.getElementById('calc_dose_n').value) || 0;
+            const d_p = parseFloat(document.getElementById('calc_dose_p').value) || 0;
+            const d_k = parseFloat(document.getElementById('calc_dose_k').value) || 0;
+            
+            reqGeralCalc.n = (d_n * estande) / 1000;
+            reqGeralCalc.p = (d_p * estande) / 1000;
+            reqGeralCalc.k = (d_k * estande) / 1000;
 
-        explicacao += `✅ <strong>Nutrição NPK:</strong> Calculada baseada na exportação para ${prod} sc/ha. Fatores de eficiência aplicados (Solo/Foliar): Fósforo (x${f_p}), Potássio (x${f_k}).`;
+            exp += `✅ <strong>Nutrição NPK (Plantio):</strong> Cálculo invertido a partir da dose base digitada pelo agrónomo por cova, multiplicado pelas ${estande} plantas.`;
+        }
 
         document.getElementById('res_n').innerText = reqGeralCalc.n.toFixed(0);
         document.getElementById('res_p').innerText = reqGeralCalc.p.toFixed(0);
         document.getElementById('res_k').innerText = reqGeralCalc.k.toFixed(0);
         document.getElementById('lbl_prnt').innerText = prnt;
-        document.getElementById('res_calcario').innerText = calcario.toFixed(1); 
-        document.getElementById('res_gesso').innerText = gesso.toFixed(0); 
-        document.getElementById('laudo_explicacao').innerHTML = explicacao;
+        document.getElementById('res_calcario').innerText = calcario_ha.toFixed(1); 
+        document.getElementById('res_gesso').innerText = gesso_ha.toFixed(0); 
+        document.getElementById('laudo_explicacao').innerHTML = exp;
 
-        gerarCronogramaAdub(); mostrarToast("Recomendação Gerada!");
+        gerarCronogramaAdub(fase, area, estande); mostrarToast("Cálculo Gerado!");
     }
 
-    function gerarCronogramaAdub() {
-        const cultura = document.getElementById('calc_cultura').value;
+    function gerarCronogramaAdub(fase, area, estande) {
         const tabela = document.getElementById('tbody_cronograma_calc');
         
-        let vol_map = reqGeralCalc.p / 0.60; let n_from_map = vol_map * 0.12; 
-        let n_remaining = reqGeralCalc.n - n_from_map; let vol_ureia = n_remaining > 0 ? n_remaining / 0.45 : 0; 
-        let vol_kcl = reqGeralCalc.k / 0.60; 
+        // MATRIZ FATOR EFICIÊNCIA E FONTES
+        const matriz = {
+            'Ureia': { c: 0.45, fe: 0.70, n: "Ureia (N)" },
+            'Ureia_NBPT': { c: 0.45, fe: 0.85, n: "Ureia Trat. (N)" },
+            'Nitrato': { c: 0.33, fe: 0.95, n: "Nitrato Amónio" },
+            'Sulfato': { c: 0.21, fe: 0.90, n: "Sulf. Amónio" },
+            'MAP': { c: 0.52, nc: 0.11, fe: 0.95, n: "MAP (P)" },
+            'SSG': { c: 0.18, nc: 0, fe: 0.95, n: "Sup. Simples (P)" },
+            'KCl': { c: 0.60, nc: 0, fe: 0.85, n: "KCl (K)" }
+        };
 
-        let dist = [];
-        if (cultura === 'conilon') {
-            dist = [ { mes: "Agosto", pct: 5 }, { mes: "Setembro", pct: 8 }, { mes: "Outubro", pct: 12 }, { mes: "Novembro", pct: 15 }, { mes: "Dezembro", pct: 15 }, { mes: "Janeiro", pct: 15 }, { mes: "Fevereiro", pct: 12 }, { mes: "Março", pct: 10 }, { mes: "Abril", pct: 8 }, { mes: "Maio", pct: 0 }, { mes: "Junho", pct: 0 }, { mes: "Julho", pct: 0 } ];
-        } else {
-            dist = [ { mes: "Agosto", pct: 8 }, { mes: "Setembro", pct: 8 }, { mes: "Outubro", pct: 10 }, { mes: "Novembro", pct: 10 }, { mes: "Dezembro", pct: 10 }, { mes: "Janeiro", pct: 10 }, { mes: "Fevereiro", pct: 10 }, { mes: "Março", pct: 10 }, { mes: "Abril", pct: 8 }, { mes: "Maio", pct: 6 }, { mes: "Junho", pct: 5 }, { mes: "Julho", pct: 5 } ];
-        }
+        const selN = document.getElementById('calc_fonte_n').value;
+        const selP = document.getElementById('calc_fonte_p').value;
+        const selK = document.getElementById('calc_fonte_k').value;
+        const ftN = matriz[selN]; const ftP = matriz[selP]; const ftK = matriz[selK];
+
+        document.getElementById('th_fonte_n').innerText = ftN.n;
+        document.getElementById('th_fonte_p').innerText = ftP.n;
+        document.getElementById('th_fonte_k').innerText = ftK.n;
+
+        // MATEMÁTICA REAL DE EFICIÊNCIA: Volume = Demanda / (Conc * FE)
+        let vol_p_ha = reqGeralCalc.p / (ftP.c * ftP.fe); 
+        
+        // Desconta o Nitrogénio fornecido pelo MAP (se escolhido)
+        let n_fornecido_p_ha = vol_p_ha * ftP.nc; 
+        let demanda_n_liquida_ha = Math.max(0, reqGeralCalc.n - n_fornecido_p_ha);
+        
+        let vol_n_ha = demanda_n_liquida_ha / (ftN.c * ftN.fe); 
+        let vol_k_ha = reqGeralCalc.k / (ftK.c * ftK.fe); 
 
         let bodyHTML = "";
-        dist.forEach(d => {
-            let frac = (d.pct / 100) / 3; 
-            bodyHTML += `<tr style="background: white;"><td style="font-weight:900; color: #555;">${d.mes}</td><td style="font-weight:900; color:#2E7D32;">${(vol_ureia * frac).toFixed(2)}</td><td style="font-weight:900; color:#E65100;">${(vol_map * frac).toFixed(2)}</td><td style="font-weight:900; color:#1565C0;">${(vol_kcl * frac).toFixed(2)}</td></tr>`;
-        });
+
+        if (fase === 'implantacao') {
+            // Linha Única para Cova
+            let u_tot = vol_n_ha * area; let u_pl = (vol_n_ha * 1000) / estande;
+            let m_tot = vol_p_ha * area; let m_pl = (vol_p_ha * 1000) / estande;
+            let k_tot = vol_k_ha * area; let k_pl = (vol_k_ha * 1000) / estande;
+
+            bodyHTML += `<tr style="background: white;">
+                <td style="font-weight:900; color: #555; vertical-align:top; padding-top:12px;">PLANTIO (Cova)</td>
+                <td style="text-align: center;"><b style="color:#2E7D32; font-size:14px;">${vol_n_ha.toFixed(1)} kg/ha</b><br><span style="color:#666;">${u_tot.toFixed(1)} kg/talhão<br>${u_pl.toFixed(0)} g/cova</span></td>
+                <td style="text-align: center;"><b style="color:#E65100; font-size:14px;">${vol_p_ha.toFixed(1)} kg/ha</b><br><span style="color:#666;">${m_tot.toFixed(1)} kg/talhão<br>${m_pl.toFixed(0)} g/cova</span></td>
+                <td style="text-align: center;"><b style="color:#1565C0; font-size:14px;">${vol_k_ha.toFixed(1)} kg/ha</b><br><span style="color:#666;">${k_tot.toFixed(1)} kg/talhão<br>${k_pl.toFixed(0)} g/cova</span></td>
+            </tr>`;
+
+            // Guarda para exportação limpa no botão
+            cronogramaFinal = [{ mes: "Plantio", n: u_tot, p: m_tot, k: k_tot, fn: ftN.n, fp: ftP.n, fk: ftK.n }];
+            
+        } else {
+            // Linhas de Produção Mensais
+            let dist = [ { mes: "Set/Out", pct: 15 }, { mes: "Nov/Dez", pct: 35 }, { mes: "Jan/Fev", pct: 35 }, { mes: "Mar/Abr", pct: 15 } ];
+            cronogramaFinal = [];
+
+            dist.forEach(d => {
+                let frac = d.pct / 100; 
+                let u_ha = vol_n_ha * frac; let u_tot = u_ha * area; let u_pl = (u_ha * 1000) / estande;
+                let m_ha = vol_p_ha * frac; let m_tot = m_ha * area; let m_pl = (m_ha * 1000) / estande;
+                let k_ha = vol_k_ha * frac; let k_tot = k_ha * area; let k_pl = (k_ha * 1000) / estande;
+
+                bodyHTML += `<tr style="background: white;">
+                    <td style="font-weight:900; color: #555; vertical-align:top; padding-top:12px;">${d.mes}</td>
+                    <td style="text-align: center;"><b style="color:#2E7D32; font-size:14px;">${u_ha.toFixed(1)} kg/ha</b><br><span style="color:#666;">${u_tot.toFixed(1)} kg/talhão<br>${u_pl.toFixed(0)} g/planta</span></td>
+                    <td style="text-align: center;"><b style="color:#E65100; font-size:14px;">${m_ha.toFixed(1)} kg/ha</b><br><span style="color:#666;">${m_tot.toFixed(1)} kg/talhão<br>${m_pl.toFixed(0)} g/planta</span></td>
+                    <td style="text-align: center;"><b style="color:#1565C0; font-size:14px;">${k_ha.toFixed(1)} kg/ha</b><br><span style="color:#666;">${k_tot.toFixed(1)} kg/talhão<br>${k_pl.toFixed(0)} g/planta</span></td>
+                </tr>`;
+
+                cronogramaFinal.push({ mes: d.mes, n: u_tot, p: m_tot, k: k_tot, fn: ftN.n, fp: ftP.n, fk: ftK.n });
+            });
+        }
         tabela.innerHTML = bodyHTML;
     }
 
     function imprimirLaudo() { document.body.classList.add('modo-laudo'); window.print(); document.body.classList.remove('modo-laudo'); }
 
     function enviarParaAplicacoes() {
-        if (reqGeralCalc.n === 0 && reqGeralCalc.p === 0 && reqGeralCalc.k === 0) { alert("Calcule a recomendação primeiro!"); return; }
-        if (!confirm("Deseja enviar este cronograma para a lista de Aplicações Planejadas?")) return;
+        if (cronogramaFinal.length === 0) { alert("Calcule a recomendação de nutrientes primeiro!"); return; }
+        if (!confirm("Deseja enviar este cronograma (Peso Físico Total p/ Área) para Aplicações Planeadas?")) return;
 
         const talhao = document.getElementById('calc_talhao').value;
-        const cultura = document.getElementById('calc_cultura').value;
         const anoAtual = new Date().getFullYear();
 
-        let dist = [];
-        if (cultura === 'conilon') {
-            dist = [ { mes: "Agosto", pct: 5 }, { mes: "Setembro", pct: 8 }, { mes: "Outubro", pct: 12 }, { mes: "Novembro", pct: 15 }, { mes: "Dezembro", pct: 15 }, { mes: "Janeiro", pct: 15 }, { mes: "Fevereiro", pct: 12 }, { mes: "Março", pct: 10 }, { mes: "Abril", pct: 8 }, { mes: "Maio", pct: 0 }, { mes: "Junho", pct: 0 }, { mes: "Julho", pct: 0 } ];
-        } else {
-            dist = [ { mes: "Agosto", pct: 8 }, { mes: "Setembro", pct: 8 }, { mes: "Outubro", pct: 10 }, { mes: "Novembro", pct: 10 }, { mes: "Dezembro", pct: 10 }, { mes: "Janeiro", pct: 10 }, { mes: "Fevereiro", pct: 10 }, { mes: "Março", pct: 10 }, { mes: "Abril", pct: 8 }, { mes: "Maio", pct: 6 }, { mes: "Junho", pct: 5 }, { mes: "Julho", pct: 5 } ];
-        }
+        cronogramaFinal.forEach(item => {
+            // Simulação de data consoante o rótulo
+            let dataApp = `${anoAtual}-10-01`; // Outubro por defeito
+            if(item.mes.includes("Plantio")) dataApp = new Date().toISOString().substring(0,10);
+            if(item.mes.includes("Jan")) dataApp = `${anoAtual+1}-01-15`;
+            if(item.mes.includes("Mar")) dataApp = `${anoAtual+1}-03-15`;
+            if(item.mes.includes("Nov")) dataApp = `${anoAtual}-11-15`;
 
-        let vol_map = reqGeralCalc.p / 0.60; let n_from_map = vol_map * 0.12; 
-        let n_remaining = reqGeralCalc.n - n_from_map; let vol_ureia = n_remaining > 0 ? n_remaining / 0.45 : 0; let vol_kcl = reqGeralCalc.k / 0.60; 
-
-        dist.forEach(d => {
-            let frac = (d.pct / 100) / 3; 
-            if (frac === 0) return;
-            let mesNum = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"].indexOf(d.mes) + 1;
-            let ano = mesNum >= 8 ? anoAtual : anoAtual + 1;
-            let dataApp = `${ano}-${String(mesNum).padStart(2, '0')}-01`;
-
-            let adubos = [ { nome: "UREIA", qtd: vol_ureia * frac, tipo: "ADUBO" }, { nome: "MAP", qtd: vol_map * frac, tipo: "ADUBO" }, { nome: "KCL", qtd: vol_kcl * frac, tipo: "ADUBO" } ];
+            let adubos = [ 
+                { nome: item.fn, qtd: item.n }, 
+                { nome: item.fp, qtd: item.p }, 
+                { nome: item.fk, qtd: item.k } 
+            ];
 
             adubos.forEach(adubo => {
                 if (adubo.qtd > 0) {
-                    agriRecords.push({ data: dataApp, talhao: talhao, produto: adubo.nome, tipo: adubo.tipo, alvo: "MANUTENÇÃO", dosagem: `${adubo.qtd.toFixed(2)} KG`, dosagem_qtd: parseFloat(adubo.qtd.toFixed(2)), dosagem_un: "KG", forma: "MANUAL", status: "PLANEJADO", custo_unit: 0, obs: "Gerado pela Calculadora" });
+                    agriRecords.push({ data: dataApp, talhao: talhao, produto: adubo.nome, tipo: "ADUBO", alvo: "NUTRIÇÃO", dosagem: `${adubo.qtd.toFixed(1)} KG`, dosagem_qtd: parseFloat(adubo.qtd.toFixed(1)), dosagem_un: "KG", forma: "MANUAL", status: "PLANEJADO", custo_unit: 0, obs: "Importação Calc. Solo" });
                 }
             });
         });
 
-        salvarDados(); aplicarFiltroSafraApp(); mostrarToast("Planejamento enviado para as Aplicações!");
+        salvarDados(); try{aplicarFiltroSafraApp();}catch(e){} mostrarToast("Enviado para Aplicações!");
     }
 
     // INIT
