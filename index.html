@@ -139,6 +139,7 @@
             @page { margin: 1cm; size: A4 portrait; }
         }
     </style>
+    <!-- Versão Fixa do Chart.js para evitar quebras futuras -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -162,7 +163,7 @@
         <button id="btn_agri_est" onclick="showTab('agri_est')">📦 Estoque</button>
         <button id="btn_solo" onclick="showTab('solo_main')">🧪 Solo & Nutrição</button>
     </div>
-    <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem()" title="Limpar e Sincronizar Agora">⏳ Inicializando Motor Limpo...</button>
+    <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem()" title="Forçar Sincronização">⏳ Inicializando...</button>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -179,7 +180,7 @@
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://i.imgur.com/jPLDeyi.png'); background-size: 60%; background-position: center; background-repeat: no-repeat; opacity: 0.05; z-index: 0; pointer-events: none;"></div>
             <div style="z-index: 1; text-align: center;">
                 <h1 style="color: var(--cor-texto); font-size: 40px; letter-spacing: 2px;">BEM-VINDO AO RANCHO 3C</h1>
-                <p style="color: var(--cor-texto-claro); font-size: 16px;">Otimização e Limpeza de Banco de Dados Ativada.</p>
+                <p style="color: var(--cor-texto-claro); font-size: 16px;">Otimização e Motor de Sincronização Definitivo Ativados.</p>
             </div>
         </div>
     </div>
@@ -357,7 +358,7 @@
     <div id="agri_app" class="tab">
         <div class="linha-lancamento linha-agri-app no-print">
             <div style="font-size:14px; font-weight:700; color:var(--cor-azul-flat); margin-bottom: 10px; font-family:'Rubik';">🚜 NOVO REGISTRO DE APLICAÇÃO</div>
-            <form id="appForm" class="grid-form" onsubmit="addAgriApp(event)">
+            <form id="form_app" class="grid-form" onsubmit="addAgriApp(event)">
                 <input type="hidden" id="editAgriIndex" value="">
                 <div><label>Data</label><input type="date" id="dataApp" required></div>
                 <div><label>Talhão</label><input type="text" id="talhao" list="lista-talhoes" required autocomplete="off"></div>
@@ -383,9 +384,9 @@
             <table class="tabela-larga">
                 <thead>
                     <tr>
-                        <th onclick="sortAgriTable(0)">DATA ↕</th><th onclick="sortAgriTable(1)">TALHÃO ↕</th><th onclick="sortAgriTable(2)">PRODUTO ↕</th>
-                        <th onclick="sortAgriTable(3)">TIPO ↕</th><th onclick="sortAgriTable(4)">ALVO ↕</th><th onclick="sortAgriTable(5)">DOSAGEM ↕</th>
-                        <th onclick="sortAgriTable(6)">FORMA ↕</th><th onclick="sortAgriTable(7)">CUSTO ↕</th><th onclick="sortAgriTable(8)" style="text-align: center;">STATUS ↕</th>
+                        <th>DATA</th><th>TALHÃO</th><th>PRODUTO</th>
+                        <th>TIPO</th><th>ALVO</th><th>DOSAGEM</th>
+                        <th>FORMA</th><th>CUSTO</th><th style="text-align: center;">STATUS</th>
                         <th class="no-print" style="text-align: center;">AÇÕES</th>
                     </tr>
                     <tr class="filter-row no-print" style="background:#f4f7f6;">
@@ -542,7 +543,7 @@
         <div id="solo_calc" class="sub-tab">
             <div class="filter-bar no-print">
                 <label style="font-weight: 700; font-size:12px;">SELECIONAR TALHÃO PARA CÁLCULO:</label>
-                <select id="calc_talhao" onchange="carregarUltimaAnaliseParaCalculo();" style="width:250px; margin-left:15px;"></select>
+                <select id="calc_talhao" onchange="carregarUltimaAnaliseParaCalculo(); atualizarMetaProdutividade();" style="width:250px; margin-left:15px;"></select>
                 <div style="margin-left: auto; text-align: right; font-size: 11px; color:#888;">
                     Última 0-20cm: <strong id="lbl_data_020">-</strong> | Última 20-40cm: <strong id="lbl_data_2040">-</strong>
                 </div>
@@ -578,7 +579,12 @@
                         <div class="grid-form">
                             <div style="grid-column: span 2;">
                                 <label>Fonte de Nitrogênio (N)</label>
-                                <select id="calc_fonte_n"><option value="Ureia">Ureia Conv. (45% | FE: 0.70)</option><option value="Ureia_NBPT">Ureia Tratada (45% | FE: 0.85)</option><option value="Nitrato">Nitrato de Amônio (33% | FE: 0.95)</option><option value="Sulfato">Sulfato de Amônio (21% | FE: 0.90)</option></select>
+                                <select id="calc_fonte_n">
+                                    <option value="Ureia">Ureia Conv. (45% | FE: 0.70)</option>
+                                    <option value="Ureia_NBPT">Ureia Tratada (45% | FE: 0.85)</option>
+                                    <option value="Nitrato">Nitrato de Amônio (33% | FE: 0.95)</option>
+                                    <option value="Sulfato">Sulfato de Amônio (21% | FE: 0.90)</option>
+                                </select>
                             </div>
                             <div style="grid-column: span 2;">
                                 <label>Fonte de Fósforo (P)</label>
@@ -686,7 +692,7 @@
 <datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
 
 <!-- ========================================== -->
-<!-- LÓGICA JAVASCRIPT (MOTOR JANITOR)          -->
+<!-- LÓGICA JAVASCRIPT (MOTOR DE HASH)          -->
 <!-- ========================================== -->
 <script>
     const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxU-XxV63Eip3g636GkrVaV8zwnVPVomePZLIsZBV-ghCYJKxYUMtQoG2Kc903zeP4UoQ/exec";
@@ -702,27 +708,35 @@
     let colOrdenacao = 'data'; let ordemAscendente = false; let filtroRapido = '';
     let chartCaixaObj = null, chartPendenteObj = null; let chartS_Agri = null, chartT_Agri = null, chartTp_Agri = null, chartCS_Agri = null, chartCT_Agri = null; let chartSoloPrincipal = null, chartSoloMicros = null;
 
-    // --- FUNÇÕES CORE (SANEAMENTO) ---
+    // --- FUNÇÕES CORE (LIMPEZA E SANITIZAÇÃO) ---
     function generateUUID() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); }
     
-    // Calcula o fuso local do Brasil para evitar bug do UTC nas datas de hoje (Bug 21h)
+    // Fuso Local Brasil (Cura o bug das 21h)
     function hojeLocal() { const d = new Date(); return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); }
     
     function strSafe(val) { return (val === null || val === undefined) ? '' : String(val).trim(); }
     function strEscape(val) { const s = strSafe(val); return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
     
-    // Extrator Seguro de Valores (Módulo Solo e Inputs)
     function parseNS(valStr) { if (!valStr || String(valStr).toLowerCase() === 'ns') return 0; let v = parseFloat(String(valStr).replace(',', '.')); return isNaN(v) ? 0 : v; }
     function safeVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
     function setVal(id, valor) { const el = document.getElementById(id); if (el) el.value = valor; }
 
     function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
     
-    // Limpador Mestre de Datas - Arranca a string ISO corrompida (Bug 18T03:00)
+    // LIMPADOR DE DATAS: O Assassino de 18T03:00Z
     function sanitizeDateString(d) {
         if(!d) return '';
         d = String(d);
-        if(d.includes('T')) return d.split('T')[0];
+        // ISO limpo ex: 2026-06-18
+        if (d.includes('T') && d.length >= 10 && d.charAt(4) === '-') return d.split('T')[0];
+        // Formato Bizarro do Bug ex: 18T03:00:00.000Z/06/2026
+        if (d.includes('T') && d.includes('/')) {
+            let parts = d.split('/');
+            if(parts.length === 3) {
+                let day = parts[0].split('T')[0];
+                return `${parts[2]}-${parts[1].padStart(2,'0')}-${day.padStart(2, '0')}`;
+            }
+        }
         return d;
     }
 
@@ -750,58 +764,57 @@
     }
     function obterSafraAtual() { return obterSafraGeral(hojeLocal()); }
 
-    // --- ALGORITMO JANITOR (Exterminador de Clones) ---
-    // Em vez de usar IDs (que causaram a duplicação se tivessem sido regerados localmente), usamos o Hash do Conteúdo para destruir os clones.
-    function deduplicateTransactions(arr) {
-        let limpos = []; let impressoes = new Set();
-        (arr || []).forEach(t => {
-            if(!t || t.deleted) return;
-            t.data = sanitizeDateString(t.data);
-            let hash = `${t.data}_${t.tipo}_${t.categoria}_${t.valor}_${t.desc}`;
-            if(!impressoes.has(hash)) { impressoes.add(hash); limpos.push(t); }
+    // --- ALGORITMO UNIFICADOR DE HASH (Exterminador de Duplicados e Restaurador de Dados) ---
+    function unificarDados(localArr, cloudArr, hashFn) {
+        let map = new Map();
+
+        // 1. Lemos a Nuvem e criamos um "Hash" baseado no conteúdo real
+        (cloudArr || []).forEach(item => {
+            if(!item || item.deleted) return;
+            let hash = hashFn(item);
+            if(!item.id) item.id = generateUUID();
+            item._hash = hash;
+            map.set(hash, item);
         });
-        return limpos;
+
+        // 2. Lemos o Computador (Local) e fundimos com a nuvem
+        (localArr || []).forEach(item => {
+            if(!item) return;
+            let hash = hashFn(item);
+            if (item.deleted) {
+                map.delete(hash); // Se você apagou localmente, forçamos a apagar na nuvem
+            } else {
+                if(!item.id) item.id = generateUUID();
+                item._hash = hash;
+                if(map.has(hash)) {
+                    let existente = map.get(hash);
+                    // Se o local for mais recente (updatedAt), ele vence.
+                    if(item.updatedAt && existente.updatedAt && item.updatedAt > existente.updatedAt) {
+                        map.set(hash, item); 
+                    } else if (!existente.updatedAt) {
+                        map.set(hash, item); // Priorizamos o local se a nuvem for velha
+                    }
+                } else {
+                    map.set(hash, item); // Se não existe na nuvem, adiciona (recuperação de dados!)
+                }
+            }
+        });
+
+        return Array.from(map.values()).map(item => { delete item._hash; return item; });
     }
 
-    function deduplicateAgri(arr) {
-        let limpos = []; let impressoes = new Set();
-        (arr || []).forEach(a => {
-            if(!a || a.deleted) return;
-            a.data = sanitizeDateString(a.data);
-            let hash = `${a.data}_${a.talhao}_${a.produto}_${a.dosagem_qtd}`;
-            if(!impressoes.has(hash)) { impressoes.add(hash); limpos.push(a); }
-        });
-        return limpos;
-    }
-
-    function deduplicateSolo(arr) {
-        let limpos = []; let impressoes = new Set();
-        (arr || []).forEach(s => {
-            if(!s || s.deleted) return;
-            s.data = sanitizeDateString(s.data);
-            let hash = `${s.data}_${s.talhao}_${s.prof}`;
-            if(!impressoes.has(hash)) { impressoes.add(hash); limpos.push(s); }
-        });
-        return limpos;
-    }
-
-    function deduplicateEstoque(arr) {
-        let limpos = []; let impressoes = new Set();
-        (arr || []).forEach(e => {
-            if(!e || e.deleted || !e.produto) return;
-            let hash = `${e.produto}_${e.un}`;
-            if(!impressoes.has(hash)) { impressoes.add(hash); limpos.push(e); }
-        });
-        return limpos;
-    }
+    // Funções de Criação de Impressão Digital (Hash)
+    let hashTransacao = t => `${sanitizeDateString(t.data)}_${strSafe(t.tipo)}_${strSafe(t.categoria)}_${t.valor}_${strSafe(t.desc)}`;
+    let hashAgri = a => `${sanitizeDateString(a.data)}_${strSafe(a.talhao)}_${strSafe(a.produto)}_${a.dosagem_qtd}`;
+    let hashSolo = s => `${sanitizeDateString(s.data)}_${strSafe(s.talhao)}_${strSafe(s.prof)}`;
+    let hashEstoque = e => `${strSafe(e.produto)}_${strSafe(e.un)}`;
 
     let permissaoNuvem = false; // Trava de Segurança Crítica
 
     async function carregarDadosNuvem() {
         const statusDiv = document.getElementById('status_conexao');
-        statusDiv.innerHTML = '⏳ Limpando BD...'; statusDiv.className = 'status-conexao aguardando';
+        statusDiv.innerHTML = '⏳ Saneando BD...'; statusDiv.className = 'status-conexao aguardando';
         
-        // Carrega locais e tenta recuperar todos
         try {
             const localStr = localStorage.getItem('rancho3c_offline');
             if (localStr) {
@@ -818,22 +831,11 @@
             const data = await response.json();
             
             if (!Array.isArray(data)) {
-                // Juntar Tudo (Local + Nuvem) e Passar no Janitor
-                let todasT = [...transacoes, ...(data.transacoes || [])];
-                let todasA = [...agriRecords, ...(data.aplicacoes || [])];
-                let todosE = [...estoque, ...(Array.isArray(data.estoque) ? data.estoque : Object.values(data.estoque || {}))];
-                let todasS = [...analisesSolo, ...(data.analises || [])];
-
-                transacoes = deduplicateTransactions(todasT);
-                agriRecords = deduplicateAgri(todasA);
-                analisesSolo = deduplicateSolo(todasS);
-                estoque = deduplicateEstoque(todosE);
-
-                // Garante que os sobreviventes tenham IDs
-                transacoes.forEach(t => { if(!t.id) t.id = generateUUID(); });
-                agriRecords.forEach(a => { if(!a.id) a.id = generateUUID(); });
-                estoque.forEach(e => { if(!e.id) e.id = generateUUID(); });
-                analisesSolo.forEach(s => { if(!s.id) s.id = generateUUID(); });
+                // Passar na Máquina de Lavar (Unificador de Hash)
+                transacoes = unificarDados(transacoes, data.transacoes, hashTransacao);
+                agriRecords = unificarDados(agriRecords, data.aplicacoes, hashAgri);
+                analisesSolo = unificarDados(analisesSolo, data.analises, hashSolo);
+                estoque = unificarDados(estoque, Array.isArray(data.estoque) ? data.estoque : Object.values(data.estoque || {}), hashEstoque);
 
                 if(data.opcoes) {
                     opcoesDin.talhoes = [...new Set([...opcoesDin.talhoes, ...(data.opcoes.talhoes || [])])].sort();
@@ -843,16 +845,16 @@
                 }
             }
             permissaoNuvem = true; 
-            statusDiv.innerHTML = '🟢 DADOS SINCRONIZADOS'; statusDiv.className = 'status-conexao conectado';
+            statusDiv.innerHTML = '🟢 DADOS SINCRONIZADOS E LIMPOS'; statusDiv.className = 'status-conexao conectado';
         } catch(e) {
             permissaoNuvem = false; // TRAVA ATIVA
-            // Se falhou a nuvem, limpa o que tem local na mesma
-            transacoes = deduplicateTransactions(transacoes);
-            agriRecords = deduplicateAgri(agriRecords);
-            analisesSolo = deduplicateSolo(analisesSolo);
-            estoque = deduplicateEstoque(estoque);
+            // Se falhou a nuvem, limpa o que tem local na mesma cruzando com ele próprio para remover clones!
+            transacoes = unificarDados(transacoes, [], hashTransacao);
+            agriRecords = unificarDados(agriRecords, [], hashAgri);
+            analisesSolo = unificarDados(analisesSolo, [], hashSolo);
+            estoque = unificarDados(estoque, [], hashEstoque);
             
-            statusDiv.innerHTML = '🔴 MODO OFFLINE (Falha Nuvem)'; statusDiv.className = 'status-conexao erro';
+            statusDiv.innerHTML = '🔴 MODO OFFLINE (Nuvem Segura)'; statusDiv.className = 'status-conexao erro';
             mostrarToast("Trabalhando Offline. Nuvem protegida.");
         }
 
@@ -861,7 +863,7 @@
 
         try { popularSeletorSolo(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); } catch(e){}
         
-        // Auto Save após Limpeza para guardar a ordem na Nuvem
+        // Auto Save após Limpeza para guardar a casa arrumada na Nuvem
         if(permissaoNuvem) salvarDados();
         showTab('home');
     }
@@ -936,9 +938,9 @@
             if (tipo === 'receita') {
                 if (sit.includes('pago')) { tR += v; rCat[cat] = (rCat[cat] || 0) + v; } else if (sit.includes('receber') || sit.includes('pagar')) aR += v;
             } else if (tipo === 'despesa') {
-                if (sit.includes('pago')) { tD += v; dCat[cat] = (dCat[cat] || 0) + v; } else if (sit.includes('pagar') || sit.includes('receber')) { aP += v; if(t.data && new Date(String(t.data) + 'T00:00:00') < hojeObj) qtdAtrasadas++; }
+                if (sit.includes('pago')) { tD += v; dCat[cat] = (dCat[cat] || 0) + v; } else if (sit.includes('pagar') || sit.includes('receber')) { aP += v; if(t.data && new Date(String(sanitizeDateString(t.data)) + 'T00:00:00') < hojeObj) qtdAtrasadas++; }
             } else if (tipo === 'investimento') {
-                if (sit.includes('pago')) { tI += v; dCat[cat] = (dCat[cat] || 0) + v; } else if (sit.includes('pagar') || sit.includes('receber')) { aP += v; if(t.data && new Date(String(t.data) + 'T00:00:00') < hojeObj) qtdAtrasadas++; }
+                if (sit.includes('pago')) { tI += v; dCat[cat] = (dCat[cat] || 0) + v; } else if (sit.includes('pagar') || sit.includes('receber')) { aP += v; if(t.data && new Date(String(sanitizeDateString(t.data)) + 'T00:00:00') < hojeObj) qtdAtrasadas++; }
             }
         });
 
@@ -1064,7 +1066,7 @@
         let htmlRec = ''; let htmlDesp = ''; let tRec = 0; let tDesp = 0;
         let pendentes = transacoes.filter(t => { 
             let sit = strSafe(t.sit).toLowerCase(); return !t.deleted && (sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente')); 
-        }).sort((a, b) => new Date(a.data || 0) - new Date(b.data || 0));
+        }).sort((a, b) => new Date(sanitizeDateString(a.data)) - new Date(sanitizeDateString(b.data)));
 
         pendentes.forEach(t => {
             let v = parseFloat(t.valor) || 0; let dF = formatarData(t.data); let tipoL = String(t.tipo).toLowerCase();
@@ -1135,7 +1137,7 @@
             `<option value="A pagar" ${sitPagar}>A PAGAR</option><option value="Pago" ${sitPago}>PAGO</option>`;
 
         document.getElementById('form-edicao').innerHTML = `
-            <div><label>DATA:</label> <input type="date" id="ed_data" value="${strSafe(t.data)}"></div> ${htmlSel}
+            <div><label>DATA:</label> <input type="date" id="ed_data" value="${sanitizeDateString(t.data)}"></div> ${htmlSel}
             <div><label>CATEGORIA:</label> <input type="text" id="ed_categoria" value="${vCat}"></div>
             <div><label>SETOR:</label> <input type="text" id="ed_setor" value="${vSet}"></div>
             <div style="grid-column: span 2;"><label>LOCAL:</label> <input type="text" id="ed_local" value="${vLoc}"></div>
@@ -1199,7 +1201,7 @@
             if(t.deleted) return false;
             let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
             if(pG && !`${strSafe(t.desc)} ${strSafe(t.local)} ${cM} ${strSafe(t.setor)} ${t.tipo}`.toLowerCase().includes(pG)) return false;
-            if(fD && strSafe(t.data) !== fD) return false;
+            if(fD && sanitizeDateString(t.data) !== fD) return false;
             if(fT && String(t.tipo).toLowerCase() !== fT) return false;
             if(fC && cM.toLowerCase() !== fC) return false;
             if(fSe && strSafe(t.setor).toLowerCase() !== fSe) return false;
@@ -1214,7 +1216,7 @@
             let vA = a[colOrdenacao], vB = b[colOrdenacao];
             if (colOrdenacao === 'categoria') { vA = vA === '-' ? a.desc : vA; vB = vB === '-' ? b.desc : vB; }
             if(colOrdenacao === 'valor' || colOrdenacao === 'qtd' || colOrdenacao === 'v_unit') { vA = parseFloat(vA)||0; vB = parseFloat(vB)||0; } 
-            else if(colOrdenacao === 'data') { vA = new Date(strSafe(vA)).getTime()||0; vB = new Date(strSafe(vB)).getTime()||0; } 
+            else if(colOrdenacao === 'data') { vA = new Date(sanitizeDateString(vA)).getTime()||0; vB = new Date(sanitizeDateString(vB)).getTime()||0; } 
             else { vA = String(vA).toLowerCase(); vB = String(vB).toLowerCase(); }
             if(vA < vB) return ordemAscendente ? -1 : 1; if(vA > vB) return ordemAscendente ? 1 : -1; return 0;
         });
@@ -1229,7 +1231,7 @@
                 let btnSit = isPago 
                     ? `<button class="bg-pago" onclick="mudarSitTransacao('${t.id}', '${tipoLower === 'receita'?'A receber':'A pagar'}')">✔️ PAGO</button>` 
                     : `<button class="bg-pendente" onclick="mudarSitTransacao('${t.id}', 'Pago')">⏳ PENDENTE</button>`;
-                let isAtrasado = (!isPago) && (t.data && new Date(String(t.data) + 'T00:00:00') < hojeObj);
+                let isAtrasado = (!isPago) && (t.data && new Date(String(sanitizeDateString(t.data)) + 'T00:00:00') < hojeObj);
                 let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (tipoLower === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
 
                 linhasHTML.push(`
@@ -1257,7 +1259,7 @@
             if (t.deleted) return;
             let sit = strSafe(t.sit).toLowerCase(); if (!sit.includes('pago')) return; 
             if (filtroSafra && obterSafraGeral(t.data) !== filtroSafra) return;
-            if (filtroMes && (!t.data || !t.data.startsWith(filtroMes))) return;
+            if (filtroMes && (!t.data || !sanitizeDateString(t.data).startsWith(filtroMes))) return;
 
             let v = parseFloat(t.valor) || 0; let tipo = String(t.tipo).toLowerCase();
             let cat = strSafe(t.categoria).toUpperCase();
@@ -1323,8 +1325,9 @@
         e.preventDefault();
         let produtoStr = document.getElementById('produto').value.toUpperCase(); let dosagemQtd = parseFloat(document.getElementById('dosagem_qtd').value); let dosagemUn = document.getElementById('dosagem_un').value; let tipoStr = verificarNovaOpcao('tipos', document.getElementById('tipo').value);
         let novoStatus = document.getElementById('status').value.toUpperCase();
+        let dataLimpa = sanitizeDateString(document.getElementById('dataApp').value);
         
-        const record = { id: generateUUID(), updatedAt: Date.now(), deleted: false, data: document.getElementById('dataApp').value, talhao: verificarNovaOpcao('talhoes', document.getElementById('talhao').value), produto: produtoStr, tipo: tipoStr, alvo: verificarNovaOpcao('alvos', document.getElementById('alvo').value), dosagem: `${dosagemQtd} ${dosagemUn}`, dosagem_qtd: dosagemQtd, dosagem_un: dosagemUn, forma: verificarNovaOpcao('formas', document.getElementById('forma').value), status: novoStatus, custo_unit: 0 };
+        const record = { id: generateUUID(), updatedAt: Date.now(), deleted: false, data: dataLimpa, talhao: verificarNovaOpcao('talhoes', document.getElementById('talhao').value), produto: produtoStr, tipo: tipoStr, alvo: verificarNovaOpcao('alvos', document.getElementById('alvo').value), dosagem: `${dosagemQtd} ${dosagemUn}`, dosagem_qtd: dosagemQtd, dosagem_un: dosagemUn, forma: verificarNovaOpcao('formas', document.getElementById('forma').value), status: novoStatus, custo_unit: 0 };
         const editId = document.getElementById('editAgriIndex').value;
         
         if (!editId) {
@@ -1337,7 +1340,7 @@
         } else { 
             let old = agriRecords.find(r => r.id === editId);
             if(old) {
-                if (old.status === 'APLICADO' && old.data <= hojeLocal()) {
+                if (old.status === 'APLICADO' && sanitizeDateString(old.data) <= hojeLocal()) {
                     let est = estoque.find(e => e && !e.deleted && e.produto === old.produto && e.un === old.dosagem_un);
                     if(est) { est.qtd += old.dosagem_qtd; est.updatedAt = Date.now(); } 
                 }
@@ -1362,11 +1365,12 @@
     function toggleStatusApp(id) {
         const rec = agriRecords.find(r => r.id === id); if(!rec) return;
         const newStatus = rec.status === 'PLANEJADO' ? 'APLICADO' : 'PLANEJADO';
+        const dataAppLocal = sanitizeDateString(rec.data);
         
-        if (newStatus === 'APLICADO' && rec.data > hojeLocal()) { alert("Data no futuro. Altere para baixar no estoque."); return; }
+        if (newStatus === 'APLICADO' && dataAppLocal > hojeLocal()) { alert("Data no futuro. Altere para baixar no estoque."); return; }
 
         rec.status = newStatus; rec.updatedAt = Date.now();
-        if (rec.data <= hojeLocal()) {
+        if (dataAppLocal <= hojeLocal()) {
             let est = estoque.find(e => e && !e.deleted && e.produto === rec.produto && e.un === rec.dosagem_un);
             let modif = newStatus === 'APLICADO' ? -rec.dosagem_qtd : rec.dosagem_qtd; 
             if (est) { est.qtd += modif; est.updatedAt = Date.now(); }
@@ -1377,7 +1381,7 @@
 
     function saveAndRenderApp() {
         let validRecords = agriRecords.filter(r => r && !r.deleted);
-        validRecords.sort((a, b) => new Date(a.data||0) - new Date(b.data||0));
+        validRecords.sort((a, b) => new Date(sanitizeDateString(a.data)||0) - new Date(sanitizeDateString(b.data)||0));
         
         const safraSelecionada = safeVal('safraSelector');
         const visibleRecords = safraSelecionada === "TODAS" ? validRecords : validRecords.filter(r => obterSafraGeral(r.data) === safraSelecionada);
@@ -1431,7 +1435,7 @@
         validEstoque.forEach(rec => {
             try {
                 let demanda = 0; let mesAtual = hojeLocal().substring(0,7);
-                agriRecords.forEach(r => { if(r && !r.deleted && r.status === 'PLANEJADO' && r.data && String(r.data).startsWith(mesAtual) && r.produto === rec.produto && r.dosagem_un === rec.un) demanda += parseFloat(r.dosagem_qtd)||0; });
+                agriRecords.forEach(r => { if(r && !r.deleted && r.status === 'PLANEJADO' && r.data && sanitizeDateString(r.data).startsWith(mesAtual) && r.produto === rec.produto && r.dosagem_un === rec.un) demanda += parseFloat(r.dosagem_qtd)||0; });
                 
                 let corQtd = ''; let aviso = ''; let cClass = ''; let tStr = String(rec.tipo||'').toUpperCase();
                 if (tStr.includes('ADUBO')) cClass = 'linha-adubo'; else if (tStr.includes('INSETICIDA')) cClass = 'linha-inseticida'; else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida'; else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
@@ -1508,13 +1512,13 @@
 
     function editAgriRecord(id) {
         const r = agriRecords.find(x => x.id === id); if(!r || r.deleted) return;
-        setVal('dataApp', r.data); setVal('talhao', r.talhao); setVal('produto', r.produto); setVal('tipo', r.tipo); setVal('alvo', r.alvo === '-' ? '' : r.alvo); setVal('dosagem_qtd', r.dosagem_qtd); setVal('dosagem_un', r.dosagem_un); setVal('forma', r.forma); setVal('status', r.status); setVal('editAgriIndex', id);
+        setVal('dataApp', sanitizeDateString(r.data)); setVal('talhao', r.talhao); setVal('produto', r.produto); setVal('tipo', r.tipo); setVal('alvo', r.alvo === '-' ? '' : r.alvo); setVal('dosagem_qtd', r.dosagem_qtd); setVal('dosagem_un', r.dosagem_un); setVal('forma', r.forma); setVal('status', r.status); setVal('editAgriIndex', id);
     }
     function deleteAgriRecord(id) { 
         if(confirm("EXCLUIR APLICAÇÃO?")) { 
             let r = agriRecords.find(x => x.id === id);
             if(r) {
-                if (r.status === 'APLICADO' && r.data <= hojeLocal()) {
+                if (r.status === 'APLICADO' && sanitizeDateString(r.data) <= hojeLocal()) {
                     let est = estoque.find(e => e && !e.deleted && e.produto === r.produto && e.un === r.dosagem_un);
                     if(est) { est.qtd += r.dosagem_qtd; est.updatedAt = Date.now(); } 
                 }
@@ -1549,7 +1553,6 @@
         }
     }
     
-    // Otimização para não quebrar o HTML na ordenação
     function sortAgriTable(n) {
         let ord = [...agriRecords.filter(r => !r.deleted)];
         let key = ['data','talhao','produto','tipo','alvo','dosagem','forma','custo','status'][n];
@@ -1561,7 +1564,7 @@
                vA = (a.dosagem_qtd||0) * (ae ? ae.valor_unit||0 : a.custo_unit||0);
                vB = (b.dosagem_qtd||0) * (be ? be.valor_unit||0 : b.custo_unit||0);
             }
-            if(n===0) { vA = new Date(vA).getTime()||0; vB = new Date(vB).getTime()||0; }
+            if(n===0) { vA = new Date(sanitizeDateString(vA)).getTime()||0; vB = new Date(sanitizeDateString(vB)).getTime()||0; }
             if(vA < vB) return ordemAscendente ? -1 : 1;
             if(vA > vB) return ordemAscendente ? 1 : -1;
             return 0;
@@ -1656,7 +1659,7 @@
         calcularSomasSolo();
 
         const nova = {
-            id: idEdicao ? idEdicao : generateUUID(), updatedAt: Date.now(), deleted: false, data: data, talhao: talhao, prof: prof,
+            id: idEdicao ? idEdicao : generateUUID(), updatedAt: Date.now(), deleted: false, data: sanitizeDateString(data), talhao: talhao, prof: prof,
             ph_h2o: safeVal('sl_ph_h2o'), ph_cacl2: safeVal('sl_ph_cacl2'), ph_kcl: safeVal('sl_ph_kcl'), ce: safeVal('sl_ce'), 
             al: safeVal('sl_al'), hal: safeVal('sl_hal'), sb: safeVal('sl_sb'), t_min: safeVal('sl_t_min'), t_max: safeVal('sl_t_max'), v: safeVal('sl_v'), m: safeVal('sl_m'),
             p_meh: safeVal('sl_p_meh'), prem: safeVal('sl_prem'), pres: safeVal('sl_pres'), ptotal: safeVal('sl_ptotal'), na: safeVal('sl_na'), k: safeVal('sl_k'), s: safeVal('sl_s'),
@@ -1666,7 +1669,6 @@
             fe: safeVal('sl_fe'), 
             mn: safeVal('sl_mn'), ext_mn: safeVal('ext_mn') || '1',
             zn: safeVal('sl_zn'), ext_zn: safeVal('ext_zn') || '1',
-            co2: 'ns', mo2: 'ns', si: 'ns', 
             areia_g: safeVal('sl_areia_g'), areia_f: safeVal('sl_areia_f'), areia_t: safeVal('sl_areia_t'), silte: safeVal('sl_silte'), argila: safeVal('sl_argila')
         };
 
@@ -1676,7 +1678,7 @@
     }
 
     function renderizarTabelaHistoricoSolo() {
-        let html = ''; let lista = [...analisesSolo].filter(a => a && !a.deleted && a.data).sort((a, b) => new Date(b.data) - new Date(a.data));
+        let html = ''; let lista = [...analisesSolo].filter(a => a && !a.deleted && a.data).sort((a, b) => new Date(sanitizeDateString(b.data)) - new Date(sanitizeDateString(a.data)));
         lista.forEach(an => { html += `<tr><td>${formatarData(an.data)}</td><td><b style="color:var(--cor-verde-flat);">${strEscape(an.talhao)}</b></td><td>${an.prof}</td><td>${an.ph_h2o}</td><td>${an.p_meh}</td><td>${an.k}</td><td>${an.v}%</td><td>${an.mo}</td><td style="text-align:center;"><button class="btn-acao btn-editar" onclick="editarAnaliseSolo('${an.id}')">✏️</button> <button class="btn-acao btn-excluir" onclick="excluirAnaliseSolo('${an.id}')">🗑️</button></td></tr>`; });
         const tbody = document.getElementById('tbody_historico_analises');
         if(tbody) tbody.innerHTML = html || '<tr><td colspan="9" style="text-align:center; padding:30px; color:#aaa;">Sem análises registadas</td></tr>';
@@ -1691,7 +1693,7 @@
 
     function editarAnaliseSolo(id) {
         let an = analisesSolo.find(a => a && a.id === id); if(!an || an.deleted) return;
-        setVal('sl_id', an.id); setVal('sl_data', an.data); setVal('sl_talhao', an.talhao); setVal('sl_prof', an.prof);
+        setVal('sl_id', an.id); setVal('sl_data', sanitizeDateString(an.data)); setVal('sl_talhao', an.talhao); setVal('sl_prof', an.prof);
         
         const campos = ['ph_h2o', 'ph_cacl2', 'ph_kcl', 'ce', 'al', 'hal', 'sb', 't_min', 't_max', 'v', 'm', 'p_meh', 'prem', 'pres', 'ptotal', 'na', 'k', 's', 'ca', 'mg', 'mo', 'co', 'b', 'cu', 'fe', 'mn', 'zn', 'areia_g', 'areia_f', 'areia_t', 'silte', 'argila'];
         campos.forEach(c => { setVal('sl_' + c, an[c] !== undefined ? an[c] : ''); });
@@ -1704,8 +1706,8 @@
     function popularDatasHistoricoSolo() {
         renderizarTabelaHistoricoSolo();
         const talhao = safeVal('hist_talhao'); const selectData = document.getElementById('hist_data');
-        let datasUnicas = [...new Set(analisesSolo.filter(a => a && !a.deleted && a.talhao === talhao).map(a => a.data))].sort((a,b) => new Date(b) - new Date(a));
-        if (datasUnicas.length > 0) { selectData.innerHTML = datasUnicas.map(d => `<option value="${d}">${formatarData(d)}</option>`).join(''); renderizarGraficoDataEspecifica(); } 
+        let datasUnicas = [...new Set(analisesSolo.filter(a => a && !a.deleted && a.talhao === talhao).map(a => sanitizeDateString(a.data)))].sort((a,b) => new Date(b) - new Date(a));
+        if (datasUnicas.length > 0) { selectData.innerHTML = datasUnicas.map(d => `<option value="${strEscape(d)}">${formatarData(d)}</option>`).join(''); renderizarGraficoDataEspecifica(); } 
         else { selectData.innerHTML = '<option value="">Sem Análises</option>'; if(chartSoloPrincipal) chartSoloPrincipal.destroy(); }
     }
 
@@ -1713,7 +1715,7 @@
         if (typeof Chart === 'undefined') return;
         const talhao = safeVal('hist_talhao'); const dataSel = safeVal('hist_data');
         if(!dataSel) return;
-        let analisesDoDia = analisesSolo.filter(a => a && !a.deleted && a.talhao === talhao && a.data === dataSel);
+        let analisesDoDia = analisesSolo.filter(a => a && !a.deleted && a.talhao === talhao && sanitizeDateString(a.data) === dataSel);
         let an020 = analisesDoDia.find(a => a.prof === '0-20'); let an2040 = analisesDoDia.find(a => a.prof === '20-40'); let anFoliar = analisesDoDia.find(a => a.prof === 'Foliar');
         const labels = ['P (mg)', 'K (mg)', 'Ca (cmol)', 'Mg (cmol)', 'SB', 'T (CTC)', 'V (%)'];
         
@@ -1733,7 +1735,7 @@
     function abrirGraficoDetalhado() {
         const talhao = safeVal('hist_talhao'); const dataSel = safeVal('hist_data');
         if(!dataSel) { alert("Selecione uma data com análises."); return; }
-        let analisesDoDia = analisesSolo.filter(a => a && !a.deleted && a.talhao === talhao && a.data === dataSel);
+        let analisesDoDia = analisesSolo.filter(a => a && !a.deleted && a.talhao === talhao && sanitizeDateString(a.data) === dataSel);
         let an020 = analisesDoDia.find(a => a.prof === '0-20'); let an2040 = analisesDoDia.find(a => a.prof === '20-40'); let anFoliar = analisesDoDia.find(a => a.prof === 'Foliar');
         
         const labels = ['Boro (B)', 'Cobre (Cu)', 'Ferro (Fe)', 'Manganês (Mn)', 'Zinco (Zn)', 'M.O.', 'Argila (x10)'];
@@ -1750,12 +1752,12 @@
         chartSoloMicros = new Chart(document.getElementById('chartSoloMicros').getContext('2d'), { type: 'bar', data: { labels: labels, datasets: datasets }, options: { responsive: true, maintainAspectRatio: false } });
     }
 
-    // --- CALCULADORA INTELIGENTE (AGORA 100% FIEL À PLANILHA) ---
+    // --- CALCULADORA INTELIGENTE E SEGURA ---
     let analiseCarregadaParaCalculo = null; 
 
     function carregarUltimaAnaliseParaCalculo() {
         const talhao = safeVal('calc_talhao');
-        let filtradas = analisesSolo.filter(a => a && !a.deleted && a.talhao === talhao).sort((a, b) => new Date(b.data||0) - new Date(a.data||0));
+        let filtradas = analisesSolo.filter(a => a && !a.deleted && a.talhao === talhao).sort((a, b) => new Date(sanitizeDateString(b.data)||0) - new Date(sanitizeDateString(a.data)||0));
 
         let ultima020 = filtradas.find(a => a.prof === '0-20'); let ultima2040 = filtradas.find(a => a.prof === '20-40');
         analiseCarregadaParaCalculo = ultima020; 
@@ -1767,7 +1769,7 @@
     }
 
     function atualizarMetaProdutividade() {
-        // Campo liberado para o Agrónomo, sem sobrescrita
+        // Desligado por segurança: a produtividade deve ser decidida livremente pelo agrônomo.
     }
 
     function alternarFaseCultura() {
@@ -1792,17 +1794,17 @@
             exp += `✅ <strong>Calagem:</strong> ${calcario_ha.toFixed(1)} t/ha. O V% atual (${v_020}%) está abaixo do alvo (${v_alvo}%). Total área: ${(calcario_ha * area).toFixed(1)} t.<br>`; 
         } else { exp += `☑️ <strong>Calagem:</strong> Não recomendada. V% adequado.<br>`; }
         
-        // --- CÁLCULO DE GESSAGEM (Fiel à Planilha Original) ---
+        // --- CÁLCULO DE GESSAGEM (Seguro contra falta de dados) ---
         let gesso_ha = 0;
         if (ca_2040_val === 'ns' || ca_2040_val === '' || al_2040_val === 'ns' || al_2040_val === '') {
-            exp += `<span style="color:var(--cor-vermelho-flat);">⚠️ <strong>Gessagem:</strong> Não avaliada (Sem dados completos da camada 20-40cm).</span><br>`;
+            exp += `<span style="color:var(--cor-vermelho-flat);">⚠️ <strong>Gessagem:</strong> Sem análise 20-40 cm: gessagem não avaliada.</span><br>`;
         } else {
             let ca_2040 = parseNS(ca_2040_val); let al_2040 = parseNS(al_2040_val); let m_2040 = parseNS(m_2040_val);
             if (ca_2040 < 0.5 || al_2040 > 0.5 || m_2040 > 20) { 
                 let K13 = ctc_020 * (60 - v_020) / 100;
                 gesso_ha = (K13 * 0.3) * 1000;
                 if(gesso_ha < 0) gesso_ha = 0;
-                exp += `✅ <strong>Gessagem:</strong> ${gesso_ha.toFixed(0)} kg/ha devido a barreira química na camada 20-40cm. Total: ${(gesso_ha * area).toFixed(0)} kg.<br>`; 
+                exp += `✅ <strong>Gessagem:</strong> ${gesso_ha.toFixed(0)} kg/ha devido a barreira química (20-40cm). Total: ${(gesso_ha * area).toFixed(0)} kg.<br>`; 
             } else { 
                 exp += `☑️ <strong>Gessagem:</strong> Não recomendada (Subsuperfície adequada).<br>`; 
             }
