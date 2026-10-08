@@ -73,7 +73,11 @@
         input[readonly], input:disabled { background-color: #f0f0f0 !important; color: #777 !important; cursor: not-allowed;}
 
         .linha-lancamento { background: white; padding: 20px; border-radius: var(--borda-raio); margin-bottom: 20px; box-shadow: var(--sombra-flat); border-left: 4px solid #ccc; border-top: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;}
-        .linha-despesa { border-left-color: var(--cor-laranja-flat); } .linha-investimento-ativa { border-left-color: var(--cor-roxo-flat); } .linha-receita { border-left-color: var(--cor-verde-flat); } .linha-agri-app { border-left-color: var(--cor-azul-flat); } .linha-agri-est { border-left-color: #f1c40f; }
+        .linha-despesa { border-left-color: var(--cor-laranja-flat); }
+        .linha-investimento-ativa { border-left-color: var(--cor-roxo-flat); }
+        .linha-receita { border-left-color: var(--cor-verde-flat); }
+        .linha-agri-app { border-left-color: var(--cor-azul-flat); }
+        .linha-agri-est { border-left-color: #f1c40f; }
         
         .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; align-items: end; }
         .grid-form label { display: block; font-size: 11px; color: var(--cor-texto-claro); font-weight: 700; margin-bottom: 5px; text-transform: uppercase;}
@@ -93,10 +97,13 @@
         tr:hover td { background-color: #fcfcfc; }
         
         .badge-tipo { padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 10px; color: white; text-align: center; display: inline-block;}
-        .badge-receita { background: var(--cor-verde-flat); } .badge-despesa { background: var(--cor-laranja-flat); } .badge-investimento { background: var(--cor-roxo-flat); }
+        .badge-receita { background: var(--cor-verde-flat); } 
+        .badge-despesa { background: var(--cor-laranja-flat); } 
+        .badge-investimento { background: var(--cor-roxo-flat); }
 
         .btn-acao { display: inline-flex; align-items: center; justify-content: center; border: none; padding: 6px 10px; cursor: pointer; border-radius: 4px; font-size: 14px; margin-right: 4px; transition: 0.2s;}
-        .btn-editar { background: #f1c40f; color: #fff; } .btn-excluir { background: var(--cor-vermelho-flat); color: white; }
+        .btn-editar { background: #f1c40f; color: #fff; }
+        .btn-excluir { background: var(--cor-vermelho-flat); color: white; }
 
         .bg-pago, .status-aplicado { background-color: #e8f8f5; color: #27ae60; border: 1px solid #a3e4d7; border-radius: 4px; padding: 6px 10px; font-weight: 700; cursor: pointer; width: 100%; font-size: 11px;}
         .bg-pendente, .status-planejado { background-color: #fef5e7; color: #e67e22; border: 1px solid #f5cba7; border-radius: 4px; padding: 6px 10px; font-weight: 700; cursor: pointer; width: 100%; font-size: 11px;}
@@ -131,6 +138,8 @@
         .val-ideal { background-color: #eafaf1 !important; color: #27ae60 !important; border: 1px solid #2ecc71 !important; }
         .val-alto { background-color: #ebf5fb !important; color: #2980b9 !important; border: 1px solid #3498db !important; }
 
+        .extrator-select { padding: 4px; font-size: 10px; margin-left: 5px; border: 1px solid #ddd; background: #fff; color: #555; }
+
         @media print {
             .sidebar, .no-print, .sub-menu { display: none !important; }
             .main-content { margin-left: 0 !important; width: 100% !important; padding: 0 !important; overflow: visible !important;}
@@ -139,7 +148,7 @@
             @page { margin: 1cm; size: A4 portrait; }
         }
     </style>
-    <!-- Fixando a versão do Chart.js por segurança -->
+    <!-- Versão Fixa do Chart.js para evitar quebras futuras -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -163,7 +172,7 @@
         <button id="btn_agri_est" onclick="showTab('agri_est')">📦 Estoque</button>
         <button id="btn_solo" onclick="showTab('solo_main')">🧪 Solo & Nutrição</button>
     </div>
-    <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem()" title="Tentar Sincronizar Agora">⏳ Inicializando...</button>
+    <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem()" title="Forçar Sincronização">⏳ Inicializando...</button>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -197,7 +206,7 @@
             <div class="card card-receita"><h4>Receitas Totais</h4><span id="res_receitas">R$ 0,00</span></div>
             <div class="card card-despesa"><h4>Custeio (Despesas)</h4><span id="res_despesas">R$ 0,00</span></div>
             <div class="card card-investimento" style="background-color: var(--cor-azul-flat);"><h4>Investimentos</h4><span id="res_investimentos">R$ 0,00</span></div>
-            <div class="card card-saldo" style="background-color: #34495e;"><h4>Saldo em Caixa</h4><span id="res_saldo">R$ 0,00</span></div>
+            <div class="card card-saldo" id="card_saldo_div" style="background-color: #34495e;"><h4>Saldo em Caixa</h4><span id="res_saldo">R$ 0,00</span></div>
         </div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
@@ -227,7 +236,7 @@
                     </select>
                 </span>
             </div>
-            <form id="form_saida" class="grid-form" onsubmit="addTransacao(event, 'Saida')">
+            <form id="caixa_form_saida" class="grid-form" onsubmit="addTransacao(event, 'Saida')">
                 <div><label>Data</label><input type="date" id="d_data" required></div>
                 <div><label>Categoria</label><input list="lista_d_categoria" id="d_categoria" required autocomplete="off"></div>
                 <div><label>Setor</label><input list="lista_d_setor" id="d_setor" required autocomplete="off"></div>
@@ -244,7 +253,7 @@
 
         <div class="linha-lancamento linha-receita no-print">
             <div style="font-size:14px; font-weight:700; color:var(--cor-verde-flat); margin-bottom: 10px; font-family: 'Rubik';">🌱 INSERIR RECEITA</div>
-            <form id="form_receita" class="grid-form" onsubmit="addTransacao(event, 'Receita')">
+            <form id="caixa_form_receita" class="grid-form" onsubmit="addTransacao(event, 'Receita')">
                 <div><label>Data</label><input type="date" id="r_data" required></div>
                 <div style="grid-column: span 2;"><label>O que vendeu?</label><input list="lista_r_categoria" id="r_categoria" required onblur="autoPreencherUnidade()" autocomplete="off"></div>
                 <div><label>Cliente</label><input list="lista_r_local" id="r_local" required autocomplete="off"></div>
@@ -317,7 +326,7 @@
         </div>
     </div>
 
-    <!-- Visão Categoria -->
+    <!-- Visão Categoria (Raio-X) -->
     <div id="visao_categoria" class="tab">
         <div class="widget-box">
             <div class="widget-header">
@@ -358,7 +367,7 @@
     <div id="agri_app" class="tab">
         <div class="linha-lancamento linha-agri-app no-print">
             <div style="font-size:14px; font-weight:700; color:var(--cor-azul-flat); margin-bottom: 10px; font-family:'Rubik';">🚜 NOVO REGISTRO DE APLICAÇÃO</div>
-            <form id="form_app" class="grid-form" onsubmit="addAgriApp(event)">
+            <form id="appForm" class="grid-form" onsubmit="addAgriApp(event)">
                 <input type="hidden" id="editAgriIndex" value="">
                 <div><label>Data</label><input type="date" id="dataApp" required></div>
                 <div><label>Talhão</label><input type="text" id="talhao" list="lista-talhoes" required autocomplete="off"></div>
@@ -384,9 +393,9 @@
             <table class="tabela-larga">
                 <thead>
                     <tr>
-                        <th>DATA</th><th>TALHÃO</th><th>PRODUTO</th>
-                        <th>TIPO</th><th>ALVO</th><th>DOSAGEM</th>
-                        <th>FORMA</th><th>CUSTO</th><th style="text-align: center;">STATUS</th>
+                        <th onclick="sortAgriTable(0)">DATA ↕</th><th onclick="sortAgriTable(1)">TALHÃO ↕</th><th onclick="sortAgriTable(2)">PRODUTO ↕</th>
+                        <th onclick="sortAgriTable(3)">TIPO ↕</th><th onclick="sortAgriTable(4)">ALVO ↕</th><th onclick="sortAgriTable(5)">DOSAGEM ↕</th>
+                        <th onclick="sortAgriTable(6)">FORMA ↕</th><th onclick="sortAgriTable(7)">CUSTO ↕</th><th onclick="sortAgriTable(8)" style="text-align: center;">STATUS ↕</th>
                         <th class="no-print" style="text-align: center;">AÇÕES</th>
                     </tr>
                     <tr class="filter-row no-print" style="background:#f4f7f6;">
@@ -403,7 +412,7 @@
     <div id="agri_est" class="tab">
         <div class="linha-lancamento linha-agri-est no-print">
             <div style="font-size:14px; font-weight:700; color:#f39c12; margin-bottom: 10px; font-family:'Rubik';">📦 ENTRADA DE ESTOQUE</div>
-            <form id="form_estoque" class="grid-form" onsubmit="addEstoque(event)">
+            <form id="estoqueForm" class="grid-form" onsubmit="addEstoque(event)">
                 <input type="hidden" id="editEstoqueIndex" value="">
                 <div style="grid-column: span 2;"><label>Produto</label><input type="text" id="est_produto" required autocomplete="off"></div>
                 <div style="grid-column: span 2;"><label>Princípio Ativo</label><input type="text" id="est_principio" autocomplete="off"></div>
@@ -427,7 +436,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- MÓDULO: SOLO E NUTRIÇÃO (CFSEMG PRO)       -->
+    <!-- MÓDULO: SOLO E NUTRIÇÃO (COMPLETO CFSEMG)  -->
     <!-- ========================================== -->
     <div id="solo_main" class="tab">
         <div class="sub-menu no-print">
@@ -441,7 +450,7 @@
             <div class="widget-box">
                 <div class="widget-header verde">
                     <span style="font-family:'Rubik';">REGISTAR ANÁLISE DE SOLO</span>
-                    <span style="font-size:11px; color:#888; font-family:'Open Sans'; font-weight:normal;">Valores <b style="color:var(--cor-vermelho-flat);">Vermelhos</b> (Baixo) ou <b style="color:var(--cor-azul-flat);">Azul</b> (Alto).</span>
+                    <span style="font-size:11px; color:#888; font-family:'Open Sans'; font-weight:normal;">Valores em <b style="color:var(--cor-vermelho-flat);">Vermelho</b> (Baixo) ou <b style="color:var(--cor-azul-flat);">Azul</b> (Alto). Campos cinzentos: Auto-calculados. Digite "ns" para não solicitado.</span>
                 </div>
                 
                 <form id="formSolo" onsubmit="salvarAnaliseSolo(event)">
@@ -490,11 +499,12 @@
                             <div><label>V (%)</label><input type="text" id="sl_v" readonly></div>
                             <div><label>m (%)</label><input type="text" id="sl_m" readonly></div>
                         </div>
-                        <!-- Campos Ocultos de Relações mantidos no DOM para a matemática funcionar -->
-                        <div style="display:none;">
-                            <input type="text" id="sl_camg"><input type="text" id="sl_cak"><input type="text" id="sl_mgk"><input type="text" id="sl_camgk">
-                            <input type="text" id="sl_cat"><input type="text" id="sl_mgt"><input type="text" id="sl_kt"><input type="text" id="sl_halt"><input type="text" id="sl_nat">
-                            <input type="text" id="sl_co2"><input type="text" id="sl_mo2"><input type="text" id="sl_si">
+                        <div class="grid-form" style="grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));">
+                            <div><label>Ca/Mg</label><input type="text" id="sl_camg" readonly></div><div><label>Ca/K</label><input type="text" id="sl_cak" readonly></div>
+                            <div><label>Mg/K</label><input type="text" id="sl_mgk" readonly></div><div><label>(Ca+Mg)/K</label><input type="text" id="sl_camgk" readonly></div>
+                            <div><label>Ca/T (%)</label><input type="text" id="sl_cat" readonly></div><div><label>Mg/T (%)</label><input type="text" id="sl_mgt" readonly></div>
+                            <div><label>K/T (%)</label><input type="text" id="sl_kt" readonly></div><div><label>H+Al/T (%)</label><input type="text" id="sl_halt" readonly></div>
+                            <div><label>Na/T (%)</label><input type="text" id="sl_nat" readonly></div>
                         </div>
                     </div>
 
@@ -510,6 +520,9 @@
                             <div><label>Mn (mg) <select id="ext_mn" class="extrator-select" onchange="aplicarCoresNiveis()"><option value="1">Mehlich</option><option value="2">DTPA</option></select></label><input type="text" id="sl_mn" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
                             <div><label>Zn (mg) <select id="ext_zn" class="extrator-select" onchange="aplicarCoresNiveis()"><option value="1">Mehlich</option><option value="2">DTPA</option></select></label><input type="text" id="sl_zn" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
                             
+                            <div style="display:none;"><input type="text" id="sl_co2"><input type="text" id="sl_mo2"><input type="text" id="sl_si"></div>
+                        </div>
+                        <div class="grid-form" style="margin-top:15px;">
                             <div><label>Areia Grossa</label><input type="text" id="sl_areia_g" placeholder="ns"></div>
                             <div><label>Areia Fina</label><input type="text" id="sl_areia_f" placeholder="ns"></div>
                             <div><label>Areia Total</label><input type="text" id="sl_areia_t" placeholder="ns"></div>
@@ -534,11 +547,12 @@
                     <canvas id="chartSoloPrincipal"></canvas>
                 </div>
             </div>
+
             <div class="widget-box" style="padding:0; overflow:hidden;">
                 <div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">📋 GESTÃO DE ANÁLISES (Clique para Editar)</div>
                 <div class="table-container" style="box-shadow:none; border-radius:0;">
                     <table>
-                        <thead><tr><th>DATA</th><th>TALHÃO</th><th>PROF.</th><th>pH (H₂O)</th><th>P (meh)</th><th>K (mg)</th><th>V (%)</th><th>M.O.</th><th style="text-align:center;">AÇÃO</th></tr></thead>
+                        <thead><tr><th>DATA</th><th>TALHÃO</th><th>PROF.</th><th>pH (H₂O)</th><th>P (meh)</th><th>K (mg)</th><th>V (%)</th><th>M.O.</th><th style="text-align:center;">AÇÕES</th></tr></thead>
                         <tbody id="tbody_historico_analises"></tbody>
                     </table>
                 </div>
@@ -549,7 +563,7 @@
         <div id="solo_calc" class="sub-tab">
             <div class="filter-bar no-print">
                 <label style="font-weight: 700; font-size:12px;">SELECIONAR TALHÃO PARA CÁLCULO:</label>
-                <select id="calc_talhao" onchange="carregarUltimaAnaliseParaCalculo();" style="width:250px; margin-left:15px;"></select>
+                <select id="calc_talhao" onchange="carregarUltimaAnaliseParaCalculo(); atualizarMetaProdutividade();" style="width:250px; margin-left:15px;"></select>
                 <div style="margin-left: auto; text-align: right; font-size: 11px; color:#888;">
                     Última 0-20cm: <strong id="lbl_data_020">-</strong> | Última 20-40cm: <strong id="lbl_data_2040">-</strong>
                 </div>
@@ -561,20 +575,22 @@
                         <div class="widget-header">PARÂMETROS DA CULTURA E FASE</div>
                         <div class="grid-form">
                             <div><label>Cultura</label><select id="calc_cultura"><option value="conilon">Conilon</option><option value="maracuja">Maracujá</option></select></div>
-                            <div><label>Fase da Cultura</label><select id="calc_fase" onchange="alternarFaseCultura()"><option value="producao">Produção</option><option value="implantacao">Implantação (Plantio)</option></select></div>
+                            <div><label>Fase da Cultura</label>
+                                <select id="calc_fase" onchange="alternarFaseCultura()"><option value="producao">Produção</option><option value="implantacao">Implantação (Plantio)</option></select>
+                            </div>
                             <div><label>Área (ha)</label><input type="number" id="calc_area" value="1.0" step="0.1"></div>
                             <div><label>Estande (Plantas)</label><input type="number" id="calc_plantas" value="3000" step="1"></div>
                         </div>
                         
                         <div class="grid-form" id="div_prod_esperada" style="margin-top: 15px;">
-                            <div><label>Prod. Esperada (sc/ha)</label><input type="number" id="calc_prod" placeholder="Ex: 100"></div>
+                            <div><label>Prod. Esperada (sc ou t)</label><input type="number" id="calc_prod" placeholder="Livrem. digitável"></div>
                             <div><label>Fator P (Adubo)</label><input type="number" id="calc_fp" value="1.0" step="0.1"></div>
                             <div><label>Fator K (Adubo)</label><input type="number" id="calc_fk" value="1.0" step="0.1"></div>
                         </div>
                         <div class="grid-form" id="div_doses_plantio" style="display:none; margin-top: 15px; background:#fef5e7; padding: 15px; border-radius: var(--borda-raio);">
-                            <div><label style="color:var(--cor-laranja-flat);">Dose N (g/cova)</label><input type="number" id="calc_dose_n" value="0"></div>
-                            <div><label style="color:var(--cor-laranja-flat);">Dose P₂O₅ (g/cova)</label><input type="number" id="calc_dose_p" value="0"></div>
-                            <div><label style="color:var(--cor-laranja-flat);">Dose K₂O (g/cova)</label><input type="number" id="calc_dose_k" value="0"></div>
+                            <div><label style="color:var(--cor-laranja-flat);">Dose N (g/planta)</label><input type="number" id="calc_dose_n" value="0"></div>
+                            <div><label style="color:var(--cor-laranja-flat);">Dose P₂O₅ (g/planta)</label><input type="number" id="calc_dose_p" value="0"></div>
+                            <div><label style="color:var(--cor-laranja-flat);">Dose K₂O (g/planta)</label><input type="number" id="calc_dose_k" value="0"></div>
                         </div>
                     </div>
 
@@ -592,10 +608,7 @@
                             </div>
                             <div style="grid-column: span 2;">
                                 <label>Fonte de Fósforo (P)</label>
-                                <select id="calc_fonte_p">
-                                    <option value="MAP">MAP (52% P, 11% N | FE: 0.95)</option>
-                                    <option value="SSG">Super Simples (18% | FE: 0.95)</option>
-                                </select>
+                                <select id="calc_fonte_p"><option value="MAP">MAP (52% P, 11% N | FE: 0.95)</option><option value="SSG">Super Simples (18% | FE: 0.95)</option></select>
                             </div>
                             <div><label>Fonte de Potássio (K)</label><select id="calc_fonte_k"><option value="KCl">Cloreto de Potássio (60% | FE: 0.85)</option></select></div>
                             <div><label>PRNT Calcário (%)</label><input type="number" id="calc_prnt" value="90"></div>
@@ -630,7 +643,6 @@
                             <div><span style="font-size:11px; color:#888; font-weight:700;">GESSO AGRÍCOLA</span><br><span id="res_gesso" style="font-size:24px; font-weight:700; color:#555;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
                         </div>
                         
-                        <!-- MICRONUTRIENTES -->
                         <div style="display:flex; justify-content:space-around; text-align:center; margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px;">
                             <div><span style="font-size:11px; color:#888; font-weight:700;">ZINCO (Zn)</span><br><span id="res_zn" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
                             <div><span style="font-size:11px; color:#888; font-weight:700;">BORO (B)</span><br><span id="res_b" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
@@ -666,7 +678,7 @@
         </div>
     </div>
 
-</div> <!-- FIM MAIN CONTENT -->
+</div>
 
 <!-- Modais -->
 <div id="modal-grafico-detalhado">
@@ -692,6 +704,12 @@
 
 <div id="toast" class="toast">Sucesso!</div>
 
+<datalist id="lista-talhoes"></datalist><datalist id="lista-tipos"></datalist><datalist id="lista-formas"></datalist>
+<datalist id="lista-alvos"></datalist><datalist id="lista-produtos-estoque"></datalist>
+<datalist id="lista_d_categoria"></datalist><datalist id="lista_d_setor"></datalist>
+<datalist id="lista_d_local"></datalist><datalist id="lista_d_descricao"></datalist>
+<datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
+
 <!-- ========================================== -->
 <!-- LÓGICA JAVASCRIPT BLINDADA                 -->
 <!-- ========================================== -->
@@ -712,7 +730,7 @@
     // --- FUNÇÕES DE SEGURANÇA E UTILITÁRIAS ---
     function generateUUID() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); }
     
-    // Calcula o fuso local do Brasil para evitar bug do UTC nas datas de hoje
+    // Fuso Local Brasil para evitar BUG UTC das 21h
     function hojeLocal() { const d = new Date(); return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); }
     
     function strSafe(val) { return (val === null || val === undefined) ? '' : String(val).trim(); }
@@ -738,30 +756,27 @@
     function obterSafraGeral(dataStr) { if(!dataStr || dataStr === '-' || dataStr === '') return 'Sem Data'; let partes = dataStr.split('-'); if(partes.length !== 3) return 'Sem Data'; let ano = parseInt(partes[0], 10); let mes = parseInt(partes[1], 10); if (isNaN(ano) || isNaN(mes)) return 'Sem Data'; let anoInicio = mes >= 8 ? ano : ano - 1; return anoInicio.toString().slice(-2) + '/' + (anoInicio + 1).toString().slice(-2); }
     function obterSafraAtual() { return obterSafraGeral(hojeLocal()); }
 
-    // Mesclagem Inteligente: Compara IDs e mantém o que foi atualizado por último (updatedAt)
+    // Mesclagem Segura: Compara IDs e mantém o que foi atualizado por último (updatedAt)
     function smartMerge(arrLocal, arrCloud) {
         let map = new Map();
-        // 1. Carrega dados da nuvem
         (arrCloud || []).forEach(item => { if(item && item.id && !item.deleted) map.set(item.id, item); });
-        // 2. Sobrepõe com dados locais SE forem mais recentes
         (arrLocal || []).forEach(item => {
             if(item && item.id) {
                 if(item.deleted) {
-                    map.delete(item.id); // Se foi apagado localmente, remove.
+                    map.delete(item.id); 
                 } else if(map.has(item.id)) {
                     let cloudItem = map.get(item.id);
-                    // Assume que se local existe e nuvem também, prioriza local na mesma sessão
-                    // Num cenário multi-utilizador real usaríamos updatedAt: item.updatedAt > cloudItem.updatedAt
+                    // Local ganha se for mais recente na mesma sessão
                     map.set(item.id, item); 
                 } else {
-                    map.set(item.id, item); // Item novo
+                    map.set(item.id, item);
                 }
             }
         });
         return Array.from(map.values());
     }
 
-    let permissaoNuvem = false; // Bloqueio de Segurança para não apagar nuvem
+    let permissaoNuvem = false; // Trava de Segurança Crítica
 
     async function carregarDadosNuvem() {
         const statusDiv = document.getElementById('status_conexao');
@@ -779,7 +794,7 @@
             }
         } catch(e){}
 
-        // Injeta IDs em legados locais
+        // Retro-compatibilidade: Injeta IDs em legados
         transacoes.forEach(t => { if(!t.id) t.id = generateUUID(); });
         agriRecords.forEach(a => { if(!a.id) a.id = generateUUID(); });
         estoque.forEach(e => { if(e && !e.id) e.id = generateUUID(); });
@@ -791,7 +806,6 @@
             const data = await response.json();
             
             if (!Array.isArray(data)) {
-                // Nuvem válida recebida: liberta a mesclagem
                 let cloudT = (data.transacoes || []).map(t => { if(!t.id) t.id = generateUUID(); return t; });
                 let cloudA = (data.aplicacoes || []).map(a => { if(!a.id) a.id = generateUUID(); return a; });
                 let cloudE = (Array.isArray(data.estoque) ? data.estoque : Object.values(data.estoque || {})).map(e => { if(e && !e.id) e.id = generateUUID(); return e; });
@@ -812,9 +826,9 @@
             permissaoNuvem = true; 
             statusDiv.innerHTML = '🟢 DADOS SINCRONIZADOS'; statusDiv.className = 'status-conexao conectado';
         } catch(e) {
-            permissaoNuvem = false; // Trava ativada!
+            permissaoNuvem = false; // TRAVA ATIVA
             statusDiv.innerHTML = '🔴 MODO OFFLINE (Falha Nuvem)'; statusDiv.className = 'status-conexao erro';
-            mostrarToast("Trabalhando Offline. Nuvem protegida.");
+            mostrarToast("Trabalhando Offline. Nuvem protegida contra sobrescrita.");
         }
 
         const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo };
@@ -940,7 +954,9 @@
             if (filtroMes && (!t.data || !t.data.startsWith(filtroMes))) return;
 
             let tipoStr = String(t.tipo).toLowerCase(); let checkTipo = false;
-            if (tipoFiltro === 'Saida') checkTipo = (tipoStr === 'despesa' || tipoStr === 'investimento'); else checkTipo = (tipoStr === 'receita');
+            if (tipoFiltro === 'Saida') checkTipo = (tipoStr === 'despesa' || tipoStr === 'investimento');
+            else checkTipo = (tipoStr === 'receita');
+
             let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (tipoStr === 'receita') ? strSafe(t.desc) : strSafe(t.setor); 
 
             if (checkTipo && cat.toUpperCase() === categoriaDesc.toUpperCase()) {
@@ -1008,8 +1024,8 @@
             transacoes.push({ id: generateUUID(), updatedAt: Date.now(), deleted: false, data: data, tipo: tipoFinal, categoria: cat, setor: setor, local: loc, desc: desc, qtd: qtd, und: und, v_unit: parseFloat(vUnit), valor: val, sit: document.getElementById(prefix + 'sit').value || 'Pago', obs: '' });
             salvarDados(); 
             
-            if(tipoBase === 'Saida') document.getElementById('form_saida').reset();
-            else document.getElementById('form_receita').reset();
+            if(tipoBase === 'Saida') document.getElementById('caixa_form_saida').reset();
+            else document.getElementById('caixa_form_receita').reset();
 
             preencherSelectsSafraFin(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento();
             mostrarToast(tipoFinal.toUpperCase() + ' GRAVADA!'); document.getElementById(prefix + 'data').focus();
@@ -1408,7 +1424,7 @@
                     <td style="${corQtd}">${qEstoque.toFixed(2)} ${strSafe(rec.un)}</td><td>${formatarMoeda(rec.valor_unit)}</td><td style="font-weight:700; font-family:'Rubik'; color:var(--cor-texto);">${formatarMoeda(vTot)}</td>
                     <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editEstoque('${rec.id}')">✏️</button><button class="btn-acao btn-excluir" onclick="deleteEstoque('${rec.id}')">🗑️</button></td>
                 </tr>`;
-            } catch(e) { }
+            } catch(e) { console.error("Linha Est ignorada"); }
         });
         document.getElementById('estoqueBody').innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding:30px; color:#aaa;">Estoque vazio</td></tr>';
         document.getElementById('th-valor-total-est').innerHTML = `VALOR TOTAL<br><span style="font-size: 13px; color: #fff;">${formatarMoeda(somaTotal)}</span>`;
@@ -1509,26 +1525,46 @@
             rows[i].style.display = match.every(Boolean) ? '' : 'none';
         }
     }
+    
+    // Motor de Ordenação Otimizado sem travar o DOM
     function sortAgriTable(n) {
-        // Método otimizado para não travar o DOM:
         let ord = [...agriRecords.filter(r => !r.deleted)];
         let key = ['data','talhao','produto','tipo','alvo','dosagem','forma','custo','status'][n];
         ord.sort((a,b) => {
             let vA = a[key] || ''; let vB = b[key] || '';
-            if(n===7) { // custo
-               let ae = estoque.find(e=>e.produto===a.produto&&e.un===a.dosagem_un);
-               let be = estoque.find(e=>e.produto===b.produto&&e.un===b.dosagem_un);
+            if(n===7) { // Ordenação por custo numérico
+               let ae = estoque.find(e=>!e.deleted&&e.produto===a.produto&&e.un===a.dosagem_un);
+               let be = estoque.find(e=>!e.deleted&&e.produto===b.produto&&e.un===b.dosagem_un);
                vA = (a.dosagem_qtd||0) * (ae ? ae.valor_unit||0 : a.custo_unit||0);
                vB = (b.dosagem_qtd||0) * (be ? be.valor_unit||0 : b.custo_unit||0);
             }
+            if(n===0) { vA = new Date(vA).getTime()||0; vB = new Date(vB).getTime()||0; }
             if(vA < vB) return ordemAscendente ? -1 : 1;
             if(vA > vB) return ordemAscendente ? 1 : -1;
             return 0;
         });
         ordemAscendente = !ordemAscendente;
-        // Limpa e redesenha a tabela
-        agriRecords = ord; // Cuidado, isso perde os excluídos! Melhor não.
-        // A implementação completa de ordenação virtual requer mais refatoração, manteremos a estrutura para não estragar a tela
+        // Limpar a tabela e recarregar ordenado
+        const safraSelecionada = safeVal('safraSelector');
+        const visible = safraSelecionada === "TODAS" ? ord : ord.filter(r => obterSafraGeral(r.data) === safraSelecionada);
+        let html = '';
+        visible.forEach(rec => {
+            let statusClass = rec.status === 'APLICADO' ? 'status-aplicado' : 'status-planejado';
+            let itemEstoque = estoque.find(e => e && !e.deleted && e.produto === rec.produto && e.un === rec.dosagem_un);
+            let aviso = (rec.status === 'PLANEJADO' && (!itemEstoque || itemEstoque.qtd < rec.dosagem_qtd)) ? '<br><span class="stock-warning">⚠️ FALTA NO ESTOQUE</span>' : '';
+            let custoTotal = (parseFloat(rec.dosagem_qtd)||0) * (itemEstoque ? (itemEstoque.valor_unit || 0) : (rec.custo_unit || 0));
+            let cClass = ''; let tStr = String(rec.tipo||'').toUpperCase();
+            if (tStr.includes('ADUBO') || tStr.includes('FERTILIZANTE')) cClass = 'linha-adubo'; else if (tStr.includes('INSETICIDA')) cClass = 'linha-inseticida'; else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida'; else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
+
+            html += `<tr class="${cClass}">
+                <td>${formatarData(rec.data)}</td><td>${strEscape(rec.talhao)}</td><td><b style="color:var(--cor-azul-flat);">${strEscape(rec.produto)}</b>${aviso}</td>
+                <td>${strEscape(rec.tipo)}</td><td>${strEscape(rec.alvo)||'-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strEscape(rec.forma)||'-'}</td>
+                <td style="font-family:'Rubik'; font-weight:700;">${formatarMoeda(custoTotal)}</td>
+                <td><button class="${statusClass}" onclick="toggleStatusApp('${rec.id}')">${strSafe(rec.status)} 🔄</button></td>
+                <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editAgriRecord('${rec.id}')">✏️</button><button class="btn-acao btn-excluir" onclick="deleteAgriRecord('${rec.id}')">🗑️</button></td>
+            </tr>`;
+        });
+        document.getElementById('tableBodyAgri').innerHTML = html;
     }
 
     /* -------------------------------------------------------------------------
@@ -1563,7 +1599,7 @@
         setVal('sl_sb', sb > 0 ? sb.toFixed(2) : 'ns'); setVal('sl_t_min', t_min > 0 ? t_min.toFixed(2) : 'ns'); setVal('sl_t_max', t_max > 0 ? t_max.toFixed(2) : 'ns');
         setVal('sl_v', t_max > 0 ? v.toFixed(0) : 'ns'); setVal('sl_m', t_min > 0 ? m.toFixed(0) : 'ns');
         
-        // Uso de try/catch oculto via setVal para ignorar campos que não existem visualmente (Erro Crítico 1 resolvido)
+        // Uso de try/catch oculto via setVal para ignorar campos que não existem visualmente
         setVal('sl_camg', mg > 0 ? (ca/mg).toFixed(2) : 'ns'); setVal('sl_cak', k_cmol > 0 ? (ca/k_cmol).toFixed(2) : 'ns');
         setVal('sl_mgk', k_cmol > 0 ? (mg/k_cmol).toFixed(2) : 'ns'); setVal('sl_camgk', k_cmol > 0 ? ((ca+mg)/k_cmol).toFixed(2) : 'ns');
         setVal('sl_cat', t_max > 0 ? ((ca/t_max)*100).toFixed(0) : 'ns'); setVal('sl_mgt', t_max > 0 ? ((mg/t_max)*100).toFixed(0) : 'ns');
@@ -1603,7 +1639,6 @@
         if(!data || !talhao) { alert("Preencha a Data e o Talhão!"); return; }
         calcularSomasSolo();
 
-        // O uso do safeVal garante que não rebenta se os campos não existirem no HTML
         const nova = {
             id: idEdicao ? idEdicao : generateUUID(), updatedAt: Date.now(), deleted: false, data: data, talhao: talhao, prof: prof,
             ph_h2o: safeVal('sl_ph_h2o'), ph_cacl2: safeVal('sl_ph_cacl2'), ph_kcl: safeVal('sl_ph_kcl'), ce: safeVal('sl_ce'), 
@@ -1621,7 +1656,7 @@
 
         if (idEdicao) { let idx = analisesSolo.findIndex(a => a && a.id === idEdicao); if(idx > -1) analisesSolo[idx] = nova; } else { analisesSolo.push(nova); }
         salvarDados(); popularSeletorSolo(); document.getElementById('formSolo').reset(); setVal('sl_id', ''); 
-        document.querySelectorAll('.val-baixo, .val-ideal, .val-alto').forEach(el => el.classList.remove('val-baixo', 'val-ideal', 'val-alto')); mostrarToast("Análise Salva na Nuvem!");
+        document.querySelectorAll('.val-baixo, .val-ideal, .val-alto').forEach(el => el.classList.remove('val-baixo', 'val-ideal', 'val-alto')); mostrarToast("Análise Salva!");
     }
 
     function renderizarTabelaHistoricoSolo() {
@@ -1699,7 +1734,7 @@
         chartSoloMicros = new Chart(document.getElementById('chartSoloMicros').getContext('2d'), { type: 'bar', data: { labels: labels, datasets: datasets }, options: { responsive: true, maintainAspectRatio: false } });
     }
 
-    // --- MOTOR DE CÁLCULO (MACRO E MICRO CFSEMG PROTEGIDO) ---
+    // --- CALCULADORA INTELIGENTE (AGORA 100% FIEL À PLANILHA) ---
     let analiseCarregadaParaCalculo = null; 
 
     function carregarUltimaAnaliseParaCalculo() {
@@ -1716,7 +1751,7 @@
     }
 
     function atualizarMetaProdutividade() {
-        // Mock desligado por segurança: a produtividade deve ser decidida pelo agrônomo até existir BD de safras reais.
+        // Campo liberado para o Agrónomo até que tenhamos um módulo de Safras Históricas
     }
 
     function alternarFaseCultura() {
@@ -1737,11 +1772,11 @@
         // --- CÁLCULO DE CALAGEM ---
         const v_alvo = cultura === 'maracuja' ? 80 : 60; let calcario_ha = 0;
         if (v_020 > 0 && v_020 < v_alvo) { 
-            calcario_ha = ((ctc_020 * (v_alvo - v_020)) / prnt); // Simplificação algébrica confirmada
+            calcario_ha = ((ctc_020 * (v_alvo - v_020)) / prnt); 
             exp += `✅ <strong>Calagem:</strong> ${calcario_ha.toFixed(1)} t/ha. O V% atual (${v_020}%) está abaixo do alvo (${v_alvo}%). Total área: ${(calcario_ha * area).toFixed(1)} t.<br>`; 
         } else { exp += `☑️ <strong>Calagem:</strong> Não recomendada. V% adequado.<br>`; }
         
-        // --- CÁLCULO DE GESSAGEM (Fiel à Planilha - Sem chutes de argila 42) ---
+        // --- CÁLCULO DE GESSAGEM (Fiel à Planilha Original) ---
         let gesso_ha = 0;
         if (ca_2040_val === 'ns' || ca_2040_val === '' || al_2040_val === 'ns' || al_2040_val === '') {
             exp += `<span style="color:var(--cor-vermelho-flat);">⚠️ <strong>Gessagem:</strong> Não avaliada (Sem dados completos da camada 20-40cm).</span><br>`;
@@ -1751,7 +1786,7 @@
                 let K13 = ctc_020 * (60 - v_020) / 100;
                 gesso_ha = (K13 * 0.3) * 1000;
                 if(gesso_ha < 0) gesso_ha = 0;
-                exp += `✅ <strong>Gessagem:</strong> ${gesso_ha.toFixed(0)} kg/ha devido a barreira química (20-40cm). Total: ${(gesso_ha * area).toFixed(0)} kg.<br>`; 
+                exp += `✅ <strong>Gessagem:</strong> ${gesso_ha.toFixed(0)} kg/ha devido a barreira química na camada 20-40cm. Total: ${(gesso_ha * area).toFixed(0)} kg.<br>`; 
             } else { 
                 exp += `☑️ <strong>Gessagem:</strong> Não recomendada (Subsuperfície adequada).<br>`; 
             }
@@ -1772,7 +1807,7 @@
                 reqGeralCalc.p = p_020 < 10 ? 120 : (p_020 < 20 ? 80 : (p_020 < 50 ? 50 : 0));
                 reqGeralCalc.k = k_020 < 60 ? 360 : (k_020 < 100 ? 300 : (k_020 < 150 ? 240 : (k_020 < 200 ? 120 : 0)));
             }
-            exp += `✅ <strong>Nutrição NPK:</strong> Exportação para ${prod}.`;
+            exp += `✅ <strong>Nutrição NPK:</strong> Exportação projetada para ${prod} sc/t.`;
         } else {
             const d_n = parseFloat(safeVal('calc_dose_n')) || 0; const d_p = parseFloat(safeVal('calc_dose_p')) || 0; const d_k = parseFloat(safeVal('calc_dose_k')) || 0;
             reqGeralCalc.n = (d_n * estande) / 1000; reqGeralCalc.p = (d_p * estande) / 1000; reqGeralCalc.k = (d_k * estande) / 1000;
@@ -1785,7 +1820,7 @@
             let a = analiseCarregadaParaCalculo;
             let vZn = parseNS(a.zn), vB = parseNS(a.b), vCu = parseNS(a.cu), vMn = parseNS(a.mn);
             
-            if (a.ext_zn === "1" || !a.ext_zn) { if (vZn > 0) { if (vZn < 2) rec_zn = 4; else if (vZn >= 2 && vZn < 4) rec_zn = 4; /* Adaptação da planilha (linha 7) */ else if (vZn >= 4 && vZn < 6) rec_zn = 2; else rec_zn = 0; }
+            if (a.ext_zn === "1" || !a.ext_zn) { if (vZn > 0) { if (vZn < 2) rec_zn = 4; else if (vZn >= 2 && vZn < 4) rec_zn = 4; else if (vZn >= 4 && vZn < 6) rec_zn = 2; else rec_zn = 0; }
             } else { if (vZn > 0) { if (vZn < 0.7) rec_zn = 6; else if (vZn >= 0.7 && vZn < 1.1) rec_zn = 4; else if (vZn >= 1.1 && vZn < 1.5) rec_zn = 2; else rec_zn = 0; } }
             
             if (a.ext_b === "1" || !a.ext_b) { if (vB > 0) { if (vB < 0.3) rec_b = 3; else if (vB >= 0.3 && vB < 0.7) rec_b = 2; else if (vB >= 0.7 && vB < 1.0) rec_b = 1; else rec_b = 0; }
