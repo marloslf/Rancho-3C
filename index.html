@@ -73,11 +73,7 @@
         input[readonly], input:disabled { background-color: #f0f0f0 !important; color: #777 !important; cursor: not-allowed;}
 
         .linha-lancamento { background: white; padding: 20px; border-radius: var(--borda-raio); margin-bottom: 20px; box-shadow: var(--sombra-flat); border-left: 4px solid #ccc; border-top: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;}
-        .linha-despesa { border-left-color: var(--cor-laranja-flat); }
-        .linha-investimento-ativa { border-left-color: var(--cor-roxo-flat); }
-        .linha-receita { border-left-color: var(--cor-verde-flat); }
-        .linha-agri-app { border-left-color: var(--cor-azul-flat); }
-        .linha-agri-est { border-left-color: #f1c40f; }
+        .linha-despesa { border-left-color: var(--cor-laranja-flat); } .linha-investimento-ativa { border-left-color: var(--cor-roxo-flat); } .linha-receita { border-left-color: var(--cor-verde-flat); } .linha-agri-app { border-left-color: var(--cor-azul-flat); } .linha-agri-est { border-left-color: #f1c40f; }
         
         .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; align-items: end; }
         .grid-form label { display: block; font-size: 11px; color: var(--cor-texto-claro); font-weight: 700; margin-bottom: 5px; text-transform: uppercase;}
@@ -97,19 +93,15 @@
         tr:hover td { background-color: #fcfcfc; }
         
         .badge-tipo { padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 10px; color: white; text-align: center; display: inline-block;}
-        .badge-receita { background: var(--cor-verde-flat); } 
-        .badge-despesa { background: var(--cor-laranja-flat); } 
-        .badge-investimento { background: var(--cor-roxo-flat); }
+        .badge-receita { background: var(--cor-verde-flat); } .badge-despesa { background: var(--cor-laranja-flat); } .badge-investimento { background: var(--cor-roxo-flat); }
 
         .btn-acao { display: inline-flex; align-items: center; justify-content: center; border: none; padding: 6px 10px; cursor: pointer; border-radius: 4px; font-size: 14px; margin-right: 4px; transition: 0.2s;}
-        .btn-editar { background: #f1c40f; color: #fff; }
-        .btn-excluir { background: var(--cor-vermelho-flat); color: white; }
+        .btn-editar { background: #f1c40f; color: #fff; } .btn-excluir { background: var(--cor-vermelho-flat); color: white; }
 
         .bg-pago, .status-aplicado { background-color: #e8f8f5; color: #27ae60; border: 1px solid #a3e4d7; border-radius: 4px; padding: 6px 10px; font-weight: 700; cursor: pointer; width: 100%; font-size: 11px;}
         .bg-pendente, .status-planejado { background-color: #fef5e7; color: #e67e22; border: 1px solid #f5cba7; border-radius: 4px; padding: 6px 10px; font-weight: 700; cursor: pointer; width: 100%; font-size: 11px;}
         .stock-warning { display: inline-block; margin-top: 4px; color: var(--cor-vermelho-flat); font-size: 10px; font-weight: 700; }
         
-        /* Cores Linhas Agrícola */
         tr.linha-adubo td { background-color: rgba(98, 208, 115, 0.05); }       
         tr.linha-inseticida td { background-color: rgba(231, 76, 60, 0.05); }
         tr.linha-fungicida td { background-color: rgba(244, 159, 62, 0.05); } 
@@ -137,7 +129,6 @@
         .val-baixo { background-color: #fdedec !important; color: #c0392b !important; border: 1px solid #e74c3c !important; }
         .val-ideal { background-color: #eafaf1 !important; color: #27ae60 !important; border: 1px solid #2ecc71 !important; }
         .val-alto { background-color: #ebf5fb !important; color: #2980b9 !important; border: 1px solid #3498db !important; }
-
         .extrator-select { padding: 4px; font-size: 10px; margin-left: 5px; border: 1px solid #ddd; background: #fff; color: #555; }
 
         @media print {
@@ -148,7 +139,6 @@
             @page { margin: 1cm; size: A4 portrait; }
         }
     </style>
-    <!-- Versão Fixa do Chart.js para evitar quebras futuras -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -172,7 +162,7 @@
         <button id="btn_agri_est" onclick="showTab('agri_est')">📦 Estoque</button>
         <button id="btn_solo" onclick="showTab('solo_main')">🧪 Solo & Nutrição</button>
     </div>
-    <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem()" title="Forçar Sincronização">⏳ Inicializando...</button>
+    <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem()" title="Limpar e Sincronizar Agora">⏳ Inicializando Motor Limpo...</button>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -189,7 +179,7 @@
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://i.imgur.com/jPLDeyi.png'); background-size: 60%; background-position: center; background-repeat: no-repeat; opacity: 0.05; z-index: 0; pointer-events: none;"></div>
             <div style="z-index: 1; text-align: center;">
                 <h1 style="color: var(--cor-texto); font-size: 40px; letter-spacing: 2px;">BEM-VINDO AO RANCHO 3C</h1>
-                <p style="color: var(--cor-texto-claro); font-size: 16px;">Selecione um módulo no menu lateral para iniciar.</p>
+                <p style="color: var(--cor-texto-claro); font-size: 16px;">Otimização e Limpeza de Banco de Dados Ativada.</p>
             </div>
         </div>
     </div>
@@ -412,7 +402,7 @@
     <div id="agri_est" class="tab">
         <div class="linha-lancamento linha-agri-est no-print">
             <div style="font-size:14px; font-weight:700; color:#f39c12; margin-bottom: 10px; font-family:'Rubik';">📦 ENTRADA DE ESTOQUE</div>
-            <form id="estoqueForm" class="grid-form" onsubmit="addEstoque(event)">
+            <form id="form_estoque" class="grid-form" onsubmit="addEstoque(event)">
                 <input type="hidden" id="editEstoqueIndex" value="">
                 <div style="grid-column: span 2;"><label>Produto</label><input type="text" id="est_produto" required autocomplete="off"></div>
                 <div style="grid-column: span 2;"><label>Princípio Ativo</label><input type="text" id="est_principio" autocomplete="off"></div>
@@ -436,7 +426,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- MÓDULO: SOLO E NUTRIÇÃO (COMPLETO CFSEMG)  -->
+    <!-- MÓDULO: SOLO E NUTRIÇÃO                    -->
     <!-- ========================================== -->
     <div id="solo_main" class="tab">
         <div class="sub-menu no-print">
@@ -499,13 +489,6 @@
                             <div><label>V (%)</label><input type="text" id="sl_v" readonly></div>
                             <div><label>m (%)</label><input type="text" id="sl_m" readonly></div>
                         </div>
-                        <div class="grid-form" style="grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));">
-                            <div><label>Ca/Mg</label><input type="text" id="sl_camg" readonly></div><div><label>Ca/K</label><input type="text" id="sl_cak" readonly></div>
-                            <div><label>Mg/K</label><input type="text" id="sl_mgk" readonly></div><div><label>(Ca+Mg)/K</label><input type="text" id="sl_camgk" readonly></div>
-                            <div><label>Ca/T (%)</label><input type="text" id="sl_cat" readonly></div><div><label>Mg/T (%)</label><input type="text" id="sl_mgt" readonly></div>
-                            <div><label>K/T (%)</label><input type="text" id="sl_kt" readonly></div><div><label>H+Al/T (%)</label><input type="text" id="sl_halt" readonly></div>
-                            <div><label>Na/T (%)</label><input type="text" id="sl_nat" readonly></div>
-                        </div>
                     </div>
 
                     <div style="margin-bottom: 25px;">
@@ -520,9 +503,6 @@
                             <div><label>Mn (mg) <select id="ext_mn" class="extrator-select" onchange="aplicarCoresNiveis()"><option value="1">Mehlich</option><option value="2">DTPA</option></select></label><input type="text" id="sl_mn" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
                             <div><label>Zn (mg) <select id="ext_zn" class="extrator-select" onchange="aplicarCoresNiveis()"><option value="1">Mehlich</option><option value="2">DTPA</option></select></label><input type="text" id="sl_zn" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
                             
-                            <div style="display:none;"><input type="text" id="sl_co2"><input type="text" id="sl_mo2"><input type="text" id="sl_si"></div>
-                        </div>
-                        <div class="grid-form" style="margin-top:15px;">
                             <div><label>Areia Grossa</label><input type="text" id="sl_areia_g" placeholder="ns"></div>
                             <div><label>Areia Fina</label><input type="text" id="sl_areia_f" placeholder="ns"></div>
                             <div><label>Areia Total</label><input type="text" id="sl_areia_t" placeholder="ns"></div>
@@ -547,7 +527,6 @@
                     <canvas id="chartSoloPrincipal"></canvas>
                 </div>
             </div>
-
             <div class="widget-box" style="padding:0; overflow:hidden;">
                 <div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">📋 GESTÃO DE ANÁLISES (Clique para Editar)</div>
                 <div class="table-container" style="box-shadow:none; border-radius:0;">
@@ -563,7 +542,7 @@
         <div id="solo_calc" class="sub-tab">
             <div class="filter-bar no-print">
                 <label style="font-weight: 700; font-size:12px;">SELECIONAR TALHÃO PARA CÁLCULO:</label>
-                <select id="calc_talhao" onchange="carregarUltimaAnaliseParaCalculo(); atualizarMetaProdutividade();" style="width:250px; margin-left:15px;"></select>
+                <select id="calc_talhao" onchange="carregarUltimaAnaliseParaCalculo();" style="width:250px; margin-left:15px;"></select>
                 <div style="margin-left: auto; text-align: right; font-size: 11px; color:#888;">
                     Última 0-20cm: <strong id="lbl_data_020">-</strong> | Última 20-40cm: <strong id="lbl_data_2040">-</strong>
                 </div>
@@ -599,12 +578,7 @@
                         <div class="grid-form">
                             <div style="grid-column: span 2;">
                                 <label>Fonte de Nitrogênio (N)</label>
-                                <select id="calc_fonte_n">
-                                    <option value="Ureia">Ureia Conv. (45% | FE: 0.70)</option>
-                                    <option value="Ureia_NBPT">Ureia Tratada (45% | FE: 0.85)</option>
-                                    <option value="Nitrato">Nitrato de Amônio (33% | FE: 0.95)</option>
-                                    <option value="Sulfato">Sulfato de Amônio (21% | FE: 0.90)</option>
-                                </select>
+                                <select id="calc_fonte_n"><option value="Ureia">Ureia Conv. (45% | FE: 0.70)</option><option value="Ureia_NBPT">Ureia Tratada (45% | FE: 0.85)</option><option value="Nitrato">Nitrato de Amônio (33% | FE: 0.95)</option><option value="Sulfato">Sulfato de Amônio (21% | FE: 0.90)</option></select>
                             </div>
                             <div style="grid-column: span 2;">
                                 <label>Fonte de Fósforo (P)</label>
@@ -643,6 +617,7 @@
                             <div><span style="font-size:11px; color:#888; font-weight:700;">GESSO AGRÍCOLA</span><br><span id="res_gesso" style="font-size:24px; font-weight:700; color:#555;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
                         </div>
                         
+                        <!-- MICRONUTRIENTES -->
                         <div style="display:flex; justify-content:space-around; text-align:center; margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px;">
                             <div><span style="font-size:11px; color:#888; font-weight:700;">ZINCO (Zn)</span><br><span id="res_zn" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
                             <div><span style="font-size:11px; color:#888; font-weight:700;">BORO (B)</span><br><span id="res_b" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
@@ -711,7 +686,7 @@
 <datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
 
 <!-- ========================================== -->
-<!-- LÓGICA JAVASCRIPT BLINDADA                 -->
+<!-- LÓGICA JAVASCRIPT (MOTOR JANITOR)          -->
 <!-- ========================================== -->
 <script>
     const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxU-XxV63Eip3g636GkrVaV8zwnVPVomePZLIsZBV-ghCYJKxYUMtQoG2Kc903zeP4UoQ/exec";
@@ -727,21 +702,35 @@
     let colOrdenacao = 'data'; let ordemAscendente = false; let filtroRapido = '';
     let chartCaixaObj = null, chartPendenteObj = null; let chartS_Agri = null, chartT_Agri = null, chartTp_Agri = null, chartCS_Agri = null, chartCT_Agri = null; let chartSoloPrincipal = null, chartSoloMicros = null;
 
-    // --- FUNÇÕES DE SEGURANÇA E UTILITÁRIAS ---
+    // --- FUNÇÕES CORE (SANEAMENTO) ---
     function generateUUID() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); }
     
-    // Fuso Local Brasil para evitar BUG UTC das 21h
+    // Calcula o fuso local do Brasil para evitar bug do UTC nas datas de hoje (Bug 21h)
     function hojeLocal() { const d = new Date(); return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); }
     
     function strSafe(val) { return (val === null || val === undefined) ? '' : String(val).trim(); }
     function strEscape(val) { const s = strSafe(val); return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
     
+    // Extrator Seguro de Valores (Módulo Solo e Inputs)
     function parseNS(valStr) { if (!valStr || String(valStr).toLowerCase() === 'ns') return 0; let v = parseFloat(String(valStr).replace(',', '.')); return isNaN(v) ? 0 : v; }
     function safeVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
     function setVal(id, valor) { const el = document.getElementById(id); if (el) el.value = valor; }
 
     function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
-    function formatarData(dataISO) { if(!dataISO || String(dataISO).toLowerCase() === 'nan') return '-'; const partes = String(dataISO).split('-'); return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : dataISO; }
+    
+    // Limpador Mestre de Datas - Arranca a string ISO corrompida (Bug 18T03:00)
+    function sanitizeDateString(d) {
+        if(!d) return '';
+        d = String(d);
+        if(d.includes('T')) return d.split('T')[0];
+        return d;
+    }
+
+    function formatarData(dataISO) { 
+        dataISO = sanitizeDateString(dataISO);
+        if(!dataISO || dataISO.toLowerCase() === 'nan') return '-'; 
+        const partes = dataISO.split('-'); return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : dataISO; 
+    }
     
     function mostrarToast(msg) { 
         const toast = document.getElementById("toast"); 
@@ -752,53 +741,76 @@
         } 
     }
     
-    function normalizarDatas(lista) { if(!Array.isArray(lista)) return []; return lista.map(t => { if (t.data) { if (typeof t.data === 'string' && t.data.includes('T')) t.data = t.data.substring(0, 10); else if (t.data instanceof Date) t.data = t.data.toISOString().substring(0, 10); } return t; }); }
-    function obterSafraGeral(dataStr) { if(!dataStr || dataStr === '-' || dataStr === '') return 'Sem Data'; let partes = dataStr.split('-'); if(partes.length !== 3) return 'Sem Data'; let ano = parseInt(partes[0], 10); let mes = parseInt(partes[1], 10); if (isNaN(ano) || isNaN(mes)) return 'Sem Data'; let anoInicio = mes >= 8 ? ano : ano - 1; return anoInicio.toString().slice(-2) + '/' + (anoInicio + 1).toString().slice(-2); }
+    function obterSafraGeral(dataStr) { 
+        dataStr = sanitizeDateString(dataStr);
+        if(!dataStr || dataStr === '-' || dataStr === '') return 'Sem Data'; 
+        let partes = dataStr.split('-'); if(partes.length !== 3) return 'Sem Data'; 
+        let ano = parseInt(partes[0], 10); let mes = parseInt(partes[1], 10); if (isNaN(ano) || isNaN(mes)) return 'Sem Data'; 
+        let anoInicio = mes >= 8 ? ano : ano - 1; return anoInicio.toString().slice(-2) + '/' + (anoInicio + 1).toString().slice(-2); 
+    }
     function obterSafraAtual() { return obterSafraGeral(hojeLocal()); }
 
-    // Mesclagem Segura: Compara IDs e mantém o que foi atualizado por último (updatedAt)
-    function smartMerge(arrLocal, arrCloud) {
-        let map = new Map();
-        (arrCloud || []).forEach(item => { if(item && item.id && !item.deleted) map.set(item.id, item); });
-        (arrLocal || []).forEach(item => {
-            if(item && item.id) {
-                if(item.deleted) {
-                    map.delete(item.id); 
-                } else if(map.has(item.id)) {
-                    let cloudItem = map.get(item.id);
-                    // Local ganha se for mais recente na mesma sessão
-                    map.set(item.id, item); 
-                } else {
-                    map.set(item.id, item);
-                }
-            }
+    // --- ALGORITMO JANITOR (Exterminador de Clones) ---
+    // Em vez de usar IDs (que causaram a duplicação se tivessem sido regerados localmente), usamos o Hash do Conteúdo para destruir os clones.
+    function deduplicateTransactions(arr) {
+        let limpos = []; let impressoes = new Set();
+        (arr || []).forEach(t => {
+            if(!t || t.deleted) return;
+            t.data = sanitizeDateString(t.data);
+            let hash = `${t.data}_${t.tipo}_${t.categoria}_${t.valor}_${t.desc}`;
+            if(!impressoes.has(hash)) { impressoes.add(hash); limpos.push(t); }
         });
-        return Array.from(map.values());
+        return limpos;
+    }
+
+    function deduplicateAgri(arr) {
+        let limpos = []; let impressoes = new Set();
+        (arr || []).forEach(a => {
+            if(!a || a.deleted) return;
+            a.data = sanitizeDateString(a.data);
+            let hash = `${a.data}_${a.talhao}_${a.produto}_${a.dosagem_qtd}`;
+            if(!impressoes.has(hash)) { impressoes.add(hash); limpos.push(a); }
+        });
+        return limpos;
+    }
+
+    function deduplicateSolo(arr) {
+        let limpos = []; let impressoes = new Set();
+        (arr || []).forEach(s => {
+            if(!s || s.deleted) return;
+            s.data = sanitizeDateString(s.data);
+            let hash = `${s.data}_${s.talhao}_${s.prof}`;
+            if(!impressoes.has(hash)) { impressoes.add(hash); limpos.push(s); }
+        });
+        return limpos;
+    }
+
+    function deduplicateEstoque(arr) {
+        let limpos = []; let impressoes = new Set();
+        (arr || []).forEach(e => {
+            if(!e || e.deleted || !e.produto) return;
+            let hash = `${e.produto}_${e.un}`;
+            if(!impressoes.has(hash)) { impressoes.add(hash); limpos.push(e); }
+        });
+        return limpos;
     }
 
     let permissaoNuvem = false; // Trava de Segurança Crítica
 
     async function carregarDadosNuvem() {
         const statusDiv = document.getElementById('status_conexao');
-        statusDiv.innerHTML = '⏳ A carregar...'; statusDiv.className = 'status-conexao aguardando';
+        statusDiv.innerHTML = '⏳ Limpando BD...'; statusDiv.className = 'status-conexao aguardando';
         
+        // Carrega locais e tenta recuperar todos
         try {
             const localStr = localStorage.getItem('rancho3c_offline');
             if (localStr) {
                 const localData = JSON.parse(localStr);
-                if(localData.transacoes) transacoes = localData.transacoes;
-                if(localData.aplicacoes) agriRecords = localData.aplicacoes;
-                if(localData.estoque) estoque = Array.isArray(localData.estoque) ? localData.estoque : Object.values(localData.estoque || {});
-                if(localData.analises) analisesSolo = localData.analises;
-                if(localData.opcoes) opcoesDin = localData.opcoes;
+                transacoes = localData.transacoes || []; agriRecords = localData.aplicacoes || [];
+                estoque = Array.isArray(localData.estoque) ? localData.estoque : Object.values(localData.estoque || {});
+                analisesSolo = localData.analises || []; opcoesDin = localData.opcoes || opcoesDin;
             }
         } catch(e){}
-
-        // Retro-compatibilidade: Injeta IDs em legados
-        transacoes.forEach(t => { if(!t.id) t.id = generateUUID(); });
-        agriRecords.forEach(a => { if(!a.id) a.id = generateUUID(); });
-        estoque.forEach(e => { if(e && !e.id) e.id = generateUUID(); });
-        analisesSolo.forEach(s => { if(!s.id) s.id = generateUUID(); });
 
         try {
             const response = await fetch(URL_GOOGLE_SCRIPT);
@@ -806,15 +818,22 @@
             const data = await response.json();
             
             if (!Array.isArray(data)) {
-                let cloudT = (data.transacoes || []).map(t => { if(!t.id) t.id = generateUUID(); return t; });
-                let cloudA = (data.aplicacoes || []).map(a => { if(!a.id) a.id = generateUUID(); return a; });
-                let cloudE = (Array.isArray(data.estoque) ? data.estoque : Object.values(data.estoque || {})).map(e => { if(e && !e.id) e.id = generateUUID(); return e; });
-                let cloudS = (data.analises || []).map(s => { if(!s.id) s.id = generateUUID(); return s; });
+                // Juntar Tudo (Local + Nuvem) e Passar no Janitor
+                let todasT = [...transacoes, ...(data.transacoes || [])];
+                let todasA = [...agriRecords, ...(data.aplicacoes || [])];
+                let todosE = [...estoque, ...(Array.isArray(data.estoque) ? data.estoque : Object.values(data.estoque || {}))];
+                let todasS = [...analisesSolo, ...(data.analises || [])];
 
-                transacoes = smartMerge(transacoes, cloudT);
-                agriRecords = smartMerge(agriRecords, cloudA);
-                analisesSolo = smartMerge(analisesSolo, cloudS);
-                estoque = smartMerge(estoque, cloudE);
+                transacoes = deduplicateTransactions(todasT);
+                agriRecords = deduplicateAgri(todasA);
+                analisesSolo = deduplicateSolo(todasS);
+                estoque = deduplicateEstoque(todosE);
+
+                // Garante que os sobreviventes tenham IDs
+                transacoes.forEach(t => { if(!t.id) t.id = generateUUID(); });
+                agriRecords.forEach(a => { if(!a.id) a.id = generateUUID(); });
+                estoque.forEach(e => { if(!e.id) e.id = generateUUID(); });
+                analisesSolo.forEach(s => { if(!s.id) s.id = generateUUID(); });
 
                 if(data.opcoes) {
                     opcoesDin.talhoes = [...new Set([...opcoesDin.talhoes, ...(data.opcoes.talhoes || [])])].sort();
@@ -827,14 +846,23 @@
             statusDiv.innerHTML = '🟢 DADOS SINCRONIZADOS'; statusDiv.className = 'status-conexao conectado';
         } catch(e) {
             permissaoNuvem = false; // TRAVA ATIVA
+            // Se falhou a nuvem, limpa o que tem local na mesma
+            transacoes = deduplicateTransactions(transacoes);
+            agriRecords = deduplicateAgri(agriRecords);
+            analisesSolo = deduplicateSolo(analisesSolo);
+            estoque = deduplicateEstoque(estoque);
+            
             statusDiv.innerHTML = '🔴 MODO OFFLINE (Falha Nuvem)'; statusDiv.className = 'status-conexao erro';
-            mostrarToast("Trabalhando Offline. Nuvem protegida contra sobrescrita.");
+            mostrarToast("Trabalhando Offline. Nuvem protegida.");
         }
 
         const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo };
         try { localStorage.setItem('rancho3c_offline', JSON.stringify(payload)); } catch(err) { alert("Memória local cheia!"); }
 
         try { popularSeletorSolo(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); } catch(e){}
+        
+        // Auto Save após Limpeza para guardar a ordem na Nuvem
+        if(permissaoNuvem) salvarDados();
         showTab('home');
     }
 
@@ -852,7 +880,7 @@
         statusDiv.innerHTML = '⏳ A gravar...'; statusDiv.className = 'status-conexao aguardando';
         try {
             const response = await fetch(URL_GOOGLE_SCRIPT, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-            if(!response.ok) throw new Error("HTTP Post Error");
+            if(!response.ok) throw new Error("HTTP Error");
             statusDiv.innerHTML = `🟢 SINCRONIZADO`; statusDiv.className = 'status-conexao conectado'; 
         } catch (e) { 
             permissaoNuvem = false; 
@@ -1190,10 +1218,7 @@
             else { vA = String(vA).toLowerCase(); vB = String(vB).toLowerCase(); }
             if(vA < vB) return ordemAscendente ? -1 : 1; if(vA > vB) return ordemAscendente ? 1 : -1; return 0;
         });
-        renderTabela(lista);
-    }
-
-    function renderTabela(lista) {
+        
         let linhasHTML = []; const hojeObj = new Date(hojeLocal() + 'T00:00:00');
         lista.forEach(t => {
             try {
@@ -1312,18 +1337,16 @@
         } else { 
             let old = agriRecords.find(r => r.id === editId);
             if(old) {
-                // Reverte estoque se aplicado passado
                 if (old.status === 'APLICADO' && old.data <= hojeLocal()) {
                     let est = estoque.find(e => e && !e.deleted && e.produto === old.produto && e.un === old.dosagem_un);
                     if(est) { est.qtd += old.dosagem_qtd; est.updatedAt = Date.now(); } 
                 }
                 
                 record.id = old.id;
-                record.custo_unit = old.custo_unit; // preserva custo histórico
+                record.custo_unit = old.custo_unit; 
                 let idx = agriRecords.indexOf(old);
                 agriRecords[idx] = record; 
                 
-                // Aplica nova
                 if (record.status === 'APLICADO' && record.data <= hojeLocal()) {
                     let est = estoque.find(e => e && !e.deleted && e.produto === record.produto && e.un === record.dosagem_un);
                     if(est) { est.qtd -= record.dosagem_qtd; est.updatedAt = Date.now(); }
@@ -1424,7 +1447,7 @@
                     <td style="${corQtd}">${qEstoque.toFixed(2)} ${strSafe(rec.un)}</td><td>${formatarMoeda(rec.valor_unit)}</td><td style="font-weight:700; font-family:'Rubik'; color:var(--cor-texto);">${formatarMoeda(vTot)}</td>
                     <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editEstoque('${rec.id}')">✏️</button><button class="btn-acao btn-excluir" onclick="deleteEstoque('${rec.id}')">🗑️</button></td>
                 </tr>`;
-            } catch(e) { console.error("Linha Est ignorada"); }
+            } catch(e) { }
         });
         document.getElementById('estoqueBody').innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding:30px; color:#aaa;">Estoque vazio</td></tr>';
         document.getElementById('th-valor-total-est').innerHTML = `VALOR TOTAL<br><span style="font-size: 13px; color: #fff;">${formatarMoeda(somaTotal)}</span>`;
@@ -1526,13 +1549,13 @@
         }
     }
     
-    // Motor de Ordenação Otimizado sem travar o DOM
+    // Otimização para não quebrar o HTML na ordenação
     function sortAgriTable(n) {
         let ord = [...agriRecords.filter(r => !r.deleted)];
         let key = ['data','talhao','produto','tipo','alvo','dosagem','forma','custo','status'][n];
         ord.sort((a,b) => {
             let vA = a[key] || ''; let vB = b[key] || '';
-            if(n===7) { // Ordenação por custo numérico
+            if(n===7) { // custo numérico
                let ae = estoque.find(e=>!e.deleted&&e.produto===a.produto&&e.un===a.dosagem_un);
                let be = estoque.find(e=>!e.deleted&&e.produto===b.produto&&e.un===b.dosagem_un);
                vA = (a.dosagem_qtd||0) * (ae ? ae.valor_unit||0 : a.custo_unit||0);
@@ -1544,7 +1567,7 @@
             return 0;
         });
         ordemAscendente = !ordemAscendente;
-        // Limpar a tabela e recarregar ordenado
+        
         const safraSelecionada = safeVal('safraSelector');
         const visible = safraSelecionada === "TODAS" ? ord : ord.filter(r => obterSafraGeral(r.data) === safraSelecionada);
         let html = '';
@@ -1598,13 +1621,6 @@
 
         setVal('sl_sb', sb > 0 ? sb.toFixed(2) : 'ns'); setVal('sl_t_min', t_min > 0 ? t_min.toFixed(2) : 'ns'); setVal('sl_t_max', t_max > 0 ? t_max.toFixed(2) : 'ns');
         setVal('sl_v', t_max > 0 ? v.toFixed(0) : 'ns'); setVal('sl_m', t_min > 0 ? m.toFixed(0) : 'ns');
-        
-        // Uso de try/catch oculto via setVal para ignorar campos que não existem visualmente
-        setVal('sl_camg', mg > 0 ? (ca/mg).toFixed(2) : 'ns'); setVal('sl_cak', k_cmol > 0 ? (ca/k_cmol).toFixed(2) : 'ns');
-        setVal('sl_mgk', k_cmol > 0 ? (mg/k_cmol).toFixed(2) : 'ns'); setVal('sl_camgk', k_cmol > 0 ? ((ca+mg)/k_cmol).toFixed(2) : 'ns');
-        setVal('sl_cat', t_max > 0 ? ((ca/t_max)*100).toFixed(0) : 'ns'); setVal('sl_mgt', t_max > 0 ? ((mg/t_max)*100).toFixed(0) : 'ns');
-        setVal('sl_kt', t_max > 0 ? ((k_cmol/t_max)*100).toFixed(0) : 'ns'); setVal('sl_halt', t_max > 0 ? ((hal/t_max)*100).toFixed(0) : 'ns');
-        setVal('sl_nat', t_max > 0 && na > 0 ? ((na_cmol/t_max)*100).toFixed(0) : 'ns');
         aplicarCoresNiveis();
     }
 
@@ -1650,7 +1666,7 @@
             fe: safeVal('sl_fe'), 
             mn: safeVal('sl_mn'), ext_mn: safeVal('ext_mn') || '1',
             zn: safeVal('sl_zn'), ext_zn: safeVal('ext_zn') || '1',
-            co2: safeVal('sl_co2') || 'ns', mo2: safeVal('sl_mo2') || 'ns', si: safeVal('sl_si') || 'ns', 
+            co2: 'ns', mo2: 'ns', si: 'ns', 
             areia_g: safeVal('sl_areia_g'), areia_f: safeVal('sl_areia_f'), areia_t: safeVal('sl_areia_t'), silte: safeVal('sl_silte'), argila: safeVal('sl_argila')
         };
 
@@ -1677,7 +1693,7 @@
         let an = analisesSolo.find(a => a && a.id === id); if(!an || an.deleted) return;
         setVal('sl_id', an.id); setVal('sl_data', an.data); setVal('sl_talhao', an.talhao); setVal('sl_prof', an.prof);
         
-        const campos = ['ph_h2o', 'ph_cacl2', 'ph_kcl', 'ce', 'al', 'hal', 'sb', 't_min', 't_max', 'v', 'm', 'p_meh', 'prem', 'pres', 'ptotal', 'na', 'k', 's', 'ca', 'mg', 'mo', 'co', 'b', 'cu', 'fe', 'mn', 'zn', 'co2', 'mo2', 'si', 'areia_g', 'areia_f', 'areia_t', 'silte', 'argila'];
+        const campos = ['ph_h2o', 'ph_cacl2', 'ph_kcl', 'ce', 'al', 'hal', 'sb', 't_min', 't_max', 'v', 'm', 'p_meh', 'prem', 'pres', 'ptotal', 'na', 'k', 's', 'ca', 'mg', 'mo', 'co', 'b', 'cu', 'fe', 'mn', 'zn', 'areia_g', 'areia_f', 'areia_t', 'silte', 'argila'];
         campos.forEach(c => { setVal('sl_' + c, an[c] !== undefined ? an[c] : ''); });
         
         if(an.ext_b) setVal('ext_b', an.ext_b); if(an.ext_cu) setVal('ext_cu', an.ext_cu); if(an.ext_mn) setVal('ext_mn', an.ext_mn); if(an.ext_zn) setVal('ext_zn', an.ext_zn);
@@ -1751,7 +1767,7 @@
     }
 
     function atualizarMetaProdutividade() {
-        // Campo liberado para o Agrónomo até que tenhamos um módulo de Safras Históricas
+        // Campo liberado para o Agrónomo, sem sobrescrita
     }
 
     function alternarFaseCultura() {
@@ -1807,7 +1823,7 @@
                 reqGeralCalc.p = p_020 < 10 ? 120 : (p_020 < 20 ? 80 : (p_020 < 50 ? 50 : 0));
                 reqGeralCalc.k = k_020 < 60 ? 360 : (k_020 < 100 ? 300 : (k_020 < 150 ? 240 : (k_020 < 200 ? 120 : 0)));
             }
-            exp += `✅ <strong>Nutrição NPK:</strong> Exportação projetada para ${prod} sc/t.`;
+            exp += `✅ <strong>Nutrição NPK:</strong> Exportação para ${prod}.`;
         } else {
             const d_n = parseFloat(safeVal('calc_dose_n')) || 0; const d_p = parseFloat(safeVal('calc_dose_p')) || 0; const d_k = parseFloat(safeVal('calc_dose_k')) || 0;
             reqGeralCalc.n = (d_n * estande) / 1000; reqGeralCalc.p = (d_p * estande) / 1000; reqGeralCalc.k = (d_k * estande) / 1000;
@@ -1831,7 +1847,6 @@
 
             if (a.ext_mn === "1" || !a.ext_mn) { if (vMn > 0) { if (vMn < 5) rec_mn = 15; else if (vMn >= 5 && vMn < 10) rec_mn = 10; else if (vMn >= 10 && vMn < 15) rec_mn = 5; else rec_mn = 0; }
             } else { if (vMn > 0) { if (vMn < 1.0) rec_mn = 15; else if (vMn >= 1.0 && vMn < 2.5) rec_mn = 10; else if (vMn >= 2.5 && vMn < 5.0) rec_mn = 5; else rec_mn = 0; } }
-            exp += `<br>✅ <strong>Micronutrientes:</strong> As recomendações basearam-se no extrator da sua última análise.`;
         }
 
         reqGeralCalc.zn = rec_zn; reqGeralCalc.b = rec_b; reqGeralCalc.cu = rec_cu; reqGeralCalc.mn = rec_mn;
