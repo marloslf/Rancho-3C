@@ -717,19 +717,38 @@
     function strSafe(val) { return (val === null || val === undefined) ? '' : String(val).trim(); }
     function strEscape(val) { const s = strSafe(val); return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
     
+    // --- MOTOR MATEMÁTICO SEGURO ---
+    // Converte os valores para inteiros (centavos) internamente para garantir precisão matemática
+    const MathSeguro = {
+        paraCentavos: (valor) => Math.round((parseFloat(valor) || 0) * 100),
+        paraReais: (centavos) => centavos / 100,
+        somar: (a, b) => MathSeguro.paraReais(MathSeguro.paraCentavos(a) + MathSeguro.paraCentavos(b)),
+        subtrair: (a, b) => MathSeguro.paraReais(MathSeguro.paraCentavos(a) - MathSeguro.paraCentavos(b)),
+        multiplicar: (qtd, valorUnit) => {
+            return MathSeguro.paraReais((parseFloat(qtd) || 0) * MathSeguro.paraCentavos(valorUnit));
+        }
+    };
+
     function parseNS(valStr) { if (!valStr || String(valStr).toLowerCase() === 'ns') return 0; let v = parseFloat(String(valStr).replace(',', '.')); return isNaN(v) ? 0 : v; }
     function safeVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
     function setVal(id, valor) { const el = document.getElementById(id); if (el) el.value = valor; }
 
-    function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+    // --- ATUALIZAÇÃO: Formatar Moeda (Travado em 2 Casas) ---
+    function formatarMoeda(valor) { 
+        const num = parseFloat(valor); 
+        return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { 
+            style: 'currency', 
+            currency: 'BRL', 
+            minimumFractionDigits: 2, 
+            maximumFractionDigits: 2 
+        }); 
+    }
     
     // LIMPADOR DE DATAS: O Assassino de 18T03:00Z
     function sanitizeDateString(d) {
         if(!d) return '';
         d = String(d);
-        // ISO limpo ex: 2026-06-18
         if (d.includes('T') && d.length >= 10 && d.charAt(4) === '-') return d.split('T')[0];
-        // Formato Bizarro do Bug ex: 18T03:00:00.000Z/06/2026
         if (d.includes('T') && d.includes('/')) {
             let parts = d.split('/');
             if(parts.length === 3) {
@@ -764,11 +783,9 @@
     }
     function obterSafraAtual() { return obterSafraGeral(hojeLocal()); }
 
-    // --- ALGORITMO UNIFICADOR DE HASH (Exterminador de Duplicados e Restaurador de Dados) ---
+    // --- ALGORITMO UNIFICADOR DE HASH (Exterminador de Duplicados) ---
     function unificarDados(localArr, cloudArr, hashFn) {
         let map = new Map();
-
-        // 1. Lemos a Nuvem e criamos um "Hash" baseado no conteúdo real
         (cloudArr || []).forEach(item => {
             if(!item || item.deleted) return;
             let hash = hashFn(item);
@@ -776,38 +793,34 @@
             item._hash = hash;
             map.set(hash, item);
         });
-
-        // 2. Lemos o Computador (Local) e fundimos com a nuvem
         (localArr || []).forEach(item => {
             if(!item) return;
             let hash = hashFn(item);
             if (item.deleted) {
-                map.delete(hash); // Se você apagou localmente, forçamos a apagar na nuvem
+                map.delete(hash); 
             } else {
                 if(!item.id) item.id = generateUUID();
                 item._hash = hash;
                 if(map.has(hash)) {
                     let existente = map.get(hash);
-                    // Se o local for mais recente (updatedAt), ele vence.
                     if(item.updatedAt && existente.updatedAt && item.updatedAt > existente.updatedAt) {
                         map.set(hash, item); 
                     } else if (!existente.updatedAt) {
-                        map.set(hash, item); // Priorizamos o local se a nuvem for velha
+                        map.set(hash, item); 
                     }
                 } else {
-                    map.set(hash, item); // Se não existe na nuvem, adiciona (recuperação de dados!)
+                    map.set(hash, item); 
                 }
             }
         });
-
         return Array.from(map.values()).map(item => { delete item._hash; return item; });
     }
 
-    // Funções de Criação de Impressão Digital (Hash)
-    let hashTransacao = t => `${sanitizeDateString(t.data)}_${strSafe(t.tipo)}_${strSafe(t.categoria)}_${t.valor}_${strSafe(t.desc)}`;
-    let hashAgri = a => `${sanitizeDateString(a.data)}_${strSafe(a.talhao)}_${strSafe(a.produto)}_${a.dosagem_qtd}`;
-    let hashSolo = s => `${sanitizeDateString(s.data)}_${strSafe(s.talhao)}_${strSafe(s.prof)}`;
-    let hashEstoque = e => `${strSafe(e.produto)}_${strSafe(e.un)}`;
+    // --- IMPRESSÕES DIGITAIS ESTRITAS (Anti-Duplicação) ---
+    let hashTransacao = t => `${sanitizeDateString(t.data)}_${strSafe(t.tipo).trim().toUpperCase()}_${strSafe(t.categoria).trim().toUpperCase()}_${parseFloat(t.valor||0).toFixed(2)}_${strSafe(t.desc).trim().toUpperCase()}`;
+    let hashAgri = a => `${sanitizeDateString(a.data)}_${strSafe(a.talhao).trim().toUpperCase()}_${strSafe(a.produto).trim().toUpperCase()}_${parseFloat(a.dosagem_qtd||0).toFixed(3)}`;
+    let hashSolo = s => `${sanitizeDateString(s.data)}_${strSafe(s.talhao).trim().toUpperCase()}_${strSafe(s.prof).trim().toUpperCase()}`;
+    let hashEstoque = e => `${strSafe(e.produto).trim().toUpperCase()}_${strSafe(e.un).trim().toUpperCase()}`;
 
     let permissaoNuvem = false; // Trava de Segurança Crítica
 
@@ -831,7 +844,6 @@
             const data = await response.json();
             
             if (!Array.isArray(data)) {
-                // Passar na Máquina de Lavar (Unificador de Hash)
                 transacoes = unificarDados(transacoes, data.transacoes, hashTransacao);
                 agriRecords = unificarDados(agriRecords, data.aplicacoes, hashAgri);
                 analisesSolo = unificarDados(analisesSolo, data.analises, hashSolo);
@@ -847,8 +859,7 @@
             permissaoNuvem = true; 
             statusDiv.innerHTML = '🟢 DADOS SINCRONIZADOS E LIMPOS'; statusDiv.className = 'status-conexao conectado';
         } catch(e) {
-            permissaoNuvem = false; // TRAVA ATIVA
-            // Se falhou a nuvem, limpa o que tem local na mesma cruzando com ele próprio para remover clones!
+            permissaoNuvem = false; 
             transacoes = unificarDados(transacoes, [], hashTransacao);
             agriRecords = unificarDados(agriRecords, [], hashAgri);
             analisesSolo = unificarDados(analisesSolo, [], hashSolo);
@@ -863,7 +874,6 @@
 
         try { popularSeletorSolo(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); } catch(e){}
         
-        // Auto Save após Limpeza para guardar a casa arrumada na Nuvem
         if(permissaoNuvem) salvarDados();
         showTab('home');
     }
@@ -935,19 +945,40 @@
             let v = parseFloat(t.valor) || 0; let sit = strSafe(t.sit).toLowerCase(); let tipo = String(t.tipo).toLowerCase();
             let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (tipo === 'receita') ? strSafe(t.desc) : strSafe(t.setor); cat = cat.toUpperCase();
 
+            // Matemática Segura implementada aqui
             if (tipo === 'receita') {
-                if (sit.includes('pago')) { tR += v; rCat[cat] = (rCat[cat] || 0) + v; } else if (sit.includes('receber') || sit.includes('pagar')) aR += v;
+                if (sit.includes('pago')) { 
+                    tR = MathSeguro.somar(tR, v); 
+                    rCat[cat] = MathSeguro.somar(rCat[cat] || 0, v); 
+                } else if (sit.includes('receber') || sit.includes('pagar')) {
+                    aR = MathSeguro.somar(aR, v);
+                }
             } else if (tipo === 'despesa') {
-                if (sit.includes('pago')) { tD += v; dCat[cat] = (dCat[cat] || 0) + v; } else if (sit.includes('pagar') || sit.includes('receber')) { aP += v; if(t.data && new Date(String(sanitizeDateString(t.data)) + 'T00:00:00') < hojeObj) qtdAtrasadas++; }
+                if (sit.includes('pago')) { 
+                    tD = MathSeguro.somar(tD, v); 
+                    dCat[cat] = MathSeguro.somar(dCat[cat] || 0, v); 
+                } else if (sit.includes('pagar') || sit.includes('receber')) { 
+                    aP = MathSeguro.somar(aP, v); 
+                    if(t.data && new Date(String(sanitizeDateString(t.data)) + 'T00:00:00') < hojeObj) qtdAtrasadas++; 
+                }
             } else if (tipo === 'investimento') {
-                if (sit.includes('pago')) { tI += v; dCat[cat] = (dCat[cat] || 0) + v; } else if (sit.includes('pagar') || sit.includes('receber')) { aP += v; if(t.data && new Date(String(sanitizeDateString(t.data)) + 'T00:00:00') < hojeObj) qtdAtrasadas++; }
+                if (sit.includes('pago')) { 
+                    tI = MathSeguro.somar(tI, v); 
+                    dCat[cat] = MathSeguro.somar(dCat[cat] || 0, v); 
+                } else if (sit.includes('pagar') || sit.includes('receber')) { 
+                    aP = MathSeguro.somar(aP, v); 
+                    if(t.data && new Date(String(sanitizeDateString(t.data)) + 'T00:00:00') < hojeObj) qtdAtrasadas++; 
+                }
             }
         });
 
         const badgeElement = document.getElementById('badge_atrasadas');
         if(qtdAtrasadas > 0 && badgeElement) { badgeElement.innerText = qtdAtrasadas; badgeElement.style.display = 'inline-block'; } else if (badgeElement) { badgeElement.style.display = 'none'; }
-        document.getElementById('res_receitas').innerText = formatarMoeda(tR); document.getElementById('res_despesas').innerText = formatarMoeda(tD); document.getElementById('res_investimentos').innerText = formatarMoeda(tI);
-        document.getElementById('res_saldo').innerText = formatarMoeda(tR - tD - tI);
+        
+        document.getElementById('res_receitas').innerText = formatarMoeda(tR); 
+        document.getElementById('res_despesas').innerText = formatarMoeda(tD); 
+        document.getElementById('res_investimentos').innerText = formatarMoeda(tI);
+        document.getElementById('res_saldo').innerText = formatarMoeda(MathSeguro.subtrair(MathSeguro.subtrair(tR, tD), tI));
 
         if (typeof Chart !== 'undefined') {
             if (chartCaixaObj) chartCaixaObj.destroy(); if (chartPendenteObj) chartPendenteObj.destroy();
@@ -990,12 +1021,12 @@
             let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (tipoStr === 'receita') ? strSafe(t.desc) : strSafe(t.setor); 
 
             if (checkTipo && cat.toUpperCase() === categoriaDesc.toUpperCase()) {
-                let v = parseFloat(t.valor) || 0; valorTotal += v;
+                let v = parseFloat(t.valor) || 0; valorTotal = MathSeguro.somar(valorTotal, v);
                 let chaveAgrupamento = tipoFiltro === 'Saida' ? strSafe(t.setor).toUpperCase() : strSafe(t.local).toUpperCase();
                 if (!chaveAgrupamento || chaveAgrupamento === '-') chaveAgrupamento = "NÃO INFORMADO";
-                divisao[chaveAgrupamento] = (divisao[chaveAgrupamento] || 0) + v;
+                divisao[chaveAgrupamento] = MathSeguro.somar(divisao[chaveAgrupamento] || 0, v);
                 let chaveDesc = strSafe(t.desc).toUpperCase(); if (!chaveDesc || chaveDesc === '-') chaveDesc = "SEM DESCRIÇÃO";
-                divisaoDesc[chaveDesc] = (divisaoDesc[chaveDesc] || 0) + v;
+                divisaoDesc[chaveDesc] = MathSeguro.somar(divisaoDesc[chaveDesc] || 0, v);
             }
         });
 
@@ -1073,11 +1104,11 @@
             if (tipoL === 'receita') {
                 htmlRec += `<tr><td>${dF}</td><td>${strEscape(t.local)}</td><td style="font-weight:700; color:var(--cor-azul-flat); text-align:right;">${formatarMoeda(v)}</td>
                     <td style="text-align: center;"><button class="btn-acao bg-pago" onclick="mudarSitEAtualizarPendencias('${t.id}', 'Pago')">✔️ Receber</button></td></tr>`;
-                tRec += v;
+                tRec = MathSeguro.somar(tRec, v);
             } else {
                 htmlDesp += `<tr><td>${dF}</td><td>${strEscape(t.local)}</td><td style="font-weight:700; color:var(--cor-vermelho-flat); text-align:right;">${formatarMoeda(v)}</td>
                     <td style="text-align: center;"><button class="btn-acao bg-pago" onclick="mudarSitEAtualizarPendencias('${t.id}', 'Pago')">✔️ Pagar</button></td></tr>`;
-                tDesp += v;
+                tDesp = MathSeguro.somar(tDesp, v);
             }
         });
         document.getElementById('tbody_receitas_pendentes').innerHTML = htmlRec || '<tr><td colspan="4" style="text-align:center; padding: 20px; color:#aaa;">Nenhuma pendência!</td></tr>';
@@ -1109,8 +1140,18 @@
         buildDatalist('lista_r_categoria', rCats); buildDatalist('lista_r_local', rLocais);
     }
 
-    function calcularTotalReceita() { let q = parseFloat(document.getElementById('r_qtd').value) || 0; let v = parseFloat(document.getElementById('r_v_unit').value) || 0; if (q>0 && v>0) document.getElementById('r_valor').value = (q * v).toFixed(2); }
-    function calcularTotalDespesa() { let q = parseFloat(document.getElementById('d_qtd').value) || 0; let v = parseFloat(document.getElementById('d_v_unit').value) || 0; if (q>0 && v>0) document.getElementById('d_valor').value = (q * v).toFixed(2); }
+    // --- CÁLCULO SEGURO NO FORMULÁRIO ---
+    function calcularTotalReceita() { 
+        let q = parseFloat(document.getElementById('r_qtd').value) || 0; 
+        let v = parseFloat(document.getElementById('r_v_unit').value) || 0; 
+        if (q > 0 && v > 0) document.getElementById('r_valor').value = MathSeguro.multiplicar(q, v).toFixed(2); 
+    }
+    
+    function calcularTotalDespesa() { 
+        let q = parseFloat(document.getElementById('d_qtd').value) || 0; 
+        let v = parseFloat(document.getElementById('d_v_unit').value) || 0; 
+        if (q > 0 && v > 0) document.getElementById('d_valor').value = MathSeguro.multiplicar(q, v).toFixed(2); 
+    }
 
     function confirmarExclusao(id) { 
         if(confirm('EXCLUIR lançamento?')) { 
@@ -1267,14 +1308,14 @@
             if (!cat || cat === '-') cat = "SEM CATEGORIA";
             let loc = strSafe(t.local).toUpperCase() || 'NÃO INFORMADO'; let setor = strSafe(t.setor).toUpperCase() || 'SEM SETOR';
 
-            if (tipo === 'despesa') { despSetor[setor] = (despSetor[setor] || 0) + v; despCat[cat] = (despCat[cat] || 0) + v; } 
-            else if (tipo === 'investimento') { invCat[cat] = (invCat[cat] || 0) + v; } 
-            else if (tipo === 'receita') { recCat[cat] = (recCat[cat] || 0) + v; recLocal[loc] = (recLocal[loc] || 0) + v; }
+            if (tipo === 'despesa') { despSetor[setor] = MathSeguro.somar(despSetor[setor] || 0, v); despCat[cat] = MathSeguro.somar(despCat[cat] || 0, v); } 
+            else if (tipo === 'investimento') { invCat[cat] = MathSeguro.somar(invCat[cat] || 0, v); } 
+            else if (tipo === 'receita') { recCat[cat] = MathSeguro.somar(recCat[cat] || 0, v); recLocal[loc] = MathSeguro.somar(recLocal[loc] || 0, v); }
         });
 
         function renderTabelaRel(id, dadosObj, cor) {
             let html = ''; let totalSoma = 0;
-            Object.entries(dadosObj).sort((a,b) => b[1] - a[1]).forEach(item => { html += `<tr><td>${strEscape(item[0])}</td><td style="font-weight:700; font-family:'Rubik'; color:${cor}; text-align:right;">${formatarMoeda(item[1])}</td></tr>`; totalSoma += item[1]; });
+            Object.entries(dadosObj).sort((a,b) => b[1] - a[1]).forEach(item => { html += `<tr><td>${strEscape(item[0])}</td><td style="font-weight:700; font-family:'Rubik'; color:${cor}; text-align:right;">${formatarMoeda(item[1])}</td></tr>`; totalSoma = MathSeguro.somar(totalSoma, item[1]); });
             if (html !== '') html += `<tr style="background-color: #f0f0f0; border-top: 2px solid ${cor};"><td style="font-weight:700;">TOTAL</td><td style="font-weight:700; font-family:'Rubik'; color:${cor}; text-align:right;">${formatarMoeda(totalSoma)}</td></tr>`;
             else html = '<tr><td colspan="2" style="text-align:center; color:#aaa;">Nenhum dado</td></tr>';
             if(document.getElementById(id)) document.getElementById(id).innerHTML = html;
@@ -1391,7 +1432,7 @@
                 let statusClass = rec.status === 'APLICADO' ? 'status-aplicado' : 'status-planejado';
                 let itemEstoque = estoque.find(e => e && !e.deleted && e.produto === rec.produto && e.un === rec.dosagem_un);
                 let aviso = (rec.status === 'PLANEJADO' && (!itemEstoque || itemEstoque.qtd < rec.dosagem_qtd)) ? '<br><span class="stock-warning">⚠️ FALTA NO ESTOQUE</span>' : '';
-                let custoTotal = (parseFloat(rec.dosagem_qtd)||0) * (itemEstoque ? (itemEstoque.valor_unit || 0) : (rec.custo_unit || 0));
+                let custoTotal = MathSeguro.multiplicar(rec.dosagem_qtd, (itemEstoque ? (itemEstoque.valor_unit || 0) : (rec.custo_unit || 0)));
                 
                 let cClass = ''; let tStr = String(rec.tipo||'').toUpperCase();
                 if (tStr.includes('ADUBO') || tStr.includes('FERTILIZANTE')) cClass = 'linha-adubo';
@@ -1444,7 +1485,8 @@
                 if(qEstoque < 0) { cClass = 'tr-alerta'; corQtd = 'color: #c0392b; font-weight: 700;'; aviso = `<br><span class="stock-warning">⚠️ SALDO NEGATIVO</span>`; } 
                 else if (qEstoque < demanda) { cClass = 'tr-alerta'; corQtd = 'color: #c0392b; font-weight: 700;'; aviso = `<br><span class="stock-warning">⚠️ PRECISA DE ${demanda.toFixed(2)} ${rec.un}</span>`; }
 
-                let vTot = qEstoque > 0 ? (qEstoque * (rec.valor_unit || 0)) : 0; somaTotal += vTot;
+                let vTot = qEstoque > 0 ? MathSeguro.multiplicar(qEstoque, (rec.valor_unit || 0)) : 0; 
+                somaTotal = MathSeguro.somar(somaTotal, vTot);
 
                 html += `<tr class="${cClass}">
                     <td><b style="color:var(--cor-laranja-flat);">${strEscape(rec.produto)}</b>${aviso}</td><td>${strEscape(rec.principio)||'-'}</td><td>${strEscape(rec.tipo)}</td>
@@ -1462,7 +1504,8 @@
         const safraSel = safeVal('safraSelector'); const talhaoSel = safeVal('talhaoDashboardSelector');
         let dS = {}, dT = {}, dTp = {}, dCS = {}, dCT = {}; let tApp = 0, tPlan = 0, count = 0;
         let validEstoque = estoque.filter(e => e && !e.deleted && e.produto);
-        let patrim = validEstoque.reduce((acc, curr) => acc + (parseFloat(curr.qtd) > 0 ? (parseFloat(curr.qtd) * (curr.valor_unit || 0)) : 0), 0);
+        
+        let patrim = validEstoque.reduce((acc, curr) => MathSeguro.somar(acc, (parseFloat(curr.qtd) > 0 ? MathSeguro.multiplicar(parseFloat(curr.qtd), (curr.valor_unit || 0)) : 0)), 0);
         document.getElementById('kpi-estoque').innerText = formatarMoeda(patrim);
 
         agriRecords.forEach(rec => {
@@ -1471,16 +1514,16 @@
             if (safraSel !== 'TODAS' && safra !== safraSel) return; if (talhaoSel !== 'TODOS' && talhao !== talhaoSel) return;
             count++;
             let itemEst = validEstoque.find(e => e.produto === rec.produto && e.un === rec.dosagem_un);
-            let custo = parseFloat(rec.dosagem_qtd) * (itemEst ? (itemEst.valor_unit || 0) : (rec.custo_unit || 0));
+            let custo = MathSeguro.multiplicar(parseFloat(rec.dosagem_qtd), (itemEst ? (itemEst.valor_unit || 0) : (rec.custo_unit || 0)));
 
             if (rec.status === 'APLICADO') {
-                tApp += custo;
+                tApp = MathSeguro.somar(tApp, custo);
                 if (!dS[safra]) dS[safra] = { L: 0, KG: 0 }; dS[safra][rec.dosagem_un] += parseFloat(rec.dosagem_qtd);
-                dCS[safra] = (dCS[safra]||0) + custo;
+                dCS[safra] = MathSeguro.somar(dCS[safra]||0, custo);
                 if (!dT[talhao]) dT[talhao] = { L: 0, KG: 0 }; dT[talhao][rec.dosagem_un] += parseFloat(rec.dosagem_qtd);
-                dCT[talhao] = (dCT[talhao]||0) + custo;
+                dCT[talhao] = MathSeguro.somar(dCT[talhao]||0, custo);
                 if (!dTp[rec.tipo]) dTp[rec.tipo] = { L: 0, KG: 0 }; dTp[rec.tipo][rec.dosagem_un] += parseFloat(rec.dosagem_qtd);
-            } else { tPlan += custo; }
+            } else { tPlan = MathSeguro.somar(tPlan, custo); }
         });
 
         document.getElementById('kpi-aplicado').innerText = formatarMoeda(tApp); document.getElementById('kpi-planejado').innerText = formatarMoeda(tPlan); document.getElementById('kpi-registros').innerText = count;
@@ -1561,8 +1604,8 @@
             if(n===7) { // custo numérico
                let ae = estoque.find(e=>!e.deleted&&e.produto===a.produto&&e.un===a.dosagem_un);
                let be = estoque.find(e=>!e.deleted&&e.produto===b.produto&&e.un===b.dosagem_un);
-               vA = (a.dosagem_qtd||0) * (ae ? ae.valor_unit||0 : a.custo_unit||0);
-               vB = (b.dosagem_qtd||0) * (be ? be.valor_unit||0 : b.custo_unit||0);
+               vA = MathSeguro.multiplicar((a.dosagem_qtd||0), (ae ? ae.valor_unit||0 : a.custo_unit||0));
+               vB = MathSeguro.multiplicar((b.dosagem_qtd||0), (be ? be.valor_unit||0 : b.custo_unit||0));
             }
             if(n===0) { vA = new Date(sanitizeDateString(vA)).getTime()||0; vB = new Date(sanitizeDateString(vB)).getTime()||0; }
             if(vA < vB) return ordemAscendente ? -1 : 1;
@@ -1578,7 +1621,7 @@
             let statusClass = rec.status === 'APLICADO' ? 'status-aplicado' : 'status-planejado';
             let itemEstoque = estoque.find(e => e && !e.deleted && e.produto === rec.produto && e.un === rec.dosagem_un);
             let aviso = (rec.status === 'PLANEJADO' && (!itemEstoque || itemEstoque.qtd < rec.dosagem_qtd)) ? '<br><span class="stock-warning">⚠️ FALTA NO ESTOQUE</span>' : '';
-            let custoTotal = (parseFloat(rec.dosagem_qtd)||0) * (itemEstoque ? (itemEstoque.valor_unit || 0) : (rec.custo_unit || 0));
+            let custoTotal = MathSeguro.multiplicar((parseFloat(rec.dosagem_qtd)||0), (itemEstoque ? (itemEstoque.valor_unit || 0) : (rec.custo_unit || 0)));
             let cClass = ''; let tStr = String(rec.tipo||'').toUpperCase();
             if (tStr.includes('ADUBO') || tStr.includes('FERTILIZANTE')) cClass = 'linha-adubo'; else if (tStr.includes('INSETICIDA')) cClass = 'linha-inseticida'; else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida'; else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
 
