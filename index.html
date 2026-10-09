@@ -20,7 +20,6 @@
         body { margin: 0; padding: 0; background-color: var(--cor-fundo); color: var(--cor-texto); font-family: 'Open Sans', sans-serif; display: flex; height: 100vh; overflow: hidden; }
         h1, h2, h3, h4, h5, .font-rubik { font-family: 'Rubik', sans-serif; margin-top: 0; }
 
-        /* --- SIDEBAR --- */
         .sidebar { width: 250px; background-color: var(--cor-sidebar); color: #fff; display: flex; flex-direction: column; height: 100vh; overflow-y: auto; position: fixed; left: 0; top: 0; z-index: 1000; }
         .sidebar-logo { padding: 30px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .sidebar-logo h2 { color: var(--cor-verde-flat); font-size: 20px; letter-spacing: 1px; margin: 10px 0 0 0; }
@@ -30,7 +29,6 @@
         .sidebar-menu button.btn-ativo { color: #fff; background-color: var(--cor-sidebar-hover); border-left: 4px solid var(--cor-sidebar-ativo); }
         .sidebar-group-title { color: #666; font-size: 11px; padding: 15px 25px 5px 25px; text-transform: uppercase; font-family: 'Open Sans', sans-serif; font-weight: 700; letter-spacing: 1px; }
 
-        /* --- MAIN CONTENT --- */
         .main-content { margin-left: 250px; width: calc(100% - 250px); height: 100vh; overflow-y: auto; padding: 30px; position: relative; }
         .header-container { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 30px; border-radius: var(--borda-raio); box-shadow: var(--sombra-flat); border: 1px solid #eee; margin-bottom: 25px; }
         .header-container img { max-width: 60px; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1)); border-radius: 8px;}
@@ -44,7 +42,6 @@
         .tab.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- WIDGETS E CARDS --- */
         .resumo-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 25px; }
         .card { padding: 25px; border-radius: var(--borda-raio); box-shadow: var(--sombra-flat); color: white; position: relative; }
         .card-receita { background-color: var(--cor-verde-flat); } .card-despesa { background-color: var(--cor-laranja-flat); } .card-investimento { background-color: var(--cor-roxo-flat); } .card-saldo { background-color: var(--cor-azul-flat); } 
@@ -65,7 +62,6 @@
         .barra-grafico-despesa { height: 100%; background-color: var(--cor-laranja-flat); border-radius: 2px;}
         .badge-atrasadas { position: absolute; top: 12px; right: 15px; background: var(--cor-vermelho-flat); color: white; font-weight: 700; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
 
-        /* --- FORMS --- */
         .filter-bar { display: flex; gap: 15px; align-items: center; background: white; padding: 15px 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-flat); margin-bottom: 20px; flex-wrap: wrap; border: 1px solid #eee;}
         input, select { padding: 10px 15px; font-size: 13px; border: 1px solid #e0e0e0; border-radius: var(--borda-raio); font-family: 'Open Sans', sans-serif; color: var(--cor-texto); background-color: #fafafa; transition: 0.2s; width: 100%; }
         input::placeholder { color: #aaa; }
@@ -83,7 +79,6 @@
         .btn-limpar { background: #95a5a6; color: white; padding: 10px 20px; border: none; border-radius: var(--borda-raio); cursor: pointer; font-family: 'Rubik', sans-serif; font-weight: 700; font-size: 12px; transition: 0.2s;}
         .btn-limpar:hover { filter: brightness(1.1); }
 
-        /* --- TABELAS --- */
         .table-container { overflow-x: auto; overflow-y: auto; border-radius: var(--borda-raio); box-shadow: var(--sombra-flat); background: white; max-height: 60vh; border: 1px solid #eee;}
         table { width: 100%; border-collapse: collapse; font-size: 12px; background: white; white-space: nowrap; font-family: 'Open Sans', sans-serif;}
         .tabela-larga { min-width: 1000px; } 
@@ -108,7 +103,6 @@
         tr.linha-herbicida td { background-color: rgba(155, 89, 182, 0.05); }
         .tr-alerta td { background-color: #fdedec !important; }
 
-        /* --- ABAS INTERNAS E MODAIS --- */
         .sub-menu { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #e0e0e0; padding-bottom: 10px;}
         .sub-menu button { padding: 8px 20px; border-radius: 20px; border: 1px solid transparent; background: transparent; font-weight: 700; color: #888; cursor: pointer; transition: 0.2s; font-family: 'Rubik', sans-serif;}
         .sub-menu button.active { background: #eef2f5; color: var(--cor-texto); border-color: #d1d9e0;}
@@ -122,7 +116,6 @@
         .toast { visibility: hidden; min-width: 250px; background-color: var(--cor-verde-flat); color: #fff; text-align: center; border-radius: var(--borda-raio); padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: 700; opacity: 0; transition: opacity 0.4s, bottom 0.4s; font-family: 'Rubik', sans-serif;}
         .toast.show { visibility: visible; opacity: 1; bottom: 50px;}
 
-        /* --- MÓDULO SOLO --- */
         .box-solo { background: white; padding: 20px; border-radius: var(--borda-raio); box-shadow: var(--sombra-flat); margin-bottom: 20px; border: 1px solid #eee;}
         .laudo-texto { background: #f8f9fa; border-left: 4px solid var(--cor-azul-flat); padding: 15px; border-radius: 0 var(--borda-raio) var(--borda-raio) 0; font-size: 13px; color: #444; margin-top: 15px; line-height: 1.6;}
         
@@ -139,7 +132,6 @@
             @page { margin: 1cm; size: A4 portrait; }
         }
     </style>
-    <!-- Versão Fixa do Chart.js para evitar quebras futuras -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -181,12 +173,12 @@
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://i.imgur.com/jPLDeyi.png'); background-size: 60%; background-position: center; background-repeat: no-repeat; opacity: 0.05; z-index: 0; pointer-events: none;"></div>
             <div style="z-index: 1; text-align: center;">
                 <h1 style="color: var(--cor-texto); font-size: 40px; letter-spacing: 2px;">BEM-VINDO AO RANCHO 3C</h1>
-                <p style="color: var(--cor-texto-claro); font-size: 16px;">Otimização de Filtros e Módulo de Chuvas Ativados.</p>
+                <p style="color: var(--cor-texto-claro); font-size: 16px;">Otimização Completa, Banco de Dados V2 e Módulo de Chuvas Ativados.</p>
             </div>
         </div>
     </div>
 
-    <!-- MÓDULO DE CHUVAS (PLUVIOMETRIA) -->
+    <!-- MÓDULO DE CHUVAS -->
     <div id="chuvas_main" class="tab">
         <div class="linha-lancamento linha-chuva no-print">
             <div style="font-size:14px; font-weight:700; color:var(--cor-azul-flat); margin-bottom: 10px; font-family:'Rubik';">🌧️ REGISTRAR CHUVA (PLUVIOMETRIA DIÁRIA)</div>
@@ -231,7 +223,7 @@
         <div class="filter-bar no-print">
             <div><label style="font-size:11px; font-weight:700; color:#888;">SAFRA:</label> <select id="filtro_safra_dashboard" onchange="atualizarResumoEGrafico()" style="width: auto; margin-left: 5px;"><option value="">TODAS</option></select></div>
             <div><label style="font-size:11px; font-weight:700; color:#888; margin-left:15px;">MÊS:</label> <input type="month" id="filtro_mes_dashboard" onchange="atualizarResumoEGrafico()" style="width: auto; margin-left: 5px;"></div>
-            <button onclick="setVal('filtro_safra_dashboard', ''); setVal('filtro_mes_dashboard', ''); atualizarResumoEGrafico()" class="btn-limpar" style="margin-left:auto;">LIMPAR FILTROS</button>
+            <button onclick="setHtml('filtro_safra_dashboard', ''); setVal('filtro_mes_dashboard', ''); atualizarResumoEGrafico()" class="btn-limpar" style="margin-left:auto;">LIMPAR FILTROS</button>
         </div>
 
         <div class="resumo-cards">
@@ -337,7 +329,7 @@
             <select id="filtro_safra_relatorios" onchange="atualizarRelatoriosDetalhados()" style="width:200px;"><option value="">TODAS</option></select>
             <label style="font-weight: 700; font-size:12px; margin-left: 20px;">MÊS:</label>
             <input type="month" id="filtro_mes_relatorios" onchange="atualizarRelatoriosDetalhados()" style="width:200px;">
-            <button onclick="setVal('filtro_safra_relatorios', ''); setVal('filtro_mes_relatorios', ''); atualizarRelatoriosDetalhados()" class="btn-limpar" style="margin-left:auto;">LIMPAR</button>
+            <button onclick="setHtml('filtro_safra_relatorios', ''); setVal('filtro_mes_relatorios', ''); atualizarRelatoriosDetalhados()" class="btn-limpar" style="margin-left:auto;">LIMPAR</button>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
@@ -664,6 +656,7 @@
                             <div><span style="font-size:11px; color:#888; font-weight:700;">GESSO AGRÍCOLA</span><br><span id="res_gesso" style="font-size:24px; font-weight:700; color:#555;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
                         </div>
                         
+                        <!-- MICRONUTRIENTES -->
                         <div style="display:flex; justify-content:space-around; text-align:center; margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px;">
                             <div><span style="font-size:11px; color:#888; font-weight:700;">ZINCO (Zn)</span><br><span id="res_zn" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
                             <div><span style="font-size:11px; color:#888; font-weight:700;">BORO (B)</span><br><span id="res_b" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
@@ -732,7 +725,7 @@
 <datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
 
 <!-- ========================================== -->
-<!-- LÓGICA JAVASCRIPT (SANEAMENTO E CHUVAS)    -->
+<!-- LÓGICA JAVASCRIPT                          -->
 <!-- ========================================== -->
 <script>
     const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxU-XxV63Eip3g636GkrVaV8zwnVPVomePZLIsZBV-ghCYJKxYUMtQoG2Kc903zeP4UoQ/exec";
@@ -748,18 +741,21 @@
     let colOrdenacao = 'data'; let ordemAscendente = false; let filtroRapido = '';
     let chartCaixaObj = null, chartPendenteObj = null; let chartS_Agri = null, chartT_Agri = null, chartTp_Agri = null, chartCS_Agri = null, chartCT_Agri = null; let chartSoloPrincipal = null, chartSoloMicros = null; let chartChuvasObj = null;
 
-    // --- FUNÇÕES CORE (LIMPEZA E SANITIZAÇÃO) ---
+    // --- FUNÇÕES DE SEGURANÇA ---
     function generateUUID() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); }
     function hojeLocal() { const d = new Date(); return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); }
     function strSafe(val) { return (val === null || val === undefined) ? '' : String(val).trim(); }
     function strEscape(val) { const s = strSafe(val); return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
     function parseNS(valStr) { if (!valStr || String(valStr).toLowerCase() === 'ns') return 0; let v = parseFloat(String(valStr).replace(',', '.')); return isNaN(v) ? 0 : v; }
     function safeVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
-    function setVal(id, valor) { const el = document.getElementById(id); if (el) { let old = el.value; el.innerHTML = valor; if(old && el.options) el.value = old; else el.value = valor; } }
+    
+    // Função corrigida para HTML estrutural (caixas de seleção)
+    function setHtml(id, htmlStr) { const el = document.getElementById(id); if (el) { let old = el.value; el.innerHTML = htmlStr; if(old) el.value = old; } }
+    // Função para inputs normais
+    function setVal(id, valor) { const el = document.getElementById(id); if (el) el.value = valor; }
 
     function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
     
-    // LIMPADOR DE DATAS
     function sanitizeDateString(d) {
         if(!d) return ''; d = String(d);
         if (d.includes('T') && d.length >= 10 && d.charAt(4) === '-') return d.split('T')[0];
@@ -790,10 +786,9 @@
     }
     function obterSafraAtual() { return obterSafraGeral(hojeLocal()); }
 
-    // --- ALGORITMO UNIFICADOR DE HASH E IDS ---
+    // --- MOTOR DE UNIFICAÇÃO ---
     function unificarDados(localArr, cloudArr, hashFn) {
         let map = new Map();
-
         (cloudArr || []).forEach(item => {
             if(!item || item.deleted) return;
             let hash = hashFn(item);
@@ -812,9 +807,7 @@
                     let existente = map.get(hash);
                     if(item.updatedAt && existente.updatedAt && item.updatedAt > existente.updatedAt) { map.set(hash, item); } 
                     else if (!existente.updatedAt) { map.set(hash, item); }
-                } else {
-                    map.set(hash, item); 
-                }
+                } else { map.set(hash, item); }
             }
         });
         return Array.from(map.values());
@@ -826,7 +819,7 @@
     let hashEstoque = e => `${strSafe(e.produto)}_${strSafe(e.un)}`;
     let hashChuva = c => sanitizeDateString(c.data);
 
-    let permissaoNuvem = false; // Trava de Segurança
+    let permissaoNuvem = false; 
 
     async function carregarDadosNuvem() {
         const statusDiv = document.getElementById('status_conexao');
@@ -866,13 +859,10 @@
             statusDiv.innerHTML = '🟢 DADOS SINCRONIZADOS E LIMPOS'; statusDiv.className = 'status-conexao conectado';
         } catch(e) {
             permissaoNuvem = false; 
-            transacoes = unificarDados(transacoes, [], hashTransacao);
-            agriRecords = unificarDados(agriRecords, [], hashAgri);
-            analisesSolo = unificarDados(analisesSolo, [], hashSolo);
-            estoque = unificarDados(estoque, [], hashEstoque);
-            chuvas = unificarDados(chuvas, [], hashChuva);
-            
+            transacoes = unificarDados(transacoes, [], hashTransacao); agriRecords = unificarDados(agriRecords, [], hashAgri); analisesSolo = unificarDados(analisesSolo, [], hashSolo);
+            estoque = unificarDados(estoque, [], hashEstoque); chuvas = unificarDados(chuvas, [], hashChuva);
             statusDiv.innerHTML = '🔴 MODO OFFLINE (Nuvem Segura)'; statusDiv.className = 'status-conexao erro';
+            mostrarToast("Atenção: A sua nuvem está desatualizada (V1) ou indisponível.");
         }
 
         const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo, chuvas };
@@ -919,8 +909,7 @@
             if(id === 'solo_main') { popularSeletorSolo(); renderizarHistoricoSolo(); }
             if(id === 'chuvas_main') { 
                 let m = hojeLocal().substring(5,7);
-                document.getElementById('cv_data').value = hojeLocal();
-                document.getElementById('filtro_mes_chuva').value = m;
+                setVal('cv_data', hojeLocal()); setVal('filtro_mes_chuva', m);
                 renderChuvas(); 
             }
         } catch(e) {}
@@ -933,7 +922,7 @@
     ========================================================================= */
     function addChuva(e) {
         e.preventDefault();
-        const dataStr = document.getElementById('cv_data').value; const mmStr = document.getElementById('cv_mm').value; const idEdicao = document.getElementById('cv_id').value;
+        const dataStr = safeVal('cv_data'); const mmStr = safeVal('cv_mm'); const idEdicao = safeVal('cv_id');
         if(!dataStr || !mmStr) return;
 
         const nova = { id: idEdicao ? idEdicao : generateUUID(), updatedAt: Date.now(), deleted: false, data: sanitizeDateString(dataStr), mm: parseFloat(mmStr) };
@@ -946,12 +935,10 @@
             if(existente) {
                 if(!confirm(`Já existe um registro de ${existente.mm} mm para este dia. Deseja substituir por ${nova.mm} mm?`)) return;
                 existente.mm = nova.mm; existente.updatedAt = Date.now();
-            } else {
-                chuvas.push(nova);
-            }
+            } else { chuvas.push(nova); }
         }
         
-        salvarDados(); document.getElementById('form_chuva').reset(); document.getElementById('cv_id').value = ''; document.getElementById('cv_data').value = hojeLocal();
+        salvarDados(); document.getElementById('form_chuva').reset(); setVal('cv_id', ''); setVal('cv_data', hojeLocal());
         renderChuvas(); mostrarToast("Chuva Registrada!");
     }
 
@@ -965,13 +952,12 @@
             <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editChuva('${c.id}')">✏️</button><button class="btn-acao btn-excluir" onclick="deleteChuva('${c.id}')">🗑️</button></td></tr>`;
         });
         document.getElementById('tbody_chuvas').innerHTML = html || '<tr><td colspan="3" style="text-align:center; padding:30px; color:#aaa;">Sem registros de chuvas</td></tr>';
-        
         renderChartChuvas();
     }
 
     function editChuva(id) {
         let c = chuvas.find(x => x.id === id); if(!c || c.deleted) return;
-        document.getElementById('cv_id').value = c.id; document.getElementById('cv_data').value = c.data; document.getElementById('cv_mm').value = c.mm; document.getElementById('cv_mm').focus();
+        setVal('cv_id', c.id); setVal('cv_data', c.data); setVal('cv_mm', c.mm); document.getElementById('cv_mm').focus();
     }
 
     function deleteChuva(id) {
@@ -983,7 +969,7 @@
 
     function renderChartChuvas() {
         if (typeof Chart === 'undefined') return;
-        const mesSelecionado = document.getElementById('filtro_mes_chuva').value;
+        const mesSelecionado = safeVal('filtro_mes_chuva');
         let validos = chuvas.filter(c => c && !c.deleted && c.data && sanitizeDateString(c.data).substring(5,7) === mesSelecionado);
         
         let dadosPorAno = {};
@@ -1017,7 +1003,7 @@
         let arrSafras = Array.from(safras).filter(s => s !== 'Sem Data').sort().reverse(); 
         let htmlOptions = '<option value="">TODAS AS SAFRAS</option>';
         arrSafras.forEach(s => htmlOptions += `<option value="${s}">Safra ${s}</option>`);
-        setVal('filtro_safra_dashboard', htmlOptions); setVal('filtro_safra_relatorios', htmlOptions);
+        setHtml('filtro_safra_dashboard', htmlOptions); setHtml('filtro_safra_relatorios', htmlOptions);
     }
 
     function atualizarResumoEGrafico() {
@@ -1082,8 +1068,7 @@
             if (filtroMes && (!t.data || !sanitizeDateString(t.data).startsWith(filtroMes))) return;
 
             let tipoStr = String(t.tipo).toLowerCase(); let checkTipo = false;
-            if (tipoFiltro === 'Saida') checkTipo = (tipoStr === 'despesa' || tipoStr === 'investimento');
-            else checkTipo = (tipoStr === 'receita');
+            if (tipoFiltro === 'Saida') checkTipo = (tipoStr === 'despesa' || tipoStr === 'investimento'); else checkTipo = (tipoStr === 'receita');
 
             let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (tipoStr === 'receita') ? strSafe(t.desc) : strSafe(t.setor); 
 
@@ -1395,20 +1380,19 @@
         const currentSelection = selector.value || obterSafraAtual();
         const safras = new Set(); safras.add(obterSafraAtual());
         agriRecords.forEach(rec => { if(rec && !rec.deleted && rec.data) safras.add(obterSafraGeral(rec.data)) });
-        selector.innerHTML = '<option value="TODAS">TODAS AS SAFRAS</option>' + Array.from(safras).sort().reverse().map(s => `<option value="${s}">${s}</option>`).join('');
-        selector.value = Array.from(safras).includes(currentSelection) ? currentSelection : "TODAS";
-        const selDash = document.getElementById('talhaoDashboardSelector');
-        if(selDash) selDash.innerHTML = '<option value="TODOS">TODOS OS TALHÕES</option>' + (opcoesDin.talhoes||[]).map(t => `<option value="${strEscape(t)}">${strEscape(t)}</option>`).join('');
+        setHtml('safraSelector', '<option value="TODAS">TODAS AS SAFRAS</option>' + Array.from(safras).sort().reverse().map(s => `<option value="${s}">${s}</option>`).join(''));
+        setVal('safraSelector', Array.from(safras).includes(currentSelection) ? currentSelection : "TODAS");
+        setHtml('talhaoDashboardSelector', '<option value="TODOS">TODOS OS TALHÕES</option>' + (opcoesDin.talhoes||[]).map(t => `<option value="${strEscape(t)}">${strEscape(t)}</option>`).join(''));
     }
 
     function aplicarFiltroSafraApp() { saveAndRenderApp(); saveAndRenderEstoque(); if (document.getElementById('agri_dash').classList.contains('active')) renderAgriDashboard(); }
 
     function renderDatalistsAgri() {
-        document.getElementById('lista-talhoes').innerHTML = (opcoesDin.talhoes||[]).map(t => `<option value="${strEscape(t)}">`).join('');
-        document.getElementById('lista-tipos').innerHTML = (opcoesDin.tipos||[]).map(t => `<option value="${strEscape(t)}">`).join('');
-        document.getElementById('lista-formas').innerHTML = (opcoesDin.formas||[]).map(t => `<option value="${strEscape(t)}">`).join('');
-        document.getElementById('lista-alvos').innerHTML = (opcoesDin.alvos||[]).map(t => `<option value="${strEscape(t)}">`).join('');
-        document.getElementById('lista-produtos-estoque').innerHTML = [...new Set(estoque.filter(e => e && !e.deleted && e.produto).map(e => e.produto))].sort().map(p => `<option value="${strEscape(p)}">`).join('');
+        setHtml('lista-talhoes', (opcoesDin.talhoes||[]).map(t => `<option value="${strEscape(t)}">`).join(''));
+        setHtml('lista-tipos', (opcoesDin.tipos||[]).map(t => `<option value="${strEscape(t)}">`).join(''));
+        setHtml('lista-formas', (opcoesDin.formas||[]).map(t => `<option value="${strEscape(t)}">`).join(''));
+        setHtml('lista-alvos', (opcoesDin.alvos||[]).map(t => `<option value="${strEscape(t)}">`).join(''));
+        setHtml('lista-produtos-estoque', [...new Set(estoque.filter(e => e && !e.deleted && e.produto).map(e => e.produto))].sort().map(p => `<option value="${strEscape(p)}">`).join(''));
     }
 
     function verificarNovaOpcao(categoria, valorStr) {
@@ -1708,7 +1692,7 @@
         analisesSolo.forEach(a => { if(a && !a.deleted && a.talhao) talhoesSet.add(a.talhao) });
         (opcoesDin.talhoes||[]).forEach(t => talhoesSet.add(t));
         const html = Array.from(talhoesSet).sort().map(t => `<option value="${strEscape(t)}">${strEscape(t)}</option>`).join('');
-        ['hist_talhao', 'calc_talhao'].forEach(id => { setVal(id, html); });
+        setHtml('hist_talhao', html); setHtml('calc_talhao', html);
         renderizarTabelaHistoricoSolo();
     }
 
@@ -1963,4 +1947,71 @@
         const tabela = document.getElementById('tbody_cronograma_calc');
         const matriz = {
             'Ureia': { c: 0.45, fe: 0.70, n: "UREIA" }, 'Ureia_NBPT': { c: 0.45, fe: 0.85, n: "UREIA TRAT." }, 'Nitrato': { c: 0.33, fe: 0.95, n: "NITRATO" }, 'Sulfato': { c: 0.21, fe: 0.90, n: "SULFATO" },
-            'MAP': { c: 0.52, nc: 0.11, fe: 0.9
+            'MAP': { c: 0.52, nc: 0.11, fe: 0.95, n: "MAP" }, 'SSG': { c: 0.18, nc: 0, fe: 0.95, n: "SUPER SIMPLES" },
+            'KCl': { c: 0.60, nc: 0, fe: 0.85, n: "KCL" }
+        };
+
+        const selN = safeVal('calc_fonte_n'); const selP = safeVal('calc_fonte_p'); const selK = safeVal('calc_fonte_k');
+        const ftN = matriz[selN]; const ftP = matriz[selP]; const ftK = matriz[selK];
+
+        document.getElementById('th_fonte_n').innerText = ftN.n; document.getElementById('th_fonte_p').innerText = ftP.n; document.getElementById('th_fonte_k').innerText = ftK.n;
+
+        let vol_p_ha = reqGeralCalc.p / (ftP.c * ftP.fe); 
+        let n_fornecido_p_ha = vol_p_ha * ftP.nc; 
+        let demanda_n_liquida_ha = Math.max(0, reqGeralCalc.n - n_fornecido_p_ha);
+        let vol_n_ha = demanda_n_liquida_ha / (ftN.c * ftN.fe); 
+        let vol_k_ha = reqGeralCalc.k / (ftK.c * ftK.fe); 
+
+        let bodyHTML = "";
+
+        if (fase === 'implantacao') {
+            let u_tot = vol_n_ha * area; let u_pl = (vol_n_ha * 1000) / estande; let m_tot = vol_p_ha * area; let m_pl = (vol_p_ha * 1000) / estande; let k_tot = vol_k_ha * area; let k_pl = (vol_k_ha * 1000) / estande;
+            bodyHTML += `<tr><td style="font-weight:700; color: #555; vertical-align:middle;">PLANTIO (Cova)</td>
+                <td style="text-align: center;"><b style="color:var(--cor-verde-flat); font-size:14px;">${vol_n_ha.toFixed(1)} kg/ha</b><br><span style="color:#888;">${u_tot.toFixed(1)} kg/talhão<br>${u_pl.toFixed(0)} g/cova</span></td>
+                <td style="text-align: center;"><b style="color:var(--cor-laranja-flat); font-size:14px;">${vol_p_ha.toFixed(1)} kg/ha</b><br><span style="color:#888;">${m_tot.toFixed(1)} kg/talhão<br>${m_pl.toFixed(0)} g/cova</span></td>
+                <td style="text-align: center;"><b style="color:var(--cor-azul-flat); font-size:14px;">${vol_k_ha.toFixed(1)} kg/ha</b><br><span style="color:#888;">${k_tot.toFixed(1)} kg/talhão<br>${k_pl.toFixed(0)} g/cova</span></td></tr>`;
+            cronogramaFinal = [{ mes: "Plantio", n: u_tot, p: m_tot, k: k_tot, fn: ftN.n, fp: ftP.n, fk: ftK.n }];
+        } else {
+            let dist = [ { mes: "Set/Out", pct: 15 }, { mes: "Nov/Dez", pct: 35 }, { mes: "Jan/Fev", pct: 35 }, { mes: "Mar/Abr", pct: 15 } ];
+            cronogramaFinal = [];
+            dist.forEach(d => {
+                let frac = d.pct / 100; 
+                let u_ha = vol_n_ha * frac; let u_tot = u_ha * area; let u_pl = (u_ha * 1000) / estande; let m_ha = vol_p_ha * frac; let m_tot = m_ha * area; let m_pl = (m_ha * 1000) / estande; let k_ha = vol_k_ha * frac; let k_tot = k_ha * area; let k_pl = (k_ha * 1000) / estande;
+                bodyHTML += `<tr><td style="font-weight:700; color: #555; vertical-align:middle;">${d.mes}</td>
+                    <td style="text-align: center;"><b style="color:var(--cor-verde-flat); font-size:14px;">${u_ha.toFixed(1)} kg/ha</b><br><span style="color:#888;">${u_tot.toFixed(1)} kg/talhão<br>${u_pl.toFixed(0)} g/planta</span></td>
+                    <td style="text-align: center;"><b style="color:var(--cor-laranja-flat); font-size:14px;">${m_ha.toFixed(1)} kg/ha</b><br><span style="color:#888;">${m_tot.toFixed(1)} kg/talhão<br>${m_pl.toFixed(0)} g/planta</span></td>
+                    <td style="text-align: center;"><b style="color:var(--cor-azul-flat); font-size:14px;">${k_ha.toFixed(1)} kg/ha</b><br><span style="color:#888;">${k_tot.toFixed(1)} kg/talhão<br>${k_pl.toFixed(0)} g/planta</span></td></tr>`;
+                cronogramaFinal.push({ mes: d.mes, n: u_tot, p: m_tot, k: k_tot, fn: ftN.n, fp: ftP.n, fk: ftK.n });
+            });
+        }
+        tabela.innerHTML = bodyHTML;
+    }
+
+    function imprimirLaudo() { document.body.classList.add('modo-laudo'); window.print(); document.body.classList.remove('modo-laudo'); }
+
+    function enviarParaAplicacoes() {
+        if (cronogramaFinal.length === 0) { alert("Calcule a recomendação primeiro!"); return; }
+        if (!confirm("Deseja enviar este cronograma para Aplicações Planejadas?")) return;
+
+        const talhao = safeVal('calc_talhao'); const anoAtual = new Date().getFullYear();
+
+        cronogramaFinal.forEach(item => {
+            let dataApp = `${anoAtual}-10-01`; 
+            if(item.mes.includes("Plantio")) dataApp = hojeLocal();
+            if(item.mes.includes("Jan")) dataApp = `${anoAtual+1}-01-15`;
+            if(item.mes.includes("Mar")) dataApp = `${anoAtual+1}-03-15`;
+            if(item.mes.includes("Nov")) dataApp = `${anoAtual}-11-15`;
+
+            let adubos = [ { nome: item.fn, qtd: item.n }, { nome: item.fp, qtd: item.p }, { nome: item.fk, qtd: item.k } ];
+            adubos.forEach(adubo => {
+                if (adubo.qtd > 0) { agriRecords.push({ id: generateUUID(), updatedAt: Date.now(), deleted: false, data: dataApp, talhao: talhao, produto: adubo.nome, tipo: "ADUBO", alvo: "NUTRIÇÃO", dosagem: `${adubo.qtd.toFixed(1)} KG`, dosagem_qtd: parseFloat(adubo.qtd.toFixed(1)), dosagem_un: "KG", forma: "MANUAL", status: "PLANEJADO", custo_unit: 0, obs: "Importação Calc. Solo" }); }
+            });
+        });
+
+        salvarDados(); try{aplicarFiltroSafraApp();}catch(e){} mostrarToast("Enviado para Aplicações!");
+    }
+
+    window.onload = () => { carregarDadosNuvem(); };
+</script>
+</body>
+</html>
