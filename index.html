@@ -181,7 +181,7 @@
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://i.imgur.com/jPLDeyi.png'); background-size: 60%; background-position: center; background-repeat: no-repeat; opacity: 0.05; z-index: 0; pointer-events: none;"></div>
             <div style="z-index: 1; text-align: center;">
                 <h1 style="color: var(--cor-texto); font-size: 40px; letter-spacing: 2px;">BEM-VINDO AO RANCHO 3C</h1>
-                <p style="color: var(--cor-texto-claro); font-size: 16px;">Otimização, Motor de Sincronização e Módulo de Chuvas Ativados.</p>
+                <p style="color: var(--cor-texto-claro); font-size: 16px;">Otimização de Filtros e Módulo de Chuvas Ativados.</p>
             </div>
         </div>
     </div>
@@ -231,7 +231,7 @@
         <div class="filter-bar no-print">
             <div><label style="font-size:11px; font-weight:700; color:#888;">SAFRA:</label> <select id="filtro_safra_dashboard" onchange="atualizarResumoEGrafico()" style="width: auto; margin-left: 5px;"><option value="">TODAS</option></select></div>
             <div><label style="font-size:11px; font-weight:700; color:#888; margin-left:15px;">MÊS:</label> <input type="month" id="filtro_mes_dashboard" onchange="atualizarResumoEGrafico()" style="width: auto; margin-left: 5px;"></div>
-            <button onclick="document.getElementById('filtro_safra_dashboard').value=''; document.getElementById('filtro_mes_dashboard').value=''; atualizarResumoEGrafico()" class="btn-limpar" style="margin-left:auto;">LIMPAR FILTROS</button>
+            <button onclick="setVal('filtro_safra_dashboard', ''); setVal('filtro_mes_dashboard', ''); atualizarResumoEGrafico()" class="btn-limpar" style="margin-left:auto;">LIMPAR FILTROS</button>
         </div>
 
         <div class="resumo-cards">
@@ -337,7 +337,7 @@
             <select id="filtro_safra_relatorios" onchange="atualizarRelatoriosDetalhados()" style="width:200px;"><option value="">TODAS</option></select>
             <label style="font-weight: 700; font-size:12px; margin-left: 20px;">MÊS:</label>
             <input type="month" id="filtro_mes_relatorios" onchange="atualizarRelatoriosDetalhados()" style="width:200px;">
-            <button onclick="document.getElementById('filtro_safra_relatorios').value=''; document.getElementById('filtro_mes_relatorios').value=''; atualizarRelatoriosDetalhados()" class="btn-limpar" style="margin-left:auto;">LIMPAR</button>
+            <button onclick="setVal('filtro_safra_relatorios', ''); setVal('filtro_mes_relatorios', ''); atualizarRelatoriosDetalhados()" class="btn-limpar" style="margin-left:auto;">LIMPAR</button>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
@@ -664,7 +664,6 @@
                             <div><span style="font-size:11px; color:#888; font-weight:700;">GESSO AGRÍCOLA</span><br><span id="res_gesso" style="font-size:24px; font-weight:700; color:#555;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
                         </div>
                         
-                        <!-- MICRONUTRIENTES -->
                         <div style="display:flex; justify-content:space-around; text-align:center; margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px;">
                             <div><span style="font-size:11px; color:#888; font-weight:700;">ZINCO (Zn)</span><br><span id="res_zn" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
                             <div><span style="font-size:11px; color:#888; font-weight:700;">BORO (B)</span><br><span id="res_b" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
@@ -700,31 +699,31 @@
         </div>
     </div>
 
-    <!-- Modais -->
-    <div id="modal-grafico-detalhado">
-        <div class="modal-grafico-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom:15px; margin-bottom: 15px;">
-                <h3 style="color: var(--cor-texto); margin:0; font-family:'Rubik';" id="titulo_modal_detalhe">ANÁLISE DETALHADA</h3>
-                <button class="btn-limpar" style="width:auto; padding:8px 15px;" onclick="document.getElementById('modal-grafico-detalhado').style.display='none'">Fechar</button>
-            </div>
-            <div style="flex:1; position:relative;"><canvas id="chartSoloMicros"></canvas></div>
-        </div>
-    </div>
-
-    <div id="modal-edicao">
-        <div class="modal-content">
-            <h3 style="margin-top: 0; color: var(--cor-texto); border-bottom: 1px solid #eee; padding-bottom:10px;">✏️ Editar Registro</h3>
-            <div class="grid-form" id="form-edicao" style="margin-bottom:20px;"></div>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-salvar-compacto" style="background: var(--cor-verde-flat); flex: 1;" onclick="guardarEdicao()">Salvar</button>
-                <button class="btn-limpar" style="width:auto;" onclick="fecharModal()">Cancelar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="toast" class="toast">Sucesso!</div>
-
 </div> <!-- FIM MAIN CONTENT -->
+
+<!-- Modais -->
+<div id="modal-grafico-detalhado">
+    <div class="modal-grafico-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom:15px; margin-bottom: 15px;">
+            <h3 style="color: var(--cor-texto); margin:0; font-family:'Rubik';" id="titulo_modal_detalhe">ANÁLISE DETALHADA</h3>
+            <button class="btn-limpar" style="width:auto; padding:8px 15px;" onclick="document.getElementById('modal-grafico-detalhado').style.display='none'">Fechar</button>
+        </div>
+        <div style="flex:1; position:relative;"><canvas id="chartSoloMicros"></canvas></div>
+    </div>
+</div>
+
+<div id="modal-edicao">
+    <div class="modal-content">
+        <h3 style="margin-top: 0; color: var(--cor-texto); border-bottom: 1px solid #eee; padding-bottom:10px;">✏️ Editar Registro</h3>
+        <div class="grid-form" id="form-edicao" style="margin-bottom:20px;"></div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-salvar-compacto" style="background: var(--cor-verde-flat); flex: 1;" onclick="guardarEdicao()">Salvar</button>
+            <button class="btn-limpar" style="width:auto;" onclick="fecharModal()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast">Sucesso!</div>
 
 <datalist id="lista-talhoes"></datalist><datalist id="lista-tipos"></datalist><datalist id="lista-formas"></datalist>
 <datalist id="lista-alvos"></datalist><datalist id="lista-produtos-estoque"></datalist>
@@ -733,7 +732,7 @@
 <datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
 
 <!-- ========================================== -->
-<!-- LÓGICA JAVASCRIPT (MOTOR DE HASH E CHUVAS) -->
+<!-- LÓGICA JAVASCRIPT (SANEAMENTO E CHUVAS)    -->
 <!-- ========================================== -->
 <script>
     const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxU-XxV63Eip3g636GkrVaV8zwnVPVomePZLIsZBV-ghCYJKxYUMtQoG2Kc903zeP4UoQ/exec";
@@ -756,10 +755,11 @@
     function strEscape(val) { const s = strSafe(val); return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
     function parseNS(valStr) { if (!valStr || String(valStr).toLowerCase() === 'ns') return 0; let v = parseFloat(String(valStr).replace(',', '.')); return isNaN(v) ? 0 : v; }
     function safeVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
-    function setVal(id, valor) { const el = document.getElementById(id); if (el) el.value = valor; }
+    function setVal(id, valor) { const el = document.getElementById(id); if (el) { let old = el.value; el.innerHTML = valor; if(old && el.options) el.value = old; else el.value = valor; } }
+
     function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
     
-    // LIMPADOR DE DATAS: O Assassino de 18T03:00Z
+    // LIMPADOR DE DATAS
     function sanitizeDateString(d) {
         if(!d) return ''; d = String(d);
         if (d.includes('T') && d.length >= 10 && d.charAt(4) === '-') return d.split('T')[0];
@@ -794,7 +794,6 @@
     function unificarDados(localArr, cloudArr, hashFn) {
         let map = new Map();
 
-        // 1. Prioriza Nuvem
         (cloudArr || []).forEach(item => {
             if(!item || item.deleted) return;
             let hash = hashFn(item);
@@ -802,7 +801,6 @@
             map.set(hash, item);
         });
 
-        // 2. Sobrepõe com Local se não existir ou se for mais recente na mesma sessão
         (localArr || []).forEach(item => {
             if(!item) return;
             let hash = hashFn(item);
@@ -828,7 +826,7 @@
     let hashEstoque = e => `${strSafe(e.produto)}_${strSafe(e.un)}`;
     let hashChuva = c => sanitizeDateString(c.data);
 
-    let permissaoNuvem = false; // Trava de Segurança Crítica
+    let permissaoNuvem = false; // Trava de Segurança
 
     async function carregarDadosNuvem() {
         const statusDiv = document.getElementById('status_conexao');
@@ -875,7 +873,6 @@
             chuvas = unificarDados(chuvas, [], hashChuva);
             
             statusDiv.innerHTML = '🔴 MODO OFFLINE (Nuvem Segura)'; statusDiv.className = 'status-conexao erro';
-            mostrarToast("Trabalhando Offline. Nuvem protegida.");
         }
 
         const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo, chuvas };
@@ -921,8 +918,9 @@
             if(id === 'agri_dash') renderAgriDashboard();
             if(id === 'solo_main') { popularSeletorSolo(); renderizarHistoricoSolo(); }
             if(id === 'chuvas_main') { 
-                setVal('cv_data', hojeLocal());
-                setVal('filtro_mes_chuva', hojeLocal().substring(5,7));
+                let m = hojeLocal().substring(5,7);
+                document.getElementById('cv_data').value = hojeLocal();
+                document.getElementById('filtro_mes_chuva').value = m;
                 renderChuvas(); 
             }
         } catch(e) {}
@@ -931,11 +929,11 @@
     }
 
     /* =========================================================================
-       MÓDULO CHUVAS (NOVO)
+       MÓDULO CHUVAS
     ========================================================================= */
     function addChuva(e) {
         e.preventDefault();
-        const dataStr = safeVal('cv_data'); const mmStr = safeVal('cv_mm'); const idEdicao = safeVal('cv_id');
+        const dataStr = document.getElementById('cv_data').value; const mmStr = document.getElementById('cv_mm').value; const idEdicao = document.getElementById('cv_id').value;
         if(!dataStr || !mmStr) return;
 
         const nova = { id: idEdicao ? idEdicao : generateUUID(), updatedAt: Date.now(), deleted: false, data: sanitizeDateString(dataStr), mm: parseFloat(mmStr) };
@@ -953,7 +951,7 @@
             }
         }
         
-        salvarDados(); document.getElementById('form_chuva').reset(); setVal('cv_id', ''); setVal('cv_data', hojeLocal());
+        salvarDados(); document.getElementById('form_chuva').reset(); document.getElementById('cv_id').value = ''; document.getElementById('cv_data').value = hojeLocal();
         renderChuvas(); mostrarToast("Chuva Registrada!");
     }
 
@@ -973,7 +971,7 @@
 
     function editChuva(id) {
         let c = chuvas.find(x => x.id === id); if(!c || c.deleted) return;
-        setVal('cv_id', c.id); setVal('cv_data', c.data); setVal('cv_mm', c.mm); document.getElementById('cv_mm').focus();
+        document.getElementById('cv_id').value = c.id; document.getElementById('cv_data').value = c.data; document.getElementById('cv_mm').value = c.mm; document.getElementById('cv_mm').focus();
     }
 
     function deleteChuva(id) {
@@ -985,7 +983,7 @@
 
     function renderChartChuvas() {
         if (typeof Chart === 'undefined') return;
-        const mesSelecionado = safeVal('filtro_mes_chuva');
+        const mesSelecionado = document.getElementById('filtro_mes_chuva').value;
         let validos = chuvas.filter(c => c && !c.deleted && c.data && sanitizeDateString(c.data).substring(5,7) === mesSelecionado);
         
         let dadosPorAno = {};
@@ -1965,71 +1963,4 @@
         const tabela = document.getElementById('tbody_cronograma_calc');
         const matriz = {
             'Ureia': { c: 0.45, fe: 0.70, n: "UREIA" }, 'Ureia_NBPT': { c: 0.45, fe: 0.85, n: "UREIA TRAT." }, 'Nitrato': { c: 0.33, fe: 0.95, n: "NITRATO" }, 'Sulfato': { c: 0.21, fe: 0.90, n: "SULFATO" },
-            'MAP': { c: 0.52, nc: 0.11, fe: 0.95, n: "MAP" }, 'SSG': { c: 0.18, nc: 0, fe: 0.95, n: "SUPER SIMPLES" },
-            'KCl': { c: 0.60, nc: 0, fe: 0.85, n: "KCL" }
-        };
-
-        const selN = safeVal('calc_fonte_n'); const selP = safeVal('calc_fonte_p'); const selK = safeVal('calc_fonte_k');
-        const ftN = matriz[selN]; const ftP = matriz[selP]; const ftK = matriz[selK];
-
-        document.getElementById('th_fonte_n').innerText = ftN.n; document.getElementById('th_fonte_p').innerText = ftP.n; document.getElementById('th_fonte_k').innerText = ftK.n;
-
-        let vol_p_ha = reqGeralCalc.p / (ftP.c * ftP.fe); 
-        let n_fornecido_p_ha = vol_p_ha * ftP.nc; 
-        let demanda_n_liquida_ha = Math.max(0, reqGeralCalc.n - n_fornecido_p_ha);
-        let vol_n_ha = demanda_n_liquida_ha / (ftN.c * ftN.fe); 
-        let vol_k_ha = reqGeralCalc.k / (ftK.c * ftK.fe); 
-
-        let bodyHTML = "";
-
-        if (fase === 'implantacao') {
-            let u_tot = vol_n_ha * area; let u_pl = (vol_n_ha * 1000) / estande; let m_tot = vol_p_ha * area; let m_pl = (vol_p_ha * 1000) / estande; let k_tot = vol_k_ha * area; let k_pl = (vol_k_ha * 1000) / estande;
-            bodyHTML += `<tr><td style="font-weight:700; color: #555; vertical-align:middle;">PLANTIO (Cova)</td>
-                <td style="text-align: center;"><b style="color:var(--cor-verde-flat); font-size:14px;">${vol_n_ha.toFixed(1)} kg/ha</b><br><span style="color:#888;">${u_tot.toFixed(1)} kg/talhão<br>${u_pl.toFixed(0)} g/cova</span></td>
-                <td style="text-align: center;"><b style="color:var(--cor-laranja-flat); font-size:14px;">${vol_p_ha.toFixed(1)} kg/ha</b><br><span style="color:#888;">${m_tot.toFixed(1)} kg/talhão<br>${m_pl.toFixed(0)} g/cova</span></td>
-                <td style="text-align: center;"><b style="color:var(--cor-azul-flat); font-size:14px;">${vol_k_ha.toFixed(1)} kg/ha</b><br><span style="color:#888;">${k_tot.toFixed(1)} kg/talhão<br>${k_pl.toFixed(0)} g/cova</span></td></tr>`;
-            cronogramaFinal = [{ mes: "Plantio", n: u_tot, p: m_tot, k: k_tot, fn: ftN.n, fp: ftP.n, fk: ftK.n }];
-        } else {
-            let dist = [ { mes: "Set/Out", pct: 15 }, { mes: "Nov/Dez", pct: 35 }, { mes: "Jan/Fev", pct: 35 }, { mes: "Mar/Abr", pct: 15 } ];
-            cronogramaFinal = [];
-            dist.forEach(d => {
-                let frac = d.pct / 100; 
-                let u_ha = vol_n_ha * frac; let u_tot = u_ha * area; let u_pl = (u_ha * 1000) / estande; let m_ha = vol_p_ha * frac; let m_tot = m_ha * area; let m_pl = (m_ha * 1000) / estande; let k_ha = vol_k_ha * frac; let k_tot = k_ha * area; let k_pl = (k_ha * 1000) / estande;
-                bodyHTML += `<tr><td style="font-weight:700; color: #555; vertical-align:middle;">${d.mes}</td>
-                    <td style="text-align: center;"><b style="color:var(--cor-verde-flat); font-size:14px;">${u_ha.toFixed(1)} kg/ha</b><br><span style="color:#888;">${u_tot.toFixed(1)} kg/talhão<br>${u_pl.toFixed(0)} g/planta</span></td>
-                    <td style="text-align: center;"><b style="color:var(--cor-laranja-flat); font-size:14px;">${m_ha.toFixed(1)} kg/ha</b><br><span style="color:#888;">${m_tot.toFixed(1)} kg/talhão<br>${m_pl.toFixed(0)} g/planta</span></td>
-                    <td style="text-align: center;"><b style="color:var(--cor-azul-flat); font-size:14px;">${k_ha.toFixed(1)} kg/ha</b><br><span style="color:#888;">${k_tot.toFixed(1)} kg/talhão<br>${k_pl.toFixed(0)} g/planta</span></td></tr>`;
-                cronogramaFinal.push({ mes: d.mes, n: u_tot, p: m_tot, k: k_tot, fn: ftN.n, fp: ftP.n, fk: ftK.n });
-            });
-        }
-        tabela.innerHTML = bodyHTML;
-    }
-
-    function imprimirLaudo() { document.body.classList.add('modo-laudo'); window.print(); document.body.classList.remove('modo-laudo'); }
-
-    function enviarParaAplicacoes() {
-        if (cronogramaFinal.length === 0) { alert("Calcule a recomendação primeiro!"); return; }
-        if (!confirm("Deseja enviar este cronograma para Aplicações Planejadas?")) return;
-
-        const talhao = safeVal('calc_talhao'); const anoAtual = new Date().getFullYear();
-
-        cronogramaFinal.forEach(item => {
-            let dataApp = `${anoAtual}-10-01`; 
-            if(item.mes.includes("Plantio")) dataApp = hojeLocal();
-            if(item.mes.includes("Jan")) dataApp = `${anoAtual+1}-01-15`;
-            if(item.mes.includes("Mar")) dataApp = `${anoAtual+1}-03-15`;
-            if(item.mes.includes("Nov")) dataApp = `${anoAtual}-11-15`;
-
-            let adubos = [ { nome: item.fn, qtd: item.n }, { nome: item.fp, qtd: item.p }, { nome: item.fk, qtd: item.k } ];
-            adubos.forEach(adubo => {
-                if (adubo.qtd > 0) { agriRecords.push({ id: generateUUID(), updatedAt: Date.now(), deleted: false, data: dataApp, talhao: talhao, produto: adubo.nome, tipo: "ADUBO", alvo: "NUTRIÇÃO", dosagem: `${adubo.qtd.toFixed(1)} KG`, dosagem_qtd: parseFloat(adubo.qtd.toFixed(1)), dosagem_un: "KG", forma: "MANUAL", status: "PLANEJADO", custo_unit: 0, obs: "Importação Calc. Solo" }); }
-            });
-        });
-
-        salvarDados(); try{aplicarFiltroSafraApp();}catch(e){} mostrarToast("Enviado para Aplicações!");
-    }
-
-    window.onload = () => { carregarDadosNuvem(); };
-</script>
-</body>
-</html>
+            'MAP': { c: 0.52, nc: 0.11, fe: 0.9
