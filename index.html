@@ -181,7 +181,7 @@
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://i.imgur.com/jPLDeyi.png'); background-size: 60%; background-position: center; background-repeat: no-repeat; opacity: 0.05; z-index: 0; pointer-events: none;"></div>
             <div style="z-index: 1; text-align: center;">
                 <h1 style="color: var(--cor-texto); font-size: 40px; letter-spacing: 2px;">BEM-VINDO AO RANCHO 3C</h1>
-                <p style="color: var(--cor-texto-claro); font-size: 16px;">Otimização Completa, Cascata de Relatórios e Módulo de Chuvas Ativados.</p>
+                <p style="color: var(--cor-texto-claro); font-size: 16px;">Otimização Completa, Leitor de XML NF-e e Módulo de Chuvas Ativados.</p>
             </div>
         </div>
     </div>
@@ -226,12 +226,11 @@
         </div>
     </div>
 
-    <!-- MÓDULO FINANCEIRO -->
+    <!-- MÓDULO FINANCEIRO (DASHBOARD) -->
     <div id="resumo" class="tab">
         <div class="filter-bar no-print">
             <div><label style="font-size:11px; font-weight:700; color:#888;">SAFRA:</label> <select id="filtro_safra_dashboard" onchange="atualizarResumoEGrafico()" style="width: auto; margin-left: 5px;"><option value="">TODAS</option></select></div>
             <div><label style="font-size:11px; font-weight:700; color:#888; margin-left:15px;">MÊS:</label> <input type="month" id="filtro_mes_dashboard" onchange="atualizarResumoEGrafico()" style="width: auto; margin-left: 5px;"></div>
-            <!-- CORREÇÃO: Usando setVal para não destruir as opções do dropdown ao limpar -->
             <button onclick="setVal('filtro_safra_dashboard', ''); setVal('filtro_mes_dashboard', ''); atualizarResumoEGrafico()" class="btn-limpar" style="margin-left:auto;">LIMPAR FILTROS</button>
         </div>
 
@@ -262,12 +261,17 @@
     <!-- CAIXA Lançamentos -->
     <div id="movimentacoes" class="tab">
         <div class="linha-lancamento linha-despesa no-print" id="caixa_lancamento_saida">
+            <!-- NOVO: Adicionado botão de Importação de XML (NF-e) no cabeçalho da Despesa -->
             <div style="display:flex; justify-content:space-between; margin-bottom: 10px; align-items: center;">
                 <span style="font-size:14px; font-weight:700; color:var(--cor-laranja-flat); font-family: 'Rubik';" id="titulo_saida">🚜 INSERIR SAÍDA:
                     <select id="d_natureza" onchange="mudarTemaSaida()" style="width:auto; margin-left:10px; padding: 4px 10px; color: var(--cor-laranja-flat); font-weight: 700; border: none; background: transparent;">
                         <option value="Despesa">CUSTEIO</option><option value="Investimento">INVESTIMENTO</option>
                     </select>
                 </span>
+                <div>
+                    <input type="file" id="xml_upload" accept=".xml" style="display:none;" onchange="importarXMLDespesa(event)">
+                    <button type="button" class="btn-salvar-compacto" style="background: var(--cor-azul-flat); font-size: 10px; padding: 8px 12px; font-family:'Rubik';" onclick="document.getElementById('xml_upload').click()">📥 Ler NF-e (XML)</button>
+                </div>
             </div>
             <form id="caixa_form_saida" class="grid-form" onsubmit="addTransacao(event, 'Saida')">
                 <div><label>Data</label><input type="date" id="d_data" required></div>
@@ -343,7 +347,6 @@
             <select id="filtro_safra_relatorios" onchange="atualizarFiltrosRelatorios()" style="width:200px;"><option value="">TODAS</option></select>
             <label style="font-weight: 700; font-size:12px; margin-left: 20px;">MÊS:</label>
             <input type="month" id="filtro_mes_relatorios" onchange="atualizarFiltrosRelatorios()" style="width:200px;">
-            <!-- CORREÇÃO: Função atualizarFiltrosRelatorios garante que as telas todas atualizam -->
             <button onclick="setVal('filtro_safra_relatorios', ''); setVal('filtro_mes_relatorios', ''); atualizarFiltrosRelatorios()" class="btn-limpar" style="margin-left:auto;">LIMPAR</button>
         </div>
 
@@ -466,7 +469,7 @@
         </div>
     </div>
 
-    <!-- ESTOQUE (COM CABEÇALHO DO TOTAL) -->
+    <!-- ESTOQUE -->
     <div id="agri_est" class="tab">
         <div style="background: white; padding: 15px 25px; border-radius: var(--borda-raio); margin-bottom: 20px; box-shadow: var(--sombra-flat); display:flex; justify-content:space-between; align-items:center; border-left: 4px solid #f39c12;">
             <div>
@@ -698,7 +701,6 @@
                             <div><span style="font-size:11px; color:#888; font-weight:700;">GESSO AGRÍCOLA</span><br><span id="res_gesso" style="font-size:24px; font-weight:700; color:#555;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
                         </div>
                         
-                        <!-- MICRONUTRIENTES -->
                         <div style="display:flex; justify-content:space-around; text-align:center; margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px;">
                             <div><span style="font-size:11px; color:#888; font-weight:700;">ZINCO (Zn)</span><br><span id="res_zn" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
                             <div><span style="font-size:11px; color:#888; font-weight:700;">BORO (B)</span><br><span id="res_b" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
@@ -737,16 +739,6 @@
 </div> <!-- FIM MAIN CONTENT -->
 
 <!-- Modais -->
-<div id="modal-grafico-detalhado">
-    <div class="modal-grafico-content">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom:15px; margin-bottom: 15px;">
-            <h3 style="color: var(--cor-texto); margin:0; font-family:'Rubik';" id="titulo_modal_detalhe">ANÁLISE DETALHADA</h3>
-            <button class="btn-limpar" style="width:auto; padding:8px 15px;" onclick="document.getElementById('modal-grafico-detalhado').style.display='none'">Fechar</button>
-        </div>
-        <div style="flex:1; position:relative;"><canvas id="chartSoloMicros"></canvas></div>
-    </div>
-</div>
-
 <div id="modal-edicao">
     <div class="modal-content">
         <h3 style="margin-top: 0; color: var(--cor-texto); border-bottom: 1px solid #eee; padding-bottom:10px;">✏️ Editar Registro</h3>
@@ -758,7 +750,7 @@
     </div>
 </div>
 
-<div id="toast" class="toast">Sucesso!</div>
+<div id="toast">Sucesso!</div>
 
 <datalist id="lista-talhoes"></datalist><datalist id="lista-tipos"></datalist><datalist id="lista-formas"></datalist>
 <datalist id="lista-alvos"></datalist><datalist id="lista-produtos-estoque"></datalist>
@@ -784,22 +776,13 @@
     let permissaoNuvem = false; 
 
     /* =========================================================================
-       2. UTILITÁRIOS
+       2. UTILITÁRIOS (Datas, IDs e Saneamento)
     ========================================================================= */
     function generateUUID() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); }
     function hojeLocal() { const d = new Date(); return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); }
     function strSafe(val) { return (val === null || val === undefined) ? '' : String(val).trim(); }
-    function strEscape(val) { const s = strSafe(val); return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
-    function parseNS(valStr) { if (!valStr || String(valStr).toLowerCase() === 'ns') return 0; let v = parseFloat(String(valStr).replace(',', '.')); return isNaN(v) ? 0 : v; }
-    function safeVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
     
-    // Ajudante para inputs normais
-    function setVal(id, valor) { const el = document.getElementById(id); if (el) el.value = valor; }
-    // Ajudante seguro para não destruir <options> de um <select>
-    function setHtml(id, htmlStr) { const el = document.getElementById(id); if (el) { let old = el.value; el.innerHTML = htmlStr; if(old && el.options) el.value = old; else if(old) el.value = old; } }
-
-    function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
-    
+    // Extratores Seguros (Para evitar erro de leitura do XML na V2)
     function sanitizeDateString(d) {
         if(!d) return ''; d = String(d);
         if (d.includes('T') && d.length >= 10 && d.charAt(4) === '-') return d.split('T')[0];
@@ -816,6 +799,14 @@
         const partes = dataISO.split('-'); return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : dataISO; 
     }
     
+    function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+    
+    function strEscape(val) { const s = strSafe(val); return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+    function parseNS(valStr) { if (!valStr || String(valStr).toLowerCase() === 'ns') return 0; let v = parseFloat(String(valStr).replace(',', '.')); return isNaN(v) ? 0 : v; }
+    function safeVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+    function setVal(id, valor) { const el = document.getElementById(id); if (el) { let old = el.value; el.innerHTML = valor; if(old && el.options) el.value = old; else el.value = valor; } }
+    function setHtml(id, htmlStr) { const el = document.getElementById(id); if (el) { let old = el.value; el.innerHTML = htmlStr; if(old) el.value = old; } }
+    
     function mostrarToast(msg) { 
         const toast = document.getElementById("toast"); 
         if(toast) { toast.innerText = msg; toast.classList.add("show"); setTimeout(() => { toast.classList.remove("show"); }, 3000); } 
@@ -831,7 +822,71 @@
     function obterSafraAtual() { return obterSafraGeral(hojeLocal()); }
 
     /* =========================================================================
-       3. SINCRONIZAÇÃO E ALGORITMO HASH
+       3. LEITOR DE XML DA NF-e (NOVA FUNCIONALIDADE)
+    ========================================================================= */
+    function importarXMLDespesa(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(text, "text/xml");
+
+            try {
+                // Tenta extrair a data de emissão
+                let dhEmi = xmlDoc.getElementsByTagName("dhEmi")[0] || xmlDoc.getElementsByTagName("dEmi")[0];
+                if (dhEmi) {
+                    let dataNF = dhEmi.textContent.substring(0, 10); 
+                    setVal('d_data', dataNF);
+                }
+
+                // Tenta extrair o nome do fornecedor (emitente)
+                let emit = xmlDoc.getElementsByTagName("emit")[0];
+                if (emit) {
+                    let xNome = emit.getElementsByTagName("xNome")[0];
+                    if (xNome) setVal('d_local', xNome.textContent.toUpperCase());
+                }
+
+                // Tenta extrair o valor total da nota
+                let icmsTot = xmlDoc.getElementsByTagName("ICMSTot")[0];
+                if (icmsTot) {
+                    let vNF = icmsTot.getElementsByTagName("vNF")[0];
+                    if (vNF) setVal('d_valor', parseFloat(vNF.textContent).toFixed(2));
+                }
+
+                // Extrai os dados do primeiro produto listado para facilitar o preenchimento
+                let det = xmlDoc.getElementsByTagName("det")[0];
+                if (det) {
+                    let prod = det.getElementsByTagName("prod")[0];
+                    if (prod) {
+                        let xProd = prod.getElementsByTagName("xProd")[0];
+                        if (xProd) setVal('d_descricao', xProd.textContent.toUpperCase());
+                        
+                        let qCom = prod.getElementsByTagName("qCom")[0];
+                        if (qCom) setVal('d_qtd', parseFloat(qCom.textContent).toFixed(2));
+                        
+                        let vUnCom = prod.getElementsByTagName("vUnCom")[0];
+                        if (vUnCom) setVal('d_v_unit', parseFloat(vUnCom.textContent).toFixed(2));
+                        
+                        let uCom = prod.getElementsByTagName("uCom")[0];
+                        if (uCom) setVal('d_und', uCom.textContent.toUpperCase());
+                    }
+                }
+                mostrarToast("XML Lido com sucesso! Revise os dados.");
+            } catch (error) {
+                alert("Erro ao tentar ler o arquivo XML. Tem a certeza que é uma NF-e válida?");
+            }
+            
+            // Limpa o botão para permitir importar o mesmo arquivo novamente se o utilizador errar
+            event.target.value = '';
+        };
+        reader.readAsText(file);
+    }
+
+    /* =========================================================================
+       4. SINCRONIZAÇÃO E ALGORITMO HASH UNIFICADOR
     ========================================================================= */
     function unificarDados(localArr, cloudArr, hashFn) {
         let map = new Map();
@@ -853,7 +908,9 @@
                     let existente = map.get(hash);
                     if(item.updatedAt && existente.updatedAt && item.updatedAt > existente.updatedAt) { map.set(hash, item); } 
                     else if (!existente.updatedAt) { map.set(hash, item); }
-                } else { map.set(hash, item); }
+                } else {
+                    map.set(hash, item); 
+                }
             }
         });
         return Array.from(map.values());
@@ -905,11 +962,12 @@
             permissaoNuvem = false; 
             transacoes = unificarDados(transacoes, [], hashTransacao); agriRecords = unificarDados(agriRecords, [], hashAgri); analisesSolo = unificarDados(analisesSolo, [], hashSolo);
             estoque = unificarDados(estoque, [], hashEstoque); chuvas = unificarDados(chuvas, [], hashChuva);
+            
             statusDiv.innerHTML = '🔴 MODO OFFLINE (Nuvem Segura)'; statusDiv.className = 'status-conexao erro';
         }
 
         const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo, chuvas };
-        try { localStorage.setItem('rancho3c_offline', JSON.stringify(payload)); } catch(err) {}
+        try { localStorage.setItem('rancho3c_offline', JSON.stringify(payload)); } catch(err) { alert("Memória local cheia!"); }
 
         try { popularSeletorSolo(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); } catch(e){}
         if(permissaoNuvem) salvarDados();
@@ -920,7 +978,7 @@
         const statusDiv = document.getElementById('status_conexao');
         const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo, chuvas };
         
-        try { localStorage.setItem('rancho3c_offline', JSON.stringify(payload)); } catch(err) { mostrarToast("Erro local!"); }
+        try { localStorage.setItem('rancho3c_offline', JSON.stringify(payload)); } catch(err) { mostrarToast("Erro local: Memória Cheia!"); }
         
         if (!permissaoNuvem) { statusDiv.innerHTML = '🔴 GUARDADO LOCAL'; statusDiv.className = 'status-conexao erro'; return; }
 
@@ -939,7 +997,7 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.sidebar-menu button').forEach(b => b.classList.remove('btn-ativo'));
             document.getElementById(id).classList.add('active');
-            const btnMap = { 'home': 'btn_home', 'resumo': 'btn_resumo', 'movimentacoes': 'btn_movimentacoes', 'relatorios_detalhados': 'btn_relatorios_detalhados', 'pendencias': 'btn_pendencias', 'agri_app': 'btn_agri_app', 'agri_est': 'btn_agri_est', 'agri_dash': 'btn_agri_dash', 'solo_main': 'btn_solo', 'chuvas_main': 'btn_chuvas' };
+            const btnMap = { 'home': 'btn_home', 'resumo': 'btn_resumo', 'movimentacoes': 'btn_movimentacoes', 'relatorios_detalhados': 'btn_relatorios_detalhados', 'pendencias': 'btn_pendencias', 'agri_app': 'btn_agri_app', 'agri_est': 'btn_agri_est', 'agri_dash': 'btn_agri_dash', 'chuvas_main': 'btn_chuvas', 'solo_main': 'btn_solo' };
             if(btnMap[id]) document.getElementById(btnMap[id]).classList.add('btn-ativo');
             
             if(id === 'resumo') atualizarResumoEGrafico();
@@ -957,7 +1015,7 @@
     }
 
     /* =========================================================================
-       4. MÓDULO CHUVAS
+       5. MÓDULO DE CHUVAS
     ========================================================================= */
     function addChuva(e) {
         e.preventDefault();
@@ -974,7 +1032,9 @@
             if(existente) {
                 if(!confirm(`Já existe um registro de ${existente.mm} mm para este dia. Deseja substituir por ${nova.mm} mm?`)) return;
                 existente.mm = nova.mm; existente.updatedAt = Date.now();
-            } else { chuvas.push(nova); }
+            } else {
+                chuvas.push(nova);
+            }
         }
         
         salvarDados(); document.getElementById('form_chuva').reset(); setVal('cv_id', ''); setVal('cv_data', hojeLocal());
@@ -991,6 +1051,7 @@
             <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editChuva('${c.id}')">✏️</button><button class="btn-acao btn-excluir" onclick="deleteChuva('${c.id}')">🗑️</button></td></tr>`;
         });
         document.getElementById('tbody_chuvas').innerHTML = html || '<tr><td colspan="3" style="text-align:center; padding:30px; color:#aaa;">Sem registros de chuvas</td></tr>';
+        
         renderChartChuvas();
     }
 
@@ -1035,7 +1096,7 @@
     }
 
     /* =========================================================================
-       5. MÓDULO FINANCEIRO
+       6. MÓDULO FINANCEIRO
     ========================================================================= */
     function preencherSelectsSafraFin() {
         let safras = new Set(); transacoes.forEach(t => { if(!t.deleted && t.data && t.data !== '-') safras.add(obterSafraGeral(t.data)); });
@@ -1095,7 +1156,6 @@
         document.getElementById('lista_top_despesas').innerHTML = hD || '<li class="item-lista-grafico" style="cursor:default;">Nenhuma saída paga</li>';
     }
 
-    // --- NOVA FUNÇÃO PARA MANTER CASCATA SINCRONIZADA ---
     function atualizarFiltrosRelatorios() {
         atualizarRelatoriosDetalhados();
         if(document.getElementById('rel_view_cascata').classList.contains('active')) {
@@ -1139,7 +1199,6 @@
         renderTabelaRel('tbody_receitas_local', recLocal, '#16a085');
     }
 
-    // --- NOVA VISÃO EM CASCATA ---
     function switchRelTab(mode) {
         document.getElementById('rel_view_tabelas').classList.remove('active');
         document.getElementById('rel_view_cascata').classList.remove('active');
@@ -1238,10 +1297,6 @@
         document.getElementById('lista_cascata_desc').innerHTML = htmlDesc || '<li>Nenhum detalhe disponível.</li>';
     }
 
-
-    /* =========================================================================
-       6. CAIXA DIÁRIO (MUDANÇA DE TEMA E LANÇAMENTO)
-    ========================================================================= */
     function mudarTemaSaida() {
         const select = document.getElementById('d_natureza'); const caixa = document.getElementById('caixa_lancamento_saida'); const titulo = document.getElementById('titulo_saida'); 
         if(select.value === 'Investimento') { caixa.className = 'linha-lancamento linha-investimento-ativa no-print'; titulo.style.color = 'var(--cor-roxo-flat)'; select.style.color = 'var(--cor-roxo-flat)';
@@ -1804,8 +1859,7 @@
         analisesSolo.forEach(a => { if(a && !a.deleted && a.talhao) talhoesSet.add(a.talhao) });
         (opcoesDin.talhoes||[]).forEach(t => talhoesSet.add(t));
         const html = Array.from(talhoesSet).sort().map(t => `<option value="${strEscape(t)}">${strEscape(t)}</option>`).join('');
-        const ht = document.getElementById('hist_talhao'); if(ht) ht.innerHTML = html;
-        const ct = document.getElementById('calc_talhao'); if(ct) ct.innerHTML = html;
+        setHtml('hist_talhao', html); setHtml('calc_talhao', html);
         renderizarTabelaHistoricoSolo();
     }
 
@@ -1821,11 +1875,9 @@
         let sb = ca + mg + k_cmol + na_cmol; let t_min = sb + al; let t_max = sb + hal;
         let v = t_max > 0 ? (sb / t_max) * 100 : 0; let m = t_min > 0 ? (al / t_min) * 100 : 0;
 
-        const elSB = document.getElementById('sl_sb'); if(elSB) elSB.value = sb > 0 ? sb.toFixed(2) : 'ns';
-        const elTmin = document.getElementById('sl_t_min'); if(elTmin) elTmin.value = t_min > 0 ? t_min.toFixed(2) : 'ns';
-        const elTmax = document.getElementById('sl_t_max'); if(elTmax) elTmax.value = t_max > 0 ? t_max.toFixed(2) : 'ns';
-        const elV = document.getElementById('sl_v'); if(elV) elV.value = t_max > 0 ? v.toFixed(0) : 'ns';
-        const elM = document.getElementById('sl_m'); if(elM) elM.value = t_min > 0 ? m.toFixed(0) : 'ns';
+        const sValT = (id, v) => { const el = document.getElementById(id); if(el) el.value = v; };
+        sValT('sl_sb', sb > 0 ? sb.toFixed(2) : 'ns'); sValT('sl_t_min', t_min > 0 ? t_min.toFixed(2) : 'ns'); sValT('sl_t_max', t_max > 0 ? t_max.toFixed(2) : 'ns');
+        sValT('sl_v', t_max > 0 ? v.toFixed(0) : 'ns'); sValT('sl_m', t_min > 0 ? m.toFixed(0) : 'ns');
         aplicarCoresNiveis();
     }
 
