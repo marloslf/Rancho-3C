@@ -181,7 +181,7 @@
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://i.imgur.com/jPLDeyi.png'); background-size: 60%; background-position: center; background-repeat: no-repeat; opacity: 0.05; z-index: 0; pointer-events: none;"></div>
             <div style="z-index: 1; text-align: center;">
                 <h1 style="color: var(--cor-texto); font-size: 40px; letter-spacing: 2px;">BEM-VINDO AO RANCHO 3C</h1>
-                <p style="color: var(--cor-texto-claro); font-size: 16px;">Otimização Completa, Leitor de XML NF-e e Módulo de Chuvas Ativados.</p>
+                <p style="color: var(--cor-texto-claro); font-size: 16px;">Sistema Leitor de NF-e Integrado e Ativo.</p>
             </div>
         </div>
     </div>
@@ -261,16 +261,16 @@
     <!-- CAIXA Lançamentos -->
     <div id="movimentacoes" class="tab">
         <div class="linha-lancamento linha-despesa no-print" id="caixa_lancamento_saida">
-            <!-- NOVO: Adicionado botão de Importação de XML (NF-e) no cabeçalho da Despesa -->
             <div style="display:flex; justify-content:space-between; margin-bottom: 10px; align-items: center;">
                 <span style="font-size:14px; font-weight:700; color:var(--cor-laranja-flat); font-family: 'Rubik';" id="titulo_saida">🚜 INSERIR SAÍDA:
                     <select id="d_natureza" onchange="mudarTemaSaida()" style="width:auto; margin-left:10px; padding: 4px 10px; color: var(--cor-laranja-flat); font-weight: 700; border: none; background: transparent;">
                         <option value="Despesa">CUSTEIO</option><option value="Investimento">INVESTIMENTO</option>
                     </select>
                 </span>
+                <!-- NOVO: Botão de Importação do XML NF-e -->
                 <div>
                     <input type="file" id="xml_upload" accept=".xml" style="display:none;" onchange="importarXMLDespesa(event)">
-                    <button type="button" class="btn-salvar-compacto" style="background: var(--cor-azul-flat); font-size: 10px; padding: 8px 12px; font-family:'Rubik';" onclick="document.getElementById('xml_upload').click()">📥 Ler NF-e (XML)</button>
+                    <button type="button" class="btn-salvar-compacto" style="background: var(--cor-azul-flat); font-size: 11px; padding: 8px 12px; font-family:'Rubik';" onclick="document.getElementById('xml_upload').click()">📥 Ler NF-e (XML)</button>
                 </div>
             </div>
             <form id="caixa_form_saida" class="grid-form" onsubmit="addTransacao(event, 'Saida')">
@@ -427,7 +427,7 @@
     <div id="agri_app" class="tab">
         <div class="linha-lancamento linha-agri-app no-print">
             <div style="font-size:14px; font-weight:700; color:var(--cor-azul-flat); margin-bottom: 10px; font-family:'Rubik';">🚜 NOVO REGISTRO DE APLICAÇÃO</div>
-            <form id="appForm" class="grid-form" onsubmit="addAgriApp(event)">
+            <form id="form_app" class="grid-form" onsubmit="addAgriApp(event)">
                 <input type="hidden" id="editAgriIndex" value="">
                 <div><label>Data</label><input type="date" id="dataApp" required></div>
                 <div><label>Talhão</label><input type="text" id="talhao" list="lista-talhoes" required autocomplete="off"></div>
@@ -739,6 +739,16 @@
 </div> <!-- FIM MAIN CONTENT -->
 
 <!-- Modais -->
+<div id="modal-grafico-detalhado">
+    <div class="modal-grafico-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom:15px; margin-bottom: 15px;">
+            <h3 style="color: var(--cor-texto); margin:0; font-family:'Rubik';" id="titulo_modal_detalhe">ANÁLISE DETALHADA</h3>
+            <button class="btn-limpar" style="width:auto; padding:8px 15px;" onclick="document.getElementById('modal-grafico-detalhado').style.display='none'">Fechar</button>
+        </div>
+        <div style="flex:1; position:relative;"><canvas id="chartSoloMicros"></canvas></div>
+    </div>
+</div>
+
 <div id="modal-edicao">
     <div class="modal-content">
         <h3 style="margin-top: 0; color: var(--cor-texto); border-bottom: 1px solid #eee; padding-bottom:10px;">✏️ Editar Registro</h3>
@@ -750,7 +760,7 @@
     </div>
 </div>
 
-<div id="toast">Sucesso!</div>
+<div id="toast" class="toast">Sucesso!</div>
 
 <datalist id="lista-talhoes"></datalist><datalist id="lista-tipos"></datalist><datalist id="lista-formas"></datalist>
 <datalist id="lista-alvos"></datalist><datalist id="lista-produtos-estoque"></datalist>
@@ -776,13 +786,12 @@
     let permissaoNuvem = false; 
 
     /* =========================================================================
-       2. UTILITÁRIOS (Datas, IDs e Saneamento)
+       2. UTILITÁRIOS
     ========================================================================= */
     function generateUUID() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); }
     function hojeLocal() { const d = new Date(); return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); }
     function strSafe(val) { return (val === null || val === undefined) ? '' : String(val).trim(); }
     
-    // Extratores Seguros (Para evitar erro de leitura do XML na V2)
     function sanitizeDateString(d) {
         if(!d) return ''; d = String(d);
         if (d.includes('T') && d.length >= 10 && d.charAt(4) === '-') return d.split('T')[0];
@@ -792,25 +801,18 @@
         }
         return d;
     }
-
     function formatarData(dataISO) { 
         dataISO = sanitizeDateString(dataISO);
         if(!dataISO || dataISO.toLowerCase() === 'nan') return '-'; 
         const partes = dataISO.split('-'); return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : dataISO; 
     }
-    
     function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num) ? '-' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
-    
     function strEscape(val) { const s = strSafe(val); return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
     function parseNS(valStr) { if (!valStr || String(valStr).toLowerCase() === 'ns') return 0; let v = parseFloat(String(valStr).replace(',', '.')); return isNaN(v) ? 0 : v; }
     function safeVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
     function setVal(id, valor) { const el = document.getElementById(id); if (el) { let old = el.value; el.innerHTML = valor; if(old && el.options) el.value = old; else el.value = valor; } }
     function setHtml(id, htmlStr) { const el = document.getElementById(id); if (el) { let old = el.value; el.innerHTML = htmlStr; if(old) el.value = old; } }
-    
-    function mostrarToast(msg) { 
-        const toast = document.getElementById("toast"); 
-        if(toast) { toast.innerText = msg; toast.classList.add("show"); setTimeout(() => { toast.classList.remove("show"); }, 3000); } 
-    }
+    function mostrarToast(msg) { const toast = document.getElementById("toast"); if(toast) { toast.innerText = msg; toast.classList.add("show"); setTimeout(() => { toast.classList.remove("show"); }, 3000); } }
     
     function obterSafraGeral(dataStr) { 
         dataStr = sanitizeDateString(dataStr);
@@ -822,7 +824,7 @@
     function obterSafraAtual() { return obterSafraGeral(hojeLocal()); }
 
     /* =========================================================================
-       3. LEITOR DE XML DA NF-e (NOVA FUNCIONALIDADE)
+       3. NOVO: LEITOR DE XML (NF-E) EM LOTE
     ========================================================================= */
     function importarXMLDespesa(event) {
         const file = event.target.files[0];
@@ -837,49 +839,69 @@
             try {
                 // Tenta extrair a data de emissão
                 let dhEmi = xmlDoc.getElementsByTagName("dhEmi")[0] || xmlDoc.getElementsByTagName("dEmi")[0];
-                if (dhEmi) {
-                    let dataNF = dhEmi.textContent.substring(0, 10); 
-                    setVal('d_data', dataNF);
-                }
+                let dataNF = dhEmi ? dhEmi.textContent.substring(0, 10) : hojeLocal();
 
                 // Tenta extrair o nome do fornecedor (emitente)
                 let emit = xmlDoc.getElementsByTagName("emit")[0];
-                if (emit) {
-                    let xNome = emit.getElementsByTagName("xNome")[0];
-                    if (xNome) setVal('d_local', xNome.textContent.toUpperCase());
+                let fornecedor = emit && emit.getElementsByTagName("xNome")[0] ? emit.getElementsByTagName("xNome")[0].textContent.toUpperCase() : "FORNECEDOR NF";
+
+                // Pega todos os produtos (itens) da nota
+                let dets = xmlDoc.getElementsByTagName("det");
+                if (dets.length === 0) throw new Error("Sem itens");
+
+                // Pergunta ao usuário se ele quer importar todos os itens ou só puxar o primeiro para o form
+                let importarMultiplos = false;
+                if (dets.length > 1) {
+                    importarMultiplos = confirm(`Encontramos ${dets.length} itens nesta NF-e.\n\nDeseja importar TODOS os itens automaticamente para a tabela de lançamentos?\n(Serão gravados como 'A PAGAR')`);
                 }
 
-                // Tenta extrair o valor total da nota
-                let icmsTot = xmlDoc.getElementsByTagName("ICMSTot")[0];
-                if (icmsTot) {
-                    let vNF = icmsTot.getElementsByTagName("vNF")[0];
-                    if (vNF) setVal('d_valor', parseFloat(vNF.textContent).toFixed(2));
-                }
-
-                // Extrai os dados do primeiro produto listado para facilitar o preenchimento
-                let det = xmlDoc.getElementsByTagName("det")[0];
-                if (det) {
-                    let prod = det.getElementsByTagName("prod")[0];
+                if (dets.length === 1 || !importarMultiplos) {
+                    // Preenche apenas o formulário visual com o primeiro item
+                    setVal('d_data', dataNF);
+                    setVal('d_local', fornecedor);
+                    let prod = dets[0].getElementsByTagName("prod")[0];
                     if (prod) {
-                        let xProd = prod.getElementsByTagName("xProd")[0];
-                        if (xProd) setVal('d_descricao', xProd.textContent.toUpperCase());
+                        setVal('d_descricao', (prod.getElementsByTagName("xProd")[0] ? prod.getElementsByTagName("xProd")[0].textContent : "").toUpperCase());
+                        setVal('d_qtd', parseFloat(prod.getElementsByTagName("qCom")[0] ? prod.getElementsByTagName("qCom")[0].textContent : 0).toFixed(2));
+                        setVal('d_v_unit', parseFloat(prod.getElementsByTagName("vUnCom")[0] ? prod.getElementsByTagName("vUnCom")[0].textContent : 0).toFixed(2));
+                        setVal('d_und', (prod.getElementsByTagName("uCom")[0] ? prod.getElementsByTagName("uCom")[0].textContent : "UN").toUpperCase());
                         
-                        let qCom = prod.getElementsByTagName("qCom")[0];
-                        if (qCom) setVal('d_qtd', parseFloat(qCom.textContent).toFixed(2));
-                        
-                        let vUnCom = prod.getElementsByTagName("vUnCom")[0];
-                        if (vUnCom) setVal('d_v_unit', parseFloat(vUnCom.textContent).toFixed(2));
-                        
-                        let uCom = prod.getElementsByTagName("uCom")[0];
-                        if (uCom) setVal('d_und', uCom.textContent.toUpperCase());
+                        let vProd = prod.getElementsByTagName("vProd")[0] ? parseFloat(prod.getElementsByTagName("vProd")[0].textContent) : 0;
+                        setVal('d_valor', vProd.toFixed(2));
                     }
+                    mostrarToast("Item carregado no formulário! Revise e grave.");
+                } else {
+                    // Importa múltiplos itens direto para o banco de dados (Batch Import)
+                    let tipoFinal = document.getElementById('d_natureza').value;
+                    let categoriaCat = document.getElementById('d_categoria').value.trim().toUpperCase() || "A CLASSIFICAR";
+                    let setorCat = document.getElementById('d_setor').value.trim().toUpperCase() || "-";
+
+                    for(let i = 0; i < dets.length; i++) {
+                        let prod = dets[i].getElementsByTagName("prod")[0];
+                        if(!prod) continue;
+                        
+                        let desc = (prod.getElementsByTagName("xProd")[0] ? prod.getElementsByTagName("xProd")[0].textContent : "ITEM SEM NOME").toUpperCase();
+                        let qtd = parseFloat(prod.getElementsByTagName("qCom")[0] ? prod.getElementsByTagName("qCom")[0].textContent : 0);
+                        let vUn = parseFloat(prod.getElementsByTagName("vUnCom")[0] ? prod.getElementsByTagName("vUnCom")[0].textContent : 0);
+                        let vTot = parseFloat(prod.getElementsByTagName("vProd")[0] ? prod.getElementsByTagName("vProd")[0].textContent : 0);
+                        let und = (prod.getElementsByTagName("uCom")[0] ? prod.getElementsByTagName("uCom")[0].textContent : "UN").toUpperCase();
+
+                        transacoes.push({
+                            id: generateUUID(), updatedAt: Date.now(), deleted: false,
+                            data: dataNF, tipo: tipoFinal, categoria: categoriaCat,
+                            setor: setorCat, local: fornecedor, desc: desc,
+                            qtd: qtd, und: und, v_unit: vUn, valor: vTot, sit: 'A pagar', obs: 'Importação Automática XML'
+                        });
+                    }
+                    salvarDados();
+                    preencherSelectsSafraFin(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento();
+                    mostrarToast(`${dets.length} itens importados para a tabela!`);
                 }
-                mostrarToast("XML Lido com sucesso! Revise os dados.");
             } catch (error) {
-                alert("Erro ao tentar ler o arquivo XML. Tem a certeza que é uma NF-e válida?");
+                alert("Erro ao processar XML. Certifique-se de que é um arquivo de NF-e válido.");
             }
             
-            // Limpa o botão para permitir importar o mesmo arquivo novamente se o utilizador errar
+            // Permite importar o mesmo arquivo novamente caso o usuário queira
             event.target.value = '';
         };
         reader.readAsText(file);
@@ -900,17 +922,14 @@
         (localArr || []).forEach(item => {
             if(!item) return;
             let hash = hashFn(item);
-            if (item.deleted) {
-                map.delete(hash); 
-            } else {
+            if (item.deleted) { map.delete(hash); } 
+            else {
                 if(!item.id) item.id = generateUUID();
                 if(map.has(hash)) {
                     let existente = map.get(hash);
                     if(item.updatedAt && existente.updatedAt && item.updatedAt > existente.updatedAt) { map.set(hash, item); } 
                     else if (!existente.updatedAt) { map.set(hash, item); }
-                } else {
-                    map.set(hash, item); 
-                }
+                } else { map.set(hash, item); }
             }
         });
         return Array.from(map.values());
@@ -962,14 +981,13 @@
             permissaoNuvem = false; 
             transacoes = unificarDados(transacoes, [], hashTransacao); agriRecords = unificarDados(agriRecords, [], hashAgri); analisesSolo = unificarDados(analisesSolo, [], hashSolo);
             estoque = unificarDados(estoque, [], hashEstoque); chuvas = unificarDados(chuvas, [], hashChuva);
-            
             statusDiv.innerHTML = '🔴 MODO OFFLINE (Nuvem Segura)'; statusDiv.className = 'status-conexao erro';
         }
 
         const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo, chuvas };
-        try { localStorage.setItem('rancho3c_offline', JSON.stringify(payload)); } catch(err) { alert("Memória local cheia!"); }
+        try { localStorage.setItem('rancho3c_offline', JSON.stringify(payload)); } catch(err) {}
 
-        try { popularSeletorSolo(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); } catch(e){}
+        try { preencherSelectsLancamento(); popularSeletorSolo(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); } catch(e){}
         if(permissaoNuvem) salvarDados();
         showTab('home');
     }
@@ -1015,7 +1033,7 @@
     }
 
     /* =========================================================================
-       5. MÓDULO DE CHUVAS
+       5. MÓDULO CHUVAS
     ========================================================================= */
     function addChuva(e) {
         e.preventDefault();
@@ -1032,9 +1050,7 @@
             if(existente) {
                 if(!confirm(`Já existe um registro de ${existente.mm} mm para este dia. Deseja substituir por ${nova.mm} mm?`)) return;
                 existente.mm = nova.mm; existente.updatedAt = Date.now();
-            } else {
-                chuvas.push(nova);
-            }
+            } else { chuvas.push(nova); }
         }
         
         salvarDados(); document.getElementById('form_chuva').reset(); setVal('cv_id', ''); setVal('cv_data', hojeLocal());
@@ -1051,7 +1067,6 @@
             <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editChuva('${c.id}')">✏️</button><button class="btn-acao btn-excluir" onclick="deleteChuva('${c.id}')">🗑️</button></td></tr>`;
         });
         document.getElementById('tbody_chuvas').innerHTML = html || '<tr><td colspan="3" style="text-align:center; padding:30px; color:#aaa;">Sem registros de chuvas</td></tr>';
-        
         renderChartChuvas();
     }
 
@@ -1859,7 +1874,8 @@
         analisesSolo.forEach(a => { if(a && !a.deleted && a.talhao) talhoesSet.add(a.talhao) });
         (opcoesDin.talhoes||[]).forEach(t => talhoesSet.add(t));
         const html = Array.from(talhoesSet).sort().map(t => `<option value="${strEscape(t)}">${strEscape(t)}</option>`).join('');
-        setHtml('hist_talhao', html); setHtml('calc_talhao', html);
+        const ht = document.getElementById('hist_talhao'); if(ht) ht.innerHTML = html;
+        const ct = document.getElementById('calc_talhao'); if(ct) ct.innerHTML = html;
         renderizarTabelaHistoricoSolo();
     }
 
