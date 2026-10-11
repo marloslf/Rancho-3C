@@ -130,7 +130,9 @@ function importarXMLDespesa(event) {
             alert("Erro ao processar XML. Certifique-se de que é um arquivo de NF-e válido.");
         }
         event.target.value = '';
-    }
+    };
+    reader.readAsText(file);
+}
 
 /* =========================================================================
    4. SINCRONIZAÇÃO E ALGORITMO HASH
@@ -779,9 +781,9 @@ function aplicarFiltros() {
     document.getElementById('tabela_relatorio').innerHTML = linhasHTML.join('') || '<tr><td colspan="11" style="text-align:center; padding: 30px; color:#aaa;">Sem lançamentos</td></tr>';
 }
 
-/* =========================================================================
+/* -------------------------------------------------------------------------
    7. BLOCO AGRÍCOLA E ESTOQUE 
-========================================================================= */
+------------------------------------------------------------------------- */
 function preencherTipoProduto() { const prod = document.getElementById('produto').value.toUpperCase(); const item = estoque.find(e => e && !e.deleted && e.produto === prod); if (item && item.tipo) setVal('tipo', item.tipo); }
 
 function popularSeletorSafraApp() {
