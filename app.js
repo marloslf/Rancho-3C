@@ -278,7 +278,9 @@ function addChuva(e) {
         if(existente) {
             if(!confirm(`Já existe um registro de ${existente.mm} mm para este dia. Deseja substituir por ${nova.mm} mm?`)) return;
             existente.mm = nova.mm; existente.updatedAt = Date.now();
-        } else { chuvas.push(nova); }
+        } else {
+            chuvas.push(nova);
+        }
     }
     
     salvarDados(); document.getElementById('form_chuva').reset(); setVal('cv_id', ''); setVal('cv_data', hojeLocal());
@@ -295,6 +297,7 @@ function renderChuvas() {
         <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editChuva('${c.id}')">✏️</button><button class="btn-acao btn-excluir" onclick="deleteChuva('${c.id}')">🗑️</button></td></tr>`;
     });
     document.getElementById('tbody_chuvas').innerHTML = html || '<tr><td colspan="3" style="text-align:center; padding:30px; color:#aaa;">Sem registros de chuvas</td></tr>';
+    
     renderChartChuvas();
 }
 
@@ -387,14 +390,14 @@ function atualizarResumoEGrafico() {
     let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
     arrRCat.forEach(x => { 
         let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0; let codeStr = encodeURIComponent(x[0]); 
-        hR += `<li class="item-lista-grafico"><div style="display:flex; justify-content:space-between;"><span>${strEscape(x[0])}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div></li>`; 
+        hR += `<li class="item-lista-grafico" onclick="abrirDetalheCategoria('${codeStr}', 'Receita')" title="Clique para ver detalhes"><div style="display:flex; justify-content:space-between;"><span>${strEscape(x[0])}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div></li>`; 
     });
     document.getElementById('lista_top_receitas').innerHTML = hR || '<li class="item-lista-grafico" style="cursor:default;">Nenhuma receita paga</li>';
 
     let arrDCat = Object.entries(dCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxDCat = arrDCat.length > 0 ? arrDCat[0][1] : 0; let hD = '';
     arrDCat.forEach(x => { 
         let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0; let codeStr = encodeURIComponent(x[0]); 
-        hD += `<li class="item-lista-grafico"><div style="display:flex; justify-content:space-between;"><span>${strEscape(x[0])}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div></li>`; 
+        hD += `<li class="item-lista-grafico" onclick="abrirDetalheCategoria('${codeStr}', 'Saida')" title="Clique para ver detalhes"><div style="display:flex; justify-content:space-between;"><span>${strEscape(x[0])}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div></li>`; 
     });
     document.getElementById('lista_top_despesas').innerHTML = hD || '<li class="item-lista-grafico" style="cursor:default;">Nenhuma saída paga</li>';
 }
@@ -538,6 +541,14 @@ function renderCascataDescricao(catEncoded, tipoFiltro) {
     });
 
     document.getElementById('lista_cascata_desc').innerHTML = htmlDesc || '<li>Nenhum detalhe disponível.</li>';
+}
+
+function abrirDetalheCategoria(catEncoded, tipoFiltro) {
+    switchTab('relatorios_detalhados');
+    switchRelTab('cascata');
+    setVal('cascata_tipo', tipoFiltro);
+    renderCascataCategorias();
+    renderCascataDescricao(catEncoded, tipoFiltro);
 }
 
 function mudarTemaSaida() {
@@ -1451,6 +1462,3 @@ function enviarParaAplicacoes() {
 }
 
 window.onload = () => { carregarDadosNuvem(); };
-</script>
-</body>
-</html>
