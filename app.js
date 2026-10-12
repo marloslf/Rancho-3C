@@ -222,7 +222,9 @@ async function carregarDadosNuvem() {
     showTab('home');
 }
 
-// CORREÇÃO PRO 1: Fila de Salvamento (Debounce) para evitar Conflitos de Nuvem
+// ==========================================
+// FILA DE SEGURANÇA PARA SALVAMENTO
+// ==========================================
 let isSaving = false;
 let pendingSave = false;
 
@@ -235,7 +237,7 @@ async function salvarDados() {
     
     if (!permissaoNuvem) { statusDiv.innerHTML = '🔴 GUARDADO LOCAL'; statusDiv.className = 'status-conexao erro'; return; }
 
-    // Cria a fila se já estiver salvando (Evita corromper dados)
+    // Cria a fila se já estiver salvando para o Google não se perder
     if (isSaving) { pendingSave = true; return; }
     
     isSaving = true;
@@ -249,7 +251,7 @@ async function salvarDados() {
         permissaoNuvem = false; statusDiv.innerHTML = '🔴 GUARDADO LOCAL'; statusDiv.className = 'status-conexao erro'; 
     } finally {
         isSaving = false;
-        // Se houver comandos na fila enquanto processava, processa o último estado agora.
+        // Processa o resto da fila se houve mais um pedido enquanto enviava
         if (pendingSave) {
             pendingSave = false;
             salvarDados();
@@ -826,7 +828,6 @@ function renderDatalistsAgri() {
     setHtml('lista-produtos-estoque', [...new Set(estoque.filter(e => e && !e.deleted && e.produto).map(e => e.produto))].sort().map(p => `<option value="${strEscape(p)}">`).join(''));
 }
 
-// CORREÇÃO PRO 2: Removemos o salvarDados() daqui para evitar Condição de Corrida
 function verificarNovaOpcao(categoria, valorStr) {
     let valor = String(valorStr||'').toUpperCase().trim();
     if(!opcoesDin[categoria]) opcoesDin[categoria] = [];
@@ -840,60 +841,77 @@ function verificarNovaOpcao(categoria, valorStr) {
 
 function addAgriApp(e) {
     e.preventDefault();
-    let produtoStr = document.getElementById('produto').value.toUpperCase(); let dosagemQtd = parseFloat(document.getElementById('dosagem_qtd').value); let dosagemUn = document.getElementById('dosagem_un').value; let tipoStr = verificarNovaOpcao('tipos', document.getElementById('tipo').value);
-    let novoStatus = document.getElementById('status').value.toUpperCase();
-    let dataLimpa = sanitizeDateString(document.getElementById('dataApp').value);
-    
-    const record = { id: generateUUID(), updatedAt: Date.now(), deleted: false, data: dataLimpa, talhao: verificarNovaOpcao('talhoes', document.getElementById('talhao').value), produto: produtoStr, tipo: tipoStr, alvo: verificarNovaOpcao('alvos', document.getElementById('alvo').value), dosagem: `${dosagemQtd} ${dosagemUn}`, dosagem_qtd: dosagemQtd, dosagem_un: dosagemUn, forma: verificarNovaOpcao('formas', document.getElementById('forma').value), status: novoStatus, custo_unit: 0 };
-    const editId = document.getElementById('editAgriIndex').value;
-    
-    if (!editId) {
-        agriRecords.push(record);
-        if (record.status === 'APLICADO' && record.data <= hojeLocal()) {
-            let est = estoque.find(e => e && !e.deleted && e.produto === record.produto && e.un === record.dosagem_un);
-            if (est) { est.qtd -= record.dosagem_qtd; est.updatedAt = Date.now(); }
-            else estoque.push({ id: generateUUID(), updatedAt: Date.now(), deleted: false, produto: record.produto, principio: "", tipo: record.tipo, qtd: -record.dosagem_qtd, un: record.dosagem_un, valor_unit: 0 });
-        }
-    } else { 
-        let old = agriRecords.find(r => r.id === editId);
-        if(old) {
-            if (old.status === 'APLICADO' && sanitizeDateString(old.data) <= hojeLocal()) {
-                let est = estoque.find(e => e && !e.deleted && e.produto === old.produto && e.un === old.dosagem_un);
-                if(est) { est.qtd += old.dosagem_qtd; est.updatedAt = Date.now(); } 
-            }
-            
-            record.id = old.id;
-            record.custo_unit = old.custo_unit; 
-            let idx = agriRecords.indexOf(old);
-            agriRecords[idx] = record; 
-            
+    try {
+        let produtoStr = document.getElementById('produto').value.toUpperCase(); 
+        let dosagemQtd = parseFloat(document.getElementById('dosagem_qtd').value); 
+        let dosagemUn = document.getElementById('dosagem_un').value; 
+        let tipoStr = verificarNovaOpcao('tipos', document.getElementById('tipo').value);
+        let novoStatus = document.getElementById('status').value.toUpperCase();
+        let dataLimpa = sanitizeDateString(document.getElementById('dataApp').value);
+        
+        const record = { 
+            id: generateUUID(), 
+            updatedAt: Date.now(), 
+            deleted: false, 
+            data: dataLimpa, 
+            talhao: verificarNovaOpcao('talhoes', document.getElementById('talhao').value), 
+            produto: produtoStr, 
+            tipo: tipoStr, 
+            alvo: verificarNovaOpcao('alvos', document.getElementById('alvo').value), 
+            dosagem: `${dosagemQtd} ${dosagemUn}`, 
+            dosagem_qtd: dosagemQtd, 
+            dosagem_un: dosagemUn, 
+            forma: verificarNovaOpcao('formas', document.getElementById('forma').value), 
+            status: novoStatus, 
+            custo_unit: 0 
+        };
+        const editId = document.getElementById('editAgriIndex').value;
+        
+        if (!editId) {
+            agriRecords.push(record);
             if (record.status === 'APLICADO' && record.data <= hojeLocal()) {
                 let est = estoque.find(e => e && !e.deleted && e.produto === record.produto && e.un === record.dosagem_un);
-                if(est) { est.qtd -= record.dosagem_qtd; est.updatedAt = Date.now(); }
+                if (est) { est.qtd -= record.dosagem_qtd; est.updatedAt = Date.now(); }
+                else estoque.push({ id: generateUUID(), updatedAt: Date.now(), deleted: false, produto: record.produto, principio: "", tipo: record.tipo, qtd: -record.dosagem_qtd, un: record.dosagem_un, valor_unit: 0 });
             }
+        } else { 
+            let old = agriRecords.find(r => r.id === editId);
+            if(old) {
+                if (old.status === 'APLICADO' && sanitizeDateString(old.data) <= hojeLocal()) {
+                    let est = estoque.find(e => e && !e.deleted && e.produto === old.produto && e.un === old.dosagem_un);
+                    if(est) { est.qtd += old.dosagem_qtd; est.updatedAt = Date.now(); } 
+                }
+                
+                record.id = old.id;
+                record.custo_unit = old.custo_unit; 
+                let idx = agriRecords.indexOf(old);
+                agriRecords[idx] = record; 
+                
+                if (record.status === 'APLICADO' && record.data <= hojeLocal()) {
+                    let est = estoque.find(e => e && !e.deleted && e.produto === record.produto && e.un === record.dosagem_un);
+                    if(est) { est.qtd -= record.dosagem_qtd; est.updatedAt = Date.now(); }
+                }
+            }
+            document.getElementById('editAgriIndex').value = ""; 
         }
-        document.getElementById('editAgriIndex').value = ""; 
+        
+        salvarDados(); 
+        popularSeletorSafraApp(); 
+        
+        const ss = document.getElementById('safraSelector'); 
+        if(ss) { ss.value = obterSafraGeral(record.data); }
+        
+        aplicarFiltroSafraApp();
+        limparFiltrosAgri();
+        
+        document.getElementById('appForm').reset(); 
+        const st = document.getElementById('status'); 
+        if(st) st.value = 'PLANEJADO'; 
+        mostrarToast("Registro Agrícola Salvo!");
+        
+    } catch (err) {
+        alert("Ops! Ocorreu um erro ao salvar o registro na tela: " + err.message);
     }
-    
-    // Agora o sistema salva na nuvem com segurança UMA ÚNICA VEZ
-    salvarDados(); 
-    
-    popularSeletorSafraApp(); 
-    
-    // CORREÇÃO PRO 3: Força a Safra atual do seletor para a Safra do novo registro, 
-    // garantindo que ele não fique "escondido" se for de uma safra diferente.
-    const ss = document.getElementById('safraSelector'); 
-    if(ss) { ss.value = obterSafraGeral(record.data); }
-    
-    aplicarFiltroSafraApp();
-    
-    // CORREÇÃO PRO 4: Garante que, ao inserir, a tabela reaplique os filtros (se houver) sem zerar as caixas
-    filterAgriTable();
-    
-    document.getElementById('appForm').reset(); 
-    const st = document.getElementById('status'); 
-    if(st) st.value = 'PLANEJADO'; 
-    mostrarToast("Registro Agrícola Salvo!");
 }
 
 function toggleStatusApp(id) {
@@ -1082,20 +1100,30 @@ function updateFilterOptionsAgri(visibleRecords) {
     const filters = [ { id: 'f_agri_data', k: 'data', fmt: formatarData }, { id: 'f_agri_talhao', k: 'talhao' }, { id: 'f_agri_produto', k: 'produto' }, { id: 'f_agri_tipo', k: 'tipo' }, { id: 'f_agri_alvo', k: 'alvo' }, { id: 'f_agri_forma', k: 'forma' }, { id: 'f_agri_status', k: 'status' } ];
     filters.forEach(f => { const sel = document.getElementById(f.id); if(!sel) return; const val = sel.value; sel.innerHTML = '<option value="">TODOS</option>'; [...new Set(visibleRecords.map(r => f.fmt ? f.fmt(r[f.k]) : (r[f.k] || '-')))].sort().forEach(v => { if(v) sel.innerHTML += `<option value="${strEscape(v)}">${strEscape(v)}</option>`; }); sel.value = val; });
 }
-function limparFiltrosAgri() { ['f_agri_data','f_agri_talhao','f_agri_produto','f_agri_tipo','f_agri_alvo','f_agri_forma','f_agri_status'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ""; }); filterAgriTable(); }
 
-// CORREÇÃO PRO 5: Segurança para evitar travamentos em linhas em branco
+function limparFiltrosAgri() { 
+    ['f_agri_data','f_agri_talhao','f_agri_produto','f_agri_tipo','f_agri_alvo','f_agri_forma','f_agri_status'].forEach(id => { 
+        const el=document.getElementById(id); 
+        if(el) el.value = ""; 
+    }); 
+    filterAgriTable(); 
+}
+
 function filterAgriTable() {
     const ids = ['f_agri_data','f_agri_talhao','f_agri_produto','f_agri_tipo','f_agri_alvo','','f_agri_forma','','f_agri_status'];
     const fs = ids.map(id => { const el = document.getElementById(id); return el ? el.value : ""; });
+    
+    // Tratamento vital para que o filtro de data funcione comparando formatos compatíveis
+    const dateFilter = fs[0] ? formatarData(fs[0]) : "";
+
     const rows = document.getElementById('tableBodyAgri').getElementsByTagName('tr');
     for (let i=0; i<rows.length; i++) {
         const cells = rows[i].getElementsByTagName('td'); 
-        if (cells.length < 9) continue; // Pula a linha "Nenhuma aplicação registrada"
+        if (cells.length < 9) continue; // Ignora o aviso de "Nenhuma aplicação registrada"
         
         const pTxt = cells[2].innerText.split('⚠️')[0].trim();
         const match = [ 
-            fs[0]===""||cells[0].innerText.trim()===fs[0], 
+            dateFilter==="" || cells[0].innerText.trim()===dateFilter, 
             fs[1]===""||cells[1].innerText.trim()===fs[1], 
             fs[2]===""||pTxt===fs[2], 
             fs[3]===""||cells[3].innerText.trim()===fs[3], 
@@ -1518,16 +1546,10 @@ function enviarParaAplicacoes() {
 document.addEventListener('input', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
         const tipo = e.target.type ? e.target.type.toLowerCase() : 'text';
-        
-        // Aplica a conversão apenas em campos de texto (ignora numbers, dates, etc.)
         if (tipo === 'text' || tipo === 'search' || !e.target.hasAttribute('type')) {
-            // Salva a posição do cursor para que a digitação continue de forma fluída
             const start = e.target.selectionStart;
             const end = e.target.selectionEnd;
-            
-            // Converte e escreve em caixa alta dinamicamente
             e.target.value = e.target.value.toUpperCase();
-            
             if (start !== null && end !== null) {
                 e.target.setSelectionRange(start, end);
             }
