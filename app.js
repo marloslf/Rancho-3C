@@ -130,11 +130,12 @@ function importarXMLDespesa(event) {
             alert("Erro ao processar XML. Certifique-se de que é um arquivo de NF-e válido.");
         }
         event.target.value = '';
-    }
+    };
+    reader.readAsText(file);
 }
 
 /* =========================================================================
-   4. SINCRONIZAÇÃO E ALGORITMO HASH
+   4. SINCRONIZAÇÃO E ALGORITMO HASH UNIFICADOR
 ========================================================================= */
 function unificarDados(localArr, cloudArr, hashFn) {
     let map = new Map();
@@ -221,21 +222,38 @@ async function carregarDadosNuvem() {
     showTab('home');
 }
 
+// CORREÇÃO PRO 1: Fila de Salvamento (Debounce) para evitar Conflitos de Nuvem
+let isSaving = false;
+let pendingSave = false;
+
 async function salvarDados() {
     const statusDiv = document.getElementById('status_conexao');
     const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo, chuvas };
     
+    // Grava localmente de imediato
     try { localStorage.setItem('rancho3c_offline', JSON.stringify(payload)); } catch(err) { mostrarToast("Erro local: Memória Cheia!"); }
     
     if (!permissaoNuvem) { statusDiv.innerHTML = '🔴 GUARDADO LOCAL'; statusDiv.className = 'status-conexao erro'; return; }
 
+    // Cria a fila se já estiver salvando (Evita corromper dados)
+    if (isSaving) { pendingSave = true; return; }
+    
+    isSaving = true;
     statusDiv.innerHTML = '⏳ A gravar...'; statusDiv.className = 'status-conexao aguardando';
+    
     try {
         const response = await fetch(URL_GOOGLE_SCRIPT, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
         if(!response.ok) throw new Error("HTTP Error");
         statusDiv.innerHTML = `🟢 SINCRONIZADO`; statusDiv.className = 'status-conexao conectado'; 
     } catch (e) { 
         permissaoNuvem = false; statusDiv.innerHTML = '🔴 GUARDADO LOCAL'; statusDiv.className = 'status-conexao erro'; 
+    } finally {
+        isSaving = false;
+        // Se houver comandos na fila enquanto processava, processa o último estado agora.
+        if (pendingSave) {
+            pendingSave = false;
+            salvarDados();
+        }
     }
 }
 
@@ -388,14 +406,14 @@ function atualizarResumoEGrafico() {
     let arrRCat = Object.entries(rCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxRCat = arrRCat.length > 0 ? arrRCat[0][1] : 0; let hR = '';
     arrRCat.forEach(x => { 
         let perc = maxRCat > 0 ? (x[1] / maxRCat) * 100 : 0; let codeStr = encodeURIComponent(x[0]); 
-        hR += `<li class="item-lista-grafico"><div style="display:flex; justify-content:space-between;"><span>${strEscape(x[0])}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div></li>`; 
+        hR += `<li class="item-lista-grafico" onclick="abrirDetalheCategoria('${codeStr}', 'Receita')" title="Clique para ver detalhes"><div style="display:flex; justify-content:space-between;"><span>${strEscape(x[0])}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-receita" style="width: ${perc}%;"></div></div></li>`; 
     });
     document.getElementById('lista_top_receitas').innerHTML = hR || '<li class="item-lista-grafico" style="cursor:default;">Nenhuma receita paga</li>';
 
     let arrDCat = Object.entries(dCat).sort((a,b) => b[1] - a[1]).slice(0, 5); let maxDCat = arrDCat.length > 0 ? arrDCat[0][1] : 0; let hD = '';
     arrDCat.forEach(x => { 
         let perc = maxDCat > 0 ? (x[1] / maxDCat) * 100 : 0; let codeStr = encodeURIComponent(x[0]); 
-        hD += `<li class="item-lista-grafico"><div style="display:flex; justify-content:space-between;"><span>${strEscape(x[0])}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div></li>`; 
+        hD += `<li class="item-lista-grafico" onclick="abrirDetalheCategoria('${codeStr}', 'Saida')" title="Clique para ver detalhes"><div style="display:flex; justify-content:space-between;"><span>${strEscape(x[0])}</span> <span>${formatarMoeda(x[1])}</span></div><div class="barra-grafico-container"><div class="barra-grafico-despesa" style="width: ${perc}%;"></div></div></li>`; 
     });
     document.getElementById('lista_top_despesas').innerHTML = hD || '<li class="item-lista-grafico" style="cursor:default;">Nenhuma saída paga</li>';
 }
@@ -540,6 +558,16 @@ function renderCascataDescricao(catEncoded, tipoFiltro) {
 
     document.getElementById('lista_cascata_desc').innerHTML = htmlDesc || '<li>Nenhum detalhe disponível.</li>';
 }
+
+function abrirDetalheCategoria(catEncoded, tipoFiltro) {
+    switchTab('relatorios_detalhados');
+    switchRelTab('cascata');
+    setVal('cascata_tipo', tipoFiltro);
+    renderCascataCategorias();
+    renderCascataDescricao(catEncoded, tipoFiltro);
+}
+
+function switchTab(id) { showTab(id); }
 
 function mudarTemaSaida() {
     const select = document.getElementById('d_natureza'); const caixa = document.getElementById('caixa_lancamento_saida'); const titulo = document.getElementById('titulo_saida'); 
@@ -798,15 +826,18 @@ function renderDatalistsAgri() {
     setHtml('lista-produtos-estoque', [...new Set(estoque.filter(e => e && !e.deleted && e.produto).map(e => e.produto))].sort().map(p => `<option value="${strEscape(p)}">`).join(''));
 }
 
+// CORREÇÃO PRO 2: Removemos o salvarDados() daqui para evitar Condição de Corrida
 function verificarNovaOpcao(categoria, valorStr) {
     let valor = String(valorStr||'').toUpperCase().trim();
     if(!opcoesDin[categoria]) opcoesDin[categoria] = [];
     if (valor && valor !== '-' && !opcoesDin[categoria].includes(valor)) {
-        opcoesDin[categoria].push(valor); opcoesDin[categoria].sort(); salvarDados(); renderDatalistsAgri(); 
-    } return valor || '-';
+        opcoesDin[categoria].push(valor); 
+        opcoesDin[categoria].sort(); 
+        renderDatalistsAgri(); 
+    } 
+    return valor || '-';
 }
 
-/* ATUALIZAÇÃO 2: Correção da atualização da tabela agrícola ao gravar um novo registro */
 function addAgriApp(e) {
     e.preventDefault();
     let produtoStr = document.getElementById('produto').value.toUpperCase(); let dosagemQtd = parseFloat(document.getElementById('dosagem_qtd').value); let dosagemUn = document.getElementById('dosagem_un').value; let tipoStr = verificarNovaOpcao('tipos', document.getElementById('tipo').value);
@@ -844,11 +875,19 @@ function addAgriApp(e) {
         document.getElementById('editAgriIndex').value = ""; 
     }
     
+    // Agora o sistema salva na nuvem com segurança UMA ÚNICA VEZ
     salvarDados(); 
+    
     popularSeletorSafraApp(); 
+    
+    // CORREÇÃO PRO 3: Força a Safra atual do seletor para a Safra do novo registro, 
+    // garantindo que ele não fique "escondido" se for de uma safra diferente.
+    const ss = document.getElementById('safraSelector'); 
+    if(ss) { ss.value = obterSafraGeral(record.data); }
+    
     aplicarFiltroSafraApp();
     
-    // NOVA LINHA: Garante que, ao inserir, a tabela reaplique os filtros (se houver) sem zerar as caixas
+    // CORREÇÃO PRO 4: Garante que, ao inserir, a tabela reaplique os filtros (se houver) sem zerar as caixas
     filterAgriTable();
     
     document.getElementById('appForm').reset(); 
@@ -1045,13 +1084,27 @@ function updateFilterOptionsAgri(visibleRecords) {
 }
 function limparFiltrosAgri() { ['f_agri_data','f_agri_talhao','f_agri_produto','f_agri_tipo','f_agri_alvo','f_agri_forma','f_agri_status'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ""; }); filterAgriTable(); }
 
+// CORREÇÃO PRO 5: Segurança para evitar travamentos em linhas em branco
 function filterAgriTable() {
     const ids = ['f_agri_data','f_agri_talhao','f_agri_produto','f_agri_tipo','f_agri_alvo','','f_agri_forma','','f_agri_status'];
     const fs = ids.map(id => { const el = document.getElementById(id); return el ? el.value : ""; });
     const rows = document.getElementById('tableBodyAgri').getElementsByTagName('tr');
     for (let i=0; i<rows.length; i++) {
-        const cells = rows[i].getElementsByTagName('td'); const pTxt = cells[2].innerText.split('⚠️')[0].trim();
-        const match = [ fs[0]===""||cells[0].innerText.trim()===fs[0], fs[1]===""||cells[1].innerText.trim()===fs[1], fs[2]===""||pTxt===fs[2], fs[3]===""||cells[3].innerText.trim()===fs[3], fs[4]===""||cells[4].innerText.trim()===fs[4], true, fs[6]===""||cells[6].innerText.trim()===fs[6], true, fs[8]===""||cells[8].innerText.replace('🔄','').trim()===fs[8] ];
+        const cells = rows[i].getElementsByTagName('td'); 
+        if (cells.length < 9) continue; // Pula a linha "Nenhuma aplicação registrada"
+        
+        const pTxt = cells[2].innerText.split('⚠️')[0].trim();
+        const match = [ 
+            fs[0]===""||cells[0].innerText.trim()===fs[0], 
+            fs[1]===""||cells[1].innerText.trim()===fs[1], 
+            fs[2]===""||pTxt===fs[2], 
+            fs[3]===""||cells[3].innerText.trim()===fs[3], 
+            fs[4]===""||cells[4].innerText.trim()===fs[4], 
+            true, 
+            fs[6]===""||cells[6].innerText.trim()===fs[6], 
+            true, 
+            fs[8]===""||cells[8].innerText.replace('🔄','').trim()===fs[8] 
+        ];
         rows[i].style.display = match.every(Boolean) ? '' : 'none';
     }
 }
@@ -1461,7 +1514,7 @@ function enviarParaAplicacoes() {
     salvarDados(); try{aplicarFiltroSafraApp();}catch(e){} mostrarToast("Enviado para Aplicações!");
 }
 
-/* ATUALIZAÇÃO 3: FORMATAÇÃO GLOBAL (CAIXA ALTA) PARA A DIGITAÇÃO DE TODOS OS INPUTS */
+/* COMANDO GLOBAL PARA MAIÚSCULAS */
 document.addEventListener('input', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
         const tipo = e.target.type ? e.target.type.toLowerCase() : 'text';
