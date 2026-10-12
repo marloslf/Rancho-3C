@@ -222,9 +222,6 @@ async function carregarDadosNuvem() {
     showTab('home');
 }
 
-// ==========================================
-// FILA DE SEGURANÇA PARA SALVAMENTO
-// ==========================================
 let isSaving = false;
 let pendingSave = false;
 
@@ -237,7 +234,7 @@ async function salvarDados() {
     
     if (!permissaoNuvem) { statusDiv.innerHTML = '🔴 GUARDADO LOCAL'; statusDiv.className = 'status-conexao erro'; return; }
 
-    // Cria a fila se já estiver salvando para o Google não se perder
+    // Fila de espera blindada para evitar corrompimento na nuvem
     if (isSaving) { pendingSave = true; return; }
     
     isSaving = true;
@@ -251,7 +248,6 @@ async function salvarDados() {
         permissaoNuvem = false; statusDiv.innerHTML = '🔴 GUARDADO LOCAL'; statusDiv.className = 'status-conexao erro'; 
     } finally {
         isSaving = false;
-        // Processa o resto da fila se houve mais um pedido enquanto enviava
         if (pendingSave) {
             pendingSave = false;
             salvarDados();
@@ -865,6 +861,7 @@ function addAgriApp(e) {
             status: novoStatus, 
             custo_unit: 0 
         };
+        
         const editId = document.getElementById('editAgriIndex').value;
         
         if (!editId) {
@@ -895,18 +892,24 @@ function addAgriApp(e) {
             document.getElementById('editAgriIndex').value = ""; 
         }
         
+        // Garante envio e armazena na memória offline
         salvarDados(); 
+        
+        // Atualiza a barra de opções de safra para acomodar a nova safra
         popularSeletorSafraApp(); 
         
+        // Força a visualização da tela ir para a mesma safra do lançamento
         const ss = document.getElementById('safraSelector'); 
         if(ss) { ss.value = obterSafraGeral(record.data); }
         
+        // Limpa a tela, remove o erro de campos de pesquisa congelados e recarrega os dados visuais
         aplicarFiltroSafraApp();
         limparFiltrosAgri();
         
         document.getElementById('appForm').reset(); 
         const st = document.getElementById('status'); 
         if(st) st.value = 'PLANEJADO'; 
+        
         mostrarToast("Registro Agrícola Salvo!");
         
     } catch (err) {
@@ -1097,8 +1100,18 @@ function deleteEstoque(id) {
 }
 
 function updateFilterOptionsAgri(visibleRecords) {
-    const filters = [ { id: 'f_agri_data', k: 'data', fmt: formatarData }, { id: 'f_agri_talhao', k: 'talhao' }, { id: 'f_agri_produto', k: 'produto' }, { id: 'f_agri_tipo', k: 'tipo' }, { id: 'f_agri_alvo', k: 'alvo' }, { id: 'f_agri_forma', k: 'forma' }, { id: 'f_agri_status', k: 'status' } ];
-    filters.forEach(f => { const sel = document.getElementById(f.id); if(!sel) return; const val = sel.value; sel.innerHTML = '<option value="">TODOS</option>'; [...new Set(visibleRecords.map(r => f.fmt ? f.fmt(r[f.k]) : (r[f.k] || '-')))].sort().forEach(v => { if(v) sel.innerHTML += `<option value="${strEscape(v)}">${strEscape(v)}</option>`; }); sel.value = val; });
+    // ATUALIZAÇÃO 1: Remover o ID da Data para evitar a destruição do input no HTML
+    const filters = [ { id: 'f_agri_talhao', k: 'talhao' }, { id: 'f_agri_produto', k: 'produto' }, { id: 'f_agri_tipo', k: 'tipo' }, { id: 'f_agri_alvo', k: 'alvo' }, { id: 'f_agri_forma', k: 'forma' }, { id: 'f_agri_status', k: 'status' } ];
+    filters.forEach(f => { 
+        const sel = document.getElementById(f.id); 
+        if(!sel) return; 
+        const val = sel.value; 
+        sel.innerHTML = '<option value="">TODOS</option>'; 
+        [...new Set(visibleRecords.map(r => f.fmt ? f.fmt(r[f.k]) : (r[f.k] || '-')))].sort().forEach(v => { 
+            if(v) sel.innerHTML += `<option value="${strEscape(v)}">${strEscape(v)}</option>`; 
+        }); 
+        sel.value = val; 
+    });
 }
 
 function limparFiltrosAgri() { 
@@ -1113,13 +1126,15 @@ function filterAgriTable() {
     const ids = ['f_agri_data','f_agri_talhao','f_agri_produto','f_agri_tipo','f_agri_alvo','','f_agri_forma','','f_agri_status'];
     const fs = ids.map(id => { const el = document.getElementById(id); return el ? el.value : ""; });
     
-    // Tratamento vital para que o filtro de data funcione comparando formatos compatíveis
+    // ATUALIZAÇÃO 2: Conversão segura de formato para a busca na tabela não dar falso-negativo
     const dateFilter = fs[0] ? formatarData(fs[0]) : "";
 
     const rows = document.getElementById('tableBodyAgri').getElementsByTagName('tr');
     for (let i=0; i<rows.length; i++) {
         const cells = rows[i].getElementsByTagName('td'); 
-        if (cells.length < 9) continue; // Ignora o aviso de "Nenhuma aplicação registrada"
+        
+        // Se for a linha vazia ('Nenhuma aplicação...'), pular imediatamente
+        if (cells.length < 9) continue; 
         
         const pTxt = cells[2].innerText.split('⚠️')[0].trim();
         const match = [ 
@@ -1550,9 +1565,12 @@ document.addEventListener('input', function(e) {
             const start = e.target.selectionStart;
             const end = e.target.selectionEnd;
             e.target.value = e.target.value.toUpperCase();
-            if (start !== null && end !== null) {
-                e.target.setSelectionRange(start, end);
-            }
+            
+            try {
+                if (start !== null && end !== null) {
+                    e.target.setSelectionRange(start, end);
+                }
+            } catch(err) {} // Alguns navegadores bloqueiam seleções em certos campos, isso evita travar a interface.
         }
     }
 });
