@@ -15,7 +15,7 @@ let chartCaixaObj = null, chartPendenteObj = null; let chartS_Agri = null, chart
 let permissaoNuvem = false; 
 
 /* =========================================================================
-   2. UTILITÁRIOS
+   2. UTILITÁRIOS E CORREÇÃO DO DOM
 ========================================================================= */
 function generateUUID() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); }
 function hojeLocal() { const d = new Date(); return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); }
@@ -41,8 +41,27 @@ function formatarMoeda(valor) { const num = parseFloat(valor); return isNaN(num)
 function strEscape(val) { const s = strSafe(val); return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 function parseNS(valStr) { if (!valStr || String(valStr).toLowerCase() === 'ns') return 0; let v = parseFloat(String(valStr).replace(',', '.')); return isNaN(v) ? 0 : v; }
 function safeVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
-function setVal(id, valor) { const el = document.getElementById(id); if (el) { let old = el.value; el.innerHTML = valor; if(old && el.options) el.value = old; else el.value = valor; } }
-function setHtml(id, htmlStr) { const el = document.getElementById(id); if (el) { let old = el.value; el.innerHTML = htmlStr; if(old) el.value = old; } }
+
+// CORREÇÃO CRÍTICA 1: O setVal não destruirá mais os seletores
+function setVal(id, valor) {
+    const el = document.getElementById(id);
+    if (el) {
+        if (el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA') {
+            el.value = valor;
+        } else {
+            el.innerText = valor;
+        }
+    }
+}
+
+function setHtml(id, htmlStr) {
+    const el = document.getElementById(id);
+    if (el) {
+        let old = el.value;
+        el.innerHTML = htmlStr;
+        if(old) el.value = old;
+    }
+}
 
 function mostrarToast(msg) { 
     const toast = document.getElementById("toast"); 
@@ -229,12 +248,10 @@ async function salvarDados() {
     const statusDiv = document.getElementById('status_conexao');
     const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo, chuvas };
     
-    // Grava localmente de imediato
     try { localStorage.setItem('rancho3c_offline', JSON.stringify(payload)); } catch(err) { mostrarToast("Erro local: Memória Cheia!"); }
     
     if (!permissaoNuvem) { statusDiv.innerHTML = '🔴 GUARDADO LOCAL'; statusDiv.className = 'status-conexao erro'; return; }
 
-    // Fila de espera blindada para evitar corrompimento na nuvem
     if (isSaving) { pendingSave = true; return; }
     
     isSaving = true;
@@ -892,17 +909,12 @@ function addAgriApp(e) {
             document.getElementById('editAgriIndex').value = ""; 
         }
         
-        // Garante envio e armazena na memória offline
         salvarDados(); 
-        
-        // Atualiza a barra de opções de safra para acomodar a nova safra
         popularSeletorSafraApp(); 
         
-        // Força a visualização da tela ir para a mesma safra do lançamento
         const ss = document.getElementById('safraSelector'); 
         if(ss) { ss.value = obterSafraGeral(record.data); }
         
-        // Limpa a tela, remove o erro de campos de pesquisa congelados e recarrega os dados visuais
         aplicarFiltroSafraApp();
         limparFiltrosAgri();
         
@@ -1100,7 +1112,7 @@ function deleteEstoque(id) {
 }
 
 function updateFilterOptionsAgri(visibleRecords) {
-    // ATUALIZAÇÃO 1: Remover o ID da Data para evitar a destruição do input no HTML
+    // CORREÇÃO CRÍTICA 2: Ocultado o filtro de DATA da lista de iteração do HTML para não quebrar a caixa de input de Data
     const filters = [ { id: 'f_agri_talhao', k: 'talhao' }, { id: 'f_agri_produto', k: 'produto' }, { id: 'f_agri_tipo', k: 'tipo' }, { id: 'f_agri_alvo', k: 'alvo' }, { id: 'f_agri_forma', k: 'forma' }, { id: 'f_agri_status', k: 'status' } ];
     filters.forEach(f => { 
         const sel = document.getElementById(f.id); 
@@ -1124,29 +1136,30 @@ function limparFiltrosAgri() {
 
 function filterAgriTable() {
     const ids = ['f_agri_data','f_agri_talhao','f_agri_produto','f_agri_tipo','f_agri_alvo','','f_agri_forma','','f_agri_status'];
-    const fs = ids.map(id => { const el = document.getElementById(id); return el ? el.value : ""; });
+    // Força tudo para maiúscula durante a leitura do filtro (evita falsos negativos do CSS)
+    const fs = ids.map(id => { const el = document.getElementById(id); return el ? el.value.toUpperCase() : ""; });
     
-    // ATUALIZAÇÃO 2: Conversão segura de formato para a busca na tabela não dar falso-negativo
+    // CORREÇÃO CRÍTICA 3: Formata a data de pesquisa (AAAA-MM-DD) para combinar com a tabela da tela (DD/MM/AAAA)
     const dateFilter = fs[0] ? formatarData(fs[0]) : "";
 
     const rows = document.getElementById('tableBodyAgri').getElementsByTagName('tr');
     for (let i=0; i<rows.length; i++) {
         const cells = rows[i].getElementsByTagName('td'); 
         
-        // Se for a linha vazia ('Nenhuma aplicação...'), pular imediatamente
+        // Proteção anti-crash: Ignora a linha quando ela disser "Nenhuma aplicação registrada"
         if (cells.length < 9) continue; 
         
-        const pTxt = cells[2].innerText.split('⚠️')[0].trim();
+        const pTxt = cells[2].innerText.split('⚠️')[0].trim().toUpperCase();
         const match = [ 
             dateFilter==="" || cells[0].innerText.trim()===dateFilter, 
-            fs[1]===""||cells[1].innerText.trim()===fs[1], 
+            fs[1]===""||cells[1].innerText.trim().toUpperCase()===fs[1], 
             fs[2]===""||pTxt===fs[2], 
-            fs[3]===""||cells[3].innerText.trim()===fs[3], 
-            fs[4]===""||cells[4].innerText.trim()===fs[4], 
+            fs[3]===""||cells[3].innerText.trim().toUpperCase()===fs[3], 
+            fs[4]===""||cells[4].innerText.trim().toUpperCase()===fs[4], 
             true, 
-            fs[6]===""||cells[6].innerText.trim()===fs[6], 
+            fs[6]===""||cells[6].innerText.trim().toUpperCase()===fs[6], 
             true, 
-            fs[8]===""||cells[8].innerText.replace('🔄','').trim()===fs[8] 
+            fs[8]===""||cells[8].innerText.replace('🔄','').trim().toUpperCase()===fs[8] 
         ];
         rows[i].style.display = match.every(Boolean) ? '' : 'none';
     }
@@ -1570,7 +1583,7 @@ document.addEventListener('input', function(e) {
                 if (start !== null && end !== null) {
                     e.target.setSelectionRange(start, end);
                 }
-            } catch(err) {} // Alguns navegadores bloqueiam seleções em certos campos, isso evita travar a interface.
+            } catch(err) {} 
         }
     }
 });
