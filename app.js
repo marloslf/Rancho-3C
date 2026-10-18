@@ -9,15 +9,24 @@ const rCategoriasPadrao = ["ACEROLA - POLPA", "CAFÉ 250G", "CAFÉ 500G", "CAFÉ
 const unidadesReceita = { "ACEROLA - POLPA": "KG", "CAFÉ 250G": "PCT", "CAFÉ 500G": "PCT", "CAFÉ EM GRÃOS": "PCT", "CAFÉ SACA": "SC", "CRÉDITO": "R$", "ESTACAS DE EUCALÍPTO": "UN", "GRAVIOLA - POLPA S/SEM.": "KG", "MARACUJÁ - FRUTO": "KG", "MARACUJÁ - POLPA C/SEM.": "KG", "MARACUJÁ - POLPA S/SEM.": "KG", "OVOS": "DZ", "PASTO - ALUGUEL": "MÊS", "RENDIMENTOS": "R$" };
 
 let transacoes = []; let agriRecords = []; let estoque = []; let chuvas = []; let analisesSolo = [];
-let opcoesDin = { talhoes: ["CAFÉ 2019", "CAFÉ 2022"], tipos: [], formas: [], alvos: [] };
+let opcoesDin = { talhoes: ["CAFÉ 2019", "CAFÉ 2022"], tipos: [], formas: [], alvos: [], talhoesInfo: {} };
 let colOrdenacao = 'data'; let ordemAscendente = false; let filtroRapido = '';
 let chartCaixaObj = null, chartPendenteObj = null; let chartS_Agri = null, chartT_Agri = null, chartTp_Agri = null, chartCS_Agri = null, chartCT_Agri = null; let chartChuvasObj = null;
 let permissaoNuvem = false; 
+let chartSoloPrincipal = null, chartSoloMicros = null;
+let reqGeralCalc = { n: 0, p: 0, k: 0, zn: 0, b: 0, cu: 0, mn: 0 };
+let cronogramaFinal = [];
+let estSortCol = 'produto', estSortAsc = true;
+let ultimaListaFiltrada = [];
+const categoriasInsumo = ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "FUNGICIDA", "HERBICIDA", "INSETICIDA", "INSUMOS"];
+
+// Setores do caixa diário que representam lavouras (entram no custo por talhão, além dos talhões cadastrados)
+const setoresLavoura = ["CAFÉ", "CAFÉ 01", "CAFÉ 02", "CAFÉ 03", "LAVOURAS", "MARACUJÁ"];
 
 /* =========================================================================
    2. UTILITÁRIOS E CORREÇÃO DO DOM
 ========================================================================= */
-function generateUUID() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); }
+function generateUUID() { return 'v2-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9); }
 function hojeLocal() { const d = new Date(); return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); }
 function strSafe(val) { return (val === null || val === undefined) ? '' : String(val).trim(); }
 
@@ -124,6 +133,8 @@ function importarXMLDespesa(event) {
                 let categoriaCat = document.getElementById('d_categoria').value.trim().toUpperCase() || "A CLASSIFICAR";
                 let setorCat = document.getElementById('d_setor').value.trim().toUpperCase() || "-";
 
+                const talhaoImp = strSafe(safeVal('d_talhao')).toUpperCase();
+                let novas = [], repetidas = 0;
                 for(let i = 0; i < dets.length; i++) {
                     let prod = dets[i].getElementsByTagName("prod")[0];
                     if(!prod) continue;
@@ -134,16 +145,34 @@ function importarXMLDespesa(event) {
                     let vTot = parseFloat(prod.getElementsByTagName("vProd")[0] ? prod.getElementsByTagName("vProd")[0].textContent : 0);
                     let und = (prod.getElementsByTagName("uCom")[0] ? prod.getElementsByTagName("uCom")[0].textContent : "UN").toUpperCase();
 
-                    transacoes.push({
+                    // Evita duplicar a mesma NF-e importada duas vezes
+                    const jaExiste = transacoes.some(x => x && !x.deleted && x.obs === 'Importação Automática XML' && sanitizeDateString(x.data) === dataNF && x.local === fornecedor && x.desc === desc && parseFloat(x.valor) === vTot);
+                    if (jaExiste) { repetidas++; continue; }
+
+                    const nt = {
                         id: generateUUID(), updatedAt: Date.now(), deleted: false,
                         data: dataNF, tipo: tipoFinal, categoria: categoriaCat,
-                        setor: setorCat, local: fornecedor, desc: desc,
+                        setor: setorCat, talhao: talhaoImp, talhao2: '', pct: 100, local: fornecedor, desc: desc,
                         qtd: qtd, und: und, v_unit: vUn, valor: vTot, sit: 'A pagar', obs: 'Importação Automática XML'
+                    };
+                    transacoes.push(nt); novas.push(nt);
+                }
+                if (novas.length && confirm(`Dar entrada de ${novas.length} item(ns) no estoque?\n(Só itens com unidade L, KG, G ou ML são lançados.)`)) {
+                    let ok = 0;
+                    novas.forEach(nt => {
+                        const conv = normalizarUnidadeEstoque(nt.und, parseFloat(nt.qtd) || 0);
+                        if (!conv || conv.qtd <= 0 || !(nt.valor > 0)) return;
+                        const tipoEst = categoriasInsumo.includes(nt.categoria) ? nt.categoria : 'INSUMOS';
+                        verificarNovaOpcao('tipos', tipoEst);
+                        nt.est_mov = { id: entradaEstoque(nt.desc, '', tipoEst, conv.qtd, conv.un, nt.valor / conv.qtd), qtd: conv.qtd, un: conv.un };
+                        ok++;
                     });
+                    renderDatalistsAgri();
+                    mostrarToast(`${ok} item(ns) entraram no estoque`);
                 }
                 salvarDados();
                 preencherSelectsSafraFin(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento();
-                mostrarToast(`${dets.length} itens importados para a tabela!`);
+                mostrarToast(`${novas.length} itens importados${repetidas ? ' (' + repetidas + ' já existiam)' : ''}!`);
             }
         } catch (error) {
             alert("Erro ao processar XML. Certifique-se de que é um arquivo de NF-e válido.");
@@ -200,7 +229,7 @@ async function carregarDadosNuvem() {
             const localData = JSON.parse(localStr);
             transacoes = localData.transacoes || []; agriRecords = localData.aplicacoes || [];
             estoque = Array.isArray(localData.estoque) ? localData.estoque : Object.values(localData.estoque || {});
-            analisesSolo = localData.analises || []; opcoesDin = localData.opcoes || opcoesDin;
+            analisesSolo = localData.analises || []; opcoesDin = localData.opcoes || opcoesDin; garantirOpcoes();
             chuvas = localData.chuvas || [];
         }
     } catch(e){}
@@ -211,24 +240,19 @@ async function carregarDadosNuvem() {
         const data = await response.json();
         
         if (!Array.isArray(data)) {
-            transacoes = unificarDados(transacoes, data.transacoes, hashTransacao);
-            agriRecords = unificarDados(agriRecords, data.aplicacoes, hashAgri);
+            transacoes = unificarPorId(transacoes, data.transacoes, hashTransacao);
+            agriRecords = unificarPorId(agriRecords, data.aplicacoes, hashAgri);
             analisesSolo = unificarDados(analisesSolo, data.analises, hashSolo);
             estoque = unificarDados(estoque, Array.isArray(data.estoque) ? data.estoque : Object.values(data.estoque || {}), hashEstoque);
             chuvas = unificarDados(chuvas, data.chuvas, hashChuva);
 
-            if(data.opcoes) {
-                opcoesDin.talhoes = [...new Set([...opcoesDin.talhoes, ...(data.opcoes.talhoes || [])])].sort();
-                opcoesDin.tipos = [...new Set([...opcoesDin.tipos, ...(data.opcoes.tipos || [])])].sort();
-                opcoesDin.formas = [...new Set([...opcoesDin.formas, ...(data.opcoes.formas || [])])].sort();
-                opcoesDin.alvos = [...new Set([...opcoesDin.alvos, ...(data.opcoes.alvos || [])])].sort();
-            }
+            if(data.opcoes) mesclarOpcoes(data.opcoes);
         }
         permissaoNuvem = true; 
         statusDiv.innerHTML = '🟢 DADOS SINCRONIZADOS E LIMPOS'; statusDiv.className = 'status-conexao conectado';
     } catch(e) {
         permissaoNuvem = false; 
-        transacoes = unificarDados(transacoes, [], hashTransacao); agriRecords = unificarDados(agriRecords, [], hashAgri); analisesSolo = unificarDados(analisesSolo, [], hashSolo);
+        transacoes = unificarPorId(transacoes, [], hashTransacao); agriRecords = unificarPorId(agriRecords, [], hashAgri); analisesSolo = unificarDados(analisesSolo, [], hashSolo);
         estoque = unificarDados(estoque, [], hashEstoque); chuvas = unificarDados(chuvas, [], hashChuva);
         statusDiv.innerHTML = '🔴 MODO OFFLINE (Nuvem Segura)'; statusDiv.className = 'status-conexao erro';
     }
@@ -237,14 +261,18 @@ async function carregarDadosNuvem() {
     try { localStorage.setItem('rancho3c_offline', JSON.stringify(payload)); } catch(err) {}
 
     try { preencherSelectsLancamento(); popularSeletorSolo(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); } catch(e){}
+    garantirOpcoes();
+    try { atualizarAlertas(); } catch(e){}
     if(permissaoNuvem) salvarDados();
     showTab('home');
+    setTimeout(verificarLembreteBackup, 1500);
 }
 
 let isSaving = false;
 let pendingSave = false;
 
 async function salvarDados() {
+    try { atualizarAlertas(); } catch(e) {}
     const statusDiv = document.getElementById('status_conexao');
     const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo, chuvas };
     
@@ -277,14 +305,16 @@ function showTab(id) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.sidebar-menu button').forEach(b => b.classList.remove('btn-ativo'));
         document.getElementById(id).classList.add('active');
-        const btnMap = { 'home': 'btn_home', 'resumo': 'btn_resumo', 'movimentacoes': 'btn_movimentacoes', 'relatorios_detalhados': 'btn_relatorios_detalhados', 'pendencias': 'btn_pendencias', 'agri_app': 'btn_agri_app', 'agri_est': 'btn_agri_est', 'agri_dash': 'btn_agri_dash', 'chuvas_main': 'btn_chuvas', 'solo_main': 'btn_solo' };
+        const btnMap = { 'home': 'btn_home', 'resumo': 'btn_resumo', 'movimentacoes': 'btn_movimentacoes', 'relatorios_detalhados': 'btn_relatorios_detalhados', 'pendencias': 'btn_pendencias', 'agri_app': 'btn_agri_app', 'agri_rel': 'btn_agri_app', 'agri_est': 'btn_agri_est', 'agri_dash': 'btn_agri_dash', 'chuvas_main': 'btn_chuvas', 'solo_main': 'btn_solo', 'talhoes_main': 'btn_talhoes' };
         if(btnMap[id]) document.getElementById(btnMap[id]).classList.add('btn-ativo');
         
         if(id === 'resumo') atualizarResumoEGrafico();
         if(id === 'relatorios_detalhados') { atualizarRelatoriosDetalhados(); renderCascataCategorias(); }
         if(id === 'movimentacoes') { atualizarOpcoesFiltros(); aplicarFiltros(); }
-        if(id === 'pendencias') renderizarTabelasPendencias();
+        if(id === 'pendencias') { renderizarTabelasPendencias(); atualizarAlertas(); }
         if(id === 'agri_app') aplicarFiltroSafraApp();
+        if(id === 'agri_rel') popularFiltrosRelAgri();
+        if(id === 'talhoes_main') renderTalhoes();
         if(id === 'agri_est') saveAndRenderEstoque();
         if(id === 'agri_dash') renderAgriDashboard();
         if(id === 'solo_main') { popularSeletorSolo(); renderizarHistoricoSolo(); }
@@ -317,6 +347,7 @@ function addChuva(e) {
     
     salvarDados(); document.getElementById('form_chuva').reset(); setVal('cv_id', ''); setVal('cv_data', hojeLocal());
     renderChuvas(); mostrarToast("Chuva Registrada!");
+    focarPrimeiroCampo('cv_data');
 }
 
 function renderChuvas() {
@@ -405,8 +436,7 @@ function atualizarResumoEGrafico() {
         }
     });
 
-    const badgeElement = document.getElementById('badge_atrasadas');
-    if(qtdAtrasadas > 0 && badgeElement) { badgeElement.innerText = qtdAtrasadas; badgeElement.style.display = 'inline-block'; } else if (badgeElement) { badgeElement.style.display = 'none'; }
+    atualizarAlertas();
     document.getElementById('res_receitas').innerText = formatarMoeda(tR); document.getElementById('res_despesas').innerText = formatarMoeda(tD); document.getElementById('res_investimentos').innerText = formatarMoeda(tI);
     document.getElementById('res_saldo').innerText = formatarMoeda(tR - tD - tI);
 
@@ -610,14 +640,41 @@ function addTransacao(e, tipoBase) {
             setor = document.getElementById('d_setor').value.trim().toUpperCase();
         }
 
-        transacoes.push({ id: generateUUID(), updatedAt: Date.now(), deleted: false, data: data, tipo: tipoFinal, categoria: cat, setor: setor, local: loc, desc: desc, qtd: qtd, und: und, v_unit: parseFloat(vUnit), valor: val, sit: document.getElementById(prefix + 'sit').value || 'Pago', obs: '' });
+        // Talhão (e rateio opcional entre dois talhões nas saídas)
+        let talhao = strSafe(safeVal(prefix + 'talhao')).toUpperCase(); let talhao2 = ''; let pct = 100;
+        if (tipoBase === 'Saida') {
+            talhao2 = strSafe(safeVal('d_talhao2')).toUpperCase();
+            if (talhao2) {
+                if (!talhao) { alert("Informe o Talhão 1 antes de ratear com um Talhão 2."); return; }
+                const p = parseFloat(safeVal('d_pct')); pct = (p > 0 && p < 100) ? p : 50;
+            }
+        }
+        if (talhao) verificarNovaOpcao('talhoes', talhao);
+        if (talhao2) verificarNovaOpcao('talhoes', talhao2);
+
+        const nova = { id: generateUUID(), updatedAt: Date.now(), deleted: false, data: data, tipo: tipoFinal, categoria: cat, setor: setor, talhao: talhao, talhao2: talhao2, pct: pct, local: loc, desc: desc, qtd: qtd, und: und, v_unit: parseFloat(vUnit), valor: val, sit: document.getElementById(prefix + 'sit').value || 'Pago', obs: '' };
+        transacoes.push(nova);
+
+        // Compra de insumo: oferece dar entrada no estoque (custo médio ponderado)
+        let avisoEstoque = '';
+        if (tipoBase === 'Saida' && categoriasInsumo.includes(cat) && parseFloat(qtd) > 0 && desc && val > 0) {
+            const conv = normalizarUnidadeEstoque(und, parseFloat(qtd));
+            if (!conv || conv.qtd <= 0) {
+                avisoEstoque = ` (unidade "${und || '?'}" não reconhecida: sem entrada no estoque)`;
+            } else if (confirm(`Dar entrada no estoque?\n\n${desc}\n${conv.qtd.toFixed(2)} ${conv.un} a ${formatarMoeda(val / conv.qtd)}/${conv.un}`)) {
+                const tipoEst = cat; verificarNovaOpcao('tipos', tipoEst);
+                nova.est_mov = { id: entradaEstoque(desc, '', tipoEst, conv.qtd, conv.un, val / conv.qtd), qtd: conv.qtd, un: conv.un };
+                renderDatalistsAgri(); avisoEstoque = ' + ESTOQUE';
+            }
+        }
+
         salvarDados(); 
         
         if(tipoBase === 'Saida') document.getElementById('caixa_form_saida').reset();
         else document.getElementById('caixa_form_receita').reset();
 
         preencherSelectsSafraFin(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento();
-        mostrarToast(tipoFinal.toUpperCase() + ' GRAVADA!'); document.getElementById(prefix + 'data').focus();
+        mostrarToast(tipoFinal.toUpperCase() + ' GRAVADA!' + avisoEstoque); focarPrimeiroCampo(prefix + 'data');
     } catch (error) { alert("Erro ao gravar: " + error.message); }
 }
 
@@ -674,7 +731,12 @@ function calcularTotalDespesa() { let q = parseFloat(document.getElementById('d_
 function confirmarExclusao(id) { 
     if(confirm('EXCLUIR lançamento?')) { 
         let t = transacoes.find(x => x.id === id);
-        if(t) { t.deleted = true; t.updatedAt = Date.now(); salvarDados(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); mostrarToast("REMOVIDO!"); }
+        if(t) {
+            if (t.est_mov && confirm(`Este lançamento deu entrada de ${Number(t.est_mov.qtd).toFixed(2)} ${t.est_mov.un} no estoque.\nRemover essa entrada do estoque também?`)) {
+                const est = estoque.find(e => e && e.id === t.est_mov.id);
+                if (est) { est.qtd = (parseFloat(est.qtd) || 0) - t.est_mov.qtd; est.updatedAt = Date.now(); }
+            }
+            t.deleted = true; t.updatedAt = Date.now(); salvarDados(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); mostrarToast("REMOVIDO!"); }
     } 
 }
 
@@ -699,6 +761,8 @@ function abrirModalEdicao(id) {
         <div><label>DATA:</label> <input type="date" id="ed_data" value="${sanitizeDateString(t.data)}"></div> ${htmlSel}
         <div><label>CATEGORIA:</label> <input type="text" id="ed_categoria" value="${vCat}"></div>
         <div><label>SETOR:</label> <input type="text" id="ed_setor" value="${vSet}"></div>
+        <div><label>TALHÃO:</label> <input type="text" id="ed_talhao" list="lista-talhoes" value="${strEscape(t.talhao)}"></div>
+        ${tipoLowerT === 'receita' ? '' : `<div><label>% TALHÃO 1:</label> <input type="number" id="ed_pct" min="1" max="99" step="1" value="${t.talhao2 ? (parseFloat(t.pct) || 50) : ''}" placeholder="50"></div><div><label>TALHÃO 2 (RESTO):</label> <input type="text" id="ed_talhao2" list="lista-talhoes" value="${strEscape(t.talhao2)}"></div>`}
         <div style="grid-column: span 2;"><label>LOCAL:</label> <input type="text" id="ed_local" value="${vLoc}"></div>
         <div style="grid-column: span 2;"><label>DESCRIÇÃO:</label> <input type="text" id="ed_desc" value="${vDesc}"></div>
         <div><label>QTD:</label> <input type="number" id="ed_qtd" step="0.01" value="${parseFloat(t.qtd)||0}"></div>
@@ -719,13 +783,21 @@ function guardarEdicao() {
         t.local = document.getElementById('ed_local').value.trim().toUpperCase(); t.desc = document.getElementById('ed_desc').value.trim().toUpperCase();
         t.qtd = document.getElementById('ed_qtd').value; t.und = document.getElementById('ed_und').value.trim().toUpperCase();
         t.valor = parseFloat(document.getElementById('ed_valor').value) || 0; t.sit = document.getElementById('ed_sit').value;
+        const gv = id => { const el = document.getElementById(id); return el ? el.value.trim().toUpperCase() : null; };
+        t.talhao = gv('ed_talhao') || '';
+        if (document.getElementById('ed_talhao2')) {
+            t.talhao2 = gv('ed_talhao2') || ''; const p = parseFloat(document.getElementById('ed_pct').value);
+            if (t.talhao2 && !t.talhao) { t.talhao = t.talhao2; t.talhao2 = ''; }
+            t.pct = t.talhao2 ? ((p > 0 && p < 100) ? p : 50) : 100;
+        }
+        if (t.talhao) verificarNovaOpcao('talhoes', t.talhao); if (t.talhao2) verificarNovaOpcao('talhoes', t.talhao2);
         t.updatedAt = Date.now();
         salvarDados(); fecharModal(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros(); 
     }
 }
 
 function atualizarOpcoesFiltros() {
-    let cats = new Set(), sets = new Set(), locs = new Set(), descs = new Set();
+    let cats = new Set(), sets = new Set(), locs = new Set(), descs = new Set(), talhs = new Set();
     transacoes.forEach(t => {
         if(t.deleted) return;
         let cat = strSafe(t.categoria); if (!cat || cat === '-') cat = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
@@ -733,9 +805,10 @@ function atualizarOpcoesFiltros() {
         if(strSafe(t.setor) && t.setor !== '-') sets.add(strSafe(t.setor).toUpperCase());
         if(strSafe(t.local) && t.local !== '-') locs.add(strSafe(t.local).toUpperCase());
         if(strSafe(t.desc) && t.desc !== '-') descs.add(strSafe(t.desc).toUpperCase());
+        [t.talhao, t.talhao2].forEach(x => { if(strSafe(x) && x !== '-') talhs.add(strSafe(x).toUpperCase()); });
     });
     function preencher(id, setVals) { const sel = document.getElementById(id); if(sel) { const val = sel.value; sel.innerHTML = '<option value="">TUDO</option>' + Array.from(setVals).sort().map(v => `<option value="${strEscape(v.toLowerCase())}">${strEscape(v)}</option>`).join(''); sel.value = val; } }
-    preencher('f_cat', cats); preencher('f_setor', sets); preencher('f_local', locs); preencher('f_desc', descs);
+    preencher('f_cat', cats); preencher('f_setor', sets); preencher('f_talhao', talhs); preencher('f_local', locs); preencher('f_desc', descs);
 }
 
 function limparFiltros() { document.querySelectorAll('.filter-bar input:not([type="button"]), .filter-row input, .filter-row select').forEach(i => i.value = ''); setFiltroRapido(''); }
@@ -758,11 +831,12 @@ function aplicarFiltros() {
     const lE = document.getElementById('f_local'); const fL = lE ? lE.value.toLowerCase() : ''; 
     const deE = document.getElementById('f_desc'); const fDe = deE ? deE.value.toLowerCase() : '';
     const siE = document.getElementById('f_sit'); const fSi = siE ? siE.value.toLowerCase() : '';
+    const tlE = document.getElementById('f_talhao'); const fTl = tlE ? tlE.value.toLowerCase() : '';
 
     let lista = transacoes.filter(t => {
         if(t.deleted) return false;
         let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
-        if(pG && !`${strSafe(t.desc)} ${strSafe(t.local)} ${cM} ${strSafe(t.setor)} ${t.tipo}`.toLowerCase().includes(pG)) return false;
+        if(pG && !`${strSafe(t.desc)} ${strSafe(t.local)} ${cM} ${strSafe(t.setor)} ${strSafe(t.talhao)} ${strSafe(t.talhao2)} ${t.tipo}`.toLowerCase().includes(pG)) return false;
         if(fD && sanitizeDateString(t.data) !== fD) return false;
         if(fT && String(t.tipo).toLowerCase() !== fT) return false;
         if(fC && cM.toLowerCase() !== fC) return false;
@@ -770,6 +844,7 @@ function aplicarFiltros() {
         if(fL && strSafe(t.local).toLowerCase() !== fL) return false;
         if(fDe && strSafe(t.desc).toLowerCase() !== fDe) return false;
         if(fSi && strSafe(t.sit).toLowerCase() !== fSi) return false;
+        if(fTl && strSafe(t.talhao).toLowerCase() !== fTl && strSafe(t.talhao2).toLowerCase() !== fTl) return false;
         if (filtroRapido === 'safra' && obterSafraGeral(t.data) !== obterSafraAtual()) return false;
         return true;
     });
@@ -783,6 +858,7 @@ function aplicarFiltros() {
         if(vA < vB) return ordemAscendente ? -1 : 1; if(vA > vB) return ordemAscendente ? 1 : -1; return 0;
     });
     
+    ultimaListaFiltrada = lista;
     let linhasHTML = []; const hojeObj = new Date(hojeLocal() + 'T00:00:00');
     lista.forEach(t => {
         try {
@@ -799,7 +875,7 @@ function aplicarFiltros() {
             linhasHTML.push(`
                 <tr class="${isAtrasado ? 'tr-alerta' : ''}">
                     <td>${formatarData(t.data)}</td><td><div class="badge-tipo ${badgeTipo}">${String(t.tipo).toUpperCase()}</div></td><td><b style="color:var(--cor-texto); font-weight:700;">${strEscape(cM)}</b></td>
-                    <td>${strEscape(t.setor)}</td><td>${strEscape(t.local)}</td><td>${strEscape(t.desc)}</td>
+                    <td>${strEscape(t.setor)}</td><td>${rotuloTalhao(t)}</td><td>${strEscape(t.local)}</td><td>${strEscape(t.desc)}</td>
                     <td>${strSafe(t.qtd)} ${strEscape(t.und)}</td><td>${formatarMoeda(t.v_unit)}</td>
                     <td style="font-weight:700; font-family:'Rubik'; color:var(--cor-texto);">${formatarMoeda(t.valor)}</td><td style="text-align: center; width: 100px;">${btnSit}</td>
                     <td class="no-print" style="text-align: center;">
@@ -809,7 +885,7 @@ function aplicarFiltros() {
                 </tr>`);
         } catch(e) {}
     });
-    document.getElementById('tabela_relatorio').innerHTML = linhasHTML.join('') || '<tr><td colspan="11" style="text-align:center; padding: 30px; color:#aaa;">Sem lançamentos</td></tr>';
+    document.getElementById('tabela_relatorio').innerHTML = linhasHTML.join('') || '<tr><td colspan="12" style="text-align:center; padding: 30px; color:#aaa;">Sem lançamentos</td></tr>';
 }
 
 /* -------------------------------------------------------------------------
@@ -882,6 +958,7 @@ function addAgriApp(e) {
         const editId = document.getElementById('editAgriIndex').value;
         
         if (!editId) {
+            if (record.status === 'APLICADO') congelarCusto(record);
             agriRecords.push(record);
             if (record.status === 'APLICADO' && record.data <= hojeLocal()) {
                 let est = estoque.find(e => e && !e.deleted && e.produto === record.produto && e.un === record.dosagem_un);
@@ -897,7 +974,8 @@ function addAgriApp(e) {
                 }
                 
                 record.id = old.id;
-                record.custo_unit = old.custo_unit; 
+                record.custo_unit = old.custo_unit; record.custo_fixo = old.custo_fixo;
+                if (record.status === 'APLICADO') { if (!(old.status === 'APLICADO' && old.custo_fixo && old.produto === record.produto && old.dosagem_un === record.dosagem_un)) congelarCusto(record); } else { record.custo_fixo = false; } 
                 let idx = agriRecords.indexOf(old);
                 agriRecords[idx] = record; 
                 
@@ -922,7 +1000,9 @@ function addAgriApp(e) {
         const st = document.getElementById('status'); 
         if(st) st.value = 'PLANEJADO'; 
         
+        esconderSugestoesProduto();
         mostrarToast("Registro Agrícola Salvo!");
+        focarPrimeiroCampo('dataApp');
         
     } catch (err) {
         alert("Ops! Ocorreu um erro ao salvar o registro na tela: " + err.message);
@@ -936,7 +1016,7 @@ function toggleStatusApp(id) {
     
     if (newStatus === 'APLICADO' && dataAppLocal > hojeLocal()) { alert("Data no futuro. Altere para baixar no estoque."); return; }
 
-    rec.status = newStatus; rec.updatedAt = Date.now();
+    rec.status = newStatus; rec.updatedAt = Date.now(); if (newStatus === 'APLICADO') congelarCusto(rec); else rec.custo_fixo = false;
     if (dataAppLocal <= hojeLocal()) {
         let est = estoque.find(e => e && !e.deleted && e.produto === rec.produto && e.un === rec.dosagem_un);
         let modif = newStatus === 'APLICADO' ? -rec.dosagem_qtd : rec.dosagem_qtd; 
@@ -958,7 +1038,7 @@ function saveAndRenderApp() {
             let statusClass = rec.status === 'APLICADO' ? 'status-aplicado' : 'status-planejado';
             let itemEstoque = estoque.find(e => e && !e.deleted && e.produto === rec.produto && e.un === rec.dosagem_un);
             let aviso = (rec.status === 'PLANEJADO' && (!itemEstoque || itemEstoque.qtd < rec.dosagem_qtd)) ? '<br><span class="stock-warning">⚠️ FALTA NO ESTOQUE</span>' : '';
-            let custoTotal = (parseFloat(rec.dosagem_qtd)||0) * (itemEstoque ? (itemEstoque.valor_unit || 0) : (rec.custo_unit || 0));
+            let custoTotal = custoAplicacao(rec);
             
             let cClass = ''; let tStr = String(rec.tipo||'').toUpperCase();
             if (tStr.includes('ADUBO') || tStr.includes('FERTILIZANTE')) cClass = 'linha-adubo';
@@ -981,22 +1061,31 @@ function saveAndRenderApp() {
 
 function addEstoque(e) {
     e.preventDefault();
-    const estRecord = { id: generateUUID(), updatedAt: Date.now(), deleted: false, produto: document.getElementById('est_produto').value.toUpperCase(), principio: document.getElementById('est_principio').value.toUpperCase(), tipo: verificarNovaOpcao('tipos', document.getElementById('est_tipo').value), qtd: parseFloat(document.getElementById('est_qtd').value), un: document.getElementById('est_un').value, valor_unit: parseFloat(document.getElementById('est_valor_unit').value) || 0 };
+    const estRecord = { id: generateUUID(), updatedAt: Date.now(), deleted: false, produto: document.getElementById('est_produto').value.toUpperCase(), principio: document.getElementById('est_principio').value.toUpperCase(), tipo: verificarNovaOpcao('tipos', document.getElementById('est_tipo').value), qtd: parseFloat(document.getElementById('est_qtd').value), un: document.getElementById('est_un').value, valor_unit: parseFloat(document.getElementById('est_valor_unit').value) || 0, qtd_min: parseFloat(document.getElementById('est_min').value) || 0 };
     const editId = document.getElementById('editEstoqueIndex').value;
     if (!editId) {
         const existing = estoque.find(item => item && !item.deleted && item.produto === estRecord.produto && item.un === estRecord.un);
-        if(existing) { existing.qtd += estRecord.qtd; existing.valor_unit = estRecord.valor_unit; existing.principio = estRecord.principio || existing.principio; existing.updatedAt = Date.now(); } else estoque.push(estRecord);
+        if(existing) { { const q0 = Math.max(0, parseFloat(existing.qtd) || 0); const tot = q0 + estRecord.qtd;
+            existing.valor_unit = tot > 0 ? ((q0 * (parseFloat(existing.valor_unit) || 0)) + (estRecord.qtd * estRecord.valor_unit)) / tot : estRecord.valor_unit; }
+            existing.qtd = (parseFloat(existing.qtd) || 0) + estRecord.qtd; if (estRecord.qtd_min > 0) existing.qtd_min = estRecord.qtd_min; existing.principio = estRecord.principio || existing.principio; existing.updatedAt = Date.now(); } else estoque.push(estRecord);
     } else { 
         let idx = estoque.findIndex(e => e.id === editId);
         if(idx > -1) { estRecord.id = estoque[idx].id; estoque[idx] = estRecord; }
         document.getElementById('editEstoqueIndex').value = ""; 
     }
-    salvarDados(); renderDatalistsAgri(); saveAndRenderEstoque(); saveAndRenderApp(); document.getElementById('form_estoque').reset(); mostrarToast("Estoque Atualizado!");
+    salvarDados(); renderDatalistsAgri(); saveAndRenderEstoque(); saveAndRenderApp(); document.getElementById('form_estoque').reset(); mostrarToast("Estoque Atualizado!"); focarPrimeiroCampo('est_produto');
 }
 
 function saveAndRenderEstoque() {
     let validEstoque = estoque.filter(e => e && !e.deleted && e.produto);
-    validEstoque.sort((a, b) => String(a.produto||'').localeCompare(String(b.produto||'')));
+    validEstoque.sort((a, b) => {
+        const totalDe = r => { const q = parseFloat(r.qtd) || 0; return q > 0 ? q * (parseFloat(r.valor_unit) || 0) : 0; };
+        let cmp = 0;
+        if (estSortCol === 'qtd' || estSortCol === 'valor_unit') { cmp = (parseFloat(a[estSortCol]) || 0) - (parseFloat(b[estSortCol]) || 0); }
+        else if (estSortCol === 'total') { cmp = totalDe(a) - totalDe(b); }
+        else { cmp = String(a[estSortCol] || '').toUpperCase().localeCompare(String(b[estSortCol] || '').toUpperCase(), 'pt-BR'); }
+        return estSortAsc ? cmp : -cmp;
+    });
     let html = ''; let somaTotal = 0;
     
     validEstoque.forEach(rec => {
@@ -1010,12 +1099,13 @@ function saveAndRenderEstoque() {
             let qEstoque = parseFloat(rec.qtd)||0;
             if(qEstoque < 0) { cClass = 'tr-alerta'; corQtd = 'color: #c0392b; font-weight: 700;'; aviso = `<br><span class="stock-warning">⚠️ SALDO NEGATIVO</span>`; } 
             else if (qEstoque < demanda) { cClass = 'tr-alerta'; corQtd = 'color: #c0392b; font-weight: 700;'; aviso = `<br><span class="stock-warning">⚠️ PRECISA DE ${demanda.toFixed(2)} ${rec.un}</span>`; }
+            else if ((parseFloat(rec.qtd_min) || 0) > 0 && qEstoque < parseFloat(rec.qtd_min)) { cClass = 'tr-alerta'; corQtd = 'color: #c0392b; font-weight: 700;'; aviso = `<br><span class="stock-warning">⚠️ ABAIXO DO MÍNIMO (${parseFloat(rec.qtd_min).toFixed(2)} ${rec.un})</span>`; }
 
             let vTot = qEstoque > 0 ? (qEstoque * (rec.valor_unit || 0)) : 0; somaTotal += vTot;
 
             html += `<tr class="${cClass}">
                 <td><b style="color:var(--cor-laranja-flat);">${strEscape(rec.produto)}</b>${aviso}</td><td>${strEscape(rec.principio)||'-'}</td><td>${strEscape(rec.tipo)}</td>
-                <td style="${corQtd}">${qEstoque.toFixed(2)} ${strSafe(rec.un)}</td><td>${formatarMoeda(rec.valor_unit)}</td><td style="font-weight:700; font-family:'Rubik'; color:var(--cor-texto);">${formatarMoeda(vTot)}</td>
+                <td style="${corQtd}">${qEstoque.toFixed(2)} ${strSafe(rec.un)}${(parseFloat(rec.qtd_min) || 0) > 0 ? `<br><span style="font-size:10px; color:#888;">mín. ${parseFloat(rec.qtd_min).toFixed(2)}</span>` : ''}</td><td>${formatarMoeda(rec.valor_unit)}</td><td style="font-weight:700; font-family:'Rubik'; color:var(--cor-texto);">${formatarMoeda(vTot)}</td>
                 <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editEstoque('${rec.id}')">✏️</button><button class="btn-acao btn-excluir" onclick="deleteEstoque('${rec.id}')">🗑️</button></td>
             </tr>`;
         } catch(e) { }
@@ -1031,7 +1121,7 @@ function renderAgriDashboard() {
     const selS = document.getElementById('safraDashboardSelector'); const safraSel = selS ? selS.value : 'TODAS'; 
     const selT = document.getElementById('talhaoDashboardSelector'); const talhaoSel = selT ? selT.value : 'TODOS';
     
-    let dS = {}, dT = {}, dTp = {}, dCS = {}, dCT = {}; let tApp = 0, tPlan = 0, count = 0;
+    let dS = {}, dT = {}, dTp = {}, dCS = {}, dCT = {}, dCSTal = {}, dCTcaixa = {}; let tApp = 0, tPlan = 0, count = 0;
     let validEstoque = estoque.filter(e => e && !e.deleted && e.produto);
     let patrim = validEstoque.reduce((acc, curr) => acc + (parseFloat(curr.qtd) > 0 ? (parseFloat(curr.qtd) * (curr.valor_unit || 0)) : 0), 0);
     document.getElementById('kpi-estoque').innerText = formatarMoeda(patrim);
@@ -1043,16 +1133,27 @@ function renderAgriDashboard() {
         if (talhaoSel !== 'TODOS' && talhao !== talhaoSel) return;
         count++;
         let itemEst = validEstoque.find(e => e.produto === rec.produto && e.un === rec.dosagem_un);
-        let custo = parseFloat(rec.dosagem_qtd) * (itemEst ? (itemEst.valor_unit || 0) : (rec.custo_unit || 0));
+        let custo = custoAplicacao(rec);
 
         if (rec.status === 'APLICADO') {
             tApp += custo;
             if (!dS[safra]) dS[safra] = { L: 0, KG: 0 }; dS[safra][rec.dosagem_un] += parseFloat(rec.dosagem_qtd);
             dCS[safra] = (dCS[safra]||0) + custo;
+            if (!dCSTal[safra]) dCSTal[safra] = {}; dCSTal[safra][talhao] = (dCSTal[safra][talhao]||0) + custo;
             if (!dT[talhao]) dT[talhao] = { L: 0, KG: 0 }; dT[talhao][rec.dosagem_un] += parseFloat(rec.dosagem_qtd);
             dCT[talhao] = (dCT[talhao]||0) + custo;
             if (!dTp[rec.tipo]) dTp[rec.tipo] = { L: 0, KG: 0 }; dTp[rec.tipo][rec.dosagem_un] += parseFloat(rec.dosagem_qtd);
         } else { tPlan += custo; }
+    });
+
+    // Despesas do Caixa Diário alocadas a talhões (campo Talhão, com rateio; ou Setor igual a um talhão)
+    transacoes.forEach(t => {
+        if (!t || t.deleted || String(t.tipo).toLowerCase() !== 'despesa') return;
+        if (safraSel !== 'TODAS' && obterSafraGeral(t.data) !== safraSel) return;
+        alocacaoTalhao(t).forEach(a => {
+            if (talhaoSel !== 'TODOS' && a.talhao !== String(talhaoSel).toUpperCase()) return;
+            dCTcaixa[a.talhao] = (dCTcaixa[a.talhao] || 0) + a.valor;
+        });
     });
 
     document.getElementById('kpi-aplicado').innerText = formatarMoeda(tApp); document.getElementById('kpi-planejado').innerText = formatarMoeda(tPlan); document.getElementById('kpi-registros').innerText = count;
@@ -1062,9 +1163,18 @@ function renderAgriDashboard() {
         return new Chart(ctx, { type: type, data: { labels: labelsKeys.length ? labelsKeys : ['Sem Dados'], datasets: [{ label: 'LITROS (L)', data: labelsKeys.map(k => ds1(k)), backgroundColor: color1, borderRadius: 2 }, { label: 'QUILOS (KG)', data: labelsKeys.map(k => ds2(k)), backgroundColor: color2, borderRadius: 2 }]}, options: { responsive: true, maintainAspectRatio: false, plugins:{ legend:{position:'bottom'} }, layout: { padding: 10 } } });
     }
 
-    const safrasK = Object.keys(dS).sort();
-    chartS_Agri = genChart(chartS_Agri, 'chartCustoSafra', 'bar', Object.keys(dCS).sort(), k=>dCS[k], k=>0, '#9b59b6', 'transparent');
-    if(chartS_Agri.data.datasets[0]) { chartS_Agri.data.datasets[0].label = 'CUSTO (R$)'; chartS_Agri.update(); }
+    const safrasCusto = Object.keys(dCSTal).sort();
+    const talhoesCusto = [...new Set(safrasCusto.flatMap(sf => Object.keys(dCSTal[sf])))].sort();
+    const paleta = ['#3498db', '#62d073', '#f49f3e', '#9b59b6', '#e74c3c', '#16a085', '#34495e', '#f1c40f'];
+    if (chartS_Agri) chartS_Agri.destroy();
+    chartS_Agri = new Chart(document.getElementById('chartCustoSafra').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: safrasCusto.length ? safrasCusto.map(sf => 'Safra ' + sf) : ['Sem Dados'],
+            datasets: talhoesCusto.map((tl, idx) => ({ label: tl, data: safrasCusto.map(sf => dCSTal[sf][tl] || 0), backgroundColor: paleta[idx % paleta.length], borderRadius: 2 }))
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${formatarMoeda(c.parsed.y)}` } } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Custo (R$)' } } }, layout: { padding: 10 } }
+    });
 
     const talhoesK = Object.keys(dT).sort();
     chartT_Agri = genChart(chartT_Agri, 'chartTalhao', 'bar', talhoesK, k=>dT[k].L, k=>dT[k].KG, '#3498db', '#62d073');
@@ -1075,10 +1185,18 @@ function renderAgriDashboard() {
         type: 'doughnut', data: { labels: tiposK.length ? tiposK : ['Sem Dados'], datasets: [{ data: tiposK.length ? tiposK.map(k => dTp[k].L + dTp[k].KG) : [1], borderWidth: 0, hoverOffset: 4, backgroundColor: ['#f49f3e','#3498db','#62d073','#9b59b6','#e74c3c'] }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '75%', layout: { padding: 15 } }
     });
 
-    const costTalhoesK = Object.keys(dCT).sort();
+    const costTalhoesK = [...new Set([...Object.keys(dCT), ...Object.keys(dCTcaixa)])].sort();
     if(chartCT_Agri) chartCT_Agri.destroy();
     chartCT_Agri = new Chart(document.getElementById('chartCustoTalhao').getContext('2d'), {
-        type: 'bar', data: { labels: costTalhoesK.length ? costTalhoesK : ['Sem Dados'], datasets: [{ label: 'CUSTO (R$)', data: costTalhoesK.map(k => dCT[k]), backgroundColor: '#f49f3e', borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, layout: { padding: 10 } }
+        type: 'bar',
+        data: {
+            labels: costTalhoesK.length ? costTalhoesK : ['Sem Dados'],
+            datasets: [
+                { label: 'APLICAÇÕES (ESTOQUE)', data: costTalhoesK.map(k => dCT[k] || 0), backgroundColor: '#f49f3e', borderRadius: 2 },
+                { label: 'CAIXA DIÁRIO (SETOR)', data: costTalhoesK.map(k => dCTcaixa[k] || 0), backgroundColor: '#9b59b6', borderRadius: 2 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${formatarMoeda(c.parsed.y)}` } } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Custo (R$)' } } }, layout: { padding: 10 } }
     });
 }
 
@@ -1102,7 +1220,7 @@ function deleteAgriRecord(id) {
 function editEstoque(id) { 
     let r = estoque.find(e => e.id === id); if(!r || r.deleted) return;
     const sVal = (idx, v) => { const e=document.getElementById(idx); if(e) e.value = v; };
-    sVal('est_produto', r.produto); sVal('est_principio', r.principio || ''); sVal('est_tipo', r.tipo); sVal('est_qtd', r.qtd); sVal('est_un', r.un); sVal('est_valor_unit', r.valor_unit || 0); sVal('editEstoqueIndex', id); 
+    sVal('est_produto', r.produto); sVal('est_principio', r.principio || ''); sVal('est_tipo', r.tipo); sVal('est_qtd', r.qtd); sVal('est_un', r.un); sVal('est_valor_unit', r.valor_unit || 0); sVal('est_min', r.qtd_min || ''); sVal('editEstoqueIndex', id); 
 }
 function deleteEstoque(id) { 
     if(confirm("EXCLUIR ITEM DO ESTOQUE?")) { 
@@ -1173,8 +1291,8 @@ function sortAgriTable(n) {
         if(n===7) { // custo numérico
            let ae = estoque.find(e=>!e.deleted&&e.produto===a.produto&&e.un===a.dosagem_un);
            let be = estoque.find(e=>!e.deleted&&e.produto===b.produto&&e.un===b.dosagem_un);
-           vA = (a.dosagem_qtd||0) * (ae ? ae.valor_unit||0 : a.custo_unit||0);
-           vB = (b.dosagem_qtd||0) * (be ? be.valor_unit||0 : b.custo_unit||0);
+           vA = custoAplicacao(a);
+           vB = custoAplicacao(b);
         }
         if(n===0) { vA = new Date(sanitizeDateString(vA)).getTime()||0; vB = new Date(sanitizeDateString(vB)).getTime()||0; }
         if(vA < vB) return ordemAscendente ? -1 : 1;
@@ -1190,7 +1308,7 @@ function sortAgriTable(n) {
         let statusClass = rec.status === 'APLICADO' ? 'status-aplicado' : 'status-planejado';
         let itemEstoque = estoque.find(e => e && !e.deleted && e.produto === rec.produto && e.un === rec.dosagem_un);
         let aviso = (rec.status === 'PLANEJADO' && (!itemEstoque || itemEstoque.qtd < rec.dosagem_qtd)) ? '<br><span class="stock-warning">⚠️ FALTA NO ESTOQUE</span>' : '';
-        let custoTotal = (parseFloat(rec.dosagem_qtd)||0) * (itemEstoque ? (itemEstoque.valor_unit || 0) : (rec.custo_unit || 0));
+        let custoTotal = custoAplicacao(rec);
         let cClass = ''; let tStr = String(rec.tipo||'').toUpperCase();
         if (tStr.includes('ADUBO') || tStr.includes('FERTILIZANTE')) cClass = 'linha-adubo'; else if (tStr.includes('INSETICIDA')) cClass = 'linha-inseticida'; else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida'; else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
 
@@ -1302,6 +1420,7 @@ function salvarAnaliseSolo(e) {
     if (idEdicao) { let idx = analisesSolo.findIndex(a => a && a.id === idEdicao); if(idx > -1) analisesSolo[idx] = nova; } else { analisesSolo.push(nova); }
     salvarDados(); popularSeletorSolo(); const fs = document.getElementById('formSolo'); if(fs) fs.reset(); if(idEl) idEl.value = ''; 
     document.querySelectorAll('.val-baixo, .val-ideal, .val-alto').forEach(el => el.classList.remove('val-baixo', 'val-ideal', 'val-alto')); mostrarToast("Análise Salva!");
+    focarPrimeiroCampo('sl_data');
 }
 
 function renderizarTabelaHistoricoSolo() {
@@ -1394,7 +1513,9 @@ function carregarUltimaAnaliseParaCalculo() {
     let filtradas = analisesSolo.filter(a => a && !a.deleted && a.talhao === talhao).sort((a, b) => new Date(sanitizeDateString(b.data)||0) - new Date(sanitizeDateString(a.data)||0));
 
     let ultima020 = filtradas.find(a => a.prof === '0-20'); let ultima2040 = filtradas.find(a => a.prof === '20-40');
-    analiseCarregadaParaCalculo = ultima020; 
+    analiseCarregadaParaCalculo = ultima020;
+    const infoT = infoTalhao(talhao);
+    if (infoT) { const setv = (i, v) => { const el = document.getElementById(i); if (el) el.value = v; }; if (infoT.area) setv('calc_area', infoT.area); if (infoT.plantas) setv('calc_plantas', infoT.plantas); if (infoT.cultura) setv('calc_cultura', infoT.cultura); } 
 
     const ld020 = document.getElementById('lbl_data_020'); if(ld020) ld020.innerText = ultima020 ? formatarData(ultima020.data) : "SEM DADOS"; 
     const ld2040 = document.getElementById('lbl_data_2040'); if(ld2040) ld2040.innerText = ultima2040 ? formatarData(ultima2040.data) : "SEM DADOS";
@@ -1570,20 +1691,394 @@ function enviarParaAplicacoes() {
     salvarDados(); try{aplicarFiltroSafraApp();}catch(e){} mostrarToast("Enviado para Aplicações!");
 }
 
-/* COMANDO GLOBAL PARA MAIÚSCULAS */
+/* -------------------------------------------------------------------------
+   9. FOCO, SUGESTÕES DE PRODUTO, ORDENAÇÃO DO ESTOQUE E RELATÓRIO
+------------------------------------------------------------------------- */
+function focarPrimeiroCampo(id) {
+    setTimeout(() => { const el = document.getElementById(id); if (el) el.focus(); }, 60);
+}
+
+function mostrarSugestoesProduto() {
+    const box = document.getElementById('sug_produto'); const inp = document.getElementById('produto');
+    if (!box || !inp) return;
+    const termo = inp.value.trim().toUpperCase();
+    const itens = estoque.filter(e => e && !e.deleted && e.produto && (!termo || String(e.produto).toUpperCase().includes(termo)))
+        .sort((a, b) => String(a.produto).localeCompare(String(b.produto), 'pt-BR'));
+    box.innerHTML = itens.length
+        ? itens.map(e => { const q = parseFloat(e.qtd) || 0; return `<div class="item-sug" onmousedown="escolherProdutoEstoque('${e.id}')"><span>${strEscape(e.produto)}</span><small class="${q <= 0 ? 'zerado' : ''}">${q.toFixed(2)} ${strEscape(e.un)}</small></div>`; }).join('')
+        : '<div class="sem-sug">Nenhum produto do estoque encontrado</div>';
+    box.style.display = 'block';
+}
+
+function esconderSugestoesProduto() { const box = document.getElementById('sug_produto'); if (box) box.style.display = 'none'; }
+
+function escolherProdutoEstoque(id) {
+    const e = estoque.find(x => x && x.id === id); if (!e) return;
+    setVal('produto', e.produto);
+    if (e.tipo) setVal('tipo', e.tipo);
+    if (e.un) setVal('dosagem_un', e.un);
+    esconderSugestoesProduto();
+    const q = document.getElementById('dosagem_qtd'); if (q) q.focus();
+}
+
+function sortEstoque(col) {
+    if (estSortCol === col) estSortAsc = !estSortAsc; else { estSortCol = col; estSortAsc = true; }
+    saveAndRenderEstoque();
+}
+
+function popularFiltrosRelAgri() {
+    const sel = document.getElementById('rel_agri_talhao'); if (!sel) return;
+    const set = new Set(opcoesDin.talhoes || []);
+    agriRecords.forEach(r => { if (r && !r.deleted && r.talhao && r.talhao !== '-') set.add(r.talhao); });
+    const atual = sel.value;
+    sel.innerHTML = '<option value="">TODOS OS TALHÕES</option>' + Array.from(set).sort().map(t => `<option value="${strEscape(t)}">${strEscape(t)}</option>`).join('');
+    sel.value = atual;
+    if (!safeVal('rel_agri_ini')) { const h = hojeLocal(); setVal('rel_agri_ini', h.substring(0, 8) + '01'); setVal('rel_agri_fim', h); }
+}
+
+function gerarRelatorioAgri() {
+    const ini = sanitizeDateString(safeVal('rel_agri_ini')); const fim = sanitizeDateString(safeVal('rel_agri_fim')); const talhao = safeVal('rel_agri_talhao');
+    if (!ini || !fim) { alert("Informe a data de início e a data de fim."); return; }
+    if (ini > fim) { alert("A data de início não pode ser maior que a data de fim."); return; }
+
+    const lista = agriRecords.filter(r => {
+        if (!r || r.deleted) return false;
+        const d = sanitizeDateString(r.data);
+        if (!d || d < ini || d > fim) return false;
+        if (talhao && r.talhao !== talhao) return false;
+        return true;
+    }).sort((a, b) => sanitizeDateString(a.data).localeCompare(sanitizeDateString(b.data)));
+
+    let html = ''; let total = 0, totalAplicado = 0, totalPlanejado = 0;
+    lista.forEach(rec => {
+        const custo = custoAplicacao(rec); total += custo;
+        if (rec.status === 'APLICADO') totalAplicado += custo; else totalPlanejado += custo;
+        html += `<tr><td>${formatarData(rec.data)}</td><td>${strEscape(rec.talhao)}</td><td><b>${strEscape(rec.produto)}</b></td><td>${strEscape(rec.tipo)}</td><td>${strEscape(rec.alvo) || '-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strEscape(rec.forma) || '-'}</td><td>${strSafe(rec.status)}</td><td style="text-align:right; font-family:'Rubik'; font-weight:700;">${formatarMoeda(custo)}</td></tr>`;
+    });
+    if (html) html += `<tr style="background:#f0f0f0; border-top:2px solid #ccc;"><td colspan="8" style="font-weight:700; text-align:right;">TOTAL DO PERÍODO</td><td style="text-align:right; font-family:'Rubik'; font-weight:700;">${formatarMoeda(total)}</td></tr>`;
+
+    document.getElementById('tbody_rel_agri').innerHTML = html || '<tr><td colspan="9" style="text-align:center; padding:30px; color:#aaa;">Nenhuma aplicação encontrada neste período</td></tr>';
+    document.getElementById('rel_agri_totais').innerHTML =
+        `<div><span>Registros</span><b>${lista.length}</b></div><div><span>Aplicado</span><b>${formatarMoeda(totalAplicado)}</b></div><div><span>Planejado</span><b>${formatarMoeda(totalPlanejado)}</b></div><div><span>Custo Total</span><b style="color:var(--cor-laranja-flat);">${formatarMoeda(total)}</b></div>`;
+    document.getElementById('rel_agri_cabecalho').innerHTML =
+        `<h3 style="margin:0 0 5px 0;">RELATÓRIO DE APLICAÇÕES - RANCHO 3C</h3><div style="font-size:13px;">Talhão: <b>${strEscape(talhao || 'TODOS')}</b> &nbsp;|&nbsp; Período: <b>${formatarData(ini)}</b> a <b>${formatarData(fim)}</b></div>`;
+}
+
+/* =========================================================================
+   10. SINCRONIZAÇÃO POR ID, BACKUP, ESTOQUE, TALHÕES E ALERTAS
+========================================================================= */
+function djb2(str) { let h = 5381; for (let i = 0; i < str.length; i++) { h = ((h << 5) + h) + str.charCodeAt(i); h |= 0; } return (h >>> 0).toString(36); }
+
+// Mescla por ID (última edição vence). Registros antigos sem ID ganham um ID estável derivado do conteúdo.
+// Registros antigos (sem prefixo v2-) com o mesmo conteúdo continuam sendo unificados, como antes.
+function unificarPorId(localArr, cloudArr, hashFn) {
+    const map = new Map();
+    const adicionar = item => {
+        if (!item) return;
+        if (!item.id) item.id = 'L' + djb2(hashFn(item));
+        const ex = map.get(item.id);
+        if (!ex || (item.updatedAt || 0) >= (ex.updatedAt || 0)) map.set(item.id, item);
+    };
+    (cloudArr || []).forEach(adicionar);
+    (localArr || []).forEach(adicionar);
+
+    const resultado = []; const legado = new Map();
+    map.forEach(item => {
+        if (String(item.id).startsWith('v2-')) { resultado.push(item); return; }
+        const h = hashFn(item); const ex = legado.get(h);
+        if (!ex) { legado.set(h, item); return; }
+        const ta = item.updatedAt || 0, tb = ex.updatedAt || 0;
+        legado.set(h, ta !== tb ? (ta > tb ? item : ex) : (item.deleted ? item : ex));
+    });
+    legado.forEach(i => resultado.push(i));
+
+    // Exclusões ficam registradas (para propagar entre aparelhos) e são limpas após 90 dias
+    const limite = Date.now() - 90 * 86400000;
+    return resultado.filter(i => !(i.deleted && i.updatedAt && i.updatedAt < limite));
+}
+
+function garantirOpcoes() {
+    if (!opcoesDin || typeof opcoesDin !== 'object') opcoesDin = {};
+    ['talhoes', 'tipos', 'formas', 'alvos'].forEach(k => { if (!Array.isArray(opcoesDin[k])) opcoesDin[k] = []; });
+    if (!opcoesDin.talhoesInfo || typeof opcoesDin.talhoesInfo !== 'object') opcoesDin.talhoesInfo = {};
+}
+
+function mesclarOpcoes(op) {
+    if (!op) return; garantirOpcoes();
+    ['talhoes', 'tipos', 'formas', 'alvos'].forEach(k => { opcoesDin[k] = [...new Set([...(opcoesDin[k] || []), ...(op[k] || [])])].sort(); });
+    const info = op.talhoesInfo || {};
+    Object.keys(info).forEach(n => { const l = opcoesDin.talhoesInfo[n]; if (!l || (info[n].updatedAt || 0) > (l.updatedAt || 0)) opcoesDin.talhoesInfo[n] = info[n]; });
+}
+
+function atualizarTudo() {
+    try { preencherSelectsLancamento(); popularSeletorSolo(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); atualizarOpcoesFiltros(); } catch (e) {}
+    try { atualizarAlertas(); } catch (e) {}
+}
+
+/* ---------- Backup ---------- */
+function baixarArquivo(nome, conteudo, mime) {
+    const blob = new Blob([conteudo], { type: mime });
+    const url = URL.createObjectURL(blob); const a = document.createElement('a');
+    a.href = url; a.download = nome; document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+}
+
+function exportarBackup() {
+    const payload = { versao: 2, exportadoEm: new Date().toISOString(), transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo, chuvas };
+    baixarArquivo(`rancho3c_backup_${hojeLocal()}.json`, JSON.stringify(payload, null, 1), 'application/json');
+    try { localStorage.setItem('rancho3c_ultimo_backup', String(Date.now())); } catch (e) {}
+    mostrarToast("Backup exportado!");
+}
+
+function importarBackup(event) {
+    const file = event.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const d = JSON.parse(e.target.result);
+            if (!d || typeof d !== 'object' || (!d.transacoes && !d.aplicacoes && !d.estoque)) throw new Error("Arquivo inválido");
+            if (!confirm("Mesclar este backup com os dados atuais?\n(Nada será apagado: registros iguais são unificados e o mais recente vence.)")) { event.target.value = ''; return; }
+            const arr = x => Array.isArray(x) ? x : Object.values(x || {});
+            transacoes = unificarPorId(transacoes, d.transacoes, hashTransacao);
+            agriRecords = unificarPorId(agriRecords, d.aplicacoes || d.agriRecords, hashAgri);
+            analisesSolo = unificarDados(analisesSolo, d.analises, hashSolo);
+            estoque = unificarDados(estoque, arr(d.estoque), hashEstoque);
+            chuvas = unificarDados(chuvas, d.chuvas, hashChuva);
+            mesclarOpcoes(d.opcoes);
+            salvarDados(); atualizarTudo(); showTab('home');
+            mostrarToast("Backup importado e mesclado!");
+        } catch (err) { alert("Não foi possível ler o backup: " + err.message); }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+}
+
+function verificarLembreteBackup() {
+    try {
+        if (!transacoes.length && !agriRecords.length) return;
+        const u = parseInt(localStorage.getItem('rancho3c_ultimo_backup') || '0', 10);
+        if (!u || Date.now() - u > 30 * 86400000) mostrarToast("Lembrete: faça um backup (menu lateral)");
+    } catch (e) {}
+}
+
+function exportarCaixaCSV() {
+    const lista = ultimaListaFiltrada || [];
+    if (!lista.length) { alert("Nada para exportar com os filtros atuais."); return; }
+    const num = v => { const n = parseFloat(v); return isNaN(n) ? '' : String(n).replace('.', ','); };
+    const txt = v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
+    const linhas = [['Data', 'Tipo', 'Categoria', 'Setor', 'Talhão', 'Local', 'Descrição', 'Qtd', 'Und', 'V.Unit', 'Total', 'Situação'].join(';')];
+    lista.forEach(t => {
+        const tal = strSafe(t.talhao) ? (strSafe(t.talhao2) ? `${t.talhao} (${t.pct}%) / ${t.talhao2}` : t.talhao) : '';
+        linhas.push([formatarData(t.data), t.tipo, t.categoria, t.setor, tal, t.local, t.desc].map(txt).concat([num(t.qtd), txt(t.und), num(t.v_unit), num(t.valor), txt(t.sit)]).join(';'));
+    });
+    baixarArquivo(`caixa_rancho3c_${hojeLocal()}.csv`, '﻿' + linhas.join('\r\n'), 'text/csv;charset=utf-8');
+    mostrarToast("Caixa exportado (CSV)!");
+}
+
+/* ---------- Estoque: entrada automática com custo médio ---------- */
+function normalizarUnidadeEstoque(und, qtd) {
+    const u = String(und || '').trim().toUpperCase().replace(/\./g, '');
+    if (['L', 'LT', 'LTS', 'LITRO', 'LITROS'].includes(u)) return { un: 'L', qtd: qtd };
+    if (['KG', 'KGS', 'K', 'QUILO', 'QUILOS'].includes(u)) return { un: 'KG', qtd: qtd };
+    if (['G', 'GR', 'GRAMA', 'GRAMAS'].includes(u)) return { un: 'KG', qtd: qtd / 1000 };
+    if (['ML'].includes(u)) return { un: 'L', qtd: qtd / 1000 };
+    return null;
+}
+
+function entradaEstoque(produto, principio, tipo, qtd, un, valorUnit) {
+    produto = String(produto || '').toUpperCase().trim();
+    const est = estoque.find(e => e && !e.deleted && e.produto === produto && e.un === un);
+    if (est) {
+        const q0 = Math.max(0, parseFloat(est.qtd) || 0); const v0 = parseFloat(est.valor_unit) || 0; const total = q0 + qtd;
+        est.valor_unit = total > 0 ? ((q0 * v0) + (qtd * valorUnit)) / total : valorUnit;
+        est.qtd = (parseFloat(est.qtd) || 0) + qtd;
+        if (!est.tipo && tipo) est.tipo = tipo;
+        est.updatedAt = Date.now();
+        return est.id;
+    }
+    const novo = { id: generateUUID(), updatedAt: Date.now(), deleted: false, produto: produto, principio: principio || '', tipo: tipo || 'INSUMOS', qtd: qtd, un: un, valor_unit: valorUnit, qtd_min: 0 };
+    estoque.push(novo);
+    return novo.id;
+}
+
+/* ---------- Custo congelado das aplicações ---------- */
+function custoUnitarioAtual(rec) {
+    const est = estoque.find(e => e && !e.deleted && e.produto === rec.produto && e.un === rec.dosagem_un);
+    return est ? (parseFloat(est.valor_unit) || 0) : (parseFloat(rec.custo_unit) || 0);
+}
+function congelarCusto(rec) { const u = custoUnitarioAtual(rec); rec.custo_unit = u; rec.custo_fixo = u > 0; }
+function custoAplicacao(rec) {
+    const q = parseFloat(rec.dosagem_qtd) || 0;
+    if (rec.status === 'APLICADO' && rec.custo_fixo) return q * (parseFloat(rec.custo_unit) || 0);
+    return q * custoUnitarioAtual(rec);
+}
+function fixarCustosAntigos() {
+    const pend = agriRecords.filter(r => r && !r.deleted && r.status === 'APLICADO' && !r.custo_fixo);
+    if (!pend.length) { alert("Todas as aplicações já realizadas estão com o custo fixado."); return; }
+    if (!confirm(`Fixar o custo de ${pend.length} aplicação(ões) já realizada(s) usando o preço ATUAL do estoque?\n\nDepois disso, mudanças de preço no estoque não alteram mais esses registros.`)) return;
+    pend.forEach(r => { congelarCusto(r); r.updatedAt = Date.now(); });
+    salvarDados(); aplicarFiltroSafraApp(); mostrarToast("Custos fixados!");
+}
+
+/* ---------- Talhões: alocação de despesas, cadastro e indicadores ---------- */
+function nomesTalhaoSet() {
+    return new Set([...(opcoesDin.talhoes || []), ...Object.keys(opcoesDin.talhoesInfo || {}), ...agriRecords.filter(r => r && !r.deleted && r.talhao && r.talhao !== '-').map(r => r.talhao), ...setoresLavoura].map(x => String(x).toUpperCase()));
+}
+
+// Divide o valor de um lançamento entre os talhões (campo Talhão; se vazio, usa o Setor quando ele for um talhão/lavoura)
+function alocacaoTalhao(t) {
+    const v = parseFloat(t.valor) || 0;
+    const t1 = strSafe(t.talhao).toUpperCase(); const t2 = strSafe(t.talhao2).toUpperCase();
+    if (t1 && t1 !== '-') {
+        if (t2 && t2 !== '-') { let p = parseFloat(t.pct); if (isNaN(p) || p <= 0 || p >= 100) p = 50; return [{ talhao: t1, valor: v * p / 100 }, { talhao: t2, valor: v * (100 - p) / 100 }]; }
+        return [{ talhao: t1, valor: v }];
+    }
+    if (String(t.tipo).toLowerCase() === 'despesa') {
+        const setor = strSafe(t.setor).toUpperCase();
+        if (setor && nomesTalhaoSet().has(setor)) return [{ talhao: setor, valor: v }];
+    }
+    return [];
+}
+
+function rotuloTalhao(t) {
+    const a = strSafe(t.talhao), b = strSafe(t.talhao2);
+    if (!a || a === '-') return '-';
+    if (b) { const p = parseFloat(t.pct) || 50; return `${strEscape(a)} (${p}%)<br>${strEscape(b)} (${100 - p}%)`; }
+    return strEscape(a);
+}
+
+function infoTalhao(n) { const i = (opcoesDin.talhoesInfo || {})[String(n).toUpperCase()]; return (i && !i.deleted) ? i : null; }
+function encAttr(s) { return encodeURIComponent(s).replace(/'/g, '%27'); }
+
+function listaTodosTalhoes() {
+    const s = new Set();
+    (opcoesDin.talhoes || []).forEach(t => s.add(String(t).toUpperCase()));
+    Object.keys(opcoesDin.talhoesInfo || {}).forEach(k => { if (infoTalhao(k)) s.add(k); });
+    agriRecords.forEach(r => { if (r && !r.deleted && r.talhao && r.talhao !== '-') s.add(String(r.talhao).toUpperCase()); });
+    transacoes.forEach(t => { if (t && !t.deleted) [t.talhao, t.talhao2].forEach(x => { if (x && x !== '-') s.add(String(x).toUpperCase()); }); });
+    return Array.from(s).sort();
+}
+
+function salvarTalhao(e) {
+    e.preventDefault();
+    const nome = safeVal('tl_nome').trim().toUpperCase(); if (!nome) return;
+    garantirOpcoes(); verificarNovaOpcao('talhoes', nome);
+    opcoesDin.talhoesInfo[nome] = { cultura: safeVal('tl_cultura'), area: parseFloat(safeVal('tl_area')) || 0, plantas: parseFloat(safeVal('tl_plantas')) || 0, updatedAt: Date.now(), deleted: false };
+    salvarDados(); document.getElementById('form_talhao').reset();
+    renderDatalistsAgri(); try { popularSeletorSafraApp(); } catch (err) {}
+    renderTalhoes(); mostrarToast("Talhão salvo!"); focarPrimeiroCampo('tl_nome');
+}
+
+function editarTalhao(enc) {
+    const n = decodeURIComponent(enc); const i = infoTalhao(n);
+    setVal('tl_nome', n); setVal('tl_cultura', i && i.cultura ? i.cultura : 'conilon'); setVal('tl_area', i && i.area ? i.area : ''); setVal('tl_plantas', i && i.plantas ? i.plantas : '');
+    const el = document.getElementById('tl_area'); if (el) el.focus();
+}
+
+function excluirTalhao(enc) {
+    const n = decodeURIComponent(enc);
+    if (!confirm(`Remover a área e o nº de plantas cadastrados de "${n}"?\n(Os lançamentos e aplicações desse talhão não são apagados.)`)) return;
+    garantirOpcoes(); opcoesDin.talhoesInfo[n] = { deleted: true, updatedAt: Date.now() };
+    salvarDados(); renderTalhoes(); mostrarToast("Cadastro removido");
+}
+
+function renderTalhoes() { renderIndicadoresTalhao(); }
+
+function renderIndicadoresTalhao() {
+    const sel = document.getElementById('ind_safra'); if (!sel) return;
+    const safras = new Set();
+    agriRecords.forEach(r => { if (r && !r.deleted && r.data) safras.add(obterSafraGeral(r.data)); });
+    transacoes.forEach(t => { if (t && !t.deleted && t.data) safras.add(obterSafraGeral(t.data)); });
+    safras.delete('Sem Data');
+    const atual = sel.value || obterSafraAtual();
+    sel.innerHTML = '<option value="TODAS">TODAS AS SAFRAS</option>' + Array.from(safras).sort().reverse().map(s => `<option value="${s}">Safra ${s}</option>`).join('');
+    sel.value = (atual === 'TODAS' || safras.has(atual)) ? atual : 'TODAS';
+    const safraSel = sel.value;
+
+    const ind = {};
+    const get = n => { if (!ind[n]) ind[n] = { app: 0, caixa: 0, receita: 0, sacas: 0 }; return ind[n]; };
+    agriRecords.forEach(r => {
+        if (!r || r.deleted || r.status !== 'APLICADO' || !r.talhao || r.talhao === '-') return;
+        if (safraSel !== 'TODAS' && obterSafraGeral(r.data) !== safraSel) return;
+        get(String(r.talhao).toUpperCase()).app += custoAplicacao(r);
+    });
+    transacoes.forEach(t => {
+        if (!t || t.deleted) return;
+        if (safraSel !== 'TODAS' && obterSafraGeral(t.data) !== safraSel) return;
+        const tipo = String(t.tipo).toLowerCase();
+        if (tipo === 'despesa') alocacaoTalhao(t).forEach(a => { get(a.talhao).caixa += a.valor; });
+        else if (tipo === 'receita') {
+            const tl = strSafe(t.talhao).toUpperCase(); if (!tl || tl === '-') return;
+            const o = get(tl); o.receita += parseFloat(t.valor) || 0;
+            if (String(t.und).trim().toUpperCase() === 'SC') o.sacas += parseFloat(t.qtd) || 0;
+        }
+    });
+
+    let html = ''; const tot = { area: 0, plantas: 0, app: 0, caixa: 0, receita: 0, sacas: 0, custoComArea: 0 };
+    listaTodosTalhoes().forEach(n => {
+        const i = infoTalhao(n); const v = ind[n] || { app: 0, caixa: 0, receita: 0, sacas: 0 };
+        const area = i ? (parseFloat(i.area) || 0) : 0; const plantas = i ? (parseFloat(i.plantas) || 0) : 0;
+        const custo = v.app + v.caixa; const res = v.receita - custo;
+        tot.area += area; tot.plantas += plantas; tot.app += v.app; tot.caixa += v.caixa; tot.receita += v.receita; tot.sacas += v.sacas; if (area > 0) tot.custoComArea += custo;
+        const enc = encAttr(n);
+        html += `<tr><td><b style="color:var(--cor-verde-flat);">${strEscape(n)}</b></td><td>${i && i.cultura ? (i.cultura === 'maracuja' ? 'MARACUJÁ' : 'CONILON') : '-'}</td>
+            <td>${area > 0 ? area.toFixed(2) : '-'}</td><td>${plantas > 0 ? plantas.toLocaleString('pt-BR') : '-'}</td>
+            <td>${formatarMoeda(v.app)}</td><td>${formatarMoeda(v.caixa)}</td><td style="font-weight:700;">${formatarMoeda(custo)}</td>
+            <td>${area > 0 ? formatarMoeda(custo / area) : '-'}</td><td>${formatarMoeda(v.receita)}</td>
+            <td style="font-weight:700; color:${res >= 0 ? '#27ae60' : '#c0392b'};">${formatarMoeda(res)}</td>
+            <td>${v.sacas > 0 ? v.sacas.toFixed(1) : '-'}</td><td>${v.sacas > 0 && custo > 0 ? formatarMoeda(custo / v.sacas) : '-'}</td>
+            <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editarTalhao('${enc}')">✏️</button>${i ? `<button class="btn-acao btn-excluir" onclick="excluirTalhao('${enc}')">🗑️</button>` : ''}</td></tr>`;
+    });
+    const custoTot = tot.app + tot.caixa; const resTot = tot.receita - custoTot;
+    if (html) html += `<tr style="background:#f0f0f0; border-top:2px solid #ccc; font-weight:700;"><td>TOTAL</td><td></td><td>${tot.area > 0 ? tot.area.toFixed(2) : '-'}</td><td>${tot.plantas > 0 ? tot.plantas.toLocaleString('pt-BR') : '-'}</td>
+        <td>${formatarMoeda(tot.app)}</td><td>${formatarMoeda(tot.caixa)}</td><td>${formatarMoeda(custoTot)}</td><td>${tot.area > 0 ? formatarMoeda(tot.custoComArea / tot.area) : '-'}</td>
+        <td>${formatarMoeda(tot.receita)}</td><td style="color:${resTot >= 0 ? '#27ae60' : '#c0392b'};">${formatarMoeda(resTot)}</td><td>${tot.sacas > 0 ? tot.sacas.toFixed(1) : '-'}</td><td>${tot.sacas > 0 && custoTot > 0 ? formatarMoeda(custoTot / tot.sacas) : '-'}</td><td class="no-print"></td></tr>`;
+    document.getElementById('tbody_indicadores').innerHTML = html || '<tr><td colspan="13" style="text-align:center; padding:30px; color:#aaa;">Cadastre um talhão para começar</td></tr>';
+}
+
+/* ---------- Alertas: contas e estoque ---------- */
+function atualizarAlertas() {
+    const hoje = hojeLocal();
+    const d = new Date(); d.setDate(d.getDate() + 7);
+    const lim = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    let pagVenc = 0, pagVencV = 0, pag7 = 0, pag7V = 0, recVenc = 0, recVencV = 0;
+    transacoes.forEach(t => {
+        if (!t || t.deleted) return;
+        const sit = strSafe(t.sit).toLowerCase();
+        if (!(sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente'))) return;
+        const data = sanitizeDateString(t.data); if (!data) return;
+        const v = parseFloat(t.valor) || 0;
+        if (String(t.tipo).toLowerCase() === 'receita') { if (data < hoje) { recVenc++; recVencV += v; } }
+        else if (data < hoje) { pagVenc++; pagVencV += v; }
+        else if (data <= lim) { pag7++; pag7V += v; }
+    });
+    const baixo = estoque.filter(e => { if (!e || e.deleted || !e.produto) return false; const q = parseFloat(e.qtd) || 0; const m = parseFloat(e.qtd_min) || 0; return q < 0 || (m > 0 && q < m); }).length;
+
+    const badge = (id, n) => { const el = document.getElementById(id); if (!el) return; if (n > 0) { el.innerText = n; el.style.display = 'inline-block'; } else el.style.display = 'none'; };
+    badge('badge_atrasadas', pagVenc); badge('badge_estoque', baixo);
+
+    const box = document.getElementById('alertas_pendencias');
+    if (box) {
+        const sub = 'font-size:12px; opacity:0.9; margin-top:6px;';
+        box.innerHTML = `
+            <div class="card" style="background-color: var(--cor-vermelho-flat);"><h4>A pagar vencidas</h4><span>${formatarMoeda(pagVencV)}</span><div style="${sub}">${pagVenc} lançamento(s)</div></div>
+            <div class="card" style="background-color: var(--cor-laranja-flat);"><h4>A pagar em 7 dias</h4><span>${formatarMoeda(pag7V)}</span><div style="${sub}">${pag7} lançamento(s)</div></div>
+            <div class="card" style="background-color: var(--cor-azul-flat);"><h4>A receber vencidas</h4><span>${formatarMoeda(recVencV)}</span><div style="${sub}">${recVenc} lançamento(s)</div></div>
+            <div class="card" style="background-color: var(--cor-roxo-flat);"><h4>Estoque abaixo do mínimo</h4><span>${baixo}</span><div style="${sub}">item(ns) a repor</div></div>`;
+    }
+}
+
+
+/* COMANDO GLOBAL PARA MAIÚSCULAS (só altera o valor quando necessário, para não fechar listas de sugestão) */
 document.addEventListener('input', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
         const tipo = e.target.type ? e.target.type.toLowerCase() : 'text';
         if (tipo === 'text' || tipo === 'search' || !e.target.hasAttribute('type')) {
-            const start = e.target.selectionStart;
-            const end = e.target.selectionEnd;
-            e.target.value = e.target.value.toUpperCase();
-            
-            try {
-                if (start !== null && end !== null) {
-                    e.target.setSelectionRange(start, end);
-                }
-            } catch(err) {} 
+            const atual = e.target.value; const maiusculo = atual.toUpperCase();
+            if (atual === maiusculo) return;
+            const start = e.target.selectionStart; const end = e.target.selectionEnd;
+            e.target.value = maiusculo;
+            try { if (start !== null && end !== null) e.target.setSelectionRange(start, end); } catch(err) {}
         }
     }
 });

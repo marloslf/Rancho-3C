@@ -13,8 +13,8 @@
 <!-- SIDEBAR -->
 <div class="sidebar no-print">
     <div class="sidebar-logo">
-        <h2 style="color: var(--cor-verde-flat);">RANCHO 3C</h2>
-        <span style="font-size: 10px; color: #aaa; letter-spacing: 1px;">SISTEMA INTEGRADO</span>
+        <h2>RANCHO 3C</h2>
+        <span>SISTEMA INTEGRADO</span>
     </div>
     <div class="sidebar-menu">
         <button id="btn_home" class="btn-ativo" onclick="showTab('home')">🏠 Início</button>
@@ -26,9 +26,15 @@
         <div class="sidebar-group-title">Agrícola</div>
         <button id="btn_agri_dash" onclick="showTab('agri_dash')">📊 Dash. Agrícola</button>
         <button id="btn_agri_app" onclick="showTab('agri_app')">🚜 Aplicações</button>
-        <button id="btn_agri_est" onclick="showTab('agri_est')">📦 Estoque</button>
+        <button id="btn_agri_est" onclick="showTab('agri_est')">📦 Estoque <span id="badge_estoque" class="badge-atrasadas" style="display: none;">0</span></button>
+        <button id="btn_talhoes" onclick="showTab('talhoes_main')">🌾 Talhões</button>
         <button id="btn_solo" onclick="showTab('solo_main')">🧪 Solo & Nutrição</button>
         <button id="btn_chuvas" onclick="showTab('chuvas_main')">🌧️ Chuvas</button>
+    </div>
+    <div class="sidebar-backup no-print">
+        <button onclick="exportarBackup()" title="Baixa todos os dados em um arquivo JSON">💾 Exportar Backup</button>
+        <button onclick="document.getElementById('backup_upload').click()" title="Mescla um backup JSON com os dados atuais">📂 Importar Backup</button>
+        <input type="file" id="backup_upload" accept=".json" style="display:none;" onchange="importarBackup(event)">
     </div>
     <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem()" title="Forçar Sincronização">⏳ Inicializando...</button>
 </div>
@@ -43,12 +49,9 @@
 
     <!-- HOME -->
     <div id="home" class="tab active">
-        <div style="position: relative; height: calc(100vh - 150px); display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; border-radius: var(--borda-raio);">
-            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://i.imgur.com/jPLDeyi.png'); background-size: 60%; background-position: center; background-repeat: no-repeat; opacity: 0.05; z-index: 0; pointer-events: none;"></div>
-            <div style="z-index: 1; text-align: center;">
-                <h1 style="color: var(--cor-texto); font-size: 40px; letter-spacing: 2px;">BEM-VINDO AO RANCHO 3C</h1>
-                <p style="color: var(--cor-texto-claro); font-size: 16px;">Arquitetura Modular (HTML/CSS/JS Separados) Ativa.</p>
-            </div>
+        <div style="height: calc(100vh - 150px); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 25px;">
+            <img src="https://i.imgur.com/jPLDeyi.png" alt="Logotipo Rancho 3C" referrerpolicy="no-referrer" style="max-width: 420px; width: 60%; max-height: 55vh; object-fit: contain;">
+            <h1 style="color: var(--cor-texto); font-size: 36px; letter-spacing: 2px; margin: 0;">BEM-VINDO(A) AO RANCHO 3C</h1>
         </div>
     </div>
 
@@ -97,7 +100,7 @@
         <div class="filter-bar no-print">
             <div><label style="font-size:11px; font-weight:700; color:#888;">SAFRA:</label> <select id="filtro_safra_dashboard" onchange="atualizarResumoEGrafico()" style="width: auto; margin-left: 5px;"><option value="">TODAS</option></select></div>
             <div><label style="font-size:11px; font-weight:700; color:#888; margin-left:15px;">MÊS:</label> <input type="month" id="filtro_mes_dashboard" onchange="atualizarResumoEGrafico()" style="width: auto; margin-left: 5px;"></div>
-            <button onclick="setHtml('filtro_safra_dashboard', ''); setVal('filtro_mes_dashboard', ''); atualizarResumoEGrafico()" class="btn-limpar" style="margin-left:auto;">LIMPAR FILTROS</button>
+            <button onclick="setVal('filtro_safra_dashboard', ''); setVal('filtro_mes_dashboard', ''); atualizarResumoEGrafico()" class="btn-limpar" style="margin-left:auto;">LIMPAR FILTROS</button>
         </div>
 
         <div class="resumo-cards">
@@ -142,6 +145,9 @@
                 <div><label>Data</label><input type="date" id="d_data" required></div>
                 <div><label>Categoria</label><input list="lista_d_categoria" id="d_categoria" required autocomplete="off"></div>
                 <div><label>Setor</label><input list="lista_d_setor" id="d_setor" required autocomplete="off"></div>
+                <div><label>Talhão</label><input list="lista-talhoes" id="d_talhao" autocomplete="off"></div>
+                <div><label>% Talhão 1</label><input type="number" id="d_pct" min="1" max="99" step="1" placeholder="50" title="Só use se for ratear com o Talhão 2 (padrão 50%)"></div>
+                <div><label>Talhão 2 (resto)</label><input list="lista-talhoes" id="d_talhao2" autocomplete="off"></div>
                 <div><label>Fornecedor</label><input list="lista_d_local" id="d_local" required autocomplete="off"></div>
                 <div style="grid-column: span 2;"><label>Descrição</label><input list="lista_d_descricao" id="d_descricao" required autocomplete="off"></div>
                 <div><label>Qtd</label><input type="number" id="d_qtd" step="0.01" oninput="calcularTotalDespesa()"></div>
@@ -159,6 +165,7 @@
                 <div><label>Data</label><input type="date" id="r_data" required></div>
                 <div style="grid-column: span 2;"><label>O que vendeu?</label><input list="lista_r_categoria" id="r_categoria" required onblur="autoPreencherUnidade()" autocomplete="off"></div>
                 <div><label>Cliente</label><input list="lista_r_local" id="r_local" required autocomplete="off"></div>
+                <div><label>Talhão</label><input list="lista-talhoes" id="r_talhao" autocomplete="off"></div>
                 <div style="grid-column: span 2;"><label>Detalhes</label><input type="text" id="r_descricao" autocomplete="off"></div>
                 <div><label>Qtd</label><input type="number" id="r_qtd" step="0.01" oninput="calcularTotalReceita()"></div>
                 <div><label>Unid.</label><input type="text" id="r_und"></div>
@@ -175,6 +182,7 @@
             <span style="flex-grow: 1;"></span>
             <input type="text" id="pesquisa_global" placeholder="Pesquisa rápida..." onkeydown="if(event.key==='Enter') aplicarFiltros()" style="width: 250px;">
             <button onclick="aplicarFiltros()" class="btn-salvar-compacto" style="background: var(--cor-sidebar);">Buscar</button>
+            <button onclick="exportarCaixaCSV()" class="btn-salvar-compacto" style="background: var(--cor-azul-flat);" title="Exporta a lista filtrada para Excel">📤 Exportar CSV</button>
             <button onclick="limparFiltros()" class="btn-limpar">Limpar</button>
         </div>
 
@@ -183,14 +191,14 @@
                 <thead>
                     <tr>
                         <th onclick="setOrdenacao('data')">DATA ↕</th><th onclick="setOrdenacao('tipo')">TIPO ↕</th><th onclick="setOrdenacao('categoria')">CATEGORIA ↕</th>
-                        <th onclick="setOrdenacao('setor')">SETOR ↕</th><th onclick="setOrdenacao('local')">LOCAL ↕</th><th onclick="setOrdenacao('desc')">DESCRIÇÃO ↕</th>
+                        <th onclick="setOrdenacao('setor')">SETOR ↕</th><th onclick="setOrdenacao('talhao')">TALHÃO ↕</th><th onclick="setOrdenacao('local')">LOCAL ↕</th><th onclick="setOrdenacao('desc')">DESCRIÇÃO ↕</th>
                         <th onclick="setOrdenacao('qtd')">QTD ↕</th><th onclick="setOrdenacao('v_unit')">V. UNIT ↕</th><th onclick="setOrdenacao('valor')">TOTAL ↕</th>
                         <th onclick="setOrdenacao('sit')" style="text-align: center;">SITUAÇÃO ↕</th><th class="no-print" style="text-align: center;">AÇÕES</th>
                     </tr>
                     <tr class="filter-row no-print">
                         <th><input type="date" id="f_data" onchange="aplicarFiltros()"></th>
                         <th><select id="f_tipo" onchange="aplicarFiltros()"><option value="">TUDO</option><option value="receita">RECEITA</option><option value="despesa">DESPESA</option><option value="investimento">INVEST</option></select></th>
-                        <th><select id="f_cat" onchange="aplicarFiltros()"></select></th><th><select id="f_setor" onchange="aplicarFiltros()"></select></th>
+                        <th><select id="f_cat" onchange="aplicarFiltros()"></select></th><th><select id="f_setor" onchange="aplicarFiltros()"></select></th><th><select id="f_talhao" onchange="aplicarFiltros()"></select></th>
                         <th><select id="f_local" onchange="aplicarFiltros()"></select></th><th><select id="f_desc" onchange="aplicarFiltros()"></select></th>
                         <th></th><th></th><th></th><th><select id="f_sit" onchange="aplicarFiltros()"><option value="">TUDO</option><option value="pago">PAGO</option><option value="a pagar">A PAGAR</option><option value="a receber">A RECEBER</option></select></th><th></th>
                     </tr>
@@ -212,7 +220,7 @@
             <select id="filtro_safra_relatorios" onchange="atualizarFiltrosRelatorios()" style="width:200px;"><option value="">TODAS</option></select>
             <label style="font-weight: 700; font-size:12px; margin-left: 20px;">MÊS:</label>
             <input type="month" id="filtro_mes_relatorios" onchange="atualizarFiltrosRelatorios()" style="width:200px;">
-            <button onclick="setHtml('filtro_safra_relatorios', ''); setVal('filtro_mes_relatorios', ''); atualizarFiltrosRelatorios()" class="btn-limpar" style="margin-left:auto;">LIMPAR</button>
+            <button onclick="setVal('filtro_safra_relatorios', ''); setVal('filtro_mes_relatorios', ''); atualizarFiltrosRelatorios()" class="btn-limpar" style="margin-left:auto;">LIMPAR</button>
         </div>
 
         <!-- ABA 1: Tabelas Normais -->
@@ -256,6 +264,7 @@
     <!-- Pendências -->
     <div id="pendencias" class="tab">
         <h2 style="font-family: 'Rubik'; margin-bottom: 20px;">CONTAS PENDENTES</h2>
+        <div class="resumo-cards" id="alertas_pendencias"></div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px;">
             <div class="widget-box" style="padding:0; border-top: 4px solid var(--cor-azul-flat);"><div class="widget-header" style="padding: 15px; margin:0; border:none; background:#f9f9f9; color: var(--cor-azul-flat);">⏳ A RECEBER</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><thead><tr><th>DATA</th><th>CLIENTE</th><th style="text-align: right;">VALOR</th><th style="text-align: center;">AÇÃO</th></tr></thead><tbody id="tbody_receitas_pendentes"></tbody></table></div></div>
             <div class="widget-box" style="padding:0; border-top: 4px solid var(--cor-vermelho-flat);"><div class="widget-header" style="padding: 15px; margin:0; border:none; background:#f9f9f9; color: var(--cor-vermelho-flat);">⏳ A PAGAR</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><thead><tr><th>DATA</th><th>FORNECEDOR</th><th style="text-align: right;">VALOR</th><th style="text-align: center;">AÇÃO</th></tr></thead><tbody id="tbody_despesas_pendentes"></tbody></table></div></div>
@@ -296,7 +305,10 @@
                 <input type="hidden" id="editAgriIndex" value="">
                 <div><label>Data</label><input type="date" id="dataApp" required></div>
                 <div><label>Talhão</label><input type="text" id="talhao" list="lista-talhoes" required autocomplete="off"></div>
-                <div style="grid-column: span 2;"><label>Produto</label><input type="text" id="produto" list="lista-produtos-estoque" required autocomplete="off" oninput="preencherTipoProduto()"></div>
+                <div style="grid-column: span 2;" class="campo-sugestao"><label>Produto</label>
+                    <input type="text" id="produto" required autocomplete="off" placeholder="DIGITE OU ESCOLHA DO ESTOQUE" oninput="preencherTipoProduto(); mostrarSugestoesProduto()" onfocus="mostrarSugestoesProduto()" onclick="mostrarSugestoesProduto()" onblur="setTimeout(esconderSugestoesProduto, 150)">
+                    <div id="sug_produto" class="lista-sugestoes"></div>
+                </div>
                 <div><label>Tipo</label><input type="text" id="tipo" list="lista-tipos" required autocomplete="off"></div>
                 <div><label>Alvo</label><input type="text" id="alvo" list="lista-alvos" autocomplete="off"></div>
                 <div><label>Qtd</label><input type="number" step="0.01" id="dosagem_qtd" required></div>
@@ -311,6 +323,8 @@
             <label style="font-weight: 700; font-size:12px;">CRONOGRAMA GERAL (SAFRA):</label>
             <select id="safraSelector" onchange="aplicarFiltroSafraApp()" style="width:200px; margin-left:15px;"></select>
             <span style="flex-grow: 1;"></span>
+            <button onclick="fixarCustosAntigos()" class="btn-limpar" style="background: #7f8c8d;" title="Fixa o custo das aplicações já realizadas com o preço atual do estoque">🔒 Fixar custos antigos</button>
+            <button onclick="showTab('agri_rel')" class="btn-salvar-compacto" style="background: var(--cor-sidebar);">📄 Relatório por Período</button>
             <button onclick="limparFiltrosAgri()" class="btn-limpar">🧹 Limpar Filtros</button>
         </div>
 
@@ -334,6 +348,58 @@
         </div>
     </div>
 
+    <!-- RELATÓRIO DE APLICAÇÕES POR PERÍODO -->
+    <div id="agri_rel" class="tab">
+        <div class="filter-bar no-print">
+            <div><label style="font-size:11px; font-weight:700; color:#888;">DATA INÍCIO:</label> <input type="date" id="rel_agri_ini" style="width:auto; margin-left:5px;"></div>
+            <div><label style="font-size:11px; font-weight:700; color:#888;">DATA FIM:</label> <input type="date" id="rel_agri_fim" style="width:auto; margin-left:5px;"></div>
+            <div><label style="font-size:11px; font-weight:700; color:#888;">TALHÃO:</label> <select id="rel_agri_talhao" style="width:220px; margin-left:5px;"></select></div>
+            <span style="flex-grow: 1;"></span>
+            <button onclick="gerarRelatorioAgri()" class="btn-salvar-compacto" style="background: var(--cor-verde-flat);">📄 Gerar Relatório</button>
+            <button onclick="window.print()" class="btn-limpar">🖨 Imprimir</button>
+            <button onclick="showTab('agri_app')" class="btn-limpar" style="background: var(--cor-azul-flat);">← Voltar</button>
+        </div>
+        <div class="widget-box" style="padding:0; overflow:hidden;">
+            <div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">📄 RELATÓRIO DE APLICAÇÕES</div>
+            <div class="rel-cabecalho-print" id="rel_agri_cabecalho" style="padding:15px;"></div>
+            <div class="table-container" style="box-shadow:none; border-radius:0; max-height:none;">
+                <table class="tabela-larga">
+                    <thead><tr><th>DATA</th><th>TALHÃO</th><th>PRODUTO</th><th>TIPO</th><th>ALVO</th><th>DOSAGEM</th><th>FORMA</th><th>STATUS</th><th style="text-align:right;">CUSTO</th></tr></thead>
+                    <tbody id="tbody_rel_agri"><tr><td colspan="9" style="text-align:center; padding:30px; color:#aaa;">Selecione o período e o talhão e clique em "Gerar Relatório"</td></tr></tbody>
+                </table>
+            </div>
+            <div class="rel-totais" id="rel_agri_totais"></div>
+        </div>
+    </div>
+
+    <!-- TALHÕES: CADASTRO E INDICADORES -->
+    <div id="talhoes_main" class="tab">
+        <div class="linha-lancamento no-print" style="border-left-color: var(--cor-verde-flat);">
+            <div style="font-size:14px; font-weight:700; color:var(--cor-verde-flat); margin-bottom: 10px; font-family:'Rubik';">🌾 CADASTRO DE TALHÃO</div>
+            <form id="form_talhao" class="grid-form" onsubmit="salvarTalhao(event)">
+                <div style="grid-column: span 2;"><label>Talhão</label><input type="text" id="tl_nome" list="lista-talhoes" required autocomplete="off"></div>
+                <div><label>Cultura</label><select id="tl_cultura"><option value="conilon">Conilon</option><option value="maracuja">Maracujá</option></select></div>
+                <div><label>Área (ha)</label><input type="number" step="0.01" id="tl_area" required></div>
+                <div><label>Nº de Plantas</label><input type="number" step="1" id="tl_plantas"></div>
+                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-verde-flat); padding: 12px;">Gravar</button>
+            </form>
+        </div>
+        <div class="filter-bar no-print">
+            <label style="font-weight: 700; font-size:12px;">INDICADORES DA SAFRA:</label>
+            <select id="ind_safra" onchange="renderIndicadoresTalhao()" style="width:220px; margin-left:15px;"></select>
+            <span style="margin-left:auto; font-size:11px; color:#888;">Custo = aplicações realizadas + despesas do Caixa com o talhão (inclui rateios). Receita e sacas vêm das receitas com Talhão preenchido (und. SC).</span>
+        </div>
+        <div class="widget-box" style="padding:0; overflow:hidden;">
+            <div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">📊 CUSTO, RECEITA E RESULTADO POR TALHÃO</div>
+            <div class="table-container" style="box-shadow:none; border-radius:0;">
+                <table style="min-width: 1300px;">
+                    <thead><tr><th>TALHÃO</th><th>CULTURA</th><th>ÁREA (HA)</th><th>PLANTAS</th><th>CUSTO APLIC.</th><th>CUSTO CAIXA</th><th>CUSTO TOTAL</th><th>CUSTO/HA</th><th>RECEITA</th><th>RESULTADO</th><th>SACAS</th><th>CUSTO/SACA</th><th class="no-print" style="text-align:center;">AÇÕES</th></tr></thead>
+                    <tbody id="tbody_indicadores"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- ESTOQUE -->
     <div id="agri_est" class="tab">
         <div style="background: white; padding: 15px 25px; border-radius: var(--borda-raio); margin-bottom: 20px; box-shadow: var(--sombra-flat); display:flex; justify-content:space-between; align-items:center; border-left: 4px solid #f39c12;">
@@ -341,7 +407,6 @@
                 <h4 style="margin:0; color:#888; font-size: 11px;">VALOR TOTAL DO ESTOQUE</h4>
                 <span id="valor_total_estoque_header" style="font-size: 24px; font-family:'Rubik'; font-weight:700; color:#f39c12;">R$ 0,00</span>
             </div>
-            <button class="btn-salvar-compacto" style="background: #f39c12; height:fit-content;" onclick="document.getElementById('form_estoque').scrollIntoView();">➕ Novo Item</button>
         </div>
 
         <div class="linha-lancamento linha-agri-est no-print" id="form_estoque_container">
@@ -353,7 +418,8 @@
                 <div><label>Tipo</label><input type="text" id="est_tipo" list="lista-tipos" required autocomplete="off"></div>
                 <div><label>Qtd Inicial</label><input type="number" step="0.01" id="est_qtd" required></div>
                 <div><label>Unid</label><select id="est_un" required><option value="L">LITROS</option><option value="KG">QUILOS</option></select></div>
-                <div><label>$ Unitário</label><input type="number" step="0.01" id="est_valor_unit" required></div>
+                <div><label>$ Unitário (custo médio)</label><input type="number" step="0.01" id="est_valor_unit" required></div>
+                <div><label>Estoque Mínimo</label><input type="number" step="0.01" id="est_min" placeholder="0"></div>
                 <button type="submit" class="btn-salvar-compacto" style="background: #f39c12; padding: 12px;">Guardar</button>
             </form>
         </div>
@@ -361,7 +427,7 @@
             <table class="tabela-larga">
                 <thead>
                     <tr>
-                        <th>PRODUTO</th><th>PRINCÍPIO ATIVO</th><th>TIPO</th><th>QTD ESTOQUE</th><th>V. UNITÁRIO</th><th>VALOR TOTAL</th><th class="no-print" style="text-align: center;">AÇÕES</th>
+                        <th class="ordenavel" onclick="sortEstoque('produto')">PRODUTO ↕</th><th class="ordenavel" onclick="sortEstoque('principio')">PRINCÍPIO ATIVO ↕</th><th class="ordenavel" onclick="sortEstoque('tipo')">TIPO ↕</th><th class="ordenavel" onclick="sortEstoque('qtd')">QTD ESTOQUE ↕</th><th class="ordenavel" onclick="sortEstoque('valor_unit')">V. UNITÁRIO ↕</th><th class="ordenavel" onclick="sortEstoque('total')">VALOR TOTAL ↕</th><th class="no-print" style="text-align: center;">AÇÕES</th>
                     </tr>
                 </thead>
                 <tbody id="estoqueBody"></tbody>
