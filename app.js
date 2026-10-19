@@ -20,7 +20,6 @@ let estSortCol = 'produto', estSortAsc = true;
 let ultimaListaFiltrada = [];
 const categoriasInsumo = ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "FUNGICIDA", "HERBICIDA", "INSETICIDA", "INSUMOS"];
 
-// Setores do caixa diário que representam lavouras (entram no custo por talhão, além dos talhões cadastrados)
 const setoresLavoura = ["CAFÉ", "CAFÉ 01", "CAFÉ 02", "CAFÉ 03", "LAVOURAS", "MARACUJÁ"];
 
 /* =========================================================================
@@ -51,7 +50,6 @@ function strEscape(val) { const s = strSafe(val); return s.replace(/&/g, '&amp;'
 function parseNS(valStr) { if (!valStr || String(valStr).toLowerCase() === 'ns') return 0; let v = parseFloat(String(valStr).replace(',', '.')); return isNaN(v) ? 0 : v; }
 function safeVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 
-// CORREÇÃO CRÍTICA 1: O setVal não destruirá mais os seletores
 function setVal(id, valor) {
     const el = document.getElementById(id);
     if (el) {
@@ -145,7 +143,6 @@ function importarXMLDespesa(event) {
                     let vTot = parseFloat(prod.getElementsByTagName("vProd")[0] ? prod.getElementsByTagName("vProd")[0].textContent : 0);
                     let und = (prod.getElementsByTagName("uCom")[0] ? prod.getElementsByTagName("uCom")[0].textContent : "UN").toUpperCase();
 
-                    // Evita duplicar a mesma NF-e importada duas vezes
                     const jaExiste = transacoes.some(x => x && !x.deleted && x.obs === 'Importação Automática XML' && sanitizeDateString(x.data) === dataNF && x.local === fornecedor && x.desc === desc && parseFloat(x.valor) === vTot);
                     if (jaExiste) { repetidas++; continue; }
 
@@ -218,6 +215,46 @@ let hashAgri = a => `${sanitizeDateString(a.data)}_${strSafe(a.talhao)}_${strSaf
 let hashSolo = s => `${sanitizeDateString(s.data)}_${strSafe(s.talhao)}_${strSafe(s.prof)}`;
 let hashEstoque = e => `${strSafe(e.produto)}_${strSafe(e.un)}`;
 let hashChuva = c => sanitizeDateString(c.data);
+
+function unificarPorId(localArr, cloudArr, hashFn) {
+    const map = new Map();
+    const adicionar = item => {
+        if (!item) return;
+        if (!item.id) item.id = 'L' + djb2(hashFn(item));
+        const ex = map.get(item.id);
+        if (!ex || (item.updatedAt || 0) >= (ex.updatedAt || 0)) map.set(item.id, item);
+    };
+    (cloudArr || []).forEach(adicionar);
+    (localArr || []).forEach(adicionar);
+
+    const resultado = []; const legado = new Map();
+    map.forEach(item => {
+        if (String(item.id).startsWith('v2-')) { resultado.push(item); return; }
+        const h = hashFn(item); const ex = legado.get(h);
+        if (!ex) { legado.set(h, item); return; }
+        const ta = item.updatedAt || 0, tb = ex.updatedAt || 0;
+        legado.set(h, ta !== tb ? (ta > tb ? item : ex) : (item.deleted ? item : ex));
+    });
+    legado.forEach(i => resultado.push(i));
+
+    const limite = Date.now() - 90 * 86400000;
+    return resultado.filter(i => !(i.deleted && i.updatedAt && i.updatedAt < limite));
+}
+
+function garantirOpcoes() {
+    if (!opcoesDin || typeof opcoesDin !== 'object') opcoesDin = {};
+    ['talhoes', 'tipos', 'formas', 'alvos'].forEach(k => { if (!Array.isArray(opcoesDin[k])) opcoesDin[k] = []; });
+    if (!opcoesDin.talhoesInfo || typeof opcoesDin.talhoesInfo !== 'object') opcoesDin.talhoesInfo = {};
+}
+
+function mesclarOpcoes(op) {
+    if (!op) return; garantirOpcoes();
+    ['talhoes', 'tipos', 'formas', 'alvos'].forEach(k => { opcoesDin[k] = [...new Set([...(opcoesDin[k] || []), ...(op[k] || [])])].sort(); });
+    const info = op.talhoesInfo || {};
+    Object.keys(info).forEach(n => { const l = opcoesDin.talhoesInfo[n]; if (!l || (info[n].updatedAt || 0) > (l.updatedAt || 0)) opcoesDin.talhoesInfo[n] = info[n]; });
+}
+
+function djb2(str) { let h = 5381; for (let i = 0; i < str.length; i++) { h = ((h << 5) + h) + str.charCodeAt(i); h |= 0; } return (h >>> 0).toString(36); }
 
 async function carregarDadosNuvem() {
     const statusDiv = document.getElementById('status_conexao');
@@ -300,6 +337,71 @@ async function salvarDados() {
     }
 }
 
+function atualizarTudo() {
+    try { preencherSelectsLancamento(); popularSeletorSolo(); preencherSelectsSafraFin(); renderDatalistsAgri(); popularSeletorSafraApp(); atualizarOpcoesFiltros(); } catch (e) {}
+    try { atualizarAlertas(); } catch (e) {}
+}
+
+/* ---------- Backup ---------- */
+function baixarArquivo(nome, conteudo, mime) {
+    const blob = new Blob([conteudo], { type: mime });
+    const url = URL.createObjectURL(blob); const a = document.createElement('a');
+    a.href = url; a.download = nome; document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+}
+
+function exportarBackup() {
+    const payload = { versao: 2, exportadoEm: new Date().toISOString(), transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo, chuvas };
+    baixarArquivo(`rancho3c_backup_${hojeLocal()}.json`, JSON.stringify(payload, null, 1), 'application/json');
+    try { localStorage.setItem('rancho3c_ultimo_backup', String(Date.now())); } catch (e) {}
+    mostrarToast("Backup exportado!");
+}
+
+function importarBackup(event) {
+    const file = event.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const d = JSON.parse(e.target.result);
+            if (!d || typeof d !== 'object' || (!d.transacoes && !d.aplicacoes && !d.estoque)) throw new Error("Arquivo inválido");
+            if (!confirm("Mesclar este backup com os dados atuais?\n(Nada será apagado: registros iguais são unificados e o mais recente vence.)")) { event.target.value = ''; return; }
+            const arr = x => Array.isArray(x) ? x : Object.values(x || {});
+            transacoes = unificarPorId(transacoes, d.transacoes, hashTransacao);
+            agriRecords = unificarPorId(agriRecords, d.aplicacoes || d.agriRecords, hashAgri);
+            analisesSolo = unificarDados(analisesSolo, d.analises, hashSolo);
+            estoque = unificarDados(estoque, arr(d.estoque), hashEstoque);
+            chuvas = unificarDados(chuvas, d.chuvas, hashChuva);
+            mesclarOpcoes(d.opcoes);
+            salvarDados(); atualizarTudo(); showTab('home');
+            mostrarToast("Backup importado e mesclado!");
+        } catch (err) { alert("Não foi possível ler o backup: " + err.message); }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+}
+
+function verificarLembreteBackup() {
+    try {
+        if (!transacoes.length && !agriRecords.length) return;
+        const u = parseInt(localStorage.getItem('rancho3c_ultimo_backup') || '0', 10);
+        if (!u || Date.now() - u > 30 * 86400000) mostrarToast("Lembrete: faça um backup (menu lateral)");
+    } catch (e) {}
+}
+
+function exportarCaixaCSV() {
+    const lista = ultimaListaFiltrada || [];
+    if (!lista.length) { alert("Nada para exportar com os filtros atuais."); return; }
+    const num = v => { const n = parseFloat(v); return isNaN(n) ? '' : String(n).replace('.', ','); };
+    const txt = v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
+    const linhas = [['Data', 'Tipo', 'Categoria', 'Setor', 'Talhão', 'Local', 'Descrição', 'Qtd', 'Und', 'V.Unit', 'Total', 'Situação'].join(';')];
+    lista.forEach(t => {
+        const tal = strSafe(t.talhao) ? (strSafe(t.talhao2) ? `${t.talhao} (${t.pct}%) / ${t.talhao2}` : t.talhao) : '';
+        linhas.push([formatarData(t.data), t.tipo, t.categoria, t.setor, tal, t.local, t.desc].map(txt).concat([num(t.qtd), txt(t.und), num(t.v_unit), num(t.valor), txt(t.sit)]).join(';'));
+    });
+    baixarArquivo(`caixa_rancho3c_${hojeLocal()}.csv`, '﻿' + linhas.join('\r\n'), 'text/csv;charset=utf-8');
+    mostrarToast("Caixa exportado (CSV)!");
+}
+
 function showTab(id) {
     try {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -312,7 +414,7 @@ function showTab(id) {
         if(id === 'relatorios_detalhados') { atualizarRelatoriosDetalhados(); renderCascataCategorias(); }
         if(id === 'movimentacoes') { atualizarOpcoesFiltros(); aplicarFiltros(); }
         if(id === 'pendencias') { renderizarTabelasPendencias(); atualizarAlertas(); }
-        if(id === 'agri_app') aplicarFiltroSafraApp();
+        if(id === 'agri_app') saveAndRenderApp();
         if(id === 'agri_rel') popularFiltrosRelAgri();
         if(id === 'talhoes_main') renderTalhoes();
         if(id === 'agri_est') saveAndRenderEstoque();
@@ -611,8 +713,6 @@ function abrirDetalheCategoria(catEncoded, tipoFiltro) {
     renderCascataCategorias();
     renderCascataDescricao(catEncoded, tipoFiltro);
 }
-
-function switchTab(id) { showTab(id); }
 
 function mudarTemaSaida() {
     const select = document.getElementById('d_natureza'); const caixa = document.getElementById('caixa_lancamento_saida'); const titulo = document.getElementById('titulo_saida'); 
@@ -993,8 +1093,8 @@ function addAgriApp(e) {
         const ss = document.getElementById('safraSelector'); 
         if(ss) { ss.value = obterSafraGeral(record.data); }
         
-        aplicarFiltroSafraApp();
-        limparFiltrosAgri();
+        // CORREÇÃO: Aplica e recarrega a tabela respeitando os filtros, e não os limpa.
+        saveAndRenderApp();
         
         document.getElementById('appForm').reset(); 
         const st = document.getElementById('status'); 
@@ -1057,6 +1157,9 @@ function saveAndRenderApp() {
     });
     document.getElementById('tableBodyAgri').innerHTML = html || '<tr><td colspan="10" style="text-align:center; padding:30px; color:#aaa;">Nenhuma aplicação registada</td></tr>';
     updateFilterOptionsAgri(visibleRecords);
+    
+    // CORREÇÃO: Chama o filtro da tabela no final do Render, em vez de o limpar, para manter as pesquisas ativas.
+    filterAgriTable();
 }
 
 function addEstoque(e) {
@@ -1230,7 +1333,6 @@ function deleteEstoque(id) {
 }
 
 function updateFilterOptionsAgri(visibleRecords) {
-    // CORREÇÃO CRÍTICA 2: Ocultado o filtro de DATA da lista de iteração do HTML para não quebrar a caixa de input de Data
     const filters = [ { id: 'f_agri_talhao', k: 'talhao' }, { id: 'f_agri_produto', k: 'produto' }, { id: 'f_agri_tipo', k: 'tipo' }, { id: 'f_agri_alvo', k: 'alvo' }, { id: 'f_agri_forma', k: 'forma' }, { id: 'f_agri_status', k: 'status' } ];
     filters.forEach(f => { 
         const sel = document.getElementById(f.id); 
@@ -1254,17 +1356,12 @@ function limparFiltrosAgri() {
 
 function filterAgriTable() {
     const ids = ['f_agri_data','f_agri_talhao','f_agri_produto','f_agri_tipo','f_agri_alvo','','f_agri_forma','','f_agri_status'];
-    // Força tudo para maiúscula durante a leitura do filtro (evita falsos negativos do CSS)
     const fs = ids.map(id => { const el = document.getElementById(id); return el ? el.value.toUpperCase() : ""; });
-    
-    // CORREÇÃO CRÍTICA 3: Formata a data de pesquisa (AAAA-MM-DD) para combinar com a tabela da tela (DD/MM/AAAA)
     const dateFilter = fs[0] ? formatarData(fs[0]) : "";
 
     const rows = document.getElementById('tableBodyAgri').getElementsByTagName('tr');
     for (let i=0; i<rows.length; i++) {
         const cells = rows[i].getElementsByTagName('td'); 
-        
-        // Proteção anti-crash: Ignora a linha quando ela disser "Nenhuma aplicação registrada"
         if (cells.length < 9) continue; 
         
         const pTxt = cells[2].innerText.split('⚠️')[0].trim().toUpperCase();
@@ -1769,8 +1866,6 @@ function gerarRelatorioAgri() {
 ========================================================================= */
 function djb2(str) { let h = 5381; for (let i = 0; i < str.length; i++) { h = ((h << 5) + h) + str.charCodeAt(i); h |= 0; } return (h >>> 0).toString(36); }
 
-// Mescla por ID (última edição vence). Registros antigos sem ID ganham um ID estável derivado do conteúdo.
-// Registros antigos (sem prefixo v2-) com o mesmo conteúdo continuam sendo unificados, como antes.
 function unificarPorId(localArr, cloudArr, hashFn) {
     const map = new Map();
     const adicionar = item => {
@@ -1792,7 +1887,6 @@ function unificarPorId(localArr, cloudArr, hashFn) {
     });
     legado.forEach(i => resultado.push(i));
 
-    // Exclusões ficam registradas (para propagar entre aparelhos) e são limpas após 90 dias
     const limite = Date.now() - 90 * 86400000;
     return resultado.filter(i => !(i.deleted && i.updatedAt && i.updatedAt < limite));
 }
@@ -1925,7 +2019,6 @@ function nomesTalhaoSet() {
     return new Set([...(opcoesDin.talhoes || []), ...Object.keys(opcoesDin.talhoesInfo || {}), ...agriRecords.filter(r => r && !r.deleted && r.talhao && r.talhao !== '-').map(r => r.talhao), ...setoresLavoura].map(x => String(x).toUpperCase()));
 }
 
-// Divide o valor de um lançamento entre os talhões (campo Talhão; se vazio, usa o Setor quando ele for um talhão/lavoura)
 function alocacaoTalhao(t) {
     const v = parseFloat(t.valor) || 0;
     const t1 = strSafe(t.talhao).toUpperCase(); const t2 = strSafe(t.talhao2).toUpperCase();
