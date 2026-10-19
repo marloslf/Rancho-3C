@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Integrado Rancho 3C - Pro Edition</title>
-    <!-- Ligação com o arquivo de CSS separado -->
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
@@ -30,6 +29,8 @@
         <button id="btn_talhoes" onclick="showTab('talhoes_main')">🌾 Talhões</button>
         <button id="btn_solo" onclick="showTab('solo_main')">🧪 Solo & Nutrição</button>
         <button id="btn_chuvas" onclick="showTab('chuvas_main')">🌧️ Chuvas</button>
+        <div class="sidebar-group-title">Configurações</div>
+        <button id="btn_cadastros" onclick="showTab('cadastros_main')">⚙️ Cadastros Base</button>
     </div>
     <div class="sidebar-backup no-print">
         <button onclick="exportarBackup()" title="Baixa todos os dados em um arquivo JSON">💾 Exportar Backup</button>
@@ -129,51 +130,17 @@
 
     <!-- CAIXA Lançamentos -->
     <div id="movimentacoes" class="tab">
-        <div class="linha-lancamento linha-despesa no-print" id="caixa_lancamento_saida">
-            <div style="display:flex; justify-content:space-between; margin-bottom: 10px; align-items: center;">
-                <span style="font-size:14px; font-weight:700; color:var(--cor-laranja-flat); font-family: 'Rubik';" id="titulo_saida">🚜 INSERIR SAÍDA:
-                    <select id="d_natureza" onchange="mudarTemaSaida()" style="width:auto; margin-left:10px; padding: 4px 10px; color: var(--cor-laranja-flat); font-weight: 700; border: none; background: transparent;">
-                        <option value="Despesa">CUSTEIO</option><option value="Investimento">INVESTIMENTO</option>
-                    </select>
-                </span>
-                <div>
-                    <input type="file" id="xml_upload" accept=".xml" style="display:none;" onchange="importarXMLDespesa(event)">
-                    <button type="button" class="btn-salvar-compacto" style="background: var(--cor-azul-flat); font-size: 11px; padding: 8px 12px; font-family:'Rubik';" onclick="document.getElementById('xml_upload').click()">📥 Ler NF-e (XML)</button>
-                </div>
-            </div>
-            <form id="caixa_form_saida" class="grid-form" onsubmit="addTransacao(event, 'Saida')">
-                <div><label>Data</label><input type="date" id="d_data" required></div>
-                <div><label>Categoria</label><input list="lista_d_categoria" id="d_categoria" required autocomplete="off"></div>
-                <div><label>Setor</label><input list="lista_d_setor" id="d_setor" required autocomplete="off"></div>
-                <div><label>Talhão</label><input list="lista-talhoes" id="d_talhao" autocomplete="off"></div>
-                <div><label>% Talhão 1</label><input type="number" id="d_pct" min="1" max="99" step="1" placeholder="50" title="Só use se for ratear com o Talhão 2 (padrão 50%)"></div>
-                <div><label>Talhão 2 (resto)</label><input list="lista-talhoes" id="d_talhao2" autocomplete="off"></div>
-                <div><label>Fornecedor</label><input list="lista_d_local" id="d_local" required autocomplete="off"></div>
-                <div style="grid-column: span 2;"><label>Descrição</label><input list="lista_d_descricao" id="d_descricao" required autocomplete="off"></div>
-                <div><label>Qtd</label><input type="number" id="d_qtd" step="0.01" oninput="calcularTotalDespesa()"></div>
-                <div><label>Unid.</label><input type="text" id="d_und"></div>
-                <div><label>$ Unit</label><input type="number" id="d_v_unit" step="0.01" oninput="calcularTotalDespesa()"></div>
-                <div><label>$ Total</label><input type="number" id="d_valor" step="0.01" required></div>
-                <div><label>Situação</label><select id="d_sit"><option value="A pagar">A PAGAR</option><option value="Pago">PAGO</option></select></div>
-                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-laranja-flat); padding: 12px;">Gravar</button>
-            </form>
-        </div>
-
-        <div class="linha-lancamento linha-receita no-print">
-            <div style="font-size:14px; font-weight:700; color:var(--cor-verde-flat); margin-bottom: 10px; font-family: 'Rubik';">🌱 INSERIR RECEITA</div>
-            <form id="caixa_form_receita" class="grid-form" onsubmit="addTransacao(event, 'Receita')">
-                <div><label>Data</label><input type="date" id="r_data" required></div>
-                <div style="grid-column: span 2;"><label>O que vendeu?</label><input list="lista_r_categoria" id="r_categoria" required onblur="autoPreencherUnidade()" autocomplete="off"></div>
-                <div><label>Cliente</label><input list="lista_r_local" id="r_local" required autocomplete="off"></div>
-                <div><label>Talhão</label><input list="lista-talhoes" id="r_talhao" autocomplete="off"></div>
-                <div style="grid-column: span 2;"><label>Detalhes</label><input type="text" id="r_descricao" autocomplete="off"></div>
-                <div><label>Qtd</label><input type="number" id="r_qtd" step="0.01" oninput="calcularTotalReceita()"></div>
-                <div><label>Unid.</label><input type="text" id="r_und"></div>
-                <div><label>$ Unit</label><input type="number" id="r_v_unit" step="0.01" oninput="calcularTotalReceita()"></div>
-                <div><label>$ Total</label><input type="number" id="r_valor" step="0.01" required></div>
-                <div><label>Situação</label><select id="r_sit"><option value="A receber">A RECEBER</option><option value="Pago">PAGO</option></select></div>
-                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-verde-flat); padding: 12px;">Gravar</button>
-            </form>
+        
+        <!-- BOTOES GIGANTES DE AÇÃO -->
+        <div class="action-buttons-caixa no-print">
+            <button class="btn-huge" style="background-color: var(--cor-laranja-flat);" onclick="abrirModalNovoLancamento('Despesa')">
+                ➖ Lançar Saída (Custeio / Invest.)
+                <span>Abre janela restrita para registros</span>
+            </button>
+            <button class="btn-huge" style="background-color: var(--cor-verde-flat);" onclick="abrirModalNovoLancamento('Receita')">
+                ➕ Lançar Entrada (Receita)
+                <span>Abre janela restrita para registros</span>
+            </button>
         </div>
 
         <div class="filter-bar no-print">
@@ -208,11 +175,37 @@
         </div>
     </div>
 
+    <!-- TELA DE CADASTROS BASE -->
+    <div id="cadastros_main" class="tab">
+        <div class="sub-menu no-print">
+            <button id="btn_cad_cat" class="active" onclick="switchCadTab('cat')">Cat. Despesas</button>
+            <button id="btn_cad_setor" onclick="switchCadTab('setor')">Setores</button>
+            <button id="btn_cad_forn" onclick="switchCadTab('forn')">Fornecedores</button>
+            <button id="btn_cad_prod" onclick="switchCadTab('prod')">Produtos (Receita)</button>
+            <button id="btn_cad_cli" onclick="switchCadTab('cli')">Clientes</button>
+        </div>
+
+        <div class="widget-box">
+            <div class="widget-header" id="cad_titulo_aba">CADASTROS</div>
+            <form id="form_cadastros_base" class="grid-form" onsubmit="salvarCadastroBase(event)" style="margin-bottom: 20px;">
+                <input type="hidden" id="cad_tipo_atual" value="d_categorias">
+                <div style="grid-column: span 3;"><label id="cad_label_input">Nome do Item</label><input type="text" id="cad_novo_nome" required autocomplete="off" placeholder="Ex: ADUBO"></div>
+                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-sidebar);">➕ Cadastrar</button>
+            </form>
+            <div class="table-container" style="max-height: 400px;">
+                <table class="tabela-larga" style="min-width: unset;">
+                    <thead><tr><th id="cad_th_lista">ITENS CADASTRADOS</th><th style="width: 100px; text-align: center;">AÇÃO</th></tr></thead>
+                    <tbody id="tbody_cadastros"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- RELATÓRIOS DETALHADOS E CASCATA -->
     <div id="relatorios_detalhados" class="tab">
         <div class="sub-menu no-print">
             <button id="btn_rel_tabelas" class="active" onclick="switchRelTab('tabelas')">Tabelas Resumo</button>
-            <button id="btn_rel_cascata" onclick="switchRelTab('cascata')">🔍 Visão Detalhada (Cascata)</button>
+            <button id="btn_rel_cascata" onclick="switchRelTab('cascata')">🔍 Visão Detalhada Profunda</button>
         </div>
 
         <div class="filter-bar no-print">
@@ -234,28 +227,17 @@
             </div>
         </div>
 
-        <!-- ABA 2: Visão Cascata -->
+        <!-- ABA 2: Visão Cascata N-Levels -->
         <div id="rel_view_cascata" class="sub-tab">
-            <div class="filter-bar" style="background:#f9f9f9; border-left: 4px solid var(--cor-azul-flat);">
-                <label style="font-weight: 700; font-size:12px;">1. SELECIONE O TIPO:</label>
-                <select id="cascata_tipo" onchange="renderCascataCategorias()" style="width:250px;">
-                    <option value="Despesa">Custeio (Despesas)</option>
-                    <option value="Receita">Receitas</option>
-                    <option value="Investimento">Investimentos</option>
-                </select>
-                <span style="margin-left: auto; font-size:18px; font-family:'Rubik'; font-weight:700; color:var(--cor-texto);" id="cascata_total_geral">R$ 0,00</span>
+            <div class="filter-bar" style="background:#f9f9f9; border-left: 4px solid var(--cor-azul-flat); justify-content:space-between;">
+                <div id="cascata_breadcrumbs" class="breadcrumb-cascata"></div>
+                <span style="font-size:18px; font-family:'Rubik'; font-weight:700; color:var(--cor-texto);" id="cascata_total_geral">R$ 0,00</span>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+            <div style="display: grid; grid-template-columns: 1fr; gap: 40px;">
                 <div>
-                    <h4 style="color: #666; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom:5px;">2. Categorias (Clique para detalhar)</h4>
+                    <h4 style="color: #666; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom:5px;" id="cascata_titulo_lista">Selecione o Tipo</h4>
                     <ul id="lista_cascata_cat" style="padding-left: 0;"></ul>
-                </div>
-                <div>
-                    <h4 style="color: #666; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom:5px;">3. Detalhamento dos Itens</h4>
-                    <ul id="lista_cascata_desc" style="padding-left: 0; background: #fff; padding: 20px; border-radius: var(--borda-raio); border: 1px solid #eee;">
-                        <li style="list-style:none; color:#aaa; font-style:italic;">Selecione uma categoria ao lado...</li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -304,7 +286,7 @@
             <form id="appForm" class="grid-form" onsubmit="addAgriApp(event)">
                 <input type="hidden" id="editAgriIndex" value="">
                 <div><label>Data</label><input type="date" id="dataApp" required></div>
-                <div><label>Talhão</label><input type="text" id="talhao" list="lista-talhoes" required autocomplete="off"></div>
+                <div><label>Talhão</label><select id="talhao" required></select></div>
                 <div style="grid-column: span 2;" class="campo-sugestao"><label>Produto</label>
                     <input type="text" id="produto" required autocomplete="off" placeholder="DIGITE OU ESCOLHA DO ESTOQUE" oninput="preencherTipoProduto(); mostrarSugestoesProduto()" onfocus="mostrarSugestoesProduto()" onclick="mostrarSugestoesProduto()" onblur="setTimeout(esconderSugestoesProduto, 150)">
                     <div id="sug_produto" class="lista-sugestoes"></div>
@@ -377,7 +359,7 @@
         <div class="linha-lancamento no-print" style="border-left-color: var(--cor-verde-flat);">
             <div style="font-size:14px; font-weight:700; color:var(--cor-verde-flat); margin-bottom: 10px; font-family:'Rubik';">🌾 CADASTRO DE TALHÃO</div>
             <form id="form_talhao" class="grid-form" onsubmit="salvarTalhao(event)">
-                <div style="grid-column: span 2;"><label>Talhão</label><input type="text" id="tl_nome" list="lista-talhoes" required autocomplete="off"></div>
+                <div style="grid-column: span 2;"><label>Talhão (Nome)</label><input type="text" id="tl_nome" required autocomplete="off"></div>
                 <div><label>Cultura</label><select id="tl_cultura"><option value="conilon">Conilon</option><option value="maracuja">Maracujá</option></select></div>
                 <div><label>Área (ha)</label><input type="number" step="0.01" id="tl_area" required></div>
                 <div><label>Nº de Plantas</label><input type="number" step="1" id="tl_plantas"></div>
@@ -457,7 +439,7 @@
                     <input type="hidden" id="sl_id" value="">
                     <div class="grid-form" style="margin-bottom: 25px;">
                         <div><label>DATA DA ANÁLISE</label><input type="date" id="sl_data" required></div>
-                        <div style="grid-column: span 2;"><label>TALHÃO / CULTURA</label><input type="text" id="sl_talhao" list="lista-talhoes" placeholder="EX: CAFÉ 2022" required autocomplete="off"></div>
+                        <div style="grid-column: span 2;"><label>TALHÃO / CULTURA</label><select id="sl_talhao" required></select></div>
                         <div><label>PROFUNDIDADE / TIPO</label>
                             <select id="sl_prof" required><option value="0-20">Camada 0 - 20 cm</option><option value="20-40">Camada 20 - 40 cm</option><option value="Foliar">Análise Foliar</option></select>
                         </div>
@@ -669,7 +651,61 @@
 
 </div> <!-- FIM MAIN CONTENT -->
 
-<!-- Modais -->
+<!-- Modais Restritos -->
+<div id="modal-novo-lancamento">
+    <div class="modal-content" style="max-width: 800px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #eee; padding-bottom:15px; margin-bottom: 20px;">
+            <h3 style="margin: 0; color: var(--cor-texto);" id="md_titulo">Lançamento</h3>
+            <div>
+                <input type="file" id="xml_upload" accept=".xml" style="display:none;" onchange="importarXMLDespesa(event)">
+                <button type="button" class="btn-salvar-compacto" style="background: var(--cor-azul-flat); font-size: 11px; padding: 8px 12px; font-family:'Rubik';" onclick="document.getElementById('xml_upload').click()">📥 Ler NF-e (XML)</button>
+            </div>
+        </div>
+        
+        <form id="form_novo_lancamento" class="grid-form" onsubmit="addTransacaoModal(event)">
+            <input type="hidden" id="md_tipo_operacao" value="">
+            
+            <div style="grid-column: span 1;"><label>Data</label><input type="date" id="md_data" required></div>
+            
+            <div style="grid-column: span 1;" id="div_md_natureza"><label>Natureza da Saída</label>
+                <select id="md_natureza">
+                    <option value="Despesa">Custeio (Despesa)</option>
+                    <option value="Investimento">Investimento</option>
+                </select>
+            </div>
+
+            <!-- Campos Restritos (Selects em vez de Inputs) -->
+            <div style="grid-column: span 2;"><label id="lbl_md_categoria">Categoria</label><select id="md_categoria" required></select></div>
+            <div style="grid-column: span 2;" id="div_md_setor"><label>Setor</label><select id="md_setor"></select></div>
+            <div style="grid-column: span 2;" id="div_md_talhao"><label>Talhão</label><select id="md_talhao"><option value="">- NENHUM -</option></select></div>
+            <div style="grid-column: span 2;" id="div_md_local"><label id="lbl_md_local">Fornecedor</label><select id="md_local" required></select></div>
+            
+            <!-- Rateio (Só Despesa) -->
+            <div style="grid-column: span 1;" id="div_md_pct"><label>% Talhão 1</label><input type="number" id="md_pct" min="1" max="99" step="1" placeholder="50"></div>
+            <div style="grid-column: span 1;" id="div_md_talhao2"><label>Talhão 2</label><select id="md_talhao2"><option value="">- NENHUM -</option></select></div>
+            
+            <div style="grid-column: span 4;"><label>Descrição Adicional do Item</label><input type="text" id="md_descricao" required autocomplete="off" placeholder="Descreva o que foi comprado ou vendido"></div>
+            
+            <div><label>Qtd</label><input type="number" id="md_qtd" step="0.01" oninput="calcularTotalModal()"></div>
+            <div><label>Unid.</label><input type="text" id="md_und"></div>
+            <div><label>$ Unit</label><input type="number" id="md_v_unit" step="0.01" oninput="calcularTotalModal()"></div>
+            <div><label>$ Total</label><input type="number" id="md_valor" step="0.01" required></div>
+            
+            <div style="grid-column: span 2;"><label>Situação</label>
+                <select id="md_sit">
+                    <option value="Pago">PAGO</option>
+                    <option value="A pagar" id="opt_pendente">A PAGAR / A RECEBER</option>
+                </select>
+            </div>
+
+            <div style="grid-column: span 4; display:flex; gap:10px; margin-top: 15px;">
+                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-laranja-flat); flex: 1;" id="btn_salvar_modal">Gravar</button>
+                <button type="button" class="btn-limpar" style="width:auto;" onclick="document.getElementById('modal-novo-lancamento').style.display = 'none';">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div id="modal-grafico-detalhado">
     <div class="modal-grafico-content">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom:15px; margin-bottom: 15px;">
@@ -693,13 +729,6 @@
 
 <div id="toast" class="toast">Sucesso!</div>
 
-<datalist id="lista-talhoes"></datalist><datalist id="lista-tipos"></datalist><datalist id="lista-formas"></datalist>
-<datalist id="lista-alvos"></datalist><datalist id="lista-produtos-estoque"></datalist>
-<datalist id="lista_d_categoria"></datalist><datalist id="lista_d_setor"></datalist>
-<datalist id="lista_d_local"></datalist><datalist id="lista_d_descricao"></datalist>
-<datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
-
-<!-- AQUI É O SEGREDO: Em vez de duplicar 800 linhas, agora basta isso! -->
 <script src="app.js"></script>
 
 </body>
