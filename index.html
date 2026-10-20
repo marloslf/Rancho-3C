@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Integrado Rancho 3C - Pro Edition</title>
+    <title>Sistema Integrado Rancho 3C</title>
+    <!-- Ligação com o arquivo de CSS separado -->
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
@@ -17,30 +18,21 @@
     </div>
     <div class="sidebar-menu">
         <button id="btn_home" class="btn-ativo" onclick="showTab('home')">🏠 Início</button>
-        
+        <button id="btn_cadastros" onclick="showTab('cadastros_main')">📝 Cadastros</button>
         <div class="sidebar-group-title">Financeiro</div>
-        <button id="btn_resumo" onclick="showTab('resumo')">📊 Dash. Finanças</button>
+        <button id="btn_resumo" onclick="showTab('resumo')">📊 Painel Financeiro</button>
         <button id="btn_movimentacoes" onclick="showTab('movimentacoes')">📋 Caixa Diário</button>
         <button id="btn_relatorios_detalhados" onclick="showTab('relatorios_detalhados')">📈 Relatórios</button>
         <button id="btn_pendencias" onclick="showTab('pendencias')">🔔 Pendências <span id="badge_atrasadas" class="badge-atrasadas" style="display: none;">0</span></button>
-        
         <div class="sidebar-group-title">Agrícola</div>
-        <button id="btn_agri_dash" onclick="showTab('agri_dash')">📊 Dash. Agrícola</button>
+        <button id="btn_agri_dash" onclick="showTab('agri_dash')">📊 Painel Agrícola</button>
         <button id="btn_agri_app" onclick="showTab('agri_app')">🚜 Aplicações</button>
         <button id="btn_agri_est" onclick="showTab('agri_est')">📦 Estoque <span id="badge_estoque" class="badge-atrasadas" style="display: none;">0</span></button>
         <button id="btn_talhoes" onclick="showTab('talhoes_main')">🌾 Talhões</button>
         <button id="btn_solo" onclick="showTab('solo_main')">🧪 Solo & Nutrição</button>
         <button id="btn_chuvas" onclick="showTab('chuvas_main')">🌧️ Chuvas</button>
-
-        <div class="sidebar-group-title">Sistema</div>
-        <button id="btn_cadastros" onclick="showTab('cadastros_main')">⚙️ Cadastros Base</button>
     </div>
-    <div class="sidebar-backup no-print">
-        <button onclick="exportarBackup()">💾 Exportar Backup</button>
-        <button onclick="document.getElementById('backup_upload').click()">📂 Importar Backup</button>
-        <input type="file" id="backup_upload" accept=".json" style="display:none;" onchange="importarBackup(event)">
-    </div>
-    <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem()">⏳ Inicializando...</button>
+    <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem()" title="Forçar Sincronização">⏳ Inicializando...</button>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -59,52 +51,85 @@
         </div>
     </div>
 
-    <!-- TELA: CADASTROS BASE -->
-    <div id="cadastros_main" class="tab">
-        <h2 style="font-family: 'Rubik'; margin-bottom: 20px;">⚙️ CADASTROS BASE</h2>
-        <div class="sub-menu no-print">
-            <button id="btn_cad_cat_despesa" class="active" onclick="mudarAbaCadastro('cat_despesa')">Cat. Despesa</button>
-            <button id="btn_cad_setor" onclick="mudarAbaCadastro('setor')">Setores</button>
-            <button id="btn_cad_fornecedor" onclick="mudarAbaCadastro('fornecedor')">Fornecedores</button>
-            <button id="btn_cad_produto" onclick="mudarAbaCadastro('produto')">Produtos (Receita)</button>
-            <button id="btn_cad_cliente" onclick="mudarAbaCadastro('cliente')">Clientes</button>
+    <!-- MÓDULO DE CHUVAS -->
+    <div id="chuvas_main" class="tab">
+        <div class="linha-lancamento linha-chuva no-print">
+            <div style="font-size:14px; font-weight:700; color:var(--cor-azul-flat); margin-bottom: 10px; font-family:'Rubik';">🌧️ REGISTRAR CHUVA (PLUVIOMETRIA DIÁRIA)</div>
+            <form id="form_chuva" class="grid-form" onsubmit="addChuva(event)">
+                <input type="hidden" id="cv_id" value="">
+                <div><label>Data</label><input type="date" id="cv_data" required></div>
+                <div><label>Volume Diário (mm)</label><input type="number" step="0.1" id="cv_mm" required placeholder="Ex: 15.5"></div>
+                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-azul-flat); padding: 12px;">Gravar Chuva</button>
+            </form>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
-            <div class="widget-box" style="border-top: 4px solid var(--cor-sidebar);">
-                <div class="widget-header"><span id="cad_titulo_form">Nova Categoria</span></div>
-                <form id="form_cadastros" onsubmit="adicionarCadastroBase(event); return false;">
-                    <div style="margin-bottom: 15px;">
-                        <label style="display:block; font-size:11px; font-weight:700; margin-bottom:5px; color:#888;">NOME DO ITEM</label>
-                        <input type="text" id="cad_nome_item" required autocomplete="off" placeholder="Ex: MANUTENÇÃO">
-                    </div>
-                    <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-sidebar); width: 100%;">💾 Gravar Item</button>
-                </form>
+        <div class="filter-bar no-print">
+            <label style="font-weight: 700; font-size:12px;">COMPARATIVO DE CHUVAS NO MÊS:</label>
+            <select id="filtro_mes_chuva" onchange="renderChartChuvas()" style="width:200px; margin-left:15px;">
+                <option value="01">Janeiro</option> <option value="02">Fevereiro</option> <option value="03">Março</option>
+                <option value="04">Abril</option> <option value="05">Maio</option> <option value="06">Junho</option>
+                <option value="07">Julho</option> <option value="08">Agosto</option> <option value="09">Setembro</option>
+                <option value="10">Outubro</option> <option value="11">Novembro</option> <option value="12">Dezembro</option>
+            </select>
+        </div>
+
+        <div class="widget-box">
+            <div class="widget-header" style="border-bottom: 2px solid var(--cor-azul-flat); color: var(--cor-azul-flat);">
+                Evolução Diária (Anos Anteriores vs Atual)
             </div>
-            
-            <div class="widget-box" style="padding:0; overflow:hidden;">
-                <div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;" id="cad_titulo_lista">Lista de Itens Cadastrados</div>
-                <div class="table-container" style="box-shadow:none; border-radius:0;">
-                    <table>
-                        <thead><tr><th>NOME REGISTRADO</th><th style="text-align: center; width:100px;">AÇÃO</th></tr></thead>
-                        <tbody id="tbody_cadastros_base"></tbody>
-                    </table>
-                </div>
+            <div class="grafico-container"><canvas id="chartChuvas"></canvas></div>
+        </div>
+
+        <div class="widget-box" style="padding:0; overflow:hidden;">
+            <div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">📋 HISTÓRICO DE LANÇAMENTOS</div>
+            <div class="table-container" style="box-shadow:none; border-radius:0;">
+                <table>
+                    <thead><tr><th>DATA</th><th>VOLUME (mm)</th><th style="text-align:center;" class="no-print">AÇÕES</th></tr></thead>
+                    <tbody id="tbody_chuvas"></tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- CAIXA Lançamentos (Modificado para Botões) -->
-    <div id="movimentacoes" class="tab">
+    <!-- MÓDULO FINANCEIRO (DASHBOARD) -->
+    <div id="resumo" class="tab">
+        <div class="filter-bar no-print">
+            <div><label style="font-size:11px; font-weight:700; color:#888;">SAFRA:</label> <select id="filtro_safra_dashboard" onchange="atualizarResumoEGrafico()" style="width: auto; margin-left: 5px;"><option value="">TODAS</option></select></div>
+            <div><label style="font-size:11px; font-weight:700; color:#888; margin-left:15px;">MÊS:</label> <input type="month" id="filtro_mes_dashboard" onchange="atualizarResumoEGrafico()" style="width: auto; margin-left: 5px;"></div>
+            <button onclick="setVal('filtro_safra_dashboard', ''); setVal('filtro_mes_dashboard', ''); atualizarResumoEGrafico()" class="btn-limpar" style="margin-left:auto;">LIMPAR FILTROS</button>
+        </div>
+
+        <div class="resumo-cards">
+            <div class="card card-receita"><h4>Receitas Totais</h4><span id="res_receitas">R$ 0,00</span></div>
+            <div class="card card-despesa"><h4>Custeio (Despesas)</h4><span id="res_despesas">R$ 0,00</span></div>
+            <div class="card card-investimento" style="background-color: var(--cor-azul-flat);"><h4>Investimentos</h4><span id="res_investimentos">R$ 0,00</span></div>
+            <div class="card card-saldo" id="card_saldo_div" style="background-color: #34495e;"><h4>Saldo em Caixa</h4><span id="res_saldo">R$ 0,00</span></div>
+        </div>
         
-        <!-- Botões 35% menores substituindo os formulários abertos -->
-        <div style="display: flex; gap: 15px; margin-bottom: 20px;" class="no-print">
-            <button onclick="abrirModalNovaSaida()" class="btn-salvar-compacto" style="background: var(--cor-laranja-flat); padding: 8px 15px; font-size: 11px;">➕ NOVA DESPESA / INVEST.</button>
-            <button onclick="abrirModalNovaReceita()" class="btn-salvar-compacto" style="background: var(--cor-verde-flat); padding: 8px 15px; font-size: 11px;">➕ NOVA RECEITA</button>
-            <div style="margin-left: auto;">
-                <input type="file" id="xml_upload" accept=".xml" style="display:none;" onchange="importarXMLDespesa(event)">
-                <button type="button" class="btn-salvar-compacto" style="background: var(--cor-azul-flat); font-size: 11px; padding: 8px 15px;" onclick="document.getElementById('xml_upload').click()">📥 Ler NF-e (XML)</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div class="widget-box"><div class="widget-header">Saídas Efetivadas</div><div class="grafico-container"><canvas id="canvas_caixa"></canvas></div></div>
+            <div class="widget-box"><div class="widget-header">Previsão (Pendentes)</div><div class="grafico-container"><canvas id="canvas_pendente"></canvas></div></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="widget-box" style="border-top: 4px solid var(--cor-verde-flat);">
+                <div class="widget-header verde" style="border:none;">Maiores Receitas (Categorias)</div>
+                <ul id="lista_top_receitas" style="padding-left: 0; margin-top: 10px;"></ul>
             </div>
+            <div class="widget-box" style="border-top: 4px solid var(--cor-laranja-flat);">
+                <div class="widget-header laranja" style="border:none;">Maiores Saídas (Setor)</div>
+                <ul id="lista_top_despesas" style="padding-left: 0; margin-top: 10px;"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- CAIXA Lançamentos -->
+    <div id="movimentacoes" class="tab">
+        <div class="barra-acoes-caixa no-print">
+            <button class="btn-novo-lanc btn-novo-despesa" onclick="abrirModalLancamento('despesa')">➖ Nova Saída <small>(Custeio / Investimento)</small></button>
+            <button class="btn-novo-lanc btn-novo-receita" onclick="abrirModalLancamento('receita')">➕ Nova Receita</button>
+            <span style="flex-grow:1;"></span>
+            <button class="btn-limpar" style="background: var(--cor-sidebar);" onclick="showTab('cadastros_main')" title="Categorias, setores, talhões, fornecedores, produtos e clientes">📝 Cadastros</button>
         </div>
 
         <div class="filter-bar no-print">
@@ -121,8 +146,8 @@
             <table class="tabela-larga">
                 <thead>
                     <tr>
-                        <th onclick="setOrdenacao('data')">DATA ↕</th><th onclick="setOrdenacao('tipo')">TIPO ↕</th><th onclick="setOrdenacao('categoria')">CATEGORIA ↕</th>
-                        <th onclick="setOrdenacao('setor')">SETOR ↕</th><th onclick="setOrdenacao('talhao')">TALHÃO ↕</th><th onclick="setOrdenacao('local')">LOCAL/CLIENTE ↕</th><th onclick="setOrdenacao('desc')">DESCRIÇÃO ↕</th>
+                        <th onclick="setOrdenacao('data')">DATA ↕</th><th onclick="setOrdenacao('tipo')">TIPO ↕</th><th onclick="setOrdenacao('categoria')">CATEGORIA / PRODUTO ↕</th>
+                        <th onclick="setOrdenacao('setor')">SETOR ↕</th><th onclick="setOrdenacao('talhao')">TALHÃO ↕</th><th onclick="setOrdenacao('local')">FORNECEDOR / CLIENTE ↕</th><th onclick="setOrdenacao('desc')">DESCRIÇÃO ↕</th>
                         <th onclick="setOrdenacao('qtd')">QTD ↕</th><th onclick="setOrdenacao('v_unit')">V. UNIT ↕</th><th onclick="setOrdenacao('valor')">TOTAL ↕</th>
                         <th onclick="setOrdenacao('sit')" style="text-align: center;">SITUAÇÃO ↕</th><th class="no-print" style="text-align: center;">AÇÕES</th>
                     </tr>
@@ -139,11 +164,11 @@
         </div>
     </div>
 
-    <!-- TELA: RELATÓRIOS DETALHADOS E CASCATA -->
+    <!-- RELATÓRIOS DETALHADOS E CASCATA -->
     <div id="relatorios_detalhados" class="tab">
         <div class="sub-menu no-print">
             <button id="btn_rel_tabelas" class="active" onclick="switchRelTab('tabelas')">Tabelas Resumo</button>
-            <button id="btn_rel_cascata" onclick="switchRelTab('cascata')">🔍 Visão Detalhada (Cascata Profunda)</button>
+            <button id="btn_rel_cascata" onclick="switchRelTab('cascata')">🔍 Visão Detalhada (Cascata)</button>
         </div>
 
         <div class="filter-bar no-print">
@@ -156,9 +181,8 @@
 
         <!-- ABA 1: Tabelas Normais -->
         <div id="rel_view_tabelas" class="sub-tab active">
-            <!-- (Mantido o código original das tabelas resumo) -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                <div class="widget-box" style="padding:0; overflow:hidden; border-top: 4px solid var(--cor-verde-flat);"><div class="widget-header" style="padding: 15px; margin:0; border:none; background:#f9f9f9; color: var(--cor-verde-flat);">🌱 RECEITAS / PRODUTO</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><tbody id="tbody_receitas_categoria"></tbody></table></div></div>
+                <div class="widget-box" style="padding:0; overflow:hidden; border-top: 4px solid var(--cor-verde-flat);"><div class="widget-header" style="padding: 15px; margin:0; border:none; background:#f9f9f9; color: var(--cor-verde-flat);">🌱 RECEITAS / CATEGORIA</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><tbody id="tbody_receitas_categoria"></tbody></table></div></div>
                 <div class="widget-box" style="padding:0; overflow:hidden; border-top: 4px solid #16a085;"><div class="widget-header" style="padding: 15px; margin:0; border:none; background:#f9f9f9; color: #16a085;">🤝 RECEITAS / CLIENTE</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><tbody id="tbody_receitas_local"></tbody></table></div></div>
                 <div class="widget-box" style="padding:0; overflow:hidden; border-top: 4px solid #f39c12;"><div class="widget-header" style="padding: 15px; margin:0; border:none; background:#f9f9f9; color: #f39c12;">🏷️ DESPESAS / CATEGORIA</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><tbody id="tbody_gastos_categoria"></tbody></table></div></div>
                 <div class="widget-box" style="padding:0; overflow:hidden; border-top: 4px solid var(--cor-laranja-flat);"><div class="widget-header" style="padding: 15px; margin:0; border:none; background:#f9f9f9; color: var(--cor-laranja-flat);">🚜 DESPESAS / SETOR</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><tbody id="tbody_gastos_setor"></tbody></table></div></div>
@@ -166,11 +190,11 @@
             </div>
         </div>
 
-        <!-- ABA 2: Visão Cascata (Atualizada para Profundidade) -->
+        <!-- ABA 2: Visão Cascata -->
         <div id="rel_view_cascata" class="sub-tab">
             <div class="filter-bar" style="background:#f9f9f9; border-left: 4px solid var(--cor-azul-flat);">
-                <label style="font-weight: 700; font-size:12px;">INICIAR ANÁLISE POR TIPO:</label>
-                <select id="cascata_tipo" onchange="resetarCascata()" style="width:250px;">
+                <label style="font-weight: 700; font-size:12px;">1. SELECIONE O TIPO:</label>
+                <select id="cascata_tipo" onchange="renderCascataCategorias()" style="width:250px;">
                     <option value="Despesa">Custeio (Despesas)</option>
                     <option value="Receita">Receitas</option>
                     <option value="Investimento">Investimentos</option>
@@ -178,35 +202,505 @@
                 <span style="margin-left: auto; font-size:18px; font-family:'Rubik'; font-weight:700; color:var(--cor-texto);" id="cascata_total_geral">R$ 0,00</span>
             </div>
 
-            <div class="widget-box" style="margin-bottom: 20px;">
-                <!-- Breadcrumbs (Caminho) para mostrar onde o usuário está -->
-                <div id="cascata_breadcrumb" style="font-size: 13px; font-weight: 700; color: #888; margin-bottom: 15px;"></div>
+            <div class="cascata-ajuda">Clique em um item para abrir o nível seguinte. Os níveis aparecem conforme houver informações e a lista avança para a direita. Clique novamente no item marcado para voltar.</div>
+            <div id="cascata_niveis" class="cascata-niveis"></div>
+        </div>
+    </div>
+
+    <!-- Pendências -->
+    <div id="pendencias" class="tab">
+        <h2 style="font-family: 'Rubik'; margin-bottom: 20px;">CONTAS PENDENTES</h2>
+        <div class="resumo-cards" id="alertas_pendencias"></div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px;">
+            <div class="widget-box" style="padding:0; border-top: 4px solid var(--cor-azul-flat);"><div class="widget-header" style="padding: 15px; margin:0; border:none; background:#f9f9f9; color: var(--cor-azul-flat);">⏳ A RECEBER</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><thead><tr><th>DATA</th><th>CLIENTE</th><th style="text-align: right;">VALOR</th><th style="text-align: center;">AÇÃO</th></tr></thead><tbody id="tbody_receitas_pendentes"></tbody></table></div></div>
+            <div class="widget-box" style="padding:0; border-top: 4px solid var(--cor-vermelho-flat);"><div class="widget-header" style="padding: 15px; margin:0; border:none; background:#f9f9f9; color: var(--cor-vermelho-flat);">⏳ A PAGAR</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><thead><tr><th>DATA</th><th>FORNECEDOR</th><th style="text-align: right;">VALOR</th><th style="text-align: center;">AÇÃO</th></tr></thead><tbody id="tbody_despesas_pendentes"></tbody></table></div></div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MÓDULO AGRÍCOLA                            -->
+    <!-- ========================================== -->
+    <div id="agri_dash" class="tab">
+        <div class="filter-bar no-print">
+            <label style="font-weight: 700; font-size:12px;">SAFRA:</label>
+            <select id="safraDashboardSelector" onchange="renderAgriDashboard()" style="width:200px; margin-left:5px;"><option value="TODAS">TODAS AS SAFRAS</option></select>
+            
+            <label style="font-weight: 700; font-size:12px; margin-left:15px;">VISÃO GERAL DO TALHÃO:</label>
+            <select id="talhaoDashboardSelector" onchange="renderAgriDashboard()" style="width:250px; margin-left:5px;"></select>
+        </div>
+
+        <div class="resumo-cards">
+            <div class="card" style="background-color: var(--cor-azul-flat);"><h4>Total Aplicado</h4><span id="kpi-aplicado">R$ 0,00</span></div>
+            <div class="card" style="background-color: #f39c12;"><h4>Total Planejado</h4><span id="kpi-planejado">R$ 0,00</span></div>
+            <div class="card" style="background-color: var(--cor-roxo-flat);"><h4>Patrimônio Estoque</h4><span id="kpi-estoque">R$ 0,00</span></div>
+            <div class="card" style="background-color: #16a085;"><h4>Registros na Safra</h4><span id="kpi-registros">0</span></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="widget-box"><div class="widget-header">Distribuição (Vol.)</div><div class="grafico-container"><canvas id="chartTalhao"></canvas></div></div>
+            <div class="widget-box"><div class="widget-header">Tipos de Produto</div><div class="grafico-container"><canvas id="chartTipo"></canvas></div></div>
+            <div class="widget-box"><div class="widget-header">Custo por Safra</div><div class="grafico-container"><canvas id="chartCustoSafra"></canvas></div></div>
+            <div class="widget-box"><div class="widget-header">Custo por Talhão</div><div class="grafico-container"><canvas id="chartCustoTalhao"></canvas></div></div>
+        </div>
+    </div>
+
+    <div id="agri_app" class="tab">
+        <div class="linha-lancamento linha-agri-app no-print">
+            <div style="font-size:14px; font-weight:700; color:var(--cor-azul-flat); margin-bottom: 10px; font-family:'Rubik';">🚜 NOVO REGISTRO DE APLICAÇÃO</div>
+            <form id="appForm" class="grid-form" onsubmit="addAgriApp(event)">
+                <input type="hidden" id="editAgriIndex" value="">
+                <div><label>Data</label><input type="date" id="dataApp" required></div>
+                <div><label>Talhão</label><input type="text" id="talhao" list="lista-talhoes" required autocomplete="off"></div>
+                <div style="grid-column: span 2;" class="campo-sugestao"><label>Produto</label>
+                    <input type="text" id="produto" required autocomplete="off" placeholder="DIGITE OU ESCOLHA DO ESTOQUE" oninput="preencherTipoProduto(); mostrarSugestoesProduto()" onfocus="mostrarSugestoesProduto()" onclick="mostrarSugestoesProduto()" onblur="setTimeout(esconderSugestoesProduto, 150)">
+                    <div id="sug_produto" class="lista-sugestoes"></div>
+                </div>
+                <div><label>Tipo</label><input type="text" id="tipo" list="lista-tipos" required autocomplete="off"></div>
+                <div><label>Alvo</label><input type="text" id="alvo" list="lista-alvos" autocomplete="off"></div>
+                <div><label>Qtd</label><input type="number" step="0.01" id="dosagem_qtd" required></div>
+                <div><label>Unid</label><select id="dosagem_un" required><option value="L">LITROS</option><option value="KG">QUILOS</option></select></div>
+                <div><label>Forma</label><input type="text" id="forma" list="lista-formas" required autocomplete="off"></div>
+                <div><label>Situação</label><select id="status" required><option value="PLANEJADO">PLANEJADO</option><option value="APLICADO">APLICADO</option></select></div>
+                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-azul-flat); padding: 12px;">Gravar</button>
+            </form>
+        </div>
+        
+        <div class="filter-bar no-print">
+            <label style="font-weight: 700; font-size:12px;">CRONOGRAMA GERAL (SAFRA):</label>
+            <select id="safraSelector" onchange="aplicarFiltroSafraApp()" style="width:200px; margin-left:15px;"></select>
+            <span style="flex-grow: 1;"></span>
+            <button onclick="fixarCustosAntigos()" class="btn-limpar" style="background: #7f8c8d;" title="Fixa o custo das aplicações já realizadas com o preço atual do estoque">🔒 Fixar custos antigos</button>
+            <button onclick="showTab('agri_rel')" class="btn-salvar-compacto" style="background: var(--cor-sidebar);">📄 Relatório por Período</button>
+            <button onclick="limparFiltrosAgri()" class="btn-limpar">🧹 Limpar Filtros</button>
+        </div>
+
+        <div class="table-container">
+            <table class="tabela-larga">
+                <thead>
+                    <tr>
+                        <th onclick="sortAgriTable(0)">DATA ↕</th><th onclick="sortAgriTable(1)">TALHÃO ↕</th><th onclick="sortAgriTable(2)">PRODUTO ↕</th>
+                        <th onclick="sortAgriTable(3)">TIPO ↕</th><th onclick="sortAgriTable(4)">ALVO ↕</th><th onclick="sortAgriTable(5)">DOSAGEM ↕</th>
+                        <th onclick="sortAgriTable(6)">FORMA ↕</th><th onclick="sortAgriTable(7)">CUSTO ↕</th><th onclick="sortAgriTable(8)" style="text-align: center;">SITUAÇÃO ↕</th>
+                        <th class="no-print" style="text-align: center;">AÇÕES</th>
+                    </tr>
+                    <tr class="filter-row no-print" style="background:#f4f7f6;">
+                        <th><input type="date" id="f_agri_data" onchange="filterAgriTable()"></th><th><select id="f_agri_talhao" onchange="filterAgriTable()"></select></th><th><select id="f_agri_produto" onchange="filterAgriTable()"></select></th>
+                        <th><select id="f_agri_tipo" onchange="filterAgriTable()"></select></th><th><select id="f_agri_alvo" onchange="filterAgriTable()"></select></th><th></th>
+                        <th><select id="f_agri_forma" onchange="filterAgriTable()"></select></th><th></th><th><select id="f_agri_status" onchange="filterAgriTable()"><option value="">TODOS</option><option value="APLICADO">APLICADO</option><option value="PLANEJADO">PLANEJADO</option></select></th><th></th>
+                    </tr>
+                </thead>
+                <tbody id="tableBodyAgri"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- RELATÓRIO DE APLICAÇÕES POR PERÍODO -->
+    <div id="agri_rel" class="tab">
+        <div class="filter-bar no-print">
+            <div><label style="font-size:11px; font-weight:700; color:#888;">DATA INÍCIO:</label> <input type="date" id="rel_agri_ini" style="width:auto; margin-left:5px;"></div>
+            <div><label style="font-size:11px; font-weight:700; color:#888;">DATA FIM:</label> <input type="date" id="rel_agri_fim" style="width:auto; margin-left:5px;"></div>
+            <div><label style="font-size:11px; font-weight:700; color:#888;">TALHÃO:</label> <select id="rel_agri_talhao" style="width:220px; margin-left:5px;"></select></div>
+            <span style="flex-grow: 1;"></span>
+            <button onclick="gerarRelatorioAgri()" class="btn-salvar-compacto" style="background: var(--cor-verde-flat);">📄 Gerar Relatório</button>
+            <button onclick="window.print()" class="btn-limpar">🖨 Imprimir</button>
+            <button onclick="showTab('agri_app')" class="btn-limpar" style="background: var(--cor-azul-flat);">← Voltar</button>
+        </div>
+        <div class="widget-box" style="padding:0; overflow:hidden;">
+            <div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">📄 RELATÓRIO DE APLICAÇÕES</div>
+            <div class="rel-cabecalho-print" id="rel_agri_cabecalho" style="padding:15px;"></div>
+            <div class="table-container" style="box-shadow:none; border-radius:0; max-height:none;">
+                <table class="tabela-larga">
+                    <thead><tr><th>DATA</th><th>TALHÃO</th><th>PRODUTO</th><th>TIPO</th><th>ALVO</th><th>DOSAGEM</th><th>FORMA</th><th>SITUAÇÃO</th><th style="text-align:right;">CUSTO</th></tr></thead>
+                    <tbody id="tbody_rel_agri"><tr><td colspan="9" style="text-align:center; padding:30px; color:#aaa;">Selecione o período e o talhão e clique em "Gerar Relatório"</td></tr></tbody>
+                </table>
+            </div>
+            <div class="rel-totais" id="rel_agri_totais"></div>
+        </div>
+    </div>
+
+    <!-- CADASTROS -->
+    <div id="cadastros_main" class="tab">
+        <div class="widget-box" style="border-left: 4px solid var(--cor-azul-flat); padding: 15px 20px;">
+            <div style="font-family:'Rubik'; font-weight:700; margin-bottom:5px;">📝 CADASTROS DO SISTEMA</div>
+            <div style="font-size:13px; color:#666; line-height:1.5;">Registre aqui, uma única vez, os itens usados no Caixa Diário. Nas janelas de lançamento, os campos só aceitam itens cadastrados nesta tela. Remover um item não altera lançamentos antigos: ele apenas deixa de ser oferecido em novos lançamentos.</div>
+        </div>
+        <div id="cadastros_conteudo"></div>
+    </div>
+
+    <!-- TALHÕES: CADASTRO E INDICADORES -->
+    <div id="talhoes_main" class="tab">
+        <div class="linha-lancamento no-print" style="border-left-color: var(--cor-verde-flat);">
+            <div style="font-size:14px; font-weight:700; color:var(--cor-verde-flat); margin-bottom: 10px; font-family:'Rubik';">🌾 CADASTRO DE TALHÃO</div>
+            <form id="form_talhao" class="grid-form" onsubmit="salvarTalhao(event)">
+                <div style="grid-column: span 2;"><label>Talhão</label><input type="text" id="tl_nome" list="lista-talhoes" required autocomplete="off"></div>
+                <div><label>Cultura</label><select id="tl_cultura"><option value="conilon">Conilon</option><option value="maracuja">Maracujá</option></select></div>
+                <div><label>Área (ha)</label><input type="number" step="0.01" id="tl_area" required></div>
+                <div><label>Nº de Plantas</label><input type="number" step="1" id="tl_plantas"></div>
+                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-verde-flat); padding: 12px;">Gravar</button>
+            </form>
+        </div>
+        <div class="filter-bar no-print">
+            <label style="font-weight: 700; font-size:12px;">INDICADORES DA SAFRA:</label>
+            <select id="ind_safra" onchange="renderIndicadoresTalhao()" style="width:220px; margin-left:15px;"></select>
+            <span style="margin-left:auto; font-size:11px; color:#888;">Custo = aplicações realizadas + despesas do Caixa com o talhão (inclui rateios). Receita e sacas vêm das receitas com Talhão preenchido (und. SC).</span>
+        </div>
+        <div class="widget-box" style="padding:0; overflow:hidden;">
+            <div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">📊 CUSTO, RECEITA E RESULTADO POR TALHÃO</div>
+            <div class="table-container" style="box-shadow:none; border-radius:0;">
+                <table style="min-width: 1300px;">
+                    <thead><tr><th>TALHÃO</th><th>CULTURA</th><th>ÁREA (HA)</th><th>PLANTAS</th><th>CUSTO APLIC.</th><th>CUSTO CAIXA</th><th>CUSTO TOTAL</th><th>CUSTO/HA</th><th>RECEITA</th><th>RESULTADO</th><th>SACAS</th><th>CUSTO/SACA</th><th class="no-print" style="text-align:center;">AÇÕES</th></tr></thead>
+                    <tbody id="tbody_indicadores"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ESTOQUE -->
+    <div id="agri_est" class="tab">
+        <div style="background: white; padding: 15px 25px; border-radius: var(--borda-raio); margin-bottom: 20px; box-shadow: var(--sombra-flat); display:flex; justify-content:space-between; align-items:center; border-left: 4px solid #f39c12;">
+            <div>
+                <h4 style="margin:0; color:#888; font-size: 11px;">VALOR TOTAL DO ESTOQUE</h4>
+                <span id="valor_total_estoque_header" style="font-size: 24px; font-family:'Rubik'; font-weight:700; color:#f39c12;">R$ 0,00</span>
+            </div>
+        </div>
+
+        <div class="linha-lancamento linha-agri-est no-print" id="form_estoque_container">
+            <div style="font-size:14px; font-weight:700; color:#f39c12; margin-bottom: 10px; font-family:'Rubik';">📦 ENTRADA DE ESTOQUE</div>
+            <form id="form_estoque" class="grid-form" onsubmit="addEstoque(event)">
+                <input type="hidden" id="editEstoqueIndex" value="">
+                <div style="grid-column: span 2;"><label>Produto</label><input type="text" id="est_produto" required autocomplete="off"></div>
+                <div style="grid-column: span 2;"><label>Princípio Ativo</label><input type="text" id="est_principio" autocomplete="off"></div>
+                <div><label>Tipo</label><input type="text" id="est_tipo" list="lista-tipos" required autocomplete="off"></div>
+                <div><label>Qtd Inicial</label><input type="number" step="0.01" id="est_qtd" required></div>
+                <div><label>Unid</label><select id="est_un" required><option value="L">LITROS</option><option value="KG">QUILOS</option></select></div>
+                <div><label>R$ Unitário (custo médio)</label><input type="number" step="0.01" id="est_valor_unit" required></div>
+                <div><label>Estoque Mínimo</label><input type="number" step="0.01" id="est_min" placeholder="0"></div>
+                <button type="submit" class="btn-salvar-compacto" style="background: #f39c12; padding: 12px;">Salvar</button>
+            </form>
+        </div>
+        <div class="table-container">
+            <table class="tabela-larga">
+                <thead>
+                    <tr>
+                        <th class="ordenavel" onclick="sortEstoque('produto')">PRODUTO ↕</th><th class="ordenavel" onclick="sortEstoque('principio')">PRINCÍPIO ATIVO ↕</th><th class="ordenavel" onclick="sortEstoque('tipo')">TIPO ↕</th><th class="ordenavel" onclick="sortEstoque('qtd')">QTD ESTOQUE ↕</th><th class="ordenavel" onclick="sortEstoque('valor_unit')">V. UNITÁRIO ↕</th><th class="ordenavel" onclick="sortEstoque('total')">VALOR TOTAL ↕</th><th class="no-print" style="text-align: center;">AÇÕES</th>
+                    </tr>
+                </thead>
+                <tbody id="estoqueBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MÓDULO: SOLO E NUTRIÇÃO                    -->
+    <!-- ========================================== -->
+    <div id="solo_main" class="tab">
+        <div class="sub-menu no-print">
+            <button id="btn_solo_reg" class="active" onclick="switchSoloTab('solo_reg')">➕ Registrar Análise</button>
+            <button id="btn_solo_hist" onclick="switchSoloTab('solo_hist')">📈 Histórico de Solo</button>
+            <button id="btn_solo_calc" onclick="switchSoloTab('solo_calc')">🧮 Calculadora CFSEMG</button>
+        </div>
+
+        <!-- TELA 1: REGISTRO -->
+        <div id="solo_reg" class="sub-tab active">
+            <div class="widget-box">
+                <div class="widget-header verde">
+                    <span style="font-family:'Rubik';">REGISTRAR ANÁLISE DE SOLO</span>
+                    <span style="font-size:11px; color:#888; font-family:'Open Sans'; font-weight:normal;">Valores em <b style="color:var(--cor-vermelho-flat);">Vermelho</b> (Baixo) ou <b style="color:var(--cor-azul-flat);">Azul</b> (Alto). Campos cinza: calculados automaticamente. Digite "ns" para não solicitado.</span>
+                </div>
                 
-                <h4 style="color: #444; border-bottom: 1px solid #eee; padding-bottom:10px;" id="cascata_titulo_nivel">Selecione uma Categoria:</h4>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <ul id="lista_cascata_deep" style="padding-left: 0; margin:0;"></ul>
+                <form id="formSolo" onsubmit="salvarAnaliseSolo(event)">
+                    <input type="hidden" id="sl_id" value="">
+                    <div class="grid-form" style="margin-bottom: 25px;">
+                        <div><label>DATA DA ANÁLISE</label><input type="date" id="sl_data" required></div>
+                        <div style="grid-column: span 2;"><label>TALHÃO / CULTURA</label><input type="text" id="sl_talhao" list="lista-talhoes" placeholder="EX: CAFÉ 2022" required autocomplete="off"></div>
+                        <div><label>PROFUNDIDADE / TIPO</label>
+                            <select id="sl_prof" required><option value="0-20">Camada 0 - 20 cm</option><option value="20-40">Camada 20 - 40 cm</option><option value="Foliar">Análise Foliar</option></select>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: var(--cor-texto); font-size:13px; text-transform: uppercase; border-bottom:1px dashed #eee; padding-bottom:5px;">Reação, Sais e Complexo Sortivo</h4>
+                        <div class="grid-form">
+                            <div><label>pH H₂O</label><input type="text" id="sl_ph_h2o" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                            <div><label>pH CaCl₂</label><input type="text" id="sl_ph_cacl2" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                            <div><label>pH KCl</label><input type="text" id="sl_ph_kcl" placeholder="ns"></div>
+                            <div><label>C.E. (μS/cm)</label><input type="text" id="sl_ce" placeholder="ns"></div>
+                            <div><label>Ca²⁺ (cmol)</label><input type="text" id="sl_ca" placeholder="ns" oninput="calcularSomasSolo()"></div>
+                            <div><label>Mg²⁺ (cmol)</label><input type="text" id="sl_mg" placeholder="ns" oninput="calcularSomasSolo()"></div>
+                            <div><label>Al³⁺ (cmol)</label><input type="text" id="sl_al" placeholder="ns" oninput="calcularSomasSolo()"></div>
+                            <div><label>H + Al (cmol)</label><input type="text" id="sl_hal" placeholder="ns" oninput="calcularSomasSolo()"></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: var(--cor-texto); font-size:13px; text-transform: uppercase; border-bottom:1px dashed #eee; padding-bottom:5px;">Extratores e Macronutrientes (mg/dm³)</h4>
+                        <div class="grid-form">
+                            <div><label>P meh.</label><input type="text" id="sl_p_meh" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                            <div><label>P rem.</label><input type="text" id="sl_prem" placeholder="ns"></div>
+                            <div><label>P res.</label><input type="text" id="sl_pres" placeholder="ns"></div>
+                            <div><label>P total</label><input type="text" id="sl_ptotal" placeholder="ns"></div>
+                            <div><label>Na⁺</label><input type="text" id="sl_na" placeholder="ns" oninput="calcularSomasSolo()"></div>
+                            <div><label>K⁺ (mg)</label><input type="text" id="sl_k" placeholder="ns" oninput="calcularSomasSolo()"></div>
+                            <div><label>S-SO₄²⁻</label><input type="text" id="sl_s" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px; background: #f8f9fa; padding: 15px; border-radius: var(--borda-raio);">
+                        <h4 style="color: var(--cor-texto); font-size:13px; text-transform: uppercase;">Somas e Relações (Automáticas)</h4>
+                        <div class="grid-form" style="margin-bottom: 15px;">
+                            <div><label>SB (cmol)</label><input type="text" id="sl_sb" readonly></div>
+                            <div><label>t (Efetiva)</label><input type="text" id="sl_t_min" readonly></div>
+                            <div><label>T (pH 7,0)</label><input type="text" id="sl_t_max" readonly></div>
+                            <div><label>V (%)</label><input type="text" id="sl_v" readonly></div>
+                            <div><label>m (%)</label><input type="text" id="sl_m" readonly></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: var(--cor-texto); font-size:13px; text-transform: uppercase; border-bottom:1px dashed #eee; padding-bottom:5px;">Micronutrientes, Carbono & Textura</h4>
+                        <div class="grid-form">
+                            <div><label>M.O. (dag/kg)</label><input type="text" id="sl_mo" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                            <div><label>C.O. (dag/kg)</label><input type="text" id="sl_co" placeholder="ns"></div>
+                            
+                            <div><label>B (mg) <select id="ext_b" class="extrator-select" onchange="aplicarCoresNiveis()"><option value="1">Água Q.</option><option value="3">BaCl2</option></select></label><input type="text" id="sl_b" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                            <div><label>Cu (mg) <select id="ext_cu" class="extrator-select" onchange="aplicarCoresNiveis()"><option value="1">Mehlich</option><option value="2">DTPA</option></select></label><input type="text" id="sl_cu" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                            <div><label>Fe (mg)</label><input type="text" id="sl_fe" placeholder="ns"></div>
+                            <div><label>Mn (mg) <select id="ext_mn" class="extrator-select" onchange="aplicarCoresNiveis()"><option value="1">Mehlich</option><option value="2">DTPA</option></select></label><input type="text" id="sl_mn" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                            <div><label>Zn (mg) <select id="ext_zn" class="extrator-select" onchange="aplicarCoresNiveis()"><option value="1">Mehlich</option><option value="2">DTPA</option></select></label><input type="text" id="sl_zn" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                            
+                            <div><label>Areia Grossa</label><input type="text" id="sl_areia_g" placeholder="ns"></div>
+                            <div><label>Areia Fina</label><input type="text" id="sl_areia_f" placeholder="ns"></div>
+                            <div><label>Areia Total</label><input type="text" id="sl_areia_t" placeholder="ns"></div>
+                            <div><label>Silte (g)</label><input type="text" id="sl_silte" placeholder="ns"></div>
+                            <div><label>Argila (g/kg)</label><input type="text" id="sl_argila" placeholder="ns" oninput="aplicarCoresNiveis()"></div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-verde-flat); font-size:14px; padding:15px; width: auto;">💾 Salvar Análise</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TELA 2: HISTÓRICO -->
+        <div id="solo_hist" class="sub-tab">
+            <div class="widget-box">
+                <div class="filter-bar no-print" style="box-shadow:none; padding:0; border:none; margin-bottom:10px;">
+                    <div><label style="font-size:11px; font-weight:700; color:#888;">1. TALHÃO:</label> <select id="hist_talhao" onchange="popularDatasHistoricoSolo()" style="width:200px;"></select></div>
+                    <div style="margin-left:15px;"><label style="font-size:11px; font-weight:700; color:#888;">2. DATA:</label> <select id="hist_data" onchange="renderizarGraficoDataEspecifica()" style="width:200px;"><option value="">Selecione um Talhão</option></select></div>
+                    <button class="btn-salvar-compacto" style="background:var(--cor-azul-flat); margin-left:auto;" onclick="abrirGraficoDetalhado()">📊 Ver Análise Detalhada (Micros)</button>
+                </div>
+                <div class="grafico-container" style="height: 350px;">
+                    <canvas id="chartSoloPrincipal"></canvas>
+                </div>
+            </div>
+            <div class="widget-box" style="padding:0; overflow:hidden;">
+                <div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">📋 GESTÃO DE ANÁLISES (Clique para Editar)</div>
+                <div class="table-container" style="box-shadow:none; border-radius:0;">
+                    <table>
+                        <thead><tr><th>DATA</th><th>TALHÃO</th><th>PROF.</th><th>pH (H₂O)</th><th>P (meh)</th><th>K (mg)</th><th>V (%)</th><th>M.O.</th><th style="text-align:center;" class="no-print">AÇÕES</th></tr></thead>
+                        <tbody id="tbody_historico_analises"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 3: CALCULADORA -->
+        <div id="solo_calc" class="sub-tab">
+            <div class="filter-bar no-print">
+                <label style="font-weight: 700; font-size:12px;">SELECIONAR TALHÃO PARA CÁLCULO:</label>
+                <select id="calc_talhao" onchange="carregarUltimaAnaliseParaCalculo();" style="width:250px; margin-left:15px;"></select>
+                <div style="margin-left: auto; text-align: right; font-size: 11px; color:#888;">
+                    Última 0-20cm: <strong id="lbl_data_020">-</strong> | Última 20-40cm: <strong id="lbl_data_2040">-</strong>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="no-print">
+                    <div class="widget-box">
+                        <div class="widget-header">PARÂMETROS DA CULTURA E FASE</div>
+                        <div class="grid-form">
+                            <div><label>Cultura</label><select id="calc_cultura"><option value="conilon">Conilon</option><option value="maracuja">Maracujá</option></select></div>
+                            <div><label>Fase da Cultura</label>
+                                <select id="calc_fase" onchange="alternarFaseCultura()"><option value="producao">Produção</option><option value="implantacao">Implantação (Plantio)</option></select>
+                            </div>
+                            <div><label>Área (ha)</label><input type="number" id="calc_area" value="1.0" step="0.1"></div>
+                            <div><label>Estande (Plantas)</label><input type="number" id="calc_plantas" value="3000" step="1"></div>
+                        </div>
+                        
+                        <div class="grid-form" id="div_prod_esperada" style="margin-top: 15px;">
+                            <div><label>Prod. Esperada (sc ou t)</label><input type="number" id="calc_prod" placeholder="Digite livremente"></div>
+                            <div><label>Fator P (Adubo)</label><input type="number" id="calc_fp" value="1.0" step="0.1"></div>
+                            <div><label>Fator K (Adubo)</label><input type="number" id="calc_fk" value="1.0" step="0.1"></div>
+                        </div>
+                        <div class="grid-form" id="div_doses_plantio" style="display:none; margin-top: 15px; background:#fef5e7; padding: 15px; border-radius: var(--borda-raio);">
+                            <div><label style="color:var(--cor-laranja-flat);">Dose N (g/planta)</label><input type="number" id="calc_dose_n" value="0"></div>
+                            <div><label style="color:var(--cor-laranja-flat);">Dose P₂O₅ (g/planta)</label><input type="number" id="calc_dose_p" value="0"></div>
+                            <div><label style="color:var(--cor-laranja-flat);">Dose K₂O (g/planta)</label><input type="number" id="calc_dose_k" value="0"></div>
+                        </div>
+                    </div>
+
+                    <div class="widget-box">
+                        <div class="widget-header">FONTES DE FERTILIZANTES (MATRIZ F.E.)</div>
+                        <div class="grid-form">
+                            <div style="grid-column: span 2;">
+                                <label>Fonte de Nitrogênio (N)</label>
+                                <select id="calc_fonte_n">
+                                    <option value="Ureia">Ureia Conv. (45% | FE: 0.70)</option>
+                                    <option value="Ureia_NBPT">Ureia Tratada (45% | FE: 0.85)</option>
+                                    <option value="Nitrato">Nitrato de Amônio (33% | FE: 0.95)</option>
+                                    <option value="Sulfato">Sulfato de Amônio (21% | FE: 0.90)</option>
+                                </select>
+                            </div>
+                            <div style="grid-column: span 2;">
+                                <label>Fonte de Fósforo (P)</label>
+                                <select id="calc_fonte_p"><option value="MAP">MAP (52% P, 11% N | FE: 0.95)</option><option value="SSG">Super Simples (18% | FE: 0.95)</option></select>
+                            </div>
+                            <div><label>Fonte de Potássio (K)</label><select id="calc_fonte_k"><option value="KCl">Cloreto de Potássio (60% | FE: 0.85)</option></select></div>
+                            <div><label>PRNT Calcário (%)</label><input type="number" id="calc_prnt" value="90"></div>
+                        </div>
+                    </div>
+
+                    <div class="widget-box">
+                        <div class="widget-header">DADOS DO SOLO (BLOQUEADOS)</div>
+                        <div class="grid-form" style="grid-template-columns: repeat(5, 1fr);">
+                            <div><label>P rem</label><input type="text" id="calc_prem" readonly></div><div><label>P meh</label><input type="text" id="calc_p" readonly></div>
+                            <div><label>K</label><input type="text" id="calc_k" readonly></div><div><label>V%</label><input type="text" id="calc_v020" readonly></div>
+                            <div><label>CTC T</label><input type="text" id="calc_ctc" readonly></div><div><label>M.O.</label><input type="text" id="calc_mo" readonly></div>
+                            <div><label>Ca(20)</label><input type="text" id="calc_ca2040" readonly></div><div><label>Al(20)</label><input type="text" id="calc_al2040" readonly></div>
+                            <div><label>m%(20)</label><input type="text" id="calc_m2040" readonly></div><div><label>Argila</label><input type="text" id="calc_argila" readonly></div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-salvar-compacto" style="background: var(--cor-verde-flat); width:100%; padding: 15px; font-size: 14px;" onclick="calcularRecomendacao()">🧮 GERAR RECOMENDAÇÃO OPERACIONAL</button>
+                </div>
+
+                <!-- RESULTADOS DO LAUDO -->
+                <div>
+                    <div class="widget-box" style="border-top: 4px solid var(--cor-verde-flat);">
+                        <h3 style="color: var(--cor-verde-flat); text-align:center; margin-bottom: 20px;">LAUDO DE DEMANDA LÍQUIDA (kg/ha)</h3>
+                        <div style="display:flex; justify-content:space-around; text-align:center; padding: 10px 0;">
+                            <div><span style="font-size:11px; color:#888; font-weight:700;">NITROGÊNIO (N)</span><br><span id="res_n" style="font-size:32px; font-weight:700; color:var(--cor-verde-flat);">0</span></div>
+                            <div><span style="font-size:11px; color:#888; font-weight:700;">FÓSFORO (P₂O₅)</span><br><span id="res_p" style="font-size:32px; font-weight:700; color:var(--cor-laranja-flat);">0</span></div>
+                            <div><span style="font-size:11px; color:#888; font-weight:700;">POTÁSSIO (K₂O)</span><br><span id="res_k" style="font-size:32px; font-weight:700; color:var(--cor-azul-flat);">0</span></div>
+                        </div>
+                        <div style="display:flex; justify-content:space-around; text-align:center; margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px;">
+                            <div><span style="font-size:11px; color:#888; font-weight:700;">CALCÁRIO (PRNT <span id="lbl_prnt">90</span>%)</span><br><span id="res_calcario" style="font-size:24px; font-weight:700; color:#555;">0</span><br><span style="font-size:10px; color:#888;">t/ha</span></div>
+                            <div><span style="font-size:11px; color:#888; font-weight:700;">GESSO AGRÍCOLA</span><br><span id="res_gesso" style="font-size:24px; font-weight:700; color:#555;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
+                        </div>
+                        
+                        <div style="display:flex; justify-content:space-around; text-align:center; margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px;">
+                            <div><span style="font-size:11px; color:#888; font-weight:700;">ZINCO (Zn)</span><br><span id="res_zn" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
+                            <div><span style="font-size:11px; color:#888; font-weight:700;">BORO (B)</span><br><span id="res_b" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
+                            <div><span style="font-size:11px; color:#888; font-weight:700;">COBRE (Cu)</span><br><span id="res_cu" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
+                            <div><span style="font-size:11px; color:#888; font-weight:700;">MANGANÊS (Mn)</span><br><span id="res_mn" style="font-size:18px; font-weight:700; color:#34495e;">0</span><br><span style="font-size:10px; color:#888;">kg/ha</span></div>
+                        </div>
+                        
+                        <div class="laudo-texto" id="laudo_explicacao">Aguardando cálculo para gerar o parecer técnico...</div>
+                    </div>
+
+                    <div class="table-container" style="box-shadow: none; border: 1px solid #eee;">
+                        <table>
+                            <thead>
+                                <tr style="background: #f4f7f6;">
+                                    <th>OPERAÇÃO / MÊS</th>
+                                    <th style="text-align: center; color:var(--cor-verde-flat);" id="th_fonte_n">FONTE N</th>
+                                    <th style="text-align: center; color:var(--cor-laranja-flat);" id="th_fonte_p">FONTE P</th>
+                                    <th style="text-align: center; color:var(--cor-azul-flat);" id="th_fonte_k">FONTE K</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody_cronograma_calc">
+                                <tr><td colspan="4" style="text-align:center; color:#888;">Aguardando cálculo...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="no-print" style="display:flex; gap:10px; margin-top: 20px;">
+                        <button class="btn-limpar" onclick="imprimirLaudo()">🖨 Imprimir</button>
+                        <button class="btn-salvar-compacto" style="background: var(--cor-azul-flat); flex:1;" onclick="enviarParaAplicacoes()">📤 Enviar p/ Aplicações Planejadas</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- As abas seguintes (Pendencias, Agri_Dash, Talhoes_main, etc) mantêm-se iguais ao index_5.html. 
-         Estou omitindo para focar no essencial, mas você as manterá no seu projeto. -->
-    
-    <!-- (RESTANTE DO CÓDIGO DA PÁGINA) -->
-    <div id="resumo" class="tab"></div> <!-- Placeholder -->
-    <div id="pendencias" class="tab"></div> <!-- Placeholder -->
-    <div id="agri_dash" class="tab"></div> <!-- Placeholder -->
-    <div id="agri_app" class="tab"></div> <!-- Placeholder -->
-    <div id="agri_rel" class="tab"></div> <!-- Placeholder -->
-    <div id="talhoes_main" class="tab"></div> <!-- Placeholder -->
-    <div id="agri_est" class="tab"></div> <!-- Placeholder -->
-    <div id="solo_main" class="tab"></div> <!-- Placeholder -->
-
 </div> <!-- FIM MAIN CONTENT -->
 
-<!-- MODAIS GLOBAIS E DE CADASTRO -->
-<div id="modal-grafico-detalhado"></div>
+<!-- Modais -->
+<!-- Janela flutuante: nova saída -->
+<div id="modal-despesa">
+    <div class="modal-content modal-lanc modal-borda-despesa" id="caixa_lancamento_saida">
+        <div class="modal-lanc-topo">
+            <span style="font-size:15px; font-weight:700; color:var(--cor-laranja-flat); font-family:'Rubik';" id="titulo_saida">🚜 NOVA SAÍDA:
+                <select id="d_natureza" onchange="mudarTemaSaida()" style="width:auto; margin-left:10px; padding: 4px 10px; color: var(--cor-laranja-flat); font-weight: 700; border: none; background: transparent;">
+                    <option value="Despesa">CUSTEIO</option><option value="Investimento">INVESTIMENTO</option>
+                </select>
+            </span>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <input type="file" id="xml_upload" accept=".xml" style="display:none;" onchange="importarXMLDespesa(event)">
+                <button type="button" class="btn-salvar-compacto" style="background: var(--cor-azul-flat); font-size: 11px; padding: 8px 12px;" onclick="document.getElementById('xml_upload').click()">📥 Ler NF-e (XML)</button>
+                <button type="button" class="btn-fechar-x" onclick="fecharModalLancamento('despesa')" title="Fechar (Esc)">✕</button>
+            </div>
+        </div>
+        <div class="aviso-cadastro">Categoria, Setor, Talhão e Fornecedor aceitam somente itens da tela <a href="#" onclick="irParaCadastros('despesa'); return false;">Cadastros</a>.</div>
+        <form id="caixa_form_saida" class="grid-form" onsubmit="addTransacao(event, 'Saida')">
+            <div><label>Data</label><input type="date" id="d_data" required></div>
+            <div><label>Categoria</label><input list="lista_d_categoria" id="d_categoria" required autocomplete="off" placeholder="Selecione"></div>
+            <div><label>Setor</label><input list="lista_d_setor" id="d_setor" required autocomplete="off" placeholder="Selecione"></div>
+            <div><label>Talhão</label><input list="lista-talhoes" id="d_talhao" autocomplete="off" placeholder="Opcional"></div>
+            <div><label>% Talhão 1</label><input type="number" id="d_pct" min="1" max="99" step="1" placeholder="50" title="Só use se for ratear com o Talhão 2 (padrão 50%)"></div>
+            <div><label>Talhão 2 (resto)</label><input list="lista-talhoes" id="d_talhao2" autocomplete="off" placeholder="Opcional"></div>
+            <div style="grid-column: span 2;"><label>Fornecedor</label><input list="lista_d_local" id="d_local" required autocomplete="off" placeholder="Selecione"></div>
+            <div style="grid-column: span 2;"><label>Descrição</label><input list="lista_d_descricao" id="d_descricao" required autocomplete="off"></div>
+            <div><label>Qtd</label><input type="number" id="d_qtd" step="0.01" oninput="calcularTotalDespesa()"></div>
+            <div><label>Unid.</label><input type="text" id="d_und"></div>
+            <div><label>R$ Unit.</label><input type="number" id="d_v_unit" step="0.01" oninput="calcularTotalDespesa()"></div>
+            <div><label>R$ Total</label><input type="number" id="d_valor" step="0.01" required></div>
+            <div><label>Situação</label><select id="d_sit"><option value="A pagar">A PAGAR</option><option value="Pago">PAGO</option></select></div>
+            <div class="modal-lanc-botoes">
+                <button type="button" class="btn-limpar" onclick="fecharModalLancamento('despesa')">Cancelar</button>
+                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-laranja-flat);" onclick="modalFecharApos=false">➕ Gravar e Novo</button>
+                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-verde-flat);" onclick="modalFecharApos=true">💾 Gravar e Fechar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Janela flutuante: nova receita -->
+<div id="modal-receita">
+    <div class="modal-content modal-lanc modal-borda-receita" id="caixa_lancamento_receita">
+        <div class="modal-lanc-topo">
+            <span style="font-size:15px; font-weight:700; color:var(--cor-verde-flat); font-family:'Rubik';">🌱 NOVA RECEITA</span>
+            <button type="button" class="btn-fechar-x" onclick="fecharModalLancamento('receita')" title="Fechar (Esc)">✕</button>
+        </div>
+        <div class="aviso-cadastro">Produto, Cliente e Talhão aceitam somente itens da tela <a href="#" onclick="irParaCadastros('receita'); return false;">Cadastros</a>.</div>
+        <form id="caixa_form_receita" class="grid-form" onsubmit="addTransacao(event, 'Receita')">
+            <div><label>Data</label><input type="date" id="r_data" required></div>
+            <div style="grid-column: span 2;"><label>Produto</label><input list="lista_r_categoria" id="r_categoria" required onblur="autoPreencherUnidade()" autocomplete="off" placeholder="Selecione"></div>
+            <div style="grid-column: span 2;"><label>Cliente</label><input list="lista_r_local" id="r_local" required autocomplete="off" placeholder="Selecione"></div>
+            <div><label>Talhão</label><input list="lista-talhoes" id="r_talhao" autocomplete="off" placeholder="Opcional"></div>
+            <div style="grid-column: span 2;"><label>Detalhes</label><input type="text" id="r_descricao" autocomplete="off"></div>
+            <div><label>Qtd</label><input type="number" id="r_qtd" step="0.01" oninput="calcularTotalReceita()"></div>
+            <div><label>Unid.</label><input type="text" id="r_und"></div>
+            <div><label>R$ Unit.</label><input type="number" id="r_v_unit" step="0.01" oninput="calcularTotalReceita()"></div>
+            <div><label>R$ Total</label><input type="number" id="r_valor" step="0.01" required></div>
+            <div><label>Situação</label><select id="r_sit"><option value="A receber">A RECEBER</option><option value="Pago">PAGO</option></select></div>
+            <div class="modal-lanc-botoes">
+                <button type="button" class="btn-limpar" onclick="fecharModalLancamento('receita')">Cancelar</button>
+                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-azul-flat);" onclick="modalFecharApos=false">➕ Gravar e Novo</button>
+                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-verde-flat);" onclick="modalFecharApos=true">💾 Gravar e Fechar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modal-grafico-detalhado">
+    <div class="modal-grafico-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom:15px; margin-bottom: 15px;">
+            <h3 style="color: var(--cor-texto); margin:0; font-family:'Rubik';" id="titulo_modal_detalhe">ANÁLISE DETALHADA</h3>
+            <button class="btn-limpar" style="width:auto; padding:8px 15px;" onclick="document.getElementById('modal-grafico-detalhado').style.display='none'">Fechar</button>
+        </div>
+        <div style="flex:1; position:relative;"><canvas id="chartSoloMicros"></canvas></div>
+    </div>
+</div>
 
 <div id="modal-edicao">
     <div class="modal-content">
@@ -219,66 +713,16 @@
     </div>
 </div>
 
-<!-- NOVO: MODAL NOVA SAÍDA -->
-<div id="modal-nova-saida" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(3px);">
-    <div class="modal-content" style="border-top: 4px solid var(--cor-laranja-flat);">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom:10px; margin-bottom: 20px;">
-            <h3 style="margin: 0; color: var(--cor-laranja-flat); font-family: 'Rubik';" id="titulo_saida_modal">🚜 NOVA SAÍDA</h3>
-            <select id="md_natureza" onchange="mudarTemaModalSaida()" style="width:auto; padding: 4px 10px; color: var(--cor-laranja-flat); font-weight: 700; border: none; background: transparent;">
-                <option value="Despesa">CUSTEIO</option><option value="Investimento">INVESTIMENTO</option>
-            </select>
-        </div>
-        <form id="form_modal_saida" class="grid-form" onsubmit="addTransacao(event, 'Saida'); return false;">
-            <div><label>Data</label><input type="date" id="md_data" required></div>
-            <div><label>Categoria (Estrito)</label><select id="md_categoria" required></select></div>
-            <div><label>Setor (Estrito)</label><select id="md_setor" required></select></div>
-            <div><label>Fornecedor (Estrito)</label><select id="md_local" required></select></div>
-            <div><label>Talhão (Opcional)</label><select id="md_talhao"></select></div>
-            <div><label>% Rateio Talhão 1</label><input type="number" id="md_pct" min="1" max="99" step="1" placeholder="50"></div>
-            <div><label>Talhão 2 (Resto)</label><select id="md_talhao2"></select></div>
-            <div style="grid-column: span 2;"><label>Descrição Livre</label><input type="text" id="md_descricao" required autocomplete="off"></div>
-            <div><label>Qtd</label><input type="number" id="md_qtd" step="0.01" oninput="calcularTotalModal('md')"></div>
-            <div><label>Unid.</label><input type="text" id="md_und"></div>
-            <div><label>$ Unit</label><input type="number" id="md_v_unit" step="0.01" oninput="calcularTotalModal('md')"></div>
-            <div><label>$ Total</label><input type="number" id="md_valor" step="0.01" required></div>
-            <div><label>Situação</label><select id="md_sit"><option value="A pagar">A PAGAR</option><option value="Pago">PAGO</option></select></div>
-            <div style="grid-column: span 2; display:flex; gap:10px; margin-top: 10px;">
-                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-laranja-flat); flex: 1;" id="btn_salvar_saida">Gravar Despesa</button>
-                <button type="button" class="btn-limpar" style="width:auto;" onclick="fecharModaisLancamento()">Cancelar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- NOVO: MODAL NOVA RECEITA -->
-<div id="modal-nova-receita" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(3px);">
-    <div class="modal-content" style="border-top: 4px solid var(--cor-verde-flat);">
-        <h3 style="margin-top: 0; color: var(--cor-verde-flat); font-family: 'Rubik'; border-bottom: 1px solid #eee; padding-bottom:10px; margin-bottom: 20px;">🌱 NOVA RECEITA</h3>
-        <form id="form_modal_receita" class="grid-form" onsubmit="addTransacao(event, 'Receita'); return false;">
-            <div><label>Data</label><input type="date" id="mr_data" required></div>
-            <div style="grid-column: span 2;"><label>Produto (Estrito)</label><select id="mr_categoria" required onchange="autoPreencherUnidadeModal()"></select></div>
-            <div><label>Cliente (Estrito)</label><select id="mr_local" required></select></div>
-            <div style="grid-column: span 2;"><label>Detalhes Livres</label><input type="text" id="mr_descricao" autocomplete="off"></div>
-            <div><label>Qtd</label><input type="number" id="mr_qtd" step="0.01" oninput="calcularTotalModal('mr')"></div>
-            <div><label>Unid.</label><input type="text" id="mr_und" id="mr_und"></div>
-            <div><label>$ Unit</label><input type="number" id="mr_v_unit" step="0.01" oninput="calcularTotalModal('mr')"></div>
-            <div><label>$ Total</label><input type="number" id="mr_valor" step="0.01" required></div>
-            <div><label>Situação</label><select id="mr_sit"><option value="A receber">A RECEBER</option><option value="Pago">PAGO</option></select></div>
-            <div style="grid-column: span 2; display:flex; gap:10px; margin-top: 10px;">
-                <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-verde-flat); flex: 1;">Gravar Receita</button>
-                <button type="button" class="btn-limpar" style="width:auto;" onclick="fecharModaisLancamento()">Cancelar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <div id="toast" class="toast">Sucesso!</div>
 
-<!-- DATALISTS MANTIDOS PARA RETROCOMPATIBILIDADE DE OUTRAS TELAS -->
 <datalist id="lista-talhoes"></datalist><datalist id="lista-tipos"></datalist><datalist id="lista-formas"></datalist>
 <datalist id="lista-alvos"></datalist><datalist id="lista-produtos-estoque"></datalist>
-<datalist id="lista_d_descricao"></datalist>
+<datalist id="lista_d_categoria"></datalist><datalist id="lista_d_setor"></datalist>
+<datalist id="lista_d_local"></datalist><datalist id="lista_d_descricao"></datalist>
+<datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
 
+<!-- AQUI É O SEGREDO: Em vez de duplicar 800 linhas, agora basta isso! -->
 <script src="app.js"></script>
+
 </body>
 </html>
