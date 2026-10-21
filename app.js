@@ -302,7 +302,7 @@ async function salvarDados() {
     statusDiv.innerHTML = '⏳ Gravando...'; statusDiv.className = 'status-conexao aguardando';
     
     try {
-        const response = await fetch(URL_GOOGLE_SCRIPT, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+        const response = await fetch(URL_GOOGLE_SCRIPT, { method: 'POST', body: JSON.stringify(Object.assign({}, payload, { opcoes: empacotarOpcoes() })), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
         if(!response.ok) throw new Error("HTTP Error");
         statusDiv.innerHTML = `🟢 SINCRONIZADO`; statusDiv.className = 'status-conexao conectado'; 
     } catch (e) { 
@@ -692,7 +692,7 @@ function abrirModalEdicao(id) {
         <div><label>VALOR TOTAL:</label> <input type="number" id="ed_valor" step="0.01" value="${parseFloat(t.valor)||0}"></div>
         <div><label>SITUAÇÃO:</label> <select id="ed_sit">${selectSit}</select></div>
     `;
-    preencherSelectsLancamento();
+    preencherSelectsLancamento(); converterListasEmCombo(document.getElementById('form-edicao'));
     document.getElementById('modal-edicao').style.display = 'flex';
 }
 
@@ -1744,22 +1744,26 @@ function garantirOpcoes() {
     CADASTROS_DEF.forEach(d => { if (!opcoesDin.cad[d.chave] || typeof opcoesDin.cad[d.chave] !== 'object') opcoesDin.cad[d.chave] = {}; });
 }
 
-function mesclarOpcoes(op) {
-    if (!op) return; garantirOpcoes();
-    ['tipos', 'formas', 'alvos'].forEach(k => { opcoesDin[k] = [...new Set([...(opcoesDin[k] || []), ...(op[k] || [])])].sort(); });
+function mesclarOpcoes(opBruto) {
+    if (!opBruto || typeof opBruto !== 'object') return; garantirOpcoes();
+    const op = desempacotarOpcoes(opBruto);
+    ['tipos', 'formas', 'alvos'].forEach(k => { opcoesDin[k] = [...new Set([...listaSegura(opcoesDin[k]), ...listaSegura(op[k])])].sort(); });
     // Talhões antigos (lista simples) só entram se nunca foram cadastrados nem removidos
-    (op.talhoes || []).forEach(n => { const nn = cadNorm(n); if (nn && !opcoesDin.cad.talhao[nn]) opcoesDin.cad.talhao[nn] = { u: 0, d: false }; });
+    listaSegura(op.talhoes).forEach(n => { const nn = cadNorm(n); if (nn && !opcoesDin.cad.talhao[nn]) opcoesDin.cad.talhao[nn] = { u: 0, d: false }; });
     // Cadastros: vale o registro mais recente de cada item (inclusive remoções)
-    const cad = op.cad || {};
+    const cad = (op.cad && typeof op.cad === 'object') ? op.cad : {};
     CADASTROS_DEF.forEach(d => {
-        const remoto = cad[d.chave] || {};
+        const remoto = (cad[d.chave] && typeof cad[d.chave] === 'object') ? cad[d.chave] : {};
         Object.keys(remoto).forEach(n => {
             const r = remoto[n]; const l = opcoesDin.cad[d.chave][n];
             if (r && typeof r === 'object' && (!l || (r.u || 0) > (l.u || 0))) opcoesDin.cad[d.chave][n] = { u: r.u || 0, d: !!r.d };
         });
     });
-    const info = op.talhoesInfo || {};
-    Object.keys(info).forEach(n => { const l = opcoesDin.talhoesInfo[n]; if (!l || (info[n].updatedAt || 0) > (l.updatedAt || 0)) opcoesDin.talhoesInfo[n] = info[n]; });
+    const info = (op.talhoesInfo && typeof op.talhoesInfo === 'object') ? op.talhoesInfo : {};
+    Object.keys(info).forEach(n => {
+        const r = info[n]; if (!r || typeof r !== 'object') return; const l = opcoesDin.talhoesInfo[n];
+        if (!l || (r.updatedAt || 0) > (l.updatedAt || 0)) opcoesDin.talhoesInfo[n] = r;
+    });
     sincronizarTalhoesDerivados();
 }
 
@@ -2263,6 +2267,184 @@ document.addEventListener('keydown', ev => {
     ['modal-despesa', 'modal-receita', 'modal-edicao'].forEach(id => { const m = document.getElementById(id); if (m && m.style.display === 'flex') m.style.display = 'none'; });
 });
 document.addEventListener('DOMContentLoaded', () => { try { vincularValidacaoCadastro(); } catch (e) {} });
+
+
+/* =========================================================================
+   12. LISTAS SUSPENSAS PRÓPRIAS, TRANSPORTE DOS CADASTROS E AJUSTE DE ÁREA
+========================================================================= */
+
+/* ---------- Transporte dos cadastros para a nuvem ----------
+   A planilha garante guardar as listas simples (talhoes/tipos/formas/alvos). Para que cadastros e dados de
+   talhões cheguem a todos os aparelhos mesmo que o script ignore campos novos, eles também viajam codificados
+   dentro de "alvos". Ao ler da nuvem, essas linhas são separadas e nunca aparecem como alvos de aplicação. */
+const PREFIXO_CAD = '~CAD|', PREFIXO_TAL = '~TAL|';
+
+function listaSegura(v) {
+    if (Array.isArray(v)) return v.map(x => String(x));
+    if (typeof v === 'string' && v.trim()) return v.split(',').map(x => x.trim()).filter(Boolean);
+    return [];
+}
+
+function empacotarOpcoes() {
+    garantirOpcoes(); const extras = [];
+    CADASTROS_DEF.forEach(d => Object.keys(opcoesDin.cad[d.chave]).forEach(n => {
+        const e = opcoesDin.cad[d.chave][n]; if (e && n) extras.push(`${PREFIXO_CAD}${d.chave}|${e.d ? 1 : 0}|${e.u || 0}|${n}`);
+    }));
+    Object.keys(opcoesDin.talhoesInfo).forEach(n => {
+        const i = opcoesDin.talhoesInfo[n]; if (!i) return;
+        extras.push(`${PREFIXO_TAL}${i.deleted ? 1 : 0}|${i.updatedAt || 0}|${i.cultura || ''}|${i.area || 0}|${i.plantas || 0}|${n}`);
+    });
+    return Object.assign({}, opcoesDin, { alvos: opcoesDin.alvos.concat(extras) });
+}
+
+function desempacotarOpcoes(op) {
+    const limpo = Object.assign({}, op); const alvos = [];
+    const cad = (op.cad && typeof op.cad === 'object') ? JSON.parse(JSON.stringify(op.cad)) : {};
+    const info = (op.talhoesInfo && typeof op.talhoesInfo === 'object') ? Object.assign({}, op.talhoesInfo) : {};
+    listaSegura(op.alvos).forEach(s => {
+        if (s.startsWith(PREFIXO_CAD)) {
+            const p = s.split('|'); const chave = p[1]; const nome = p.slice(4).join('|'); const u = parseFloat(p[3]) || 0;
+            if (!chave || !nome) return;
+            if (!cad[chave] || typeof cad[chave] !== 'object') cad[chave] = {};
+            const ex = cad[chave][nome]; if (!ex || u > (ex.u || 0)) cad[chave][nome] = { u: u, d: p[2] === '1' };
+        } else if (s.startsWith(PREFIXO_TAL)) {
+            const p = s.split('|'); const nome = p.slice(6).join('|'); const u = parseFloat(p[2]) || 0; if (!nome) return;
+            const ex = info[nome]; if (ex && (ex.updatedAt || 0) >= u) return;
+            info[nome] = p[1] === '1' ? { deleted: true, updatedAt: u } : { cultura: p[3] || 'conilon', area: parseFloat(p[4]) || 0, plantas: parseFloat(p[5]) || 0, updatedAt: u, deleted: false };
+        } else alvos.push(s);
+    });
+    limpo.alvos = alvos; limpo.cad = cad; limpo.talhoesInfo = info;
+    return limpo;
+}
+
+/* ---------- Lista suspensa própria (substitui o datalist nativo) ---------- */
+let comboAtual = null, comboIdx = -1, comboSilencio = false;
+
+function semAcento(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase(); }
+
+function converterListasEmCombo(raiz) {
+    (raiz || document).querySelectorAll('input[list]').forEach(el => {
+        el.dataset.lista = el.getAttribute('list'); el.removeAttribute('list'); el.setAttribute('autocomplete', 'off');
+    });
+}
+
+function comboElemento() {
+    let d = document.getElementById('combo-lista');
+    if (!d) {
+        d = document.createElement('div'); d.id = 'combo-lista'; d.className = 'combo-lista';
+        d.addEventListener('mousedown', ev => {
+            ev.preventDefault();
+            const link = ev.target.closest && ev.target.closest('.combo-link');
+            if (link) { comboFechar(); fecharModalLancamento('despesa'); fecharModalLancamento('receita'); fecharModal(); showTab('cadastros_main'); return; }
+            const it = ev.target.closest && ev.target.closest('.combo-item');
+            if (it && comboAtual) comboEscolher(comboAtual, decodeURIComponent(it.dataset.v));
+        });
+        document.body.appendChild(d);
+    }
+    return d;
+}
+
+function comboOpcoes(inp) { const dl = document.getElementById(inp.dataset.lista); return dl ? Array.from(dl.options).map(o => o.value) : []; }
+
+function comboAberto() { const d = document.getElementById('combo-lista'); return !!(d && d.style.display === 'block'); }
+
+function comboFechar() { const d = document.getElementById('combo-lista'); if (d) d.style.display = 'none'; comboAtual = null; comboIdx = -1; }
+
+function comboPosicionar() {
+    if (!comboAtual) return; const box = comboElemento(); const r = comboAtual.getBoundingClientRect();
+    const abaixo = window.innerHeight - r.bottom - 12; const acima = r.top - 12;
+    box.style.left = r.left + 'px'; box.style.minWidth = Math.max(r.width, 200) + 'px';
+    if (abaixo < 160 && acima > abaixo) { box.style.top = 'auto'; box.style.bottom = (window.innerHeight - r.top + 2) + 'px'; box.style.maxHeight = Math.min(280, acima) + 'px'; }
+    else { box.style.bottom = 'auto'; box.style.top = (r.bottom + 2) + 'px'; box.style.maxHeight = Math.min(280, abaixo) + 'px'; }
+}
+
+function comboAbrir(inp, mostrarTodos) {
+    if (!inp || !inp.dataset || !inp.dataset.lista) return;
+    const todas = comboOpcoes(inp); const termo = semAcento(inp.value.trim());
+    const exato = todas.some(o => semAcento(o) === termo);
+    const lista = (mostrarTodos || !termo || exato) ? todas : todas.filter(o => semAcento(o).includes(termo));
+    const restrito = !!CAMPOS_CAD[inp.id]; const box = comboElemento();
+    comboAtual = inp; comboIdx = -1;
+    if (!lista.length) {
+        if (!restrito) { box.style.display = 'none'; return; }
+        box.innerHTML = `<div class="combo-vazio">${todas.length ? `Nenhum item cadastrado com “${strEscape(inp.value.trim())}”.` : 'Nenhum item cadastrado ainda.'}<br>Este campo aceita somente itens da tela de cadastros.<br><a href="#" class="combo-link" onclick="return false;">📝 Abrir Cadastros</a></div>`;
+    } else {
+        box.innerHTML = lista.map(o => `<div class="combo-item${semAcento(o) === termo ? ' ativo' : ''}" data-v="${encAttr(o)}">${strEscape(o)}</div>`).join('');
+    }
+    box.style.display = 'block'; comboPosicionar();
+    const ativo = box.querySelector('.combo-item.ativo'); if (ativo) { comboIdx = Array.from(box.children).indexOf(ativo); ativo.scrollIntoView({ block: 'nearest' }); }
+}
+
+function comboEscolher(inp, valor) {
+    comboSilencio = true;
+    inp.value = valor;
+    inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true }));
+    comboSilencio = false; comboFechar();
+}
+
+function comboMover(delta) {
+    const box = comboElemento(); const itens = Array.from(box.querySelectorAll('.combo-item')); if (!itens.length) return;
+    comboIdx = (comboIdx + delta + itens.length) % itens.length;
+    itens.forEach((el, i) => el.classList.toggle('ativo', i === comboIdx));
+    itens[comboIdx].scrollIntoView({ block: 'nearest' });
+}
+
+document.addEventListener('focusin', e => {
+    const t = e.target; if (!t || !t.matches) return;
+    if (t.matches('input[list]')) converterListasEmCombo(t.parentElement || document);
+    if (t.matches('input[data-lista]')) comboAbrir(t);
+    else if (!(t.closest && t.closest('#combo-lista'))) comboFechar();
+});
+document.addEventListener('click', e => { const t = e.target; if (t && t.matches && t.matches('input[data-lista]') && (comboAtual !== t || !comboAberto())) comboAbrir(t); });
+document.addEventListener('input', e => { if (comboSilencio) return; const t = e.target; if (t && t.matches && t.matches('input[data-lista]')) comboAbrir(t); });
+document.addEventListener('focusout', e => { if (e.target === comboAtual) setTimeout(() => { if (document.activeElement !== comboAtual) comboFechar(); }, 120); });
+document.addEventListener('keydown', e => {
+    const t = e.target; if (!t || !t.matches || !t.matches('input[data-lista]')) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); if (!comboAberto() || comboAtual !== t) comboAbrir(t, true); else comboMover(1); }
+    else if (e.key === 'ArrowUp' && comboAberto()) { e.preventDefault(); comboMover(-1); }
+    else if (e.key === 'Enter' && comboAberto()) {
+        const box = comboElemento(); const it = box.querySelectorAll('.combo-item')[comboIdx];
+        if (it && comboIdx >= 0) { e.preventDefault(); comboEscolher(t, decodeURIComponent(it.dataset.v)); } else comboFechar();
+    }
+    else if (e.key === 'Escape' && comboAberto()) { e.preventDefault(); e.stopPropagation(); comboFechar(); }
+    else if (e.key === 'Tab') comboFechar();
+}, true);
+window.addEventListener('scroll', () => { if (comboAtual) comboPosicionar(); }, true);
+window.addEventListener('resize', () => comboFechar());
+
+/* ---------- Relatórios e listas ocupam toda a área disponível ---------- */
+function ajustarAreaListas() {
+    const m = document.querySelector('.main-content'); if (!m) return;
+    const padInf = parseFloat(getComputedStyle(m).paddingBottom) || 0; const mTop = m.getBoundingClientRect().top;
+    m.querySelectorAll('.table-container:not(.no-fill), .cascata-coluna > ul').forEach(el => {
+        if (!el.offsetParent) return; // oculto
+        const topo = el.getBoundingClientRect().top - mTop + m.scrollTop;
+        let extra = padInf;
+        for (let n = el; n && n !== m; n = n.parentElement) {
+            const cs = getComputedStyle(n);
+            if (n !== el) extra += (parseFloat(cs.paddingBottom) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+            extra += parseFloat(cs.marginBottom) || 0;
+            const nTopo = n.getBoundingClientRect().top;
+            for (let s = n.nextElementSibling; s; s = s.nextElementSibling) {
+                if (!s.offsetParent) continue;
+                if (s.getBoundingClientRect().top <= nTopo + 1) continue; // ao lado, não abaixo
+                const sc = getComputedStyle(s); extra += s.offsetHeight + (parseFloat(sc.marginTop) || 0) + (parseFloat(sc.marginBottom) || 0);
+            }
+        }
+        const h = Math.max(240, Math.floor(m.clientHeight - topo - extra));
+        el.style.height = h + 'px'; el.style.maxHeight = h + 'px';
+    });
+}
+
+let _ajusteTimer = null;
+function agendarAjusteArea() { clearTimeout(_ajusteTimer); _ajusteTimer = setTimeout(() => { try { ajustarAreaListas(); } catch (e) {} }, 40); }
+window.addEventListener('resize', agendarAjusteArea);
+document.addEventListener('DOMContentLoaded', () => {
+    try { converterListasEmCombo(); } catch (e) {}
+    const m = document.querySelector('.main-content');
+    if (m && window.MutationObserver) new MutationObserver(agendarAjusteArea).observe(m, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+    agendarAjusteArea();
+});
 
 
 /* COMANDO GLOBAL PARA MAIÚSCULAS (só altera o valor quando necessário, para não fechar listas de sugestão) */
