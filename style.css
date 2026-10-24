@@ -203,7 +203,9 @@ input.nao-cadastrado { border-color: var(--cor-vermelho-flat); background-color:
 .menu-grupo.aberto .menu-sub { display: flex; }
 .menu-sub button { text-align: left; width: 100%; padding: 11px 14px; }
 .topbar .badge-atrasadas { position: static; display: inline-block; margin-left: 6px; transform: none; vertical-align: middle; }
-.topbar .status-conexao { margin: 0 0 0 auto; padding: 7px 12px; font-size: 10px; white-space: nowrap; border-bottom: none; }
+.versao-sistema { font-size: 10px; color: #ffb3aa; white-space: nowrap; margin-left: auto; }
+.versao-sistema.ok { color: var(--cor-sidebar-titulo); }
+.topbar .status-conexao { margin: 0; padding: 7px 12px; font-size: 10px; white-space: nowrap; border-bottom: none; }
 @media (max-width: 760px) { .topbar { gap: 8px; padding: 0 10px; } .topbar-marca { display: none; } .topbar-menu { overflow-x: auto; } .topbar button { padding: 8px 9px; font-size: 11px; } .main-content { padding: 15px; } }
 
 /* Rateio em até 4 talhões */

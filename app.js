@@ -2600,6 +2600,9 @@ function atualizarMarcasMenu() {
 
 document.addEventListener('DOMContentLoaded', () => { try { atualizarMarcasMenu(); } catch (e) {} });
 
+const VERSAO_SISTEMA = 'v24/10/2026-b';
+document.addEventListener('DOMContentLoaded', () => { const v = document.getElementById('versao_sistema'); if (v) { v.textContent = VERSAO_SISTEMA; v.classList.add('ok'); } });
+
 /* COMANDO GLOBAL PARA MAIÚSCULAS (só altera o valor quando necessário, para não fechar listas de sugestão) */
 document.addEventListener('input', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {

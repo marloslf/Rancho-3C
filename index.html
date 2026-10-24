@@ -2,10 +2,13 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Integrado Rancho 3C</title>
     <!-- Ligação com o arquivo de CSS separado -->
-    <link rel="stylesheet" href="style.css?v=20261024">
+    <link rel="stylesheet" href="style.css?v=20261024b">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -37,6 +40,7 @@
             </div>
         </div>
     </div>
+    <span id="versao_sistema" class="versao-sistema" title="Versão dos arquivos carregados">⚠ app.js desatualizado</span>
     <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem()" title="Forçar Sincronização">⏳ Inicializando...</button>
 </nav>
 
@@ -745,7 +749,7 @@
 <datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
 
 <!-- AQUI É O SEGREDO: Em vez de duplicar 800 linhas, agora basta isso! -->
-<script src="app.js?v=20261024"></script>
+<script src="app.js?v=20261024b"></script>
 
 </body>
 </html>
