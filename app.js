@@ -319,10 +319,11 @@ async function salvarDados() {
 function showTab(id) {
     try {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.sidebar-menu button').forEach(b => b.classList.remove('btn-ativo'));
+        document.querySelectorAll('.topbar button').forEach(b => b.classList.remove('btn-ativo'));
         document.getElementById(id).classList.add('active');
         const btnMap = { 'home': 'btn_home', 'resumo': 'btn_resumo', 'movimentacoes': 'btn_movimentacoes', 'relatorios_detalhados': 'btn_relatorios_detalhados', 'pendencias': 'btn_pendencias', 'agri_app': 'btn_agri_app', 'agri_rel': 'btn_agri_app', 'agri_est': 'btn_agri_est', 'agri_dash': 'btn_agri_dash', 'chuvas_main': 'btn_chuvas', 'solo_main': 'btn_solo', 'talhoes_main': 'btn_talhoes', 'cadastros_main': 'btn_cadastros' };
         if(btnMap[id]) document.getElementById(btnMap[id]).classList.add('btn-ativo');
+        try { fecharMenusTopo(); atualizarMarcasMenu(); } catch (e2) {}
         
         if(id === 'resumo') atualizarResumoEGrafico();
         if(id === 'relatorios_detalhados') { atualizarRelatoriosDetalhados(); renderCascataCategorias(); }
@@ -552,7 +553,7 @@ function addTransacao(e, tipoBase) {
         const prefix = tipoBase === 'Saida' ? 'd_' : 'r_';
         // Os campos só aceitam itens da tela Cadastros
         const checagens = tipoBase === 'Saida'
-            ? [['d_categoria', 'categoria_despesa', 'Categoria'], ['d_setor', 'setor', 'Setor'], ['d_talhao', 'talhao', 'Talhão'], ['d_talhao2', 'talhao', 'Talhão 2'], ['d_local', 'fornecedor', 'Fornecedor']]
+            ? [['d_categoria', 'categoria_despesa', 'Categoria'], ['d_setor', 'setor', 'Setor'], ['d_talhao', 'talhao', 'Talhão'], ['d_talhao2', 'talhao', 'Talhão 2'], ['d_talhao3', 'talhao', 'Talhão 3'], ['d_talhao4', 'talhao', 'Talhão 4'], ['d_local', 'fornecedor', 'Fornecedor']]
             : [['r_categoria', 'produto_receita', 'Produto'], ['r_local', 'cliente', 'Cliente'], ['r_talhao', 'talhao', 'Talhão']];
         const falhas = checagens.filter(c => { const v = cadNorm(safeVal(c[0])); return v && !cadTem(c[1], v); }).map(c => `• ${c[2]}: ${cadNorm(safeVal(c[0]))}`);
         if (falhas.length) { alert("Os itens abaixo não estão cadastrados:\n\n" + falhas.join("\n") + "\n\nCadastre-os na tela Cadastros e tente novamente."); return; }
@@ -573,16 +574,14 @@ function addTransacao(e, tipoBase) {
             setor = document.getElementById('d_setor').value.trim().toUpperCase();
         }
 
-        // Talhão (e rateio opcional entre dois talhões nas saídas)
-        let talhao = strSafe(safeVal(prefix + 'talhao')).toUpperCase(); let talhao2 = ''; let pct = 100;
+        // Talhão (nas saídas, o custo pode ser distribuído entre até 4 talhões)
+        let talhao = strSafe(safeVal(prefix + 'talhao')).toUpperCase(); let talhao2 = ''; let pct = 100; let listaRt = null;
         if (tipoBase === 'Saida') {
-            talhao2 = strSafe(safeVal('d_talhao2')).toUpperCase();
-            if (talhao2) {
-                if (!talhao) { alert("Informe o Talhão 1 antes de ratear com um Talhão 2."); return; }
-                const p = parseFloat(safeVal('d_pct')); pct = (p > 0 && p < 100) ? p : 50;
-            }
+            const rt = lerRateio('d_'); if (rt.erro) { alert(rt.erro); return; }
+            listaRt = rt.lista; talhao = listaRt[0] ? listaRt[0].talhao : ''; talhao2 = listaRt[1] ? listaRt[1].talhao : ''; pct = listaRt.length >= 2 ? listaRt[0].pct : 100;
         }
         const nova = { id: generateUUID(), updatedAt: Date.now(), deleted: false, data: data, tipo: tipoFinal, categoria: cat, setor: setor, talhao: talhao, talhao2: talhao2, pct: pct, local: loc, desc: desc, qtd: qtd, und: und, v_unit: parseFloat(vUnit), valor: val, sit: document.getElementById(prefix + 'sit').value || 'Pago', obs: '' };
+        if (listaRt) gravarRateioNaTransacao(nova, listaRt);
         transacoes.push(nova);
 
         // Compra de insumo: oferece dar entrada no estoque (custo médio ponderado)
@@ -601,7 +600,7 @@ function addTransacao(e, tipoBase) {
         salvarDados();
 
         document.getElementById(tipoBase === 'Saida' ? 'caixa_form_saida' : 'caixa_form_receita').reset();
-        setVal(prefix + 'data', hojeLocal()); revalidarCadastros();
+        setVal(prefix + 'data', hojeLocal()); revalidarCadastros(); try { atualizarSomaRateio('d_'); } catch (e2) {}
         preencherSelectsSafraFin(); atualizarOpcoesFiltros(); aplicarFiltros(); preencherSelectsLancamento();
         mostrarToast(tipoFinal.toUpperCase() + ' GRAVADA!' + avisoEstoque);
         if (modalFecharApos) fecharModalLancamento(tipoBase === 'Saida' ? 'despesa' : 'receita');
@@ -683,8 +682,7 @@ function abrirModalEdicao(id) {
         <div><label>DATA:</label> <input type="date" id="ed_data" value="${sanitizeDateString(t.data)}"></div> ${htmlSel}
         <div><label>${ehRec ? 'PRODUTO' : 'CATEGORIA'}:</label> <input type="text" id="ed_categoria" list="${ehRec ? 'lista_r_categoria' : 'lista_d_categoria'}" data-orig="${vCat}" value="${vCat}" autocomplete="off"></div>
         ${ehRec ? '' : `<div><label>SETOR:</label> <input type="text" id="ed_setor" list="lista_d_setor" data-orig="${vSet}" value="${vSet}" autocomplete="off"></div>`}
-        <div><label>TALHÃO:</label> <input type="text" id="ed_talhao" list="lista-talhoes" data-orig="${strEscape(t.talhao)}" value="${strEscape(t.talhao)}" autocomplete="off"></div>
-        ${ehRec ? '' : `<div><label>% TALHÃO 1:</label> <input type="number" id="ed_pct" min="1" max="99" step="1" value="${t.talhao2 ? (parseFloat(t.pct) || 50) : ''}" placeholder="50"></div><div><label>TALHÃO 2 (RESTO):</label> <input type="text" id="ed_talhao2" list="lista-talhoes" data-orig="${strEscape(t.talhao2)}" value="${strEscape(t.talhao2)}" autocomplete="off"></div>`}
+        ${ehRec ? `<div><label>TALHÃO:</label> <input type="text" id="ed_talhao" list="lista-talhoes" data-orig="${strEscape(t.talhao)}" value="${strEscape(t.talhao)}" autocomplete="off"></div>` : `<div style="grid-column: 1 / -1;">${htmlRateio('ed_', rateioDe(t))}</div>`}
         <div style="grid-column: span 2;"><label>${ehRec ? 'CLIENTE' : 'FORNECEDOR'}:</label> <input type="text" id="ed_local" list="${ehRec ? 'lista_r_local' : 'lista_d_local'}" data-orig="${vLoc}" value="${vLoc}" autocomplete="off"></div>
         <div style="grid-column: span 2;"><label>DESCRIÇÃO:</label> <input type="text" id="ed_desc" value="${vDesc}"></div>
         <div><label>QTD:</label> <input type="number" id="ed_qtd" step="0.01" value="${parseFloat(t.qtd)||0}"></div>
@@ -704,7 +702,7 @@ function guardarEdicao() {
     // Itens novos ou alterados precisam estar cadastrados (valores antigos já gravados podem ser mantidos)
     const campos = ehRec
         ? [['ed_categoria', 'produto_receita', 'Produto'], ['ed_local', 'cliente', 'Cliente'], ['ed_talhao', 'talhao', 'Talhão']]
-        : [['ed_categoria', 'categoria_despesa', 'Categoria'], ['ed_setor', 'setor', 'Setor'], ['ed_talhao', 'talhao', 'Talhão'], ['ed_talhao2', 'talhao', 'Talhão 2'], ['ed_local', 'fornecedor', 'Fornecedor']];
+        : [['ed_categoria', 'categoria_despesa', 'Categoria'], ['ed_setor', 'setor', 'Setor'], ['ed_talhao', 'talhao', 'Talhão'], ['ed_talhao2', 'talhao', 'Talhão 2'], ['ed_talhao3', 'talhao', 'Talhão 3'], ['ed_talhao4', 'talhao', 'Talhão 4'], ['ed_local', 'fornecedor', 'Fornecedor']];
     const falhas = [];
     campos.forEach(c => {
         const el = document.getElementById(c[0]); if (!el) return;
@@ -713,18 +711,14 @@ function guardarEdicao() {
     });
     if (falhas.length) { alert("Os itens abaixo não estão cadastrados:\n\n" + falhas.join("\n") + "\n\nCadastre-os na tela Cadastros e tente novamente."); return; }
 
+    let rtEd = null; if (document.getElementById('ed_talhao2')) { rtEd = lerRateio('ed_'); if (rtEd.erro) { alert(rtEd.erro); return; } }
     const gv = i => { const el = document.getElementById(i); return el ? el.value.trim().toUpperCase() : null; };
     t.data = sanitizeDateString(document.getElementById('ed_data').value); t.tipo = document.getElementById('ed_tipo').value;
     t.categoria = gv('ed_categoria') || ''; if (document.getElementById('ed_setor')) t.setor = gv('ed_setor') || '-';
     t.local = gv('ed_local') || ''; t.desc = gv('ed_desc') || '';
     t.qtd = document.getElementById('ed_qtd').value; t.und = gv('ed_und') || '';
     t.valor = parseFloat(document.getElementById('ed_valor').value) || 0; t.sit = document.getElementById('ed_sit').value;
-    t.talhao = gv('ed_talhao') || '';
-    if (document.getElementById('ed_talhao2')) {
-        t.talhao2 = gv('ed_talhao2') || ''; const p = parseFloat(document.getElementById('ed_pct').value);
-        if (t.talhao2 && !t.talhao) { t.talhao = t.talhao2; t.talhao2 = ''; }
-        t.pct = t.talhao2 ? ((p > 0 && p < 100) ? p : 50) : 100;
-    }
+    if (rtEd) gravarRateioNaTransacao(t, rtEd.lista); else t.talhao = gv('ed_talhao') || '';
     t.updatedAt = Date.now();
     salvarDados(); fecharModal(); preencherSelectsSafraFin(); preencherSelectsLancamento(); atualizarOpcoesFiltros(); aplicarFiltros();
 }
@@ -738,7 +732,7 @@ function atualizarOpcoesFiltros() {
         if(strSafe(t.setor) && t.setor !== '-') sets.add(strSafe(t.setor).toUpperCase());
         if(strSafe(t.local) && t.local !== '-') locs.add(strSafe(t.local).toUpperCase());
         if(strSafe(t.desc) && t.desc !== '-') descs.add(strSafe(t.desc).toUpperCase());
-        [t.talhao, t.talhao2].forEach(x => { if(strSafe(x) && x !== '-') talhs.add(strSafe(x).toUpperCase()); });
+        talhoesDe(t).forEach(x => talhs.add(x));
     });
     function preencher(id, setVals) { const sel = document.getElementById(id); if(sel) { const val = sel.value; sel.innerHTML = '<option value="">TUDO</option>' + Array.from(setVals).sort().map(v => `<option value="${strEscape(v.toLowerCase())}">${strEscape(v)}</option>`).join(''); sel.value = val; } }
     preencher('f_cat', cats); preencher('f_setor', sets); preencher('f_talhao', talhs); preencher('f_local', locs); preencher('f_desc', descs);
@@ -769,7 +763,7 @@ function aplicarFiltros() {
     let lista = transacoes.filter(t => {
         if(t.deleted) return false;
         let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (String(t.tipo).toLowerCase() === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
-        if(pG && !`${strSafe(t.desc)} ${strSafe(t.local)} ${cM} ${strSafe(t.setor)} ${strSafe(t.talhao)} ${strSafe(t.talhao2)} ${t.tipo}`.toLowerCase().includes(pG)) return false;
+        if(pG && !`${strSafe(t.desc)} ${strSafe(t.local)} ${cM} ${strSafe(t.setor)} ${talhoesDe(t).join(' ')} ${t.tipo}`.toLowerCase().includes(pG)) return false;
         if(fD && sanitizeDateString(t.data) !== fD) return false;
         if(fT && String(t.tipo).toLowerCase() !== fT) return false;
         if(fC && cM.toLowerCase() !== fC) return false;
@@ -777,7 +771,7 @@ function aplicarFiltros() {
         if(fL && strSafe(t.local).toLowerCase() !== fL) return false;
         if(fDe && strSafe(t.desc).toLowerCase() !== fDe) return false;
         if(fSi && strSafe(t.sit).toLowerCase() !== fSi) return false;
-        if(fTl && strSafe(t.talhao).toLowerCase() !== fTl && strSafe(t.talhao2).toLowerCase() !== fTl) return false;
+        if(fTl && !talhoesDe(t).some(x => x.toLowerCase() === fTl)) return false;
         if (filtroRapido === 'safra' && obterSafraGeral(t.data) !== obterSafraAtual()) return false;
         return true;
     });
@@ -1787,7 +1781,7 @@ function exportarCaixaCSV() {
     const txt = v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
     const linhas = [['Data', 'Tipo', 'Categoria/Produto', 'Setor', 'Talhão', 'Fornecedor/Cliente', 'Descrição', 'Qtd', 'Und', 'V.Unit', 'Total', 'Situação'].join(';')];
     lista.forEach(t => {
-        const tal = strSafe(t.talhao) ? (strSafe(t.talhao2) ? `${t.talhao} (${t.pct}%) / ${t.talhao2}` : t.talhao) : '';
+        const rt = rateioDe(t); const tal = rt.map(x => rt.length > 1 ? `${x.talhao} (${x.pct}%)` : x.talhao).join(' / ');
         linhas.push([formatarData(t.data), t.tipo, t.categoria, t.setor, tal, t.local, t.desc].map(txt).concat([num(t.qtd), txt(t.und), num(t.v_unit), num(t.valor), txt(t.sit)]).join(';'));
     });
     baixarArquivo(`caixa_rancho3c_${hojeLocal()}.csv`, '﻿' + linhas.join('\r\n'), 'text/csv;charset=utf-8');
@@ -1846,12 +1840,8 @@ function nomesTalhaoSet() {
 
 // Divide o valor de um lançamento entre os talhões (campo Talhão; se vazio, usa o Setor quando ele for um talhão/lavoura)
 function alocacaoTalhao(t) {
-    const v = parseFloat(t.valor) || 0;
-    const t1 = strSafe(t.talhao).toUpperCase(); const t2 = strSafe(t.talhao2).toUpperCase();
-    if (t1 && t1 !== '-') {
-        if (t2 && t2 !== '-') { let p = parseFloat(t.pct); if (isNaN(p) || p <= 0 || p >= 100) p = 50; return [{ talhao: t1, valor: v * p / 100 }, { talhao: t2, valor: v * (100 - p) / 100 }]; }
-        return [{ talhao: t1, valor: v }];
-    }
+    const v = parseFloat(t.valor) || 0; const r = rateioDe(t);
+    if (r.length) { let acc = 0; return r.map((x, i) => { const val = i === r.length - 1 ? v - acc : v * x.pct / 100; acc += val; return { talhao: x.talhao, valor: val }; }); }
     if (String(t.tipo).toLowerCase() === 'despesa') {
         const setor = strSafe(t.setor).toUpperCase();
         if (setor && nomesTalhaoSet().has(setor)) return [{ talhao: setor, valor: v }];
@@ -1860,10 +1850,9 @@ function alocacaoTalhao(t) {
 }
 
 function rotuloTalhao(t) {
-    const a = strSafe(t.talhao), b = strSafe(t.talhao2);
-    if (!a || a === '-') return '-';
-    if (b) { const p = parseFloat(t.pct) || 50; return `${strEscape(a)} (${p}%)<br>${strEscape(b)} (${100 - p}%)`; }
-    return strEscape(a);
+    const r = rateioDe(t); if (!r.length) return '-';
+    if (r.length === 1) return strEscape(r[0].talhao);
+    return r.map(x => `${strEscape(x.talhao)} (${x.pct}%)`).join('<br>');
 }
 
 function infoTalhao(n) { const i = (opcoesDin.talhoesInfo || {})[String(n).toUpperCase()]; return (i && !i.deleted) ? i : null; }
@@ -1962,7 +1951,7 @@ function atualizarAlertas() {
     const baixo = estoque.filter(e => { if (!e || e.deleted || !e.produto) return false; const q = parseFloat(e.qtd) || 0; const m = parseFloat(e.qtd_min) || 0; return q < 0 || (m > 0 && q < m); }).length;
 
     const badge = (id, n) => { const el = document.getElementById(id); if (!el) return; if (n > 0) { el.innerText = n; el.style.display = 'inline-block'; } else el.style.display = 'none'; };
-    badge('badge_atrasadas', pagVenc); badge('badge_estoque', baixo);
+    badge('badge_atrasadas', pagVenc); badge('badge_estoque', baixo); try { atualizarMarcasMenu(); } catch (e2) {}
 
     const box = document.getElementById('alertas_pendencias');
     if (box) {
@@ -1989,7 +1978,7 @@ const CADASTROS_DEF = [
 ];
 
 // Campo do formulário -> cadastro que o alimenta
-const CAMPOS_CAD = { d_categoria: 'categoria_despesa', d_setor: 'setor', d_talhao: 'talhao', d_talhao2: 'talhao', d_local: 'fornecedor', r_categoria: 'produto_receita', r_local: 'cliente', r_talhao: 'talhao' };
+const CAMPOS_CAD = { d_categoria: 'categoria_despesa', d_setor: 'setor', d_talhao: 'talhao', d_talhao2: 'talhao', d_talhao3: 'talhao', d_talhao4: 'talhao', d_local: 'fornecedor', r_categoria: 'produto_receita', r_local: 'cliente', r_talhao: 'talhao' };
 
 function cadNorm(v) { const s = strSafe(v).toUpperCase().replace(/\s+/g, ' '); return s === '-' ? '' : s; }
 function cadLista(chave) {
@@ -2029,7 +2018,7 @@ function semearCadastros() {
         if (!t || t.deleted) return;
         if (String(t.tipo).toLowerCase() === 'receita') { add('produto_receita', t.categoria); add('cliente', t.local); }
         else { add('categoria_despesa', t.categoria); add('setor', t.setor); add('fornecedor', t.local); }
-        add('talhao', t.talhao); add('talhao', t.talhao2);
+        talhoesDe(t).forEach(x => add('talhao', x));
     });
     sincronizarTalhoesDerivados();
 }
@@ -2043,7 +2032,7 @@ function cadUsos(chave) {
         else if (chave === 'fornecedor' && !rec) inc(t.local);
         else if (chave === 'produto_receita' && rec) inc(t.categoria);
         else if (chave === 'cliente' && rec) inc(t.local);
-        else if (chave === 'talhao') { inc(t.talhao); inc(t.talhao2); }
+        else if (chave === 'talhao') { talhoesDe(t).forEach(x => inc(x)); }
     });
     if (chave === 'talhao') agriRecords.forEach(r => { if (r && !r.deleted) inc(r.talhao); });
     return c;
@@ -2264,7 +2253,7 @@ function abrirDetalheCategoria(catEncoded, tipoFiltro) {
 
 document.addEventListener('keydown', ev => {
     if (ev.key !== 'Escape') return;
-    ['modal-despesa', 'modal-receita', 'modal-edicao'].forEach(id => { const m = document.getElementById(id); if (m && m.style.display === 'flex') m.style.display = 'none'; });
+    ['modal-despesa', 'modal-receita', 'modal-edicao', 'modal-chuvas'].forEach(id => { const m = document.getElementById(id); if (m && m.style.display === 'flex') m.style.display = 'none'; });
 });
 document.addEventListener('DOMContentLoaded', () => { try { vincularValidacaoCadastro(); } catch (e) {} });
 
@@ -2446,6 +2435,170 @@ document.addEventListener('DOMContentLoaded', () => {
     agendarAjusteArea();
 });
 
+
+/* =========================================================================
+   13. RATEIO DA DESPESA EM ATÉ 4 TALHÕES
+========================================================================= */
+function rateioDe(t) {
+    if (t && typeof t.rateio === 'string' && t.rateio.indexOf(':') > -1) {
+        const l = t.rateio.split('|').map(s => { const i = s.lastIndexOf(':'); return { talhao: s.slice(0, i).trim().toUpperCase(), pct: parseFloat(s.slice(i + 1)) }; })
+            .filter(x => x.talhao && x.talhao !== '-' && x.pct > 0);
+        if (l.length >= 2) return l;
+    }
+    const t1 = strSafe(t && t.talhao).toUpperCase(), t2 = strSafe(t && t.talhao2).toUpperCase();
+    if (t1 && t1 !== '-') {
+        if (t2 && t2 !== '-') { let p = parseFloat(t.pct); if (isNaN(p) || p <= 0 || p >= 100) p = 50; return [{ talhao: t1, pct: p }, { talhao: t2, pct: Math.round((100 - p) * 100) / 100 }]; }
+        return [{ talhao: t1, pct: 100 }];
+    }
+    return [];
+}
+function talhoesDe(t) { return rateioDe(t).map(x => x.talhao); }
+
+const idRateio = (pref, n) => n === 1 ? pref + 'talhao' : pref + 'talhao' + n;
+const idPct = (pref, n) => n === 1 ? pref + 'pct' : pref + 'pct' + n;
+
+function htmlRateio(pref, lista) {
+    let linhas = '';
+    for (let n = 1; n <= 4; n++) {
+        const it = (lista || [])[n - 1];
+        linhas += `<div class="rateio-linha"><label>Talhão ${n}</label>
+            <input type="text" id="${idRateio(pref, n)}" list="lista-talhoes" autocomplete="off" placeholder="${n === 1 ? 'Opcional' : 'Opcional'}" data-orig="${it ? strEscape(it.talhao) : ''}" value="${it ? strEscape(it.talhao) : ''}" oninput="atualizarSomaRateio('${pref}')" onchange="atualizarSomaRateio('${pref}')">
+            <input type="number" id="${idPct(pref, n)}" class="rateio-pct" min="0.01" max="100" step="0.01" placeholder="%" title="Percentual deste talhão (vazio = divide o que sobrar)" value="${it && lista.length > 1 ? it.pct : ''}" oninput="atualizarSomaRateio('${pref}')"></div>`;
+    }
+    return `<div class="rateio-box"><div class="rateio-topo"><b>🌾 Talhões — distribuir o custo (até 4)</b>
+        <span class="rateio-soma" id="${pref}rateio_soma"></span>
+        <button type="button" class="btn-rateio" onclick="dividirIgual('${pref}')">⚖️ Dividir igualmente</button></div>
+        <div class="rateio-grid">${linhas}</div></div>`;
+}
+
+function lerRateio(pref) {
+    const itens = [];
+    for (let n = 1; n <= 4; n++) {
+        const nome = cadNorm(safeVal(idRateio(pref, n))); const raw = safeVal(idPct(pref, n)); const p = parseFloat(raw);
+        if (nome) itens.push({ n: n, talhao: nome, pct: (raw !== '' && !isNaN(p)) ? p : null });
+        else if (raw !== '' && n === 1) return { lista: [], erro: 'Informe o Talhão 1 antes de definir percentuais.' };
+    }
+    if (!itens.length) { return { lista: [] }; }
+    const nomes = itens.map(i => i.talhao);
+    if (new Set(nomes).size !== nomes.length) return { lista: [], erro: 'O mesmo talhão foi informado mais de uma vez.' };
+    if (itens.length === 1) return { lista: [{ talhao: itens[0].talhao, pct: 100 }] };
+    if (itens.some(i => i.pct !== null && (i.pct <= 0 || i.pct >= 100))) return { lista: [], erro: 'Cada percentual deve ficar entre 0 e 100.' };
+    const dados = itens.filter(i => i.pct !== null); const brancos = itens.filter(i => i.pct === null);
+    const soma = dados.reduce((s, i) => s + i.pct, 0);
+    if (brancos.length) {
+        const resto = Math.round((100 - soma) * 100) / 100;
+        if (resto <= 0) return { lista: [], erro: `Os percentuais informados já somam ${soma}%. Não sobra nada para ${brancos.map(b => b.talhao).join(', ')}.` };
+        let acc = 0; brancos.forEach((b, k) => { b.pct = (k === brancos.length - 1) ? Math.round((resto - acc) * 100) / 100 : Math.round(resto / brancos.length * 100) / 100; acc += b.pct; });
+    } else if (Math.abs(soma - 100) > 0.01) {
+        return { lista: [], erro: `A soma dos percentuais deve ser 100% (agora: ${Math.round(soma * 100) / 100}%).` };
+    }
+    return { lista: itens.map(i => ({ talhao: i.talhao, pct: i.pct })) };
+}
+
+function atualizarSomaRateio(pref) {
+    const el = document.getElementById(pref + 'rateio_soma'); if (!el) return;
+    const r = lerRateio(pref);
+    if (r.erro) { el.textContent = r.erro; el.className = 'rateio-soma erro'; }
+    else if (r.lista.length > 1) { el.textContent = r.lista.map(x => `${x.talhao} ${x.pct}%`).join(' · '); el.className = 'rateio-soma ok'; }
+    else el.textContent = '';
+}
+
+function dividirIgual(pref) {
+    const n = []; for (let i = 1; i <= 4; i++) if (cadNorm(safeVal(idRateio(pref, i)))) n.push(i);
+    for (let i = 1; i <= 4; i++) setVal(idPct(pref, i), '');
+    if (n.length > 1) { let acc = 0; n.forEach((i, k) => { const p = k === n.length - 1 ? Math.round((100 - acc) * 100) / 100 : Math.round(100 / n.length * 100) / 100; acc += p; setVal(idPct(pref, i), p); }); }
+    atualizarSomaRateio(pref);
+}
+
+function gravarRateioNaTransacao(t, lista) {
+    t.talhao = lista[0] ? lista[0].talhao : ''; t.talhao2 = lista[1] ? lista[1].talhao : '';
+    t.pct = lista.length >= 2 ? lista[0].pct : 100;
+    t.rateio = lista.length > 2 ? lista.map(x => x.talhao + ':' + x.pct).join('|') : '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const box = document.getElementById('d_rateio_box');
+    if (box) { box.outerHTML = htmlRateio('d_', []).replace('class="rateio-box"', 'class="rateio-box" id="d_rateio_box" style="grid-column: 1 / -1;"'); try { vincularValidacaoCadastro(); } catch (e) {} }
+});
+
+/* =========================================================================
+   14. CHUVAS: TOTAIS MENSAIS / ANUAIS E COMPARATIVO
+========================================================================= */
+const NOMES_MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+let chartChuvaAnalise = null;
+
+function chuvasValidas() { return chuvas.filter(c => c && !c.deleted && c.data && !isNaN(parseFloat(c.mm))).map(c => { const d = sanitizeDateString(c.data); return { ano: d.substring(0, 4), mes: parseInt(d.substring(5, 7), 10), dia: parseInt(d.substring(8, 10), 10), mm: parseFloat(c.mm) }; }); }
+
+function abrirModalChuvas() {
+    const l = chuvasValidas(); const anos = [...new Set(l.map(x => x.ano))].sort().reverse();
+    const hoje = hojeLocal().substring(0, 4); const principal = anos.includes(hoje) ? hoje : (anos[0] || hoje);
+    const opt = (lista, vazio) => (vazio ? `<option value="">${vazio}</option>` : '') + lista.map(a => `<option value="${a}">${a}</option>`).join('');
+    const lista = anos.length ? anos : [hoje];
+    document.getElementById('ca_ano_a').innerHTML = opt(lista); document.getElementById('ca_ano_b').innerHTML = opt(lista, 'SEM COMPARAÇÃO');
+    setVal('ca_ano_a', principal); const outro = lista.find(a => a !== principal); setVal('ca_ano_b', outro || '');
+    setVal('ca_visao', 'mensal'); setVal('ca_mes', '0');
+    document.getElementById('modal-chuvas').style.display = 'flex'; renderAnaliseChuvas();
+}
+function fecharModalChuvas() { document.getElementById('modal-chuvas').style.display = 'none'; }
+
+function renderAnaliseChuvas() {
+    const visao = safeVal('ca_visao'); const mesF = parseInt(safeVal('ca_mes'), 10) || 0; const A = safeVal('ca_ano_a'); const B = safeVal('ca_ano_b');
+    document.getElementById('ca_ano_a_box').style.display = visao === 'mensal' ? '' : 'none';
+    document.getElementById('ca_ano_b_box').style.display = visao === 'mensal' ? '' : 'none';
+    const l = chuvasValidas(); const fmt = n => (Math.round(n * 10) / 10).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const pctTxt = (a, b) => b > 0 ? ((a - b) / b * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%' : '-';
+    const dif = (a, b) => { const d = a - b; return `<span style="color:${d > 0 ? '#2980b9' : d < 0 ? '#c0392b' : '#888'}; font-weight:700;">${d > 0 ? '+' : ''}${fmt(d)}</span>`; };
+    let html = '', labels = [], datasets = [], resumo = '';
+    if (visao === 'mensal') {
+        const soma = ano => { const v = new Array(12).fill(0), dias = new Array(12).fill(0); l.filter(x => x.ano === ano).forEach(x => { v[x.mes - 1] += x.mm; if (x.mm > 0) dias[x.mes - 1]++; }); return { v, dias }; };
+        const a = soma(A); const b = B ? soma(B) : null; const meses = mesF ? [mesF - 1] : [...Array(12).keys()];
+        html = `<thead><tr><th>MÊS</th><th style="text-align:right">${A} (mm)</th><th style="text-align:right">DIAS COM CHUVA</th>${b ? `<th style="text-align:right">${B} (mm)</th><th style="text-align:right">DIAS</th><th style="text-align:right">DIFERENÇA (mm)</th><th style="text-align:right">VARIAÇÃO</th>` : ''}</tr></thead><tbody>`;
+        let tA = 0, tB = 0, dA = 0, dB = 0;
+        meses.forEach(i => {
+            tA += a.v[i]; dA += a.dias[i]; labels.push(NOMES_MESES[i].substring(0, 3));
+            html += `<tr><td><b>${NOMES_MESES[i]}</b></td><td style="text-align:right">${fmt(a.v[i])}</td><td style="text-align:right">${a.dias[i]}</td>`;
+            if (b) { tB += b.v[i]; dB += b.dias[i]; html += `<td style="text-align:right">${fmt(b.v[i])}</td><td style="text-align:right">${b.dias[i]}</td><td style="text-align:right">${dif(a.v[i], b.v[i])}</td><td style="text-align:right">${pctTxt(a.v[i], b.v[i])}</td>`; }
+            html += '</tr>';
+        });
+        html += `</tbody><tfoot><tr style="background:#f8f9fa; font-weight:700;"><td>TOTAL${mesF ? '' : ' DO ANO'}</td><td style="text-align:right">${fmt(tA)}</td><td style="text-align:right">${dA}</td>${b ? `<td style="text-align:right">${fmt(tB)}</td><td style="text-align:right">${dB}</td><td style="text-align:right">${dif(tA, tB)}</td><td style="text-align:right">${pctTxt(tA, tB)}</td>` : ''}</tr></tfoot>`;
+        datasets.push({ label: A, data: meses.map(i => Math.round(a.v[i] * 10) / 10), backgroundColor: '#3498db' });
+        if (b) datasets.push({ label: B, data: meses.map(i => Math.round(b.v[i] * 10) / 10), backgroundColor: '#e67e22' });
+        resumo = `Total ${A}: <b>${fmt(tA)} mm</b>` + (b ? ` &nbsp;|&nbsp; Total ${B}: <b>${fmt(tB)} mm</b> &nbsp;|&nbsp; Diferença: ${dif(tA, tB)} mm (${pctTxt(tA, tB)})` : '');
+    } else {
+        const porAno = {}; l.filter(x => !mesF || x.mes === mesF).forEach(x => { const o = porAno[x.ano] || (porAno[x.ano] = { t: 0, dias: 0, max: 0 }); o.t += x.mm; if (x.mm > 0) o.dias++; if (x.mm > o.max) o.max = x.mm; });
+        const anos = Object.keys(porAno).sort();
+        html = `<thead><tr><th>ANO</th><th style="text-align:right">TOTAL (mm)</th><th style="text-align:right">DIAS COM CHUVA</th><th style="text-align:right">MÉDIA POR DIA CHUVOSO (mm)</th><th style="text-align:right">MAIOR CHUVA DIÁRIA (mm)</th><th style="text-align:right">VS. ANO ANTERIOR</th></tr></thead><tbody>`;
+        anos.forEach((an, i) => { const o = porAno[an]; const ant = i > 0 ? porAno[anos[i - 1]] : null;
+            html += `<tr><td><b>${an}</b></td><td style="text-align:right">${fmt(o.t)}</td><td style="text-align:right">${o.dias}</td><td style="text-align:right">${o.dias ? fmt(o.t / o.dias) : '-'}</td><td style="text-align:right">${fmt(o.max)}</td><td style="text-align:right">${ant ? dif(o.t, ant.t) + ' (' + pctTxt(o.t, ant.t) + ')' : '-'}</td></tr>`; });
+        if (!anos.length) html += '<tr><td colspan="6" style="text-align:center; padding:25px; color:#aaa;">Sem registros no filtro escolhido</td></tr>';
+        html += '</tbody>';
+        labels = anos; datasets.push({ label: mesF ? `Total de ${NOMES_MESES[mesF - 1]} (mm)` : 'Total do ano (mm)', data: anos.map(a => Math.round(porAno[a].t * 10) / 10), backgroundColor: '#3498db' });
+        const tot = anos.reduce((s, a) => s + porAno[a].t, 0); resumo = anos.length ? `Média anual${mesF ? ' (' + NOMES_MESES[mesF - 1] + ')' : ''}: <b>${fmt(tot / anos.length)} mm</b> em ${anos.length} ano(s)` : '';
+    }
+    document.getElementById('ca_tabela').innerHTML = html; document.getElementById('ca_resumo').innerHTML = resumo;
+    if (typeof Chart === 'undefined') return;
+    if (chartChuvaAnalise) chartChuvaAnalise.destroy();
+    const m = visao === 'mensal' ? labels : labels;
+    chartChuvaAnalise = new Chart(document.getElementById('chartChuvaAnalise').getContext('2d'), { type: 'bar', data: { labels: m, datasets: datasets }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'Milímetros (mm)' } } } } });
+}
+
+/* =========================================================================
+   15. MENU SUPERIOR
+========================================================================= */
+function fecharMenusTopo() { document.querySelectorAll('.menu-grupo.aberto').forEach(g => g.classList.remove('aberto')); }
+function alternarGrupoMenu(ev, btn) { ev.stopPropagation(); const g = btn.parentElement; const aberto = g.classList.contains('aberto'); fecharMenusTopo(); if (!aberto) g.classList.add('aberto'); }
+document.addEventListener('click', ev => { if (!(ev.target.closest && ev.target.closest('.menu-grupo'))) fecharMenusTopo(); });
+function atualizarMarcasMenu() {
+    document.querySelectorAll('.menu-grupo').forEach(g => {
+        g.querySelector('.menu-grupo-btn').classList.toggle('btn-ativo', !!g.querySelector('.menu-sub button.btn-ativo'));
+        let n = 0; g.querySelectorAll('.menu-sub .badge-atrasadas').forEach(b => { if (b.style.display !== 'none') n += parseInt(b.innerText, 10) || 0; });
+        const bg = g.querySelector('.menu-grupo-btn .badge-atrasadas'); if (bg) { bg.innerText = n; bg.style.display = n > 0 ? 'inline-block' : 'none'; }
+    });
+    document.body.classList.toggle('na-home', !!document.getElementById('home') && document.getElementById('home').classList.contains('active'));
+}
+
+
+document.addEventListener('DOMContentLoaded', () => { try { atualizarMarcasMenu(); } catch (e) {} });
 
 /* COMANDO GLOBAL PARA MAIÚSCULAS (só altera o valor quando necessário, para não fechar listas de sugestão) */
 document.addEventListener('input', function(e) {

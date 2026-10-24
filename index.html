@@ -5,35 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Integrado Rancho 3C</title>
     <!-- Ligação com o arquivo de CSS separado -->
-    <link rel="stylesheet" href="style.css?v=20261021">
+    <link rel="stylesheet" href="style.css?v=20261024">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar no-print">
-    <div class="sidebar-logo">
-        <h2>RANCHO 3C</h2>
-        <span>SISTEMA INTEGRADO</span>
-    </div>
-    <div class="sidebar-menu">
+<!-- MENU SUPERIOR -->
+<nav class="topbar no-print">
+    <div class="topbar-marca" onclick="showTab('home')" title="Início">RANCHO 3C</div>
+    <div class="topbar-menu">
         <button id="btn_home" class="btn-ativo" onclick="showTab('home')">🏠 Início</button>
         <button id="btn_cadastros" onclick="showTab('cadastros_main')">📝 Cadastros</button>
-        <div class="sidebar-group-title">Financeiro</div>
-        <button id="btn_resumo" onclick="showTab('resumo')">📊 Painel Financeiro</button>
-        <button id="btn_movimentacoes" onclick="showTab('movimentacoes')">📋 Caixa Diário</button>
-        <button id="btn_relatorios_detalhados" onclick="showTab('relatorios_detalhados')">📈 Relatórios</button>
-        <button id="btn_pendencias" onclick="showTab('pendencias')">🔔 Pendências <span id="badge_atrasadas" class="badge-atrasadas" style="display: none;">0</span></button>
-        <div class="sidebar-group-title">Agrícola</div>
-        <button id="btn_agri_dash" onclick="showTab('agri_dash')">📊 Painel Agrícola</button>
-        <button id="btn_agri_app" onclick="showTab('agri_app')">🚜 Aplicações</button>
-        <button id="btn_agri_est" onclick="showTab('agri_est')">📦 Estoque <span id="badge_estoque" class="badge-atrasadas" style="display: none;">0</span></button>
-        <button id="btn_talhoes" onclick="showTab('talhoes_main')">🌾 Talhões</button>
-        <button id="btn_solo" onclick="showTab('solo_main')">🧪 Solo & Nutrição</button>
-        <button id="btn_chuvas" onclick="showTab('chuvas_main')">🌧️ Chuvas</button>
+        <div class="menu-grupo">
+            <button type="button" class="menu-grupo-btn" onclick="alternarGrupoMenu(event, this)">💰 Financeiro ▾ <span class="badge-atrasadas" style="display: none;">0</span></button>
+            <div class="menu-sub">
+                <button id="btn_resumo" onclick="showTab('resumo')">📊 Painel Financeiro</button>
+                <button id="btn_movimentacoes" onclick="showTab('movimentacoes')">📋 Caixa Diário</button>
+                <button id="btn_relatorios_detalhados" onclick="showTab('relatorios_detalhados')">📈 Relatórios</button>
+                <button id="btn_pendencias" onclick="showTab('pendencias')">🔔 Pendências <span id="badge_atrasadas" class="badge-atrasadas" style="display: none;">0</span></button>
+            </div>
+        </div>
+        <div class="menu-grupo">
+            <button type="button" class="menu-grupo-btn" onclick="alternarGrupoMenu(event, this)">🌱 Agrícola ▾ <span class="badge-atrasadas" style="display: none;">0</span></button>
+            <div class="menu-sub">
+                <button id="btn_agri_dash" onclick="showTab('agri_dash')">📊 Painel Agrícola</button>
+                <button id="btn_agri_app" onclick="showTab('agri_app')">🚜 Aplicações</button>
+                <button id="btn_agri_est" onclick="showTab('agri_est')">📦 Estoque <span id="badge_estoque" class="badge-atrasadas" style="display: none;">0</span></button>
+                <button id="btn_talhoes" onclick="showTab('talhoes_main')">🌾 Talhões</button>
+                <button id="btn_solo" onclick="showTab('solo_main')">🧪 Solo & Nutrição</button>
+                <button id="btn_chuvas" onclick="showTab('chuvas_main')">🌧️ Chuvas</button>
+            </div>
+        </div>
     </div>
     <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem()" title="Forçar Sincronização">⏳ Inicializando...</button>
-</div>
+</nav>
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
@@ -45,7 +50,7 @@
 
     <!-- HOME -->
     <div id="home" class="tab active">
-        <div style="height: calc(100vh - 150px); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 25px;">
+        <div style="height: calc(100vh - 56px - 60px); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 25px;">
             <img src="https://i.imgur.com/jPLDeyi.png" alt="Logotipo Rancho 3C" referrerpolicy="no-referrer" style="max-width: 420px; width: 60%; max-height: 55vh; object-fit: contain;">
             <h1 style="color: var(--cor-texto); font-size: 36px; letter-spacing: 2px; margin: 0;">BEM-VINDO(A) AO RANCHO 3C</h1>
         </div>
@@ -65,6 +70,7 @@
 
         <div class="filter-bar no-print">
             <label style="font-weight: 700; font-size:12px;">COMPARATIVO DE CHUVAS NO MÊS:</label>
+            <button type="button" class="btn-salvar-compacto" style="background: var(--cor-azul-flat); margin-left:auto; order:3;" onclick="abrirModalChuvas()">📊 Totais e comparativo</button>
             <select id="filtro_mes_chuva" onchange="renderChartChuvas()" style="width:200px; margin-left:15px;">
                 <option value="01">Janeiro</option> <option value="02">Fevereiro</option> <option value="03">Março</option>
                 <option value="04">Abril</option> <option value="05">Maio</option> <option value="06">Junho</option>
@@ -626,6 +632,25 @@
 
 <!-- Modais -->
 <!-- Janela flutuante: nova saída -->
+<!-- Janela flutuante: totais e comparativo de chuvas -->
+<div id="modal-chuvas">
+    <div class="modal-content modal-lanc modal-borda-chuva" style="max-width: 1100px;">
+        <div class="modal-lanc-topo">
+            <span style="font-size:15px; font-weight:700; color:var(--cor-azul-flat); font-family:'Rubik';">📊 CHUVAS — TOTAIS E COMPARATIVO</span>
+            <button type="button" class="btn-fechar-x" onclick="fecharModalChuvas()" title="Fechar (Esc)">✕</button>
+        </div>
+        <div class="chuva-filtros">
+            <div><label>Visão</label><select id="ca_visao" onchange="renderAnaliseChuvas()"><option value="mensal">Mensal (mês a mês)</option><option value="anual">Anual (total por ano)</option></select></div>
+            <div><label>Mês</label><select id="ca_mes" onchange="renderAnaliseChuvas()"><option value="0">Todos os meses</option><option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option><option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option></select></div>
+            <div id="ca_ano_a_box"><label>Ano</label><select id="ca_ano_a" onchange="renderAnaliseChuvas()"></select></div>
+            <div id="ca_ano_b_box"><label>Comparar com</label><select id="ca_ano_b" onchange="renderAnaliseChuvas()"></select></div>
+        </div>
+        <div id="ca_resumo" class="chuva-resumo"></div>
+        <div class="grafico-container" style="height: 260px;"><canvas id="chartChuvaAnalise"></canvas></div>
+        <div class="table-container no-fill" style="margin-top: 15px; max-height: none; overflow: visible;"><table id="ca_tabela"></table></div>
+    </div>
+</div>
+
 <div id="modal-despesa">
     <div class="modal-content modal-lanc modal-borda-despesa" id="caixa_lancamento_saida">
         <div class="modal-lanc-topo">
@@ -645,9 +670,7 @@
             <div><label>Data</label><input type="date" id="d_data" required></div>
             <div><label>Categoria</label><input list="lista_d_categoria" id="d_categoria" required autocomplete="off" placeholder="Selecione"></div>
             <div><label>Setor</label><input list="lista_d_setor" id="d_setor" required autocomplete="off" placeholder="Selecione"></div>
-            <div><label>Talhão</label><input list="lista-talhoes" id="d_talhao" autocomplete="off" placeholder="Opcional"></div>
-            <div><label>% Talhão 1</label><input type="number" id="d_pct" min="1" max="99" step="1" placeholder="50" title="Só use se for ratear com o Talhão 2 (padrão 50%)"></div>
-            <div><label>Talhão 2 (resto)</label><input list="lista-talhoes" id="d_talhao2" autocomplete="off" placeholder="Opcional"></div>
+            <div id="d_rateio_box" style="grid-column: 1 / -1;"></div>
             <div style="grid-column: span 2;"><label>Fornecedor</label><input list="lista_d_local" id="d_local" required autocomplete="off" placeholder="Selecione"></div>
             <div style="grid-column: span 2;"><label>Descrição</label><input list="lista_d_descricao" id="d_descricao" required autocomplete="off"></div>
             <div><label>Qtd</label><input type="number" id="d_qtd" step="0.01" oninput="calcularTotalDespesa()"></div>
@@ -722,7 +745,7 @@
 <datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
 
 <!-- AQUI É O SEGREDO: Em vez de duplicar 800 linhas, agora basta isso! -->
-<script src="app.js?v=20261021"></script>
+<script src="app.js?v=20261024"></script>
 
 </body>
 </html>
