@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Integrado Rancho 3C</title>
     <!-- Ligação com o arquivo de CSS separado -->
-    <link rel="stylesheet" href="style.css?v=20261024b">
+    <link rel="stylesheet" href="style.css?v=20261025c">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -44,14 +44,10 @@
     <button id="status_conexao" class="status-conexao aguardando" onclick="carregarDadosNuvem()" title="Forçar Sincronização">⏳ Inicializando...</button>
 </nav>
 
+<img class="logo-fundo" src="https://i.imgur.com/jPLDeyi.png" alt="" aria-hidden="true" referrerpolicy="no-referrer">
+
 <!-- MAIN CONTENT -->
 <div class="main-content">
-    <div class="header-container no-print">
-        <div style="width: 100px;"><img src="https://i.imgur.com/jPLDeyi.png" alt="Logotipo" referrerpolicy="no-referrer"></div>
-        <h3 style="color: var(--cor-texto); font-size: 20px; font-weight: 900; margin: 0; text-transform: uppercase; flex: 1; text-align: center; letter-spacing: 1px;">Gestão Agrícola e Financeira 3C</h3>
-        <div style="width: 100px;"></div>
-    </div>
-
     <!-- HOME -->
     <div id="home" class="tab active">
         <div style="height: calc(100vh - 56px - 60px); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 25px;">
@@ -136,7 +132,7 @@
     <!-- CAIXA Lançamentos -->
     <div id="movimentacoes" class="tab">
         <div class="barra-acoes-caixa no-print">
-            <button class="btn-novo-lanc btn-novo-despesa" onclick="abrirModalLancamento('despesa')">➖ Nova Saída <small>(Custeio / Investimento)</small></button>
+            <button class="btn-novo-lanc btn-novo-despesa" onclick="abrirModalLancamento('despesa')">➖ Nova Saída</button>
             <button class="btn-novo-lanc btn-novo-receita" onclick="abrirModalLancamento('receita')">➕ Nova Receita</button>
             <span style="flex-grow:1;"></span>
             <button class="btn-limpar" style="background: var(--cor-sidebar);" onclick="showTab('cadastros_main')" title="Categorias, setores, talhões, fornecedores, produtos e clientes">📝 Cadastros</button>
@@ -148,7 +144,8 @@
             <span style="flex-grow: 1;"></span>
             <input type="text" id="pesquisa_global" placeholder="Pesquisa rápida..." onkeydown="if(event.key==='Enter') aplicarFiltros()" style="width: 250px;">
             <button onclick="aplicarFiltros()" class="btn-salvar-compacto" style="background: var(--cor-sidebar);">Buscar</button>
-            <button onclick="exportarCaixaCSV()" class="btn-salvar-compacto" style="background: var(--cor-azul-flat);" title="Exporta a lista filtrada para Excel">📤 Exportar CSV</button>
+            <button onclick="exportarCaixa('xlsx')" class="btn-salvar-compacto" style="background: #1e8449;" title="Exporta a lista filtrada em Excel (.xlsx)">📗 Excel (.xlsx)</button>
+            <button onclick="exportarCaixa('pdf')" class="btn-salvar-compacto" style="background: #c0392b;" title="Exporta a lista filtrada em PDF">📕 PDF</button>
             <button onclick="limparFiltros()" class="btn-limpar">Limpar</button>
         </div>
 
@@ -179,9 +176,10 @@
         <div class="sub-menu no-print">
             <button id="btn_rel_tabelas" class="active" onclick="switchRelTab('tabelas')">Tabelas Resumo</button>
             <button id="btn_rel_cascata" onclick="switchRelTab('cascata')">🔍 Visão Detalhada (Cascata)</button>
+            <button id="btn_rel_custos" onclick="switchRelTab('custos')">📊 Gestão de Despesas</button>
         </div>
 
-        <div class="filter-bar no-print">
+        <div class="filter-bar no-print" id="rel_filtros_comuns">
             <label style="font-weight: 700; font-size:12px;">FILTRAR POR SAFRA:</label>
             <select id="filtro_safra_relatorios" onchange="atualizarFiltrosRelatorios()" style="width:200px;"><option value="">TODAS</option></select>
             <label style="font-weight: 700; font-size:12px; margin-left: 20px;">MÊS:</label>
@@ -197,6 +195,34 @@
                 <div class="widget-box" style="padding:0; overflow:hidden; border-top: 4px solid #f39c12;"><div class="widget-header" style="padding: 15px; margin:0; border:none; background:#f9f9f9; color: #f39c12;">🏷️ DESPESAS / CATEGORIA</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><tbody id="tbody_gastos_categoria"></tbody></table></div></div>
                 <div class="widget-box" style="padding:0; overflow:hidden; border-top: 4px solid var(--cor-laranja-flat);"><div class="widget-header" style="padding: 15px; margin:0; border:none; background:#f9f9f9; color: var(--cor-laranja-flat);">🚜 DESPESAS / SETOR</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><tbody id="tbody_gastos_setor"></tbody></table></div></div>
                 <div class="widget-box" style="padding:0; overflow:hidden; border-top: 4px solid var(--cor-roxo-flat);"><div class="widget-header" style="padding: 15px; margin:0; border:none; background:#f9f9f9; color: var(--cor-roxo-flat);">🏗️ INVESTIMENTOS</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><tbody id="tbody_investimentos_categoria"></tbody></table></div></div>
+            </div>
+        </div>
+
+        <!-- ABA 3: Gestão de despesas (setor, lavoura/talhão e safra) -->
+        <div id="rel_view_custos" class="sub-tab">
+            <div class="filter-bar no-print">
+                <label style="font-weight: 700; font-size:12px;">SAFRA:</label>
+                <select id="cs_safra" onchange="renderGestaoDespesas()" style="width:170px;"></select>
+                <label style="font-weight: 700; font-size:12px; margin-left: 10px;">NATUREZA:</label>
+                <select id="cs_nat" onchange="renderGestaoDespesas()" style="width:150px;"><option value="CUSTEIO">Custeio</option><option value="INVESTIMENTO">Investimento</option></select>
+                <label style="font-weight: 700; font-size:12px; margin-left: 10px;">VISÃO:</label>
+                <select id="cs_visao" onchange="renderGestaoDespesas()" style="width:360px;">
+                    <option value="lavouras">Por talhão (lavoura) e tipo de custo</option>
+                    <option value="setores">Por setor e categoria (com orçamento)</option>
+                    <option value="mensal">Evolução mensal por setor</option>
+                    <option value="gerais">Custos gerais (categoria → setor)</option>
+                    <option value="comparativo">Comparativo entre safras</option>
+                </select>
+                <span style="flex-grow: 1;"></span>
+                <button id="gd_btn_orc" onclick="abrirOrcamento()" class="btn-salvar-compacto" style="background: var(--cor-azul-flat);">🎯 Definir orçamento</button>
+                <button onclick="exportarCustos('xlsx')" class="btn-salvar-compacto" style="background: #1e8449;">📗 Excel (.xlsx)</button>
+                <button onclick="exportarCustos('pdf')" class="btn-salvar-compacto" style="background: #c0392b;">📕 PDF</button>
+            </div>
+            <div id="gd_cards" class="gd-cards"></div>
+            <div class="widget-box" style="padding:0; overflow:hidden;">
+                <div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9; border-bottom: 2px solid var(--cor-verde-flat); color: var(--cor-verde-flat);">📊 GESTÃO DE DESPESAS — POR SETOR E POR LAVOURA</div>
+                <div id="cs_nota" style="padding: 10px 15px; font-size: 12px; color: #777; border-bottom: 1px solid #eee; line-height:1.5;"></div>
+                <div class="table-container" style="box-shadow:none; border-radius:0;"><table id="cs_tabela" class="tabela-larga"></table></div>
             </div>
         </div>
 
@@ -312,6 +338,8 @@
             <div><label style="font-size:11px; font-weight:700; color:#888;">TALHÃO:</label> <select id="rel_agri_talhao" style="width:220px; margin-left:5px;"></select></div>
             <span style="flex-grow: 1;"></span>
             <button onclick="gerarRelatorioAgri()" class="btn-salvar-compacto" style="background: var(--cor-verde-flat);">📄 Gerar Relatório</button>
+            <button onclick="exportarRelatorioAgri('xlsx')" class="btn-salvar-compacto" style="background: #1e8449;">📗 Excel (.xlsx)</button>
+            <button onclick="exportarRelatorioAgri('pdf')" class="btn-salvar-compacto" style="background: #c0392b;">📕 PDF</button>
             <button onclick="window.print()" class="btn-limpar">🖨 Imprimir</button>
             <button onclick="showTab('agri_app')" class="btn-limpar" style="background: var(--cor-azul-flat);">← Voltar</button>
         </div>
@@ -422,7 +450,7 @@
                     <input type="hidden" id="sl_id" value="">
                     <div class="grid-form" style="margin-bottom: 25px;">
                         <div><label>DATA DA ANÁLISE</label><input type="date" id="sl_data" required></div>
-                        <div style="grid-column: span 2;"><label>TALHÃO / CULTURA</label><input type="text" id="sl_talhao" list="lista-talhoes" placeholder="EX: CAFÉ 2022" required autocomplete="off"></div>
+                        <div style="grid-column: span 2;"><label>TALHÃO / CULTURA</label><input type="text" id="sl_talhao" list="lista-talhoes" placeholder="EX: CAFÉ 02" required autocomplete="off"></div>
                         <div><label>PROFUNDIDADE / TIPO</label>
                             <select id="sl_prof" required><option value="0-20">Camada 0 - 20 cm</option><option value="20-40">Camada 20 - 40 cm</option><option value="Foliar">Análise Foliar</option></select>
                         </div>
@@ -655,6 +683,33 @@
     </div>
 </div>
 
+<!-- Janela: lançamentos que formam um valor do relatório -->
+<div id="modal-gd">
+    <div class="modal-content modal-lanc" style="max-width: 1100px; border-left-color: var(--cor-verde-flat);">
+        <div class="modal-lanc-topo">
+            <span id="gd_titulo" style="font-size:15px; font-weight:700; color:var(--cor-verde-flat); font-family:'Rubik';"></span>
+            <button type="button" class="btn-fechar-x" onclick="fecharModalGd()" title="Fechar (Esc)">✕</button>
+        </div>
+        <div class="table-container no-fill" style="margin-top: 10px; max-height: 65vh; overflow: auto;"><table id="gd_tabela"></table></div>
+    </div>
+</div>
+
+<!-- Janela: orçamento de custeio por safra e setor -->
+<div id="modal-orcamento">
+    <div class="modal-content modal-lanc" style="max-width: 860px; border-left-color: var(--cor-azul-flat);">
+        <div class="modal-lanc-topo">
+            <span id="orc_titulo" style="font-size:15px; font-weight:700; color:var(--cor-azul-flat); font-family:'Rubik';"></span>
+            <button type="button" class="btn-fechar-x" onclick="fecharModalOrcamento()" title="Fechar (Esc)">✕</button>
+        </div>
+        <p style="font-size:12px; color:#777; margin:8px 0;">Informe quanto pretende gastar de <b>custeio</b> em cada setor nesta safra. Deixe em branco para não acompanhar o setor.</p>
+        <div class="table-container no-fill" style="max-height: 55vh; overflow: auto;"><table id="orc_corpo"></table></div>
+        <div class="modal-lanc-botoes" style="margin-top:14px;">
+            <button type="button" class="btn-limpar" onclick="fecharModalOrcamento()">Cancelar</button>
+            <button type="button" class="btn-salvar-compacto" style="background: var(--cor-verde-flat);" onclick="salvarOrcamento()">💾 SALVAR ORÇAMENTO</button>
+        </div>
+    </div>
+</div>
+
 <div id="modal-despesa">
     <div class="modal-content modal-lanc modal-borda-despesa" id="caixa_lancamento_saida">
         <div class="modal-lanc-topo">
@@ -671,17 +726,18 @@
         </div>
         <div class="aviso-cadastro">Categoria, Setor, Talhão e Fornecedor aceitam somente itens da tela <a href="#" onclick="irParaCadastros('despesa'); return false;">Cadastros</a>.</div>
         <form id="caixa_form_saida" class="grid-form" onsubmit="addTransacao(event, 'Saida')">
-            <div><label>Data</label><input type="date" id="d_data" required></div>
-            <div><label>Categoria</label><input list="lista_d_categoria" id="d_categoria" required autocomplete="off" placeholder="Selecione"></div>
-            <div><label>Setor</label><input list="lista_d_setor" id="d_setor" required autocomplete="off" placeholder="Selecione"></div>
-            <div id="d_rateio_box" style="grid-column: 1 / -1;"></div>
-            <div style="grid-column: span 2;"><label>Fornecedor</label><input list="lista_d_local" id="d_local" required autocomplete="off" placeholder="Selecione"></div>
-            <div style="grid-column: span 2;"><label>Descrição</label><input list="lista_d_descricao" id="d_descricao" required autocomplete="off"></div>
-            <div><label>Qtd</label><input type="number" id="d_qtd" step="0.01" oninput="calcularTotalDespesa()"></div>
-            <div><label>Unid.</label><input type="text" id="d_und"></div>
-            <div><label>R$ Unit.</label><input type="number" id="d_v_unit" step="0.01" oninput="calcularTotalDespesa()"></div>
-            <div><label>R$ Total</label><input type="number" id="d_valor" step="0.01" required></div>
-            <div><label>Situação</label><select id="d_sit"><option value="A pagar">A PAGAR</option><option value="Pago">PAGO</option></select></div>
+            <div class="f2"><label>Data</label><input type="date" id="d_data" required></div>
+            <div class="f4"><label>Categoria</label><input list="lista_d_categoria" id="d_categoria" required autocomplete="off" placeholder="Selecione" oninput="aoMudarCategoria('d_')" onchange="aoMudarCategoria('d_')"></div>
+            <div class="f4"><label>Setor</label><input list="lista_d_setor" id="d_setor" required autocomplete="off" placeholder="Escolha a categoria" oninput="atualizarAvisoInsumo()" onchange="atualizarAvisoInsumo()"></div>
+            <div class="f2"><label>Situação</label><select id="d_sit"><option value="A pagar">A PAGAR</option><option value="Pago">PAGO</option></select></div>
+            <div id="d_aviso_insumo" class="aviso-insumo f12" style="display:none;">💡 <b>Compra de insumo:</b> o custo chega ao talhão pelas <b>Aplicações</b> (dê entrada no estoque ao gravar). Não é necessário informar o talhão aqui — assim a adubação não é contada duas vezes.</div>
+            <div id="d_rateio_box" class="f12" style="grid-column: 1 / -1;"></div>
+            <div class="f6"><label>Fornecedor</label><input list="lista_d_local" id="d_local" required autocomplete="off" placeholder="Selecione"></div>
+            <div class="f6"><label>Descrição</label><input list="lista_d_descricao" id="d_descricao" required autocomplete="off"></div>
+            <div class="f3"><label>Qtd</label><input type="number" id="d_qtd" step="0.01" oninput="calcularTotalDespesa()"></div>
+            <div class="f3"><label>Unid.</label><input type="text" list="lista_unidades" id="d_und" autocomplete="off" placeholder="Selecione"></div>
+            <div class="f3"><label>R$ Unit.</label><input type="number" id="d_v_unit" step="0.01" oninput="calcularTotalDespesa()"></div>
+            <div class="f3"><label>R$ Total</label><input type="number" id="d_valor" step="0.01" required></div>
             <div class="modal-lanc-botoes">
                 <button type="button" class="btn-limpar" onclick="fecharModalLancamento('despesa')">Cancelar</button>
                 <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-laranja-flat);" onclick="modalFecharApos=false">➕ Gravar e Novo</button>
@@ -700,16 +756,16 @@
         </div>
         <div class="aviso-cadastro">Produto, Cliente e Talhão aceitam somente itens da tela <a href="#" onclick="irParaCadastros('receita'); return false;">Cadastros</a>.</div>
         <form id="caixa_form_receita" class="grid-form" onsubmit="addTransacao(event, 'Receita')">
-            <div><label>Data</label><input type="date" id="r_data" required></div>
-            <div style="grid-column: span 2;"><label>Produto</label><input list="lista_r_categoria" id="r_categoria" required onblur="autoPreencherUnidade()" autocomplete="off" placeholder="Selecione"></div>
-            <div style="grid-column: span 2;"><label>Cliente</label><input list="lista_r_local" id="r_local" required autocomplete="off" placeholder="Selecione"></div>
-            <div><label>Talhão</label><input list="lista-talhoes" id="r_talhao" autocomplete="off" placeholder="Opcional"></div>
-            <div style="grid-column: span 2;"><label>Detalhes</label><input type="text" id="r_descricao" autocomplete="off"></div>
-            <div><label>Qtd</label><input type="number" id="r_qtd" step="0.01" oninput="calcularTotalReceita()"></div>
-            <div><label>Unid.</label><input type="text" id="r_und"></div>
-            <div><label>R$ Unit.</label><input type="number" id="r_v_unit" step="0.01" oninput="calcularTotalReceita()"></div>
-            <div><label>R$ Total</label><input type="number" id="r_valor" step="0.01" required></div>
-            <div><label>Situação</label><select id="r_sit"><option value="A receber">A RECEBER</option><option value="Pago">PAGO</option></select></div>
+            <div class="f2"><label>Data</label><input type="date" id="r_data" required></div>
+            <div class="f4"><label>Produto</label><input list="lista_r_categoria" id="r_categoria" required onblur="autoPreencherUnidade()" autocomplete="off" placeholder="Selecione"></div>
+            <div class="f4"><label>Cliente</label><input list="lista_r_local" id="r_local" required autocomplete="off" placeholder="Selecione"></div>
+            <div class="f2"><label>Situação</label><select id="r_sit"><option value="A receber">A RECEBER</option><option value="Pago">PAGO</option></select></div>
+            <div class="f4"><label>Talhão</label><input list="lista-talhoes" id="r_talhao" autocomplete="off" placeholder="Opcional"></div>
+            <div class="f8"><label>Detalhes</label><input type="text" id="r_descricao" autocomplete="off"></div>
+            <div class="f3"><label>Qtd</label><input type="number" id="r_qtd" step="0.01" oninput="calcularTotalReceita()"></div>
+            <div class="f3"><label>Unid.</label><input type="text" list="lista_unidades" id="r_und" autocomplete="off" placeholder="Selecione"></div>
+            <div class="f3"><label>R$ Unit.</label><input type="number" id="r_v_unit" step="0.01" oninput="calcularTotalReceita()"></div>
+            <div class="f3"><label>R$ Total</label><input type="number" id="r_valor" step="0.01" required></div>
             <div class="modal-lanc-botoes">
                 <button type="button" class="btn-limpar" onclick="fecharModalLancamento('receita')">Cancelar</button>
                 <button type="submit" class="btn-salvar-compacto" style="background: var(--cor-azul-flat);" onclick="modalFecharApos=false">➕ Gravar e Novo</button>
@@ -744,12 +800,12 @@
 
 <datalist id="lista-talhoes"></datalist><datalist id="lista-tipos"></datalist><datalist id="lista-formas"></datalist>
 <datalist id="lista-alvos"></datalist><datalist id="lista-produtos-estoque"></datalist>
-<datalist id="lista_d_categoria"></datalist><datalist id="lista_d_setor"></datalist>
+<datalist id="lista_d_categoria"></datalist><datalist id="lista_d_setor"></datalist><datalist id="lista_ed_setor"></datalist><datalist id="lista_unidades"></datalist>
 <datalist id="lista_d_local"></datalist><datalist id="lista_d_descricao"></datalist>
 <datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
 
 <!-- AQUI É O SEGREDO: Em vez de duplicar 800 linhas, agora basta isso! -->
-<script src="app.js?v=20261024b"></script>
+<script src="app.js?v=20261025c"></script>
 
 </body>
 </html>

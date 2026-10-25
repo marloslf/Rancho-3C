@@ -3,13 +3,24 @@
 ========================================================================= */
 const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbx4Gc3P2B0Jh7_piAm9a-auSTSYrXDqsVS5FkXXjciddgzOhhlHISRTGo-PGuNpBgQD3w/exec";
 
-const dCategoriasPadrao = ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "DIÁRIAS", "DIESEL", "FUNGICIDA", "GASOLINA", "HERBICIDA", "INSETICIDA", "INSUMOS", "INVESTIMENTO", "MANUTENÇÃO", "MERCADO", "PROLABORE", "RAÇÃO"];
-const dSetoresPadrao = ["ADMINISTRAÇÃO", "CÃES", "CAFÉ", "CAFÉ 01", "CAFÉ 02", "CAFÉ 03", "CASA", "CAVALOS", "COLHEITA", "DEFINIR", "FAZENDA", "FUNCIONÁRIOS", "GADO", "GALINHAS", "IRRIGAÇÃO", "LAVOURAS", "MARACUJÁ", "PEDRO MARINELLI", "PEIXES", "TORREFAÇÃO", "TRATOR"];
+const ESTRUTURA_DESPESAS = {
+    "ADUBO": ["CAFÉ 1", "CAFÉ 2", "CAFÉ 3", "MARACUJÁ", "FAZENDA"],
+    "DEFENSIVO": ["CAFÉ 1", "CAFÉ 2", "CAFÉ 3", "MARACUJÁ", "FAZENDA"],
+    "COMBUSTÍVEL": ["ADMINISTRAÇÃO", "FAZENDA", "TRATOR"],
+    "MÃO DE OBRA": ["CAFÉ 1", "CAFÉ 2", "CAFÉ 3", "MARACUJÁ", "FAZENDA", "SALÁRIO"],
+    "ENERGIA": ["FAZENDA", "IRRIGAÇÃO"],
+    "RAÇÃO": ["CAVALOS", "GALINHAS", "PEIXES", "PETS", "GADO"],
+    "MANUTENÇÃO": ["FAZENDA", "IRRIGAÇÃO", "EQUIPAMENTOS"],
+    "FINANÇAS": ["CONTABILIDADE", "IMPOSTOS", "PRÓ-LABORE"]
+};
+const dCategoriasPadrao = Object.keys(ESTRUTURA_DESPESAS);
+const dSetoresPadrao = [...new Set(Object.values(ESTRUTURA_DESPESAS).reduce((a, b) => a.concat(b), []))];
+const UNIDADES_PADRAO = ["KG", "G", "L", "ML", "SC", "UN", "PCT", "DZ", "CX", "SACO", "M", "M²", "M³", "T", "H", "DIA", "MÊS", "R$"];
 const rCategoriasPadrao = ["ACEROLA - POLPA", "CAFÉ 250G", "CAFÉ 500G", "CAFÉ EM GRÃOS", "CAFÉ SACA", "CRÉDITO", "ESTACAS DE EUCALÍPTO", "GRAVIOLA - POLPA S/SEM.", "MARACUJÁ - FRUTO", "MARACUJÁ - POLPA C/SEM.", "MARACUJÁ - POLPA S/SEM.", "OVOS", "PASTO - ALUGUEL", "RENDIMENTOS"];
 const unidadesReceita = { "ACEROLA - POLPA": "KG", "CAFÉ 250G": "PCT", "CAFÉ 500G": "PCT", "CAFÉ EM GRÃOS": "PCT", "CAFÉ SACA": "SC", "CRÉDITO": "R$", "ESTACAS DE EUCALÍPTO": "UN", "GRAVIOLA - POLPA S/SEM.": "KG", "MARACUJÁ - FRUTO": "KG", "MARACUJÁ - POLPA C/SEM.": "KG", "MARACUJÁ - POLPA S/SEM.": "KG", "OVOS": "DZ", "PASTO - ALUGUEL": "MÊS", "RENDIMENTOS": "R$" };
 
 let transacoes = []; let agriRecords = []; let estoque = []; let chuvas = []; let analisesSolo = [];
-let opcoesDin = { talhoes: ["CAFÉ 2019", "CAFÉ 2022"], tipos: [], formas: [], alvos: [], talhoesInfo: {} };
+let opcoesDin = { talhoes: ["CAFÉ 01", "CAFÉ 02", "CAFÉ 03"], tipos: [], formas: [], alvos: [], talhoesInfo: {} };
 let colOrdenacao = 'data'; let ordemAscendente = false; let filtroRapido = '';
 let chartCaixaObj = null, chartPendenteObj = null; let chartS_Agri = null, chartT_Agri = null, chartTp_Agri = null, chartCS_Agri = null, chartCT_Agri = null; let chartChuvasObj = null;
 let permissaoNuvem = false; 
@@ -18,7 +29,7 @@ let reqGeralCalc = { n: 0, p: 0, k: 0, zn: 0, b: 0, cu: 0, mn: 0 };
 let cronogramaFinal = [];
 let estSortCol = 'produto', estSortAsc = true;
 let ultimaListaFiltrada = [];
-const categoriasInsumo = ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "FUNGICIDA", "HERBICIDA", "INSETICIDA", "INSUMOS"];
+const categoriasInsumo = ["ACARICIDA", "ADUBO", "ADUBO FOLIAR", "BACTERICIDA", "DEFENSIVO", "FUNGICIDA", "HERBICIDA", "INSETICIDA", "INSUMOS"];
 
 // Setores do caixa diário que representam lavouras (entram no custo por talhão, além dos talhões cadastrados)
 const setoresLavoura = ["CAFÉ", "CAFÉ 01", "CAFÉ 02", "CAFÉ 03", "LAVOURAS", "MARACUJÁ"];
@@ -126,7 +137,9 @@ function importarXMLDespesa(event) {
                     setVal('d_descricao', (prod.getElementsByTagName("xProd")[0] ? prod.getElementsByTagName("xProd")[0].textContent : "").toUpperCase());
                     setVal('d_qtd', parseFloat(prod.getElementsByTagName("qCom")[0] ? prod.getElementsByTagName("qCom")[0].textContent : 0).toFixed(2));
                     setVal('d_v_unit', parseFloat(prod.getElementsByTagName("vUnCom")[0] ? prod.getElementsByTagName("vUnCom")[0].textContent : 0).toFixed(2));
-                    setVal('d_und', (prod.getElementsByTagName("uCom")[0] ? prod.getElementsByTagName("uCom")[0].textContent : "UN").toUpperCase());
+                    const undNF = (prod.getElementsByTagName("uCom")[0] ? prod.getElementsByTagName("uCom")[0].textContent : "UN").toUpperCase();
+                    if (undNF && !cadTem('unidade', undNF)) { cadAdicionar('unidade', undNF); preencherSelectsLancamento(); }
+                    setVal('d_und', undNF);
                     
                     let vProd = prod.getElementsByTagName("vProd")[0] ? parseFloat(prod.getElementsByTagName("vProd")[0].textContent) : 0;
                     setVal('d_valor', vProd.toFixed(2));
@@ -159,6 +172,7 @@ function importarXMLDespesa(event) {
                     let vUn = parseFloat(prod.getElementsByTagName("vUnCom")[0] ? prod.getElementsByTagName("vUnCom")[0].textContent : 0);
                     let vTot = parseFloat(prod.getElementsByTagName("vProd")[0] ? prod.getElementsByTagName("vProd")[0].textContent : 0);
                     let und = (prod.getElementsByTagName("uCom")[0] ? prod.getElementsByTagName("uCom")[0].textContent : "UN").toUpperCase();
+                    if (und && !cadTem('unidade', und)) cadAdicionar('unidade', und);
 
                     // Evita duplicar a mesma NF-e importada duas vezes
                     const jaExiste = transacoes.some(x => x && !x.deleted && x.obs === 'Importação Automática XML' && sanitizeDateString(x.data) === dataNF && x.local === fornecedor && x.desc === desc && parseFloat(x.valor) === vTot);
@@ -273,7 +287,7 @@ async function carregarDadosNuvem() {
         statusDiv.innerHTML = '🔴 SEM CONEXÃO (SALVO NO APARELHO)'; statusDiv.className = 'status-conexao erro';
     }
 
-    try { semearCadastros(); } catch(e) {}
+    try { semearCadastros(); migrarEstruturaDespesas(); migrarLavouras(); } catch(e) {}
     const payload = { transacoes, aplicacoes: agriRecords, estoque, opcoes: opcoesDin, analises: analisesSolo, chuvas };
     try { localStorage.setItem('rancho3c_offline', JSON.stringify(payload)); } catch(err) {}
 
@@ -525,15 +539,13 @@ function atualizarRelatoriosDetalhados() {
 }
 
 function switchRelTab(mode) {
-    document.getElementById('rel_view_tabelas').classList.remove('active');
-    document.getElementById('rel_view_cascata').classList.remove('active');
-    document.getElementById('btn_rel_tabelas').classList.remove('active');
-    document.getElementById('btn_rel_cascata').classList.remove('active');
-    
-    document.getElementById('rel_view_' + mode).classList.add('active');
-    document.getElementById('btn_rel_' + mode).classList.add('active');
-    
-    if(mode === 'cascata') renderCascataCategorias();
+    ['tabelas', 'cascata', 'custos'].forEach(m => {
+        const v = document.getElementById('rel_view_' + m), b = document.getElementById('btn_rel_' + m);
+        if (v) v.classList.toggle('active', m === mode); if (b) b.classList.toggle('active', m === mode);
+    });
+    const fc = document.getElementById('rel_filtros_comuns'); if (fc) fc.style.display = mode === 'custos' ? 'none' : '';
+    if (mode === 'cascata') renderCascataCategorias();
+    if (mode === 'custos') popularCustosTalhaoSafra();
 }
 
 function switchTab(id) { showTab(id); }
@@ -553,10 +565,11 @@ function addTransacao(e, tipoBase) {
         const prefix = tipoBase === 'Saida' ? 'd_' : 'r_';
         // Os campos só aceitam itens da tela Cadastros
         const checagens = tipoBase === 'Saida'
-            ? [['d_categoria', 'categoria_despesa', 'Categoria'], ['d_setor', 'setor', 'Setor'], ['d_talhao', 'talhao', 'Talhão'], ['d_talhao2', 'talhao', 'Talhão 2'], ['d_talhao3', 'talhao', 'Talhão 3'], ['d_talhao4', 'talhao', 'Talhão 4'], ['d_local', 'fornecedor', 'Fornecedor']]
-            : [['r_categoria', 'produto_receita', 'Produto'], ['r_local', 'cliente', 'Cliente'], ['r_talhao', 'talhao', 'Talhão']];
+            ? [['d_categoria', 'categoria_despesa', 'Categoria'], ['d_setor', 'setor', 'Setor'], ['d_und', 'unidade', 'Unidade'], ['d_talhao', 'talhao', 'Talhão'], ['d_talhao2', 'talhao', 'Talhão 2'], ['d_talhao3', 'talhao', 'Talhão 3'], ['d_talhao4', 'talhao', 'Talhão 4'], ['d_local', 'fornecedor', 'Fornecedor']]
+            : [['r_categoria', 'produto_receita', 'Produto'], ['r_local', 'cliente', 'Cliente'], ['r_talhao', 'talhao', 'Talhão'], ['r_und', 'unidade', 'Unidade']];
         const falhas = checagens.filter(c => { const v = cadNorm(safeVal(c[0])); return v && !cadTem(c[1], v); }).map(c => `• ${c[2]}: ${cadNorm(safeVal(c[0]))}`);
         if (falhas.length) { alert("Os itens abaixo não estão cadastrados:\n\n" + falhas.join("\n") + "\n\nCadastre-os na tela Cadastros e tente novamente."); return; }
+        if (tipoBase === 'Saida' && !setorValidoParaCategoria(safeVal('d_categoria'), safeVal('d_setor'))) { alert(`O setor "${cadNorm(safeVal('d_setor'))}" não pertence à categoria "${cadNorm(safeVal('d_categoria'))}".\n\nEscolha um setor da categoria ou vincule-o na tela Cadastros.`); return; }
         if (!cadNorm(safeVal(prefix + 'categoria')) || !cadNorm(safeVal(prefix + 'local')) || (tipoBase === 'Saida' && !cadNorm(safeVal('d_setor')))) { alert("Preencha todos os campos obrigatórios com itens cadastrados."); return; }
         let data = sanitizeDateString(document.getElementById(prefix + 'data').value);
         let cat = document.getElementById(prefix + 'categoria').value.trim().toUpperCase();
@@ -578,6 +591,7 @@ function addTransacao(e, tipoBase) {
         let talhao = strSafe(safeVal(prefix + 'talhao')).toUpperCase(); let talhao2 = ''; let pct = 100; let listaRt = null;
         if (tipoBase === 'Saida') {
             const rt = lerRateio('d_'); if (rt.erro) { alert(rt.erro); return; }
+            const conf = conflitoSetorTalhao(setor, rt.lista.map(x => x.talhao)); if (conf) { alert(conf); return; }
             listaRt = rt.lista; talhao = listaRt[0] ? listaRt[0].talhao : ''; talhao2 = listaRt[1] ? listaRt[1].talhao : ''; pct = listaRt.length >= 2 ? listaRt[0].pct : 100;
         }
         const nova = { id: generateUUID(), updatedAt: Date.now(), deleted: false, data: data, tipo: tipoFinal, categoria: cat, setor: setor, talhao: talhao, talhao2: talhao2, pct: pct, local: loc, desc: desc, qtd: qtd, und: und, v_unit: parseFloat(vUnit), valor: val, sit: document.getElementById(prefix + 'sit').value || 'Pago', obs: '' };
@@ -592,7 +606,7 @@ function addTransacao(e, tipoBase) {
                 avisoEstoque = ` (unidade "${und || '?'}" não reconhecida: sem entrada no estoque)`;
             } else if (confirm(`Dar entrada no estoque?\n\n${desc}\n${conv.qtd.toFixed(2)} ${conv.un} a ${formatarMoeda(val / conv.qtd)}/${conv.un}`)) {
                 const tipoEst = cat; verificarNovaOpcao('tipos', tipoEst);
-                nova.est_mov = { id: entradaEstoque(desc, '', tipoEst, conv.qtd, conv.un, val / conv.qtd), qtd: conv.qtd, un: conv.un };
+                nova.est_mov = { id: entradaEstoque(desc, '', tipoEst, conv.qtd, conv.un, val / conv.qtd), qtd: conv.qtd, un: conv.un }; gravarRateioNaTransacao(nova, []);
                 renderDatalistsAgri(); avisoEstoque = ' + ESTOQUE';
             }
         }
@@ -641,9 +655,9 @@ function preencherSelectsLancamento() {
     transacoes.forEach(t => { if (t && !t.deleted && String(t.tipo).toLowerCase() !== 'receita' && strSafe(t.desc)) dDescs.add(strSafe(t.desc).toUpperCase()); });
     const montar = (id, arr) => { const dl = document.getElementById(id); if (dl) dl.innerHTML = Array.from(arr).map(v => `<option value="${strEscape(v)}">`).join(''); };
     montar('lista_d_categoria', cadLista('categoria_despesa')); montar('lista_d_setor', cadLista('setor')); montar('lista_d_local', cadLista('fornecedor'));
-    montar('lista_r_categoria', cadLista('produto_receita')); montar('lista_r_local', cadLista('cliente'));
+    montar('lista_r_categoria', cadLista('produto_receita')); montar('lista_r_local', cadLista('cliente')); montar('lista_unidades', cadLista('unidade'));
     montar('lista_d_descricao', Array.from(dDescs).sort());
-    renderDatalistsAgri();
+    renderDatalistsAgri(); try { atualizarSetoresDaCategoria('d_'); } catch (e) {}
 }
 
 function calcularTotalReceita() { let q = parseFloat(document.getElementById('r_qtd').value) || 0; let v = parseFloat(document.getElementById('r_v_unit').value) || 0; if (q>0 && v>0) document.getElementById('r_valor').value = (q * v).toFixed(2); }
@@ -678,18 +692,28 @@ function abrirModalEdicao(id) {
         `<option value="A receber" ${sitReceber}>A RECEBER</option><option value="Pago" ${sitPago}>PAGO</option>` :
         `<option value="A pagar" ${sitPagar}>A PAGAR</option><option value="Pago" ${sitPago}>PAGO</option>`;
 
-    document.getElementById('form-edicao').innerHTML = `
-        <div><label>DATA:</label> <input type="date" id="ed_data" value="${sanitizeDateString(t.data)}"></div> ${htmlSel}
-        <div><label>${ehRec ? 'PRODUTO' : 'CATEGORIA'}:</label> <input type="text" id="ed_categoria" list="${ehRec ? 'lista_r_categoria' : 'lista_d_categoria'}" data-orig="${vCat}" value="${vCat}" autocomplete="off"></div>
-        ${ehRec ? '' : `<div><label>SETOR:</label> <input type="text" id="ed_setor" list="lista_d_setor" data-orig="${vSet}" value="${vSet}" autocomplete="off"></div>`}
-        ${ehRec ? `<div><label>TALHÃO:</label> <input type="text" id="ed_talhao" list="lista-talhoes" data-orig="${strEscape(t.talhao)}" value="${strEscape(t.talhao)}" autocomplete="off"></div>` : `<div style="grid-column: 1 / -1;">${htmlRateio('ed_', rateioDe(t))}</div>`}
-        <div style="grid-column: span 2;"><label>${ehRec ? 'CLIENTE' : 'FORNECEDOR'}:</label> <input type="text" id="ed_local" list="${ehRec ? 'lista_r_local' : 'lista_d_local'}" data-orig="${vLoc}" value="${vLoc}" autocomplete="off"></div>
-        <div style="grid-column: span 2;"><label>DESCRIÇÃO:</label> <input type="text" id="ed_desc" value="${vDesc}"></div>
-        <div><label>QTD:</label> <input type="number" id="ed_qtd" step="0.01" value="${parseFloat(t.qtd)||0}"></div>
-        <div><label>UNID:</label> <input type="text" id="ed_und" value="${strEscape(t.und)}"></div>
-        <div><label>VALOR TOTAL:</label> <input type="number" id="ed_valor" step="0.01" value="${parseFloat(t.valor)||0}"></div>
-        <div><label>SITUAÇÃO:</label> <select id="ed_sit">${selectSit}</select></div>
-    `;
+    const vUnd = strEscape(t.und);
+    const cabEd = `<div class="f2"><label>DATA:</label> <input type="date" id="ed_data" value="${sanitizeDateString(t.data)}"></div>`;
+    const campoCat = `<input type="text" id="ed_categoria" list="${ehRec ? 'lista_r_categoria' : 'lista_d_categoria'}" data-orig="${vCat}" value="${vCat}" autocomplete="off" ${ehRec ? '' : `oninput="aoMudarCategoria('ed_')" onchange="aoMudarCategoria('ed_')"`}>`;
+    const rodape = `<div class="f3"><label>QTD:</label> <input type="number" id="ed_qtd" step="0.01" value="${parseFloat(t.qtd)||0}"></div>
+        <div class="f3"><label>UNID:</label> <input type="text" id="ed_und" list="lista_unidades" data-orig="${vUnd}" value="${vUnd}" autocomplete="off"></div>
+        <div class="f3"><label>VALOR TOTAL:</label> <input type="number" id="ed_valor" step="0.01" value="${parseFloat(t.valor)||0}"></div>
+        <div class="f3"><label>SITUAÇÃO:</label> <select id="ed_sit">${selectSit}</select></div>`;
+    document.getElementById('form-edicao').innerHTML = ehRec ? `
+        ${cabEd}${htmlSel}
+        <div class="f5"><label>PRODUTO:</label> ${campoCat}</div>
+        <div class="f5"><label>CLIENTE:</label> <input type="text" id="ed_local" list="lista_r_local" data-orig="${vLoc}" value="${vLoc}" autocomplete="off"></div>
+        <div class="f4"><label>TALHÃO:</label> <input type="text" id="ed_talhao" list="lista-talhoes" data-orig="${strEscape(t.talhao)}" value="${strEscape(t.talhao)}" autocomplete="off"></div>
+        <div class="f8"><label>DESCRIÇÃO:</label> <input type="text" id="ed_desc" value="${vDesc}"></div>
+        ${rodape}` : `
+        ${cabEd}<div class="f2">${htmlSel.replace(/^\s*<div>|<\/div>\s*$/g, '')}</div>
+        <div class="f4"><label>CATEGORIA:</label> ${campoCat}</div>
+        <div class="f4"><label>SETOR:</label> <input type="text" id="ed_setor" list="lista_ed_setor" data-orig="${vSet}" value="${vSet}" autocomplete="off" placeholder="Escolha a categoria"></div>
+        <div class="f12">${htmlRateio('ed_', rateioDe(t))}</div>
+        <div class="f6"><label>FORNECEDOR:</label> <input type="text" id="ed_local" list="lista_d_local" data-orig="${vLoc}" value="${vLoc}" autocomplete="off"></div>
+        <div class="f6"><label>DESCRIÇÃO:</label> <input type="text" id="ed_desc" value="${vDesc}"></div>
+        ${rodape}`;
+    atualizarSetoresDaCategoria('ed_');
     preencherSelectsLancamento(); converterListasEmCombo(document.getElementById('form-edicao'));
     document.getElementById('modal-edicao').style.display = 'flex';
 }
@@ -701,17 +725,21 @@ function guardarEdicao() {
     const ehRec = String(t.tipo).toLowerCase() === 'receita';
     // Itens novos ou alterados precisam estar cadastrados (valores antigos já gravados podem ser mantidos)
     const campos = ehRec
-        ? [['ed_categoria', 'produto_receita', 'Produto'], ['ed_local', 'cliente', 'Cliente'], ['ed_talhao', 'talhao', 'Talhão']]
-        : [['ed_categoria', 'categoria_despesa', 'Categoria'], ['ed_setor', 'setor', 'Setor'], ['ed_talhao', 'talhao', 'Talhão'], ['ed_talhao2', 'talhao', 'Talhão 2'], ['ed_talhao3', 'talhao', 'Talhão 3'], ['ed_talhao4', 'talhao', 'Talhão 4'], ['ed_local', 'fornecedor', 'Fornecedor']];
+        ? [['ed_categoria', 'produto_receita', 'Produto'], ['ed_local', 'cliente', 'Cliente'], ['ed_talhao', 'talhao', 'Talhão'], ['ed_und', 'unidade', 'Unidade']]
+        : [['ed_categoria', 'categoria_despesa', 'Categoria'], ['ed_setor', 'setor', 'Setor'], ['ed_talhao', 'talhao', 'Talhão'], ['ed_talhao2', 'talhao', 'Talhão 2'], ['ed_talhao3', 'talhao', 'Talhão 3'], ['ed_talhao4', 'talhao', 'Talhão 4'], ['ed_local', 'fornecedor', 'Fornecedor'], ['ed_und', 'unidade', 'Unidade']];
     const falhas = [];
     campos.forEach(c => {
         const el = document.getElementById(c[0]); if (!el) return;
         const v = cadNorm(el.value); const orig = cadNorm(el.dataset.orig || '');
         if (v && v !== orig && !cadTem(c[1], v)) falhas.push(`• ${c[2]}: ${v}`);
     });
-    if (falhas.length) { alert("Os itens abaixo não estão cadastrados:\n\n" + falhas.join("\n") + "\n\nCadastre-os na tela Cadastros e tente novamente."); return; }
+    if (!ehRec && document.getElementById('ed_setor')) {
+        const elC = document.getElementById('ed_categoria'), elS = document.getElementById('ed_setor'); const cE = cadNorm(elC.value), sE = cadNorm(elS.value);
+        if ((cE !== cadNorm(elC.dataset.orig || '') || sE !== cadNorm(elS.dataset.orig || '')) && !setorValidoParaCategoria(cE, sE)) falhas.push(`• Setor: "${sE}" não pertence à categoria "${cE}"`);
+    }
+    if (falhas.length) { alert("Corrija os itens abaixo:\n\n" + falhas.join("\n") + "\n\nCadastre ou vincule na tela Cadastros e tente novamente."); return; }
 
-    let rtEd = null; if (document.getElementById('ed_talhao2')) { rtEd = lerRateio('ed_'); if (rtEd.erro) { alert(rtEd.erro); return; } }
+    let rtEd = null; if (document.getElementById('ed_talhao2')) { rtEd = lerRateio('ed_'); if (rtEd.erro) { alert(rtEd.erro); return; } if (!ehRec && document.getElementById('ed_setor')) { const confE = conflitoSetorTalhao(document.getElementById('ed_setor').value.trim().toUpperCase(), rtEd.lista.map(x => x.talhao)); if (confE) { alert(confE); return; } } }
     const gv = i => { const el = document.getElementById(i); return el ? el.value.trim().toUpperCase() : null; };
     t.data = sanitizeDateString(document.getElementById('ed_data').value); t.tipo = document.getElementById('ed_tipo').value;
     t.categoria = gv('ed_categoria') || ''; if (document.getElementById('ed_setor')) t.setor = gv('ed_setor') || '-';
@@ -1735,7 +1763,7 @@ function garantirOpcoes() {
     ['talhoes', 'tipos', 'formas', 'alvos'].forEach(k => { if (!Array.isArray(opcoesDin[k])) opcoesDin[k] = []; });
     if (!opcoesDin.talhoesInfo || typeof opcoesDin.talhoesInfo !== 'object') opcoesDin.talhoesInfo = {};
     if (!opcoesDin.cad || typeof opcoesDin.cad !== 'object') opcoesDin.cad = {};
-    CADASTROS_DEF.forEach(d => { if (!opcoesDin.cad[d.chave] || typeof opcoesDin.cad[d.chave] !== 'object') opcoesDin.cad[d.chave] = {}; });
+    cadChaves().forEach(k => { if (!opcoesDin.cad[k] || typeof opcoesDin.cad[k] !== 'object') opcoesDin.cad[k] = {}; });
 }
 
 function mesclarOpcoes(opBruto) {
@@ -1746,11 +1774,11 @@ function mesclarOpcoes(opBruto) {
     listaSegura(op.talhoes).forEach(n => { const nn = cadNorm(n); if (nn && !opcoesDin.cad.talhao[nn]) opcoesDin.cad.talhao[nn] = { u: 0, d: false }; });
     // Cadastros: vale o registro mais recente de cada item (inclusive remoções)
     const cad = (op.cad && typeof op.cad === 'object') ? op.cad : {};
-    CADASTROS_DEF.forEach(d => {
-        const remoto = (cad[d.chave] && typeof cad[d.chave] === 'object') ? cad[d.chave] : {};
+    cadChaves().forEach(k => {
+        const remoto = (cad[k] && typeof cad[k] === 'object') ? cad[k] : {};
         Object.keys(remoto).forEach(n => {
-            const r = remoto[n]; const l = opcoesDin.cad[d.chave][n];
-            if (r && typeof r === 'object' && (!l || (r.u || 0) > (l.u || 0))) opcoesDin.cad[d.chave][n] = { u: r.u || 0, d: !!r.d };
+            const r = remoto[n]; const l = opcoesDin.cad[k][n];
+            if (r && typeof r === 'object' && (!l || (r.u || 0) > (l.u || 0))) opcoesDin.cad[k][n] = { u: r.u || 0, d: !!r.d };
         });
     });
     const info = (op.talhoesInfo && typeof op.talhoesInfo === 'object') ? op.talhoesInfo : {};
@@ -1772,20 +1800,6 @@ function baixarArquivo(nome, conteudo, mime) {
     const url = URL.createObjectURL(blob); const a = document.createElement('a');
     a.href = url; a.download = nome; document.body.appendChild(a); a.click();
     setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
-}
-
-function exportarCaixaCSV() {
-    const lista = ultimaListaFiltrada || [];
-    if (!lista.length) { alert("Nada para exportar com os filtros atuais."); return; }
-    const num = v => { const n = parseFloat(v); return isNaN(n) ? '' : String(n).replace('.', ','); };
-    const txt = v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
-    const linhas = [['Data', 'Tipo', 'Categoria/Produto', 'Setor', 'Talhão', 'Fornecedor/Cliente', 'Descrição', 'Qtd', 'Und', 'V.Unit', 'Total', 'Situação'].join(';')];
-    lista.forEach(t => {
-        const rt = rateioDe(t); const tal = rt.map(x => rt.length > 1 ? `${x.talhao} (${x.pct}%)` : x.talhao).join(' / ');
-        linhas.push([formatarData(t.data), t.tipo, t.categoria, t.setor, tal, t.local, t.desc].map(txt).concat([num(t.qtd), txt(t.und), num(t.v_unit), num(t.valor), txt(t.sit)]).join(';'));
-    });
-    baixarArquivo(`caixa_rancho3c_${hojeLocal()}.csv`, '﻿' + linhas.join('\r\n'), 'text/csv;charset=utf-8');
-    mostrarToast("Caixa exportado (CSV)!");
 }
 
 /* ---------- Estoque: entrada automática com custo médio ---------- */
@@ -1840,10 +1854,12 @@ function nomesTalhaoSet() {
 
 // Divide o valor de um lançamento entre os talhões (campo Talhão; se vazio, usa o Setor quando ele for um talhão/lavoura)
 function alocacaoTalhao(t) {
+    if (t && t.est_mov) return []; // compra que entrou no estoque: o custo chega ao talhão pela Aplicação
     const v = parseFloat(t.valor) || 0; const r = rateioDe(t);
     if (r.length) { let acc = 0; return r.map((x, i) => { const val = i === r.length - 1 ? v - acc : v * x.pct / 100; acc += val; return { talhao: x.talhao, valor: val }; }); }
-    if (String(t.tipo).toLowerCase() === 'despesa') {
-        const setor = strSafe(t.setor).toUpperCase();
+    if (String(t.tipo).toLowerCase() !== 'receita') {
+        const setor = strSafe(t.setor).toUpperCase(); const lig = talhaoDoSetor(setor);
+        if (lig) return [{ talhao: lig, valor: v }];
         if (setor && nomesTalhaoSet().has(setor)) return [{ talhao: setor, valor: v }];
     }
     return [];
@@ -1969,16 +1985,17 @@ function atualizarAlertas() {
    11. CADASTROS, JANELAS DE LANÇAMENTO E CASCATA EM NÍVEIS
 ========================================================================= */
 const CADASTROS_DEF = [
-    { chave: 'categoria_despesa', grupo: 'despesa', titulo: 'Categoria',  plural: 'Categorias',   icone: '🏷️', cor: 'var(--cor-laranja-flat)' },
-    { chave: 'setor',             grupo: 'despesa', titulo: 'Setor',      plural: 'Setores',      icone: '🚜', cor: 'var(--cor-laranja-flat)' },
+    { chave: 'categoria_despesa', hier: true, grupo: 'despesa', titulo: 'Categoria',  plural: 'Categorias',   icone: '🏷️', cor: 'var(--cor-laranja-flat)' },
+    { chave: 'setor', hier: true,             grupo: 'despesa', titulo: 'Setor',      plural: 'Setores',      icone: '🚜', cor: 'var(--cor-laranja-flat)' },
     { chave: 'talhao',            grupo: 'despesa', titulo: 'Talhão',     plural: 'Talhões',      icone: '🌾', cor: 'var(--cor-laranja-flat)' },
     { chave: 'fornecedor',        grupo: 'despesa', titulo: 'Fornecedor', plural: 'Fornecedores', icone: '🏪', cor: 'var(--cor-laranja-flat)' },
     { chave: 'produto_receita',   grupo: 'receita', titulo: 'Produto',    plural: 'Produtos',     icone: '🌱', cor: 'var(--cor-verde-flat)' },
-    { chave: 'cliente',           grupo: 'receita', titulo: 'Cliente',    plural: 'Clientes',     icone: '🤝', cor: 'var(--cor-verde-flat)' }
+    { chave: 'cliente',           grupo: 'receita', titulo: 'Cliente',    plural: 'Clientes',     icone: '🤝', cor: 'var(--cor-verde-flat)' },
+    { chave: 'unidade',           grupo: 'geral',   titulo: 'Unidade',    plural: 'Unidades',     icone: '⚖️', cor: 'var(--cor-azul-flat)' }
 ];
 
 // Campo do formulário -> cadastro que o alimenta
-const CAMPOS_CAD = { d_categoria: 'categoria_despesa', d_setor: 'setor', d_talhao: 'talhao', d_talhao2: 'talhao', d_talhao3: 'talhao', d_talhao4: 'talhao', d_local: 'fornecedor', r_categoria: 'produto_receita', r_local: 'cliente', r_talhao: 'talhao' };
+const CAMPOS_CAD = { d_categoria: 'categoria_despesa', d_setor: 'setor', d_talhao: 'talhao', d_talhao2: 'talhao', d_talhao3: 'talhao', d_talhao4: 'talhao', d_local: 'fornecedor', r_categoria: 'produto_receita', r_local: 'cliente', r_talhao: 'talhao', d_und: 'unidade', r_und: 'unidade' };
 
 function cadNorm(v) { const s = strSafe(v).toUpperCase().replace(/\s+/g, ' '); return s === '-' ? '' : s; }
 function cadLista(chave) {
@@ -1999,6 +2016,7 @@ function cadAdicionar(chave, nome) {
 function cadRemover(chave, nome) {
     const n = cadNorm(nome); if (!n) return false; garantirOpcoes();
     opcoesDin.cad[chave][n] = { u: Date.now(), d: true };
+    if (chave === 'categoria_despesa' || chave === 'setor') desvincularTodos(chave, n);
     if (chave === 'talhao') { opcoesDin.talhoesInfo[n] = { deleted: true, updatedAt: Date.now() }; sincronizarTalhoesDerivados(); }
     return true;
 }
@@ -2010,6 +2028,8 @@ function semearCadastros() {
     dCategoriasPadrao.forEach(v => add('categoria_despesa', v));
     dSetoresPadrao.forEach(v => add('setor', v));
     rCategoriasPadrao.forEach(v => add('produto_receita', v));
+    UNIDADES_PADRAO.forEach(v => add('unidade', v));
+    estoque.forEach(e => { if (e && !e.deleted) add('unidade', e.un); });
     (opcoesDin.talhoes || []).forEach(v => add('talhao', v));
     Object.keys(opcoesDin.talhoesInfo || {}).forEach(k => { if (infoTalhao(k)) add('talhao', k); });
     agriRecords.forEach(r => { if (r && !r.deleted) add('talhao', r.talhao); });
@@ -2018,7 +2038,7 @@ function semearCadastros() {
         if (!t || t.deleted) return;
         if (String(t.tipo).toLowerCase() === 'receita') { add('produto_receita', t.categoria); add('cliente', t.local); }
         else { add('categoria_despesa', t.categoria); add('setor', t.setor); add('fornecedor', t.local); }
-        talhoesDe(t).forEach(x => add('talhao', x));
+        talhoesDe(t).forEach(x => add('talhao', x)); add('unidade', t.und);
     });
     sincronizarTalhoesDerivados();
 }
@@ -2032,6 +2052,7 @@ function cadUsos(chave) {
         else if (chave === 'fornecedor' && !rec) inc(t.local);
         else if (chave === 'produto_receita' && rec) inc(t.categoria);
         else if (chave === 'cliente' && rec) inc(t.local);
+        else if (chave === 'unidade') inc(t.und);
         else if (chave === 'talhao') { talhoesDe(t).forEach(x => inc(x)); }
     });
     if (chave === 'talhao') agriRecords.forEach(r => { if (r && !r.deleted) inc(r.talhao); });
@@ -2057,11 +2078,12 @@ function renderCadastros() {
             </form>
             <ul class="cad-lista" id="cad_lista_${d.chave}"></ul>
         </div>`;
-    const grupo = g => CADASTROS_DEF.filter(d => d.grupo === g).map(card).join('');
+    const grupo = g => CADASTROS_DEF.filter(d => d.grupo === g && !d.hier).map(card).join('');
     cont.innerHTML = `
-        <h3 class="cad-titulo" style="color: var(--cor-laranja-flat);">🚜 Despesas</h3><div class="cad-grid">${grupo('despesa')}</div>
-        <h3 class="cad-titulo" style="color: var(--cor-verde-flat);">🌱 Receitas</h3><div class="cad-grid">${grupo('receita')}</div>`;
-    CADASTROS_DEF.forEach(d => renderListaCadastro(d.chave));
+        <h3 class="cad-titulo" style="color: var(--cor-laranja-flat);">🚜 Despesas</h3><div class="cad-grid">${htmlHierarquia()}${grupo('despesa')}</div>
+        <h3 class="cad-titulo" style="color: var(--cor-verde-flat);">🌱 Receitas</h3><div class="cad-grid">${grupo('receita')}</div>
+        <h3 class="cad-titulo" style="color: var(--cor-azul-flat);">⚖️ Geral</h3><div class="cad-grid">${grupo('geral')}</div>`;
+    CADASTROS_DEF.forEach(d => renderListaCadastro(d.chave)); renderHierarquia();
 }
 
 function renderListaCadastro(chave) {
@@ -2072,7 +2094,7 @@ function renderListaCadastro(chave) {
     const lista = termo ? todos.filter(n => n.includes(termo)) : todos;
     let html = '';
     if (termo && !todos.includes(termo)) html += `<li class="cad-dica">➕ Clique em <b>Adicionar</b> para cadastrar “${strEscape(termo)}”</li>`;
-    html += lista.map(n => `<li class="cad-item"><span class="cad-nome">${strEscape(n)}</span><span class="cad-uso">${usos[n] ? usos[n] + ' uso(s)' : 'sem uso'}</span><button type="button" class="btn-acao btn-excluir" title="Remover do cadastro" onclick="cadRemoverItem('${chave}', '${encAttr(n)}')">🗑️</button></li>`).join('');
+    html += lista.map(n => `<li class="cad-item"><span class="cad-nome">${strEscape(n)}</span><span class="cad-uso">${usos[n] ? usos[n] + ' uso(s)' : 'sem uso'}</span><button type="button" class="btn-acao btn-editar" title="Renomear" onclick="cadRenomearItem('${chave}', '${encAttr(n)}')">✏️</button><button type="button" class="btn-acao btn-excluir" title="Remover do cadastro" onclick="cadRemoverItem('${chave}', '${encAttr(n)}')">🗑️</button></li>`).join('');
     if (!html) html = `<li class="cad-dica">Nenhum item cadastrado</li>`;
     ul.innerHTML = html;
     const c = document.getElementById('cad_cont_' + chave); if (c) c.innerText = todos.length + ' ' + (todos.length === 1 ? 'item' : 'itens');
@@ -2097,7 +2119,7 @@ function cadRemoverItem(chave, enc) {
     if (chave === 'talhao') msg += `\nA área e o nº de plantas cadastrados também serão removidos.`;
     if (!confirm(msg)) return;
     cadRemover(chave, n); salvarDados();
-    renderListaCadastro(chave); atualizarListasAposCadastro();
+    renderListaCadastro(chave); atualizarListasAposCadastro(); try { renderHierarquia(); } catch (e) {}
     try { renderTalhoes(); } catch (e) {}
     mostrarToast(def.titulo + ' removido do cadastro');
 }
@@ -2105,8 +2127,9 @@ function cadRemoverItem(chave, enc) {
 /* ---------- Validação: campos só aceitam itens cadastrados ---------- */
 function validarCampoCad(id, chave) {
     const el = document.getElementById(id); if (!el) return true;
-    const v = cadNorm(el.value); const ok = !v || cadTem(chave, v);
-    el.setCustomValidity(ok ? '' : 'Item não cadastrado. Cadastre-o na tela Cadastros.');
+    const v = cadNorm(el.value); let ok = !v || cadTem(chave, v); let msg = 'Item não cadastrado. Cadastre-o na tela Cadastros.';
+    if (ok && id === 'd_setor' && !setorValidoParaCategoria(safeVal('d_categoria'), v)) { ok = false; msg = 'Este setor não pertence à categoria escolhida.'; }
+    el.setCustomValidity(ok ? '' : msg);
     el.classList.toggle('nao-cadastrado', !ok);
     return ok;
 }
@@ -2124,7 +2147,7 @@ function revalidarCadastros() { Object.keys(CAMPOS_CAD).forEach(id => validarCam
 let modalFecharApos = false;
 
 function abrirModalLancamento(tipo) {
-    preencherSelectsLancamento(); vincularValidacaoCadastro();
+    preencherSelectsLancamento(); vincularValidacaoCadastro(); atualizarAvisoInsumo();
     const ehRec = tipo === 'receita'; const p = ehRec ? 'r_' : 'd_';
     if (!safeVal(p + 'data')) setVal(p + 'data', hojeLocal());
     if (!ehRec) mudarTemaSaida();
@@ -2253,7 +2276,7 @@ function abrirDetalheCategoria(catEncoded, tipoFiltro) {
 
 document.addEventListener('keydown', ev => {
     if (ev.key !== 'Escape') return;
-    ['modal-despesa', 'modal-receita', 'modal-edicao', 'modal-chuvas'].forEach(id => { const m = document.getElementById(id); if (m && m.style.display === 'flex') m.style.display = 'none'; });
+    ['modal-despesa', 'modal-receita', 'modal-edicao', 'modal-chuvas', 'modal-gd', 'modal-orcamento'].forEach(id => { const m = document.getElementById(id); if (m && m.style.display === 'flex') m.style.display = 'none'; });
 });
 document.addEventListener('DOMContentLoaded', () => { try { vincularValidacaoCadastro(); } catch (e) {} });
 
@@ -2276,8 +2299,8 @@ function listaSegura(v) {
 
 function empacotarOpcoes() {
     garantirOpcoes(); const extras = [];
-    CADASTROS_DEF.forEach(d => Object.keys(opcoesDin.cad[d.chave]).forEach(n => {
-        const e = opcoesDin.cad[d.chave][n]; if (e && n) extras.push(`${PREFIXO_CAD}${d.chave}|${e.d ? 1 : 0}|${e.u || 0}|${n}`);
+    cadChaves().forEach(k => Object.keys(opcoesDin.cad[k]).forEach(n => {
+        const e = opcoesDin.cad[k][n]; if (e && n) extras.push(`${PREFIXO_CAD}${k}|${e.d ? 1 : 0}|${e.u || 0}|${n}`);
     }));
     Object.keys(opcoesDin.talhoesInfo).forEach(n => {
         const i = opcoesDin.talhoesInfo[n]; if (!i) return;
@@ -2352,11 +2375,11 @@ function comboAbrir(inp, mostrarTodos) {
     const todas = comboOpcoes(inp); const termo = semAcento(inp.value.trim());
     const exato = todas.some(o => semAcento(o) === termo);
     const lista = (mostrarTodos || !termo || exato) ? todas : todas.filter(o => semAcento(o).includes(termo));
-    const restrito = !!CAMPOS_CAD[inp.id]; const box = comboElemento();
+    const restrito = !!CAMPOS_CAD[inp.id] || inp.id === 'ed_setor'; const semCat = /^(d|ed)_setor$/.test(inp.id) && !cadNorm(safeVal(inp.id.replace('setor', 'categoria'))); const box = comboElemento();
     comboAtual = inp; comboIdx = -1;
     if (!lista.length) {
         if (!restrito) { box.style.display = 'none'; return; }
-        box.innerHTML = `<div class="combo-vazio">${todas.length ? `Nenhum item cadastrado com “${strEscape(inp.value.trim())}”.` : 'Nenhum item cadastrado ainda.'}<br>Este campo aceita somente itens da tela de cadastros.<br><a href="#" class="combo-link" onclick="return false;">📝 Abrir Cadastros</a></div>`;
+        box.innerHTML = `<div class="combo-vazio">${semCat ? 'Escolha primeiro a categoria — os setores dependem dela.' : todas.length ? `Nenhum item cadastrado com “${strEscape(inp.value.trim())}”.` : 'Nenhum item cadastrado ainda.'}<br>Este campo aceita somente itens da tela de cadastros.<br><a href="#" class="combo-link" onclick="return false;">📝 Abrir Cadastros</a></div>`;
     } else {
         box.innerHTML = lista.map(o => `<div class="combo-item${semAcento(o) === termo ? ' ativo' : ''}" data-v="${encAttr(o)}">${strEscape(o)}</div>`).join('');
     }
@@ -2600,8 +2623,710 @@ function atualizarMarcasMenu() {
 
 document.addEventListener('DOMContentLoaded', () => { try { atualizarMarcasMenu(); } catch (e) {} });
 
-const VERSAO_SISTEMA = 'v24/10/2026-b';
+const VERSAO_SISTEMA = 'v25/10/2026-c';
 document.addEventListener('DOMContentLoaded', () => { const v = document.getElementById('versao_sistema'); if (v) { v.textContent = VERSAO_SISTEMA; v.classList.add('ok'); } });
+
+/* =========================================================================
+   16. HIERARQUIA CATEGORIA → SETOR, UNIDADES E RENOMEAÇÃO DOS CADASTROS
+========================================================================= */
+const MARCA_ESTRUTURA = 'ESTRUTURA-2026-10-25';
+let hierCat = '';
+
+function cadChaves() { return CADASTROS_DEF.map(d => d.chave).concat(['vinculo', 'migracao', 'lavoura', 'orcamento']); }
+function vincKey(c, s) { return cadNorm(c) + '|' + cadNorm(s); }
+function cadVinculado(c, s) { garantirOpcoes(); const e = opcoesDin.cad.vinculo[vincKey(c, s)]; return !!(e && !e.d); }
+function setoresDe(c) { c = cadNorm(c); if (!c) return []; return cadLista('setor').filter(s => cadVinculado(c, s)); }
+function categoriasDeSetor(s) { return cadLista('categoria_despesa').filter(c => cadVinculado(c, s)); }
+function setorValidoParaCategoria(c, s) {
+    c = cadNorm(c); s = cadNorm(s); if (!c || !s) return true;
+    const l = setoresDe(c); return !l.length || l.includes(s);
+}
+function cadVincular(c, s) { garantirOpcoes(); opcoesDin.cad.vinculo[vincKey(c, s)] = { u: Date.now(), d: false }; }
+function cadDesvincular(c, s) { garantirOpcoes(); opcoesDin.cad.vinculo[vincKey(c, s)] = { u: Date.now(), d: true }; }
+function desvincularTodos(chave, nome) {
+    garantirOpcoes(); const n = cadNorm(nome); const v = opcoesDin.cad.vinculo;
+    Object.keys(v).forEach(k => {
+        const i = k.indexOf('|'); const c = k.slice(0, i), s = k.slice(i + 1);
+        if (((chave === 'categoria_despesa' && c === n) || (chave === 'setor' && s === n)) && v[k] && !v[k].d) v[k] = { u: Date.now(), d: true };
+    });
+}
+function cadUsosPar(c, s) {
+    c = cadNorm(c); s = cadNorm(s); let n = 0;
+    transacoes.forEach(t => { if (t && !t.deleted && String(t.tipo).toLowerCase() !== 'receita' && cadNorm(t.categoria) === c && cadNorm(t.setor) === s) n++; });
+    return n;
+}
+
+// Aplica uma única vez a estrutura padrão (categorias, setores e vínculos); itens antigos sem nenhum uso saem da lista
+function migrarEstruturaDespesas() {
+    garantirOpcoes(); if (opcoesDin.cad.migracao[MARCA_ESTRUTURA]) return false;
+    const agora = Date.now(); const cad = opcoesDin.cad;
+    Object.keys(ESTRUTURA_DESPESAS).forEach(c => {
+        cad.categoria_despesa[c] = { u: agora, d: false };
+        ESTRUTURA_DESPESAS[c].forEach(s => { cad.setor[s] = { u: agora, d: false }; cad.vinculo[vincKey(c, s)] = { u: agora, d: false }; });
+    });
+    const usoC = cadUsos('categoria_despesa'), usoS = cadUsos('setor'); const setPadrao = new Set(dSetoresPadrao);
+    cadLista('categoria_despesa').forEach(n => { if (!ESTRUTURA_DESPESAS[n] && !usoC[n]) cad.categoria_despesa[n] = { u: agora, d: true }; });
+    cadLista('setor').forEach(n => { if (!setPadrao.has(n) && !usoS[n]) cad.setor[n] = { u: agora, d: true }; });
+    cad.migracao[MARCA_ESTRUTURA] = { u: agora, d: false };
+    return true;
+}
+
+/* ---------- Renomear / unificar itens (propaga para os lançamentos) ---------- */
+function cadRenomear(chave, de, para) {
+    de = cadNorm(de); para = cadNorm(para); if (!de || !para || de === para) return -1;
+    garantirOpcoes(); const agora = Date.now(); const cad = opcoesDin.cad; let alterados = 0;
+    cad[chave][para] = { u: agora, d: false }; cad[chave][de] = { u: agora, d: true };
+    if (chave === 'talhao') alterados += propagarTalhao(de, para, agora);
+    if (chave === 'setor') moverSetorMapeamentos(de, para, agora);
+    if (chave === 'categoria_despesa' || chave === 'setor') {
+        Object.keys(cad.vinculo).slice().forEach(k => {
+            const e = cad.vinculo[k]; if (!e || e.d) return; const i = k.indexOf('|'); let c = k.slice(0, i), s = k.slice(i + 1);
+            if (chave === 'categoria_despesa' && c === de) { cad.vinculo[k] = { u: agora, d: true }; cad.vinculo[vincKey(para, s)] = { u: agora, d: false }; }
+            if (chave === 'setor' && s === de) { cad.vinculo[k] = { u: agora, d: true }; cad.vinculo[vincKey(c, para)] = { u: agora, d: false }; }
+        });
+    }
+    transacoes.forEach(t => {
+        if (!t || t.deleted) return; const rec = String(t.tipo).toLowerCase() === 'receita'; let mudou = false;
+        if (chave === 'categoria_despesa' && !rec && cadNorm(t.categoria) === de) { t.categoria = para; mudou = true; }
+        else if (chave === 'setor' && !rec && cadNorm(t.setor) === de) { t.setor = para; mudou = true; }
+        else if (chave === 'fornecedor' && !rec && cadNorm(t.local) === de) { t.local = para; mudou = true; }
+        else if (chave === 'produto_receita' && rec && cadNorm(t.categoria) === de) { t.categoria = para; mudou = true; }
+        else if (chave === 'cliente' && rec && cadNorm(t.local) === de) { t.local = para; mudou = true; }
+        else if (chave === 'unidade' && cadNorm(t.und) === de) { t.und = para; mudou = true; }
+        if (mudou) { t.updatedAt = agora; alterados++; }
+    });
+    return alterados;
+}
+
+function atualizarTelasAposCadastro() {
+    try { CADASTROS_DEF.forEach(d => renderListaCadastro(d.chave)); renderHierarquia(); } catch (e) {}
+    try { atualizarListasAposCadastro(); atualizarOpcoesFiltros(); aplicarFiltros(); } catch (e) {}
+    try { renderTalhoes(); renderDatalistsAgri(); popularSeletorSafraApp(); } catch (e) {}
+}
+
+function cadRenomearItem(chave, enc) {
+    const de = decodeURIComponent(enc); const def = CADASTROS_DEF.find(d => d.chave === chave);
+    const entrada = prompt(`Novo nome para ${def.titulo.toLowerCase()} "${de}":`, de); if (entrada === null) return;
+    const para = cadNorm(entrada); if (!para || para === de) return;
+    const usos = cadUsos(chave)[de] || 0; const existe = cadTem(chave, para);
+    if ((usos || existe) && !confirm(`Renomear "${de}" para "${para}"?\n\n` + (usos ? `${usos} lançamento(s) serão atualizados.\n` : '') + (existe ? `"${para}" já existe: os dois serão unificados.` : ''))) return;
+    const n = cadRenomear(chave, de, para);
+    if (hierCat === de) hierCat = para;
+    salvarDados(); atualizarTelasAposCadastro();
+    mostrarToast(`${def.titulo} renomeado${n > 0 ? ' (' + n + ' lançamento(s) atualizados)' : ''}!`);
+}
+
+/* ---------- Tela de cadastros: categorias e setores em hierarquia ---------- */
+function htmlHierarquia() {
+    return `<div class="widget-box cad-card cad-hier" id="cad_hier" style="border-top: 4px solid var(--cor-laranja-flat);">
+        <div class="widget-header" style="border:none; margin-bottom:8px; padding-bottom:0;"><span>🏷️ Categorias e Setores <small style="font-weight:600; text-transform:none; color:#888;">— cada setor pertence a uma categoria</small></span><span class="cad-contagem" id="hier_cont"></span></div>
+        <div class="hier-grid">
+            <div class="hier-col">
+                <div class="hier-titulo">1. Categorias</div>
+                <form class="cad-form" onsubmit="hierAddCategoria(event)"><input type="text" id="hier_in_cat" placeholder="Nova categoria" autocomplete="off"><button type="submit" class="btn-salvar-compacto" style="background: var(--cor-laranja-flat);">Adicionar</button></form>
+                <ul class="cad-lista hier-lista" id="hier_lista_cat"></ul>
+            </div>
+            <div class="hier-col">
+                <div class="hier-titulo" id="hier_titulo_set">2. Setores</div>
+                <form class="cad-form" onsubmit="hierAddSetor(event)"><input type="text" id="hier_in_set" placeholder="Novo setor desta categoria" autocomplete="off"><button type="submit" class="btn-salvar-compacto" style="background: var(--cor-laranja-flat);">Adicionar</button></form>
+                <div class="cad-form"><select id="hier_sel_existente"></select><button type="button" class="btn-salvar-compacto" style="background: var(--cor-azul-flat);" onclick="hierVincularExistente()">Vincular</button></div>
+                <ul class="cad-lista hier-lista" id="hier_lista_set"></ul>
+            </div>
+        </div>
+        <div id="hier_orfaos"></div>
+        <div id="hier_lav"></div>
+    </div>`;
+}
+
+function renderHierarquia() {
+    const box = document.getElementById('cad_hier'); if (!box) return;
+    const cats = cadLista('categoria_despesa');
+    if (!cats.includes(hierCat)) hierCat = cats[0] || '';
+    const usosC = cadUsos('categoria_despesa'); const termo = cadNorm(safeVal('hier_in_cat'));
+    const catsVis = termo ? cats.filter(c => c.includes(termo)) : cats;
+    let h = '';
+    if (termo && !cats.includes(termo)) h += `<li class="cad-dica">➕ Clique em <b>Adicionar</b> para cadastrar “${strEscape(termo)}”</li>`;
+    h += catsVis.map(c => `<li class="cad-item hier-cat${c === hierCat ? ' sel' : ''}" onclick="hierSelecionar('${encAttr(c)}')"><span class="cad-nome">${strEscape(c)}</span><span class="cad-uso">${setoresDe(c).length} setor(es) · ${usosC[c] ? usosC[c] + ' uso(s)' : 'sem uso'}</span>
+        <button type="button" class="btn-acao btn-editar" title="Renomear" onclick="event.stopPropagation(); cadRenomearItem('categoria_despesa', '${encAttr(c)}')">✏️</button>
+        <button type="button" class="btn-acao btn-excluir" title="Remover do cadastro" onclick="event.stopPropagation(); cadRemoverItem('categoria_despesa', '${encAttr(c)}')">🗑️</button></li>`).join('');
+    document.getElementById('hier_lista_cat').innerHTML = h || '<li class="cad-dica">Nenhuma categoria cadastrada</li>';
+
+    const tit = document.getElementById('hier_titulo_set'); const lista = setoresDe(hierCat);
+    tit.innerHTML = hierCat ? `2. Setores de <b>${strEscape(hierCat)}</b>` : '2. Setores';
+    const usosS = cadUsos('setor');
+    document.getElementById('hier_lista_set').innerHTML = !hierCat ? '<li class="cad-dica">Cadastre ou selecione uma categoria</li>' :
+        (lista.map(s => { const outras = categoriasDeSetor(s).filter(c => c !== hierCat);
+            return `<li class="cad-item"><span class="cad-nome">${strEscape(s)}${talhaoDoSetor(s) ? ` <small class="hier-badge-lav" title="Setor ligado a este talhão">🌾 ${strEscape(talhaoDoSetor(s))}</small>` : ''}${outras.length ? ` <small class="cad-uso" title="Também vinculado a: ${strEscape(outras.join(', '))}">+${outras.length} categoria(s)</small>` : ''}</span><span class="cad-uso">${cadUsosPar(hierCat, s) ? cadUsosPar(hierCat, s) + ' uso(s)' : 'sem uso'}</span>
+            <button type="button" class="btn-acao btn-editar" title="Renomear o setor (vale para todas as categorias)" onclick="cadRenomearItem('setor', '${encAttr(s)}')">✏️</button>
+            <button type="button" class="btn-acao btn-excluir" title="Desvincular desta categoria" onclick="hierDesvincular('${encAttr(s)}')">✂️</button></li>`; }).join('') || '<li class="cad-dica">Nenhum setor vinculado — adicione abaixo ou vincule um existente</li>');
+    const livres = cadLista('setor').filter(s => !cadVinculado(hierCat, s));
+    document.getElementById('hier_sel_existente').innerHTML = '<option value="">Vincular setor já cadastrado…</option>' + livres.map(s => `<option value="${strEscape(s)}">${strEscape(s)}</option>`).join('');
+    const orf = cadLista('setor').filter(s => !categoriasDeSetor(s).length);
+    document.getElementById('hier_orfaos').innerHTML = orf.length ? `<div class="hier-orfaos"><b>Setores sem categoria (${orf.length}):</b> ` + orf.map(s => `<span class="hier-chip">${strEscape(s)} <a href="#" title="Remover do cadastro" onclick="cadRemoverItem('setor', '${encAttr(s)}'); return false;">✕</a></span>`).join('') + ` <small>— use “Vincular setor já cadastrado” para ligá-los a uma categoria.</small></div>` : '';
+    const c = document.getElementById('hier_cont'); if (c) c.innerText = cats.length + ' categorias';
+    renderLavourasSetores();
+}
+
+function hierSelecionar(enc) { hierCat = decodeURIComponent(enc); renderHierarquia(); }
+function hierAddCategoria(e) {
+    e.preventDefault(); const n = cadNorm(safeVal('hier_in_cat')); if (!n) return;
+    if (cadTem('categoria_despesa', n)) { hierCat = n; setVal('hier_in_cat', ''); renderHierarquia(); mostrarToast('Categoria já cadastrada!'); return; }
+    cadAdicionar('categoria_despesa', n); hierCat = n; salvarDados(); setVal('hier_in_cat', ''); atualizarTelasAposCadastro(); mostrarToast('Categoria cadastrada! Agora adicione os setores dela.');
+    focarPrimeiroCampo('hier_in_set');
+}
+function hierAddSetor(e) {
+    e.preventDefault(); if (!hierCat) { mostrarToast('Escolha uma categoria primeiro'); return; }
+    const n = cadNorm(safeVal('hier_in_set')); if (!n) return;
+    if (cadVinculado(hierCat, n)) { mostrarToast('Esse setor já pertence a esta categoria!'); return; }
+    if (!cadTem('setor', n)) cadAdicionar('setor', n);
+    cadVincular(hierCat, n); salvarDados(); setVal('hier_in_set', ''); atualizarTelasAposCadastro(); mostrarToast('Setor cadastrado em ' + hierCat); focarPrimeiroCampo('hier_in_set');
+}
+function hierVincularExistente() {
+    const s = cadNorm(safeVal('hier_sel_existente')); if (!hierCat || !s) return;
+    cadVincular(hierCat, s); salvarDados(); atualizarTelasAposCadastro(); mostrarToast(s + ' vinculado a ' + hierCat);
+}
+function hierDesvincular(enc) {
+    const s = decodeURIComponent(enc); const usos = cadUsosPar(hierCat, s);
+    if (!confirm(`Desvincular "${s}" da categoria "${hierCat}"?\n\n` + (usos ? `${usos} lançamento(s) já usam essa combinação e NÃO serão alterados. ` : '') + `O setor deixa de ser oferecido para esta categoria.`)) return;
+    cadDesvincular(hierCat, s); salvarDados(); atualizarTelasAposCadastro();
+}
+
+/* ---------- Lançamento: o setor depende da categoria escolhida ---------- */
+function atualizarSetoresDaCategoria(pref) {
+    const cat = cadNorm(safeVal(pref + 'categoria')); const dl = document.getElementById(pref === 'd_' ? 'lista_d_setor' : 'lista_ed_setor'); if (!dl) return;
+    let lista = []; if (cat) { lista = setoresDe(cat); if (!lista.length) lista = cadLista('setor'); }
+    dl.innerHTML = lista.map(v => `<option value="${strEscape(v)}">`).join('');
+    const el = document.getElementById(pref + 'setor'); if (!el) return;
+    el.placeholder = cat ? 'Selecione' : 'Escolha a categoria';
+    if (pref === 'd_') {
+        if (cat && cadNorm(el.value) && !lista.includes(cadNorm(el.value))) el.value = '';
+        validarCampoCad('d_setor', 'setor');
+    }
+}
+function atualizarAvisoInsumo() {
+    const el = document.getElementById('d_aviso_insumo'); if (!el) return; const msgs = []; const insumo = categoriasInsumo.includes(cadNorm(safeVal('d_categoria')));
+    if (insumo) msgs.push('💡 <b>Compra de insumo:</b> o custo só chega à lavoura quando o produto for <b>aplicado</b> (tela Aplicações). Dê entrada no estoque ao gravar e deixe o talhão em branco — assim a adubação não é contada duas vezes.');
+    const m = talhaoDoSetor(safeVal('d_setor'));
+    if (m && !insumo) msgs.push(`🌾 O setor <b>${strEscape(cadNorm(safeVal('d_setor')))}</b> é a lavoura <b>${strEscape(m)}</b>: o custo será atribuído a esse talhão automaticamente.`);
+    el.innerHTML = msgs.join('<br>'); el.style.display = msgs.length ? 'block' : 'none';
+}
+function aoMudarCategoria(pref) { atualizarSetoresDaCategoria(pref); if (pref === 'd_') atualizarAvisoInsumo(); }
+
+/* =========================================================================
+   17. GESTÃO DE DESPESAS: POR SETOR, POR LAVOURA (TALHÃO) E POR SAFRA
+   Regras:
+   - Lavoura = talhão. Um setor pode estar ligado a um talhão (CAFÉ 1 = CAFÉ 01): o custo vai para ele.
+   - Setores sem talhão são custos gerais (FAZENDA, TRATOR, ENERGIA, RAÇÃO...), exibidos à parte.
+   - Adubos e defensivos comprados para o estoque só viram custo da lavoura quando APLICADOS.
+   - Custeio e investimento são sempre exibidos separados.
+========================================================================= */
+const GRUPOS_CUSTO = ['ADUBAÇÃO', 'DEFENSIVOS', 'MÃO DE OBRA', 'COMBUSTÍVEL', 'ENERGIA', 'MANUTENÇÃO', 'OUTROS'];
+const MARCA_LAVOURA = 'LAVOURA-2026-10-25';
+let custosUltimo = null;
+let gdCelulas = [];
+
+function grupoCusto(texto) {
+    const t = semAcento(texto);
+    if (/ADUB|FERTIL|CALC|FOLIAR|NPK/.test(t)) return 'ADUBAÇÃO';
+    if (/DEFENS|FUNGIC|HERBIC|INSETIC|ACARIC|BACTERIC|NEMAT|FORMIC/.test(t)) return 'DEFENSIVOS';
+    if (/MAO DE OBRA|DIARIA|SALARIO|FUNCIONARIO/.test(t)) return 'MÃO DE OBRA';
+    if (/COMBUST|DIESEL|GASOLINA/.test(t)) return 'COMBUSTÍVEL';
+    if (/ENERGIA/.test(t)) return 'ENERGIA';
+    if (/MANUT/.test(t)) return 'MANUTENÇÃO';
+    return 'OUTROS';
+}
+
+/* ---------- Setor <-> talhão (lavoura) ---------- */
+function talhaoDoSetor(s) {
+    s = cadNorm(s); if (!s) return ''; garantirOpcoes();
+    const l = opcoesDin.cad.lavoura; let u = -1, r = '';
+    Object.keys(l).forEach(k => { const e = l[k]; if (!e || e.d) return; const i = k.indexOf('|'); if (k.slice(0, i) === s && (e.u || 0) >= u) { u = e.u || 0; r = k.slice(i + 1); } });
+    return (r && cadTem('talhao', r)) ? r : '';
+}
+function setorDoTalhao(t) {
+    t = cadNorm(t); if (!t) return ''; garantirOpcoes(); const l = opcoesDin.cad.lavoura; const achados = [];
+    Object.keys(l).forEach(k => { const e = l[k]; if (!e || e.d) return; const i = k.indexOf('|'); const s = k.slice(0, i); if (k.slice(i + 1) === t && talhaoDoSetor(s) === t) achados.push(s); });
+    achados.sort(); return achados[0] || '';
+}
+function cadMapearLavoura(setor, talhao) {
+    garantirOpcoes(); const s = cadNorm(setor), t = cadNorm(talhao); const agora = Date.now(); const l = opcoesDin.cad.lavoura;
+    Object.keys(l).forEach(k => { const e = l[k]; if (e && !e.d && k.slice(0, k.indexOf('|')) === s) l[k] = { u: agora, d: true }; });
+    if (t) l[s + '|' + t] = { u: agora, d: false };
+}
+function conflitoSetorTalhao(setor, talhoes) {
+    const m = talhaoDoSetor(setor); if (!m || !talhoes || !talhoes.length) return '';
+    return talhoes.some(x => cadNorm(x) !== m) ? `O setor "${cadNorm(setor)}" corresponde ao talhão "${m}".\n\nDeixe o talhão em branco (o custo é atribuído automaticamente) ou escolha o mesmo talhão.` : '';
+}
+function moverSetorMapeamentos(de, para, agora) {
+    const l = opcoesDin.cad.lavoura; Object.keys(l).slice().forEach(k => { const e = l[k]; if (!e || e.d) return; const i = k.indexOf('|'); if (k.slice(0, i) === de) { l[k] = { u: agora, d: true }; l[para + '|' + k.slice(i + 1)] = { u: agora, d: false }; } });
+    const o = opcoesDin.cad.orcamento; Object.keys(o).slice().forEach(k => { const e = o[k]; if (!e || e.d) return; const p = k.split('|'); if (p.length === 3 && p[1] === de) { o[k] = { u: agora, d: true }; o[p[0] + '|' + para + '|' + p[2]] = { u: agora, d: false }; } });
+}
+// Renomeia um talhão em TODOS os registros (lançamentos, aplicações, análises, informações e vínculos com setores)
+function propagarTalhao(de, para, agora) {
+    let n = 0; const info = opcoesDin.talhoesInfo; const i = info[de];
+    if (i && !i.deleted && !(info[para] && !info[para].deleted)) info[para] = Object.assign({}, i, { updatedAt: agora, deleted: false });
+    if (i) info[de] = { deleted: true, updatedAt: agora };
+    transacoes.forEach(t => {
+        if (!t || t.deleted) return; const r = rateioDe(t);
+        if (r.some(x => x.talhao === de)) { gravarRateioNaTransacao(t, r.map(x => ({ talhao: x.talhao === de ? para : x.talhao, pct: x.pct }))); t.updatedAt = agora; n++; }
+    });
+    agriRecords.forEach(r => { if (r && !r.deleted && cadNorm(r.talhao) === de) { r.talhao = para; r.updatedAt = agora; n++; } });
+    analisesSolo.forEach(a => { if (a && !a.deleted && cadNorm(a.talhao) === de) { a.talhao = para; a.updatedAt = agora; n++; } });
+    const l = opcoesDin.cad.lavoura; Object.keys(l).slice().forEach(k => { const e = l[k]; if (!e || e.d) return; const x = k.indexOf('|'); if (k.slice(x + 1) === de) { l[k] = { u: agora, d: true }; l[k.slice(0, x) + '|' + para] = { u: agora, d: false }; } });
+    sincronizarTalhoesDerivados();
+    return n;
+}
+
+// Uma única vez: talhões passam a se chamar CAFÉ 01/02/03 e os setores CAFÉ 1/2/3 e MARACUJÁ são ligados a eles
+function migrarLavouras() {
+    garantirOpcoes(); if (opcoesDin.cad.migracao[MARCA_LAVOURA]) return false;
+    const agora = Date.now();
+    [['CAFÉ 2019', 'CAFÉ 01'], ['CAFÉ 2022', 'CAFÉ 02'], ['CAFÉ 2025', 'CAFÉ 03']].forEach(p => cadRenomear('talhao', p[0], p[1]));
+    ['CAFÉ 01', 'CAFÉ 02', 'CAFÉ 03'].forEach(n => {
+        if (!cadTem('talhao', n)) cadAdicionar('talhao', n);
+        if (!infoTalhao(n)) opcoesDin.talhoesInfo[n] = { cultura: 'conilon', area: 0, plantas: 0, updatedAt: agora, deleted: false };
+    });
+    [['CAFÉ 1', 'CAFÉ 01'], ['CAFÉ 2', 'CAFÉ 02'], ['CAFÉ 3', 'CAFÉ 03']].forEach(p => { if (!talhaoDoSetor(p[0])) opcoesDin.cad.lavoura[p[0] + '|' + p[1]] = { u: agora, d: false }; });
+    const mar = cadLista('talhao').filter(n => semAcento(n).indexOf('MARACUJA') === 0);
+    if (mar.length === 1 && !talhaoDoSetor('MARACUJÁ')) opcoesDin.cad.lavoura['MARACUJÁ|' + mar[0]] = { u: agora, d: false };
+    opcoesDin.cad.migracao[MARCA_LAVOURA] = { u: agora, d: false };
+    return true;
+}
+
+/* ---------- Cadastros: ligação setor -> talhão ---------- */
+function renderLavourasSetores() {
+    const box = document.getElementById('hier_lav'); if (!box) return;
+    const tal = cadLista('talhao');
+    box.innerHTML = `<div class="hier-lav"><div class="hier-titulo">🌾 Setor ↔ Lavoura (talhão)</div>
+        <div class="cad-dica" style="padding:0 0 10px;">Setores ligados a um talhão têm o custo atribuído a ele automaticamente. Setores sem talhão são <b>custos gerais</b> e aparecem à parte nos relatórios.</div>
+        <div class="hier-lav-grid">` + cadLista('setor').map(s => { const m = talhaoDoSetor(s);
+            return `<label class="hier-lav-item${m ? ' ligado' : ''}"><span>${strEscape(s)}</span><select onchange="hierMapearLavoura('${encAttr(s)}', this.value)"><option value="">Custo geral</option>${tal.map(t => `<option value="${strEscape(t)}"${t === m ? ' selected' : ''}>${strEscape(t)}</option>`).join('')}</select></label>`; }).join('') + '</div></div>';
+}
+function hierMapearLavoura(enc, valor) {
+    const s = decodeURIComponent(enc); cadMapearLavoura(s, valor); salvarDados(); renderLavourasSetores();
+    mostrarToast(valor ? `${s} ligado ao talhão ${valor}` : `${s} agora é custo geral`);
+}
+
+/* ---------- Orçamento por safra e setor ---------- */
+function orcPrefixo(safra, setor) { return safra + '|' + setor + '|'; }
+function orcGet(safra, setor) {
+    garantirOpcoes(); const p = orcPrefixo(safra, cadNorm(setor)); let u = -1, v = 0;
+    Object.keys(opcoesDin.cad.orcamento).forEach(k => { const e = opcoesDin.cad.orcamento[k]; if (k.indexOf(p) === 0 && e && !e.d && (e.u || 0) >= u) { u = e.u || 0; v = parseFloat(k.slice(p.length)) || 0; } });
+    return v;
+}
+function orcSet(safra, setor, valor) {
+    garantirOpcoes(); const p = orcPrefixo(safra, cadNorm(setor)); const agora = Date.now(); const o = opcoesDin.cad.orcamento;
+    Object.keys(o).forEach(k => { if (k.indexOf(p) === 0 && o[k] && !o[k].d) o[k] = { u: agora, d: true }; });
+    valor = Math.round((parseFloat(valor) || 0) * 100) / 100; if (valor > 0) o[p + valor] = { u: agora, d: false };
+}
+function safraOrcamento() { const s = safeVal('cs_safra'); return (s && s !== 'TODAS') ? s : obterSafraAtual(); }
+function setoresOrdenados() {
+    const l = cadLista('setor'); return l.filter(s => talhaoDoSetor(s)).concat(l.filter(s => !talhaoDoSetor(s)));
+}
+function abrirOrcamento() {
+    const sf = safraOrcamento(); if (!sf || sf === 'Sem Data') { alert('Escolha uma safra.'); return; }
+    const real = {}; custosAtomos().forEach(a => { if (a.safra === sf && a.nat === 'CUSTEIO') real[a.setor] = (real[a.setor] || 0) + a.valor; });
+    document.getElementById('orc_titulo').innerText = '🎯 ORÇAMENTO DE CUSTEIO — SAFRA ' + sf;
+    document.getElementById('orc_corpo').innerHTML = '<thead><tr><th>SETOR</th><th>LIGADO AO TALHÃO</th><th style="text-align:right">REALIZADO</th><th style="text-align:right">ORÇADO (R$)</th></tr></thead><tbody>' +
+        setoresOrdenados().map(s => { const o = orcGet(sf, s); return `<tr><td><b>${strEscape(s)}</b></td><td>${strEscape(talhaoDoSetor(s) || 'Custo geral')}</td><td style="text-align:right">${formatarMoeda(real[s] || 0)}</td><td style="text-align:right"><input type="number" min="0" step="0.01" class="orc-in" data-setor="${encAttr(s)}" value="${o > 0 ? o : ''}" placeholder="0,00"></td></tr>`; }).join('') + '</tbody>';
+    document.getElementById('modal-orcamento').dataset.safra = sf; document.getElementById('modal-orcamento').style.display = 'flex';
+}
+function fecharModalOrcamento() { document.getElementById('modal-orcamento').style.display = 'none'; }
+function salvarOrcamento() {
+    const m = document.getElementById('modal-orcamento'); const sf = m.dataset.safra; if (!sf) return;
+    m.querySelectorAll('.orc-in').forEach(i => { const s = decodeURIComponent(i.dataset.setor); const novo = parseFloat(i.value) || 0; if (novo !== orcGet(sf, s)) orcSet(sf, s, novo); });
+    salvarDados(); fecharModalOrcamento(); renderGestaoDespesas(); mostrarToast('Orçamento salvo!');
+}
+
+/* ---------- Base de cálculo: cada "átomo" é um valor de custo com data, safra, categoria, setor e talhão ---------- */
+function custosAtomos() {
+    const out = [];
+    agriRecords.forEach(r => {
+        if (!r || r.deleted || r.status !== 'APLICADO' || !r.talhao || r.talhao === '-' || !r.data) return;
+        const v = custoAplicacao(r); if (!v) return; const tal = cadNorm(r.talhao); const g = grupoCusto(r.tipo || r.produto); const data = sanitizeDateString(r.data);
+        out.push({ origem: 'Aplicação', data: data, safra: obterSafraGeral(data), nat: 'CUSTEIO', cat: g === 'ADUBAÇÃO' ? 'ADUBO' : (g === 'DEFENSIVOS' ? 'DEFENSIVO' : (cadNorm(r.tipo) || 'OUTROS')),
+            setor: setorDoTalhao(tal) || tal, talhao: tal, valor: v, desc: strSafe(r.produto) + (r.dosagem ? ' — ' + r.dosagem : '') });
+    });
+    transacoes.forEach(t => {
+        if (!t || t.deleted || !t.data) return; const tp = String(t.tipo).toLowerCase(); if (tp === 'receita') return;
+        if (t.est_mov) return; // compra que entrou no estoque: só vira custo quando aplicada
+        const v = parseFloat(t.valor) || 0; if (!v) return; const data = sanitizeDateString(t.data);
+        const setor = cadNorm(t.setor); const base = { origem: 'Caixa', data: data, safra: obterSafraGeral(data), nat: tp === 'investimento' ? 'INVESTIMENTO' : 'CUSTEIO', cat: cadNorm(t.categoria) || 'SEM CATEGORIA',
+            setor: (!setor || setor === '-') ? 'NÃO INFORMADO' : setor, desc: [strSafe(t.local) === '-' ? '' : strSafe(t.local), strSafe(t.desc) === '-' ? '' : strSafe(t.desc)].filter(Boolean).join(' — ') };
+        const al = alocacaoTalhao(t);
+        if (al.length) al.forEach(a => out.push(Object.assign({}, base, { talhao: a.talhao, valor: a.valor })));
+        else out.push(Object.assign({}, base, { talhao: '', valor: v }));
+    });
+    return out.filter(a => a.safra !== 'Sem Data');
+}
+function receitasPorTalhao(safra) {
+    const m = {};
+    transacoes.forEach(t => {
+        if (!t || t.deleted || String(t.tipo).toLowerCase() !== 'receita' || !t.data) return;
+        if (safra !== 'TODAS' && obterSafraGeral(t.data) !== safra) return;
+        const tl = cadNorm(t.talhao); if (!tl || tl === '-') return; const o = m[tl] || (m[tl] = { valor: 0, sacas: 0 });
+        o.valor += parseFloat(t.valor) || 0; if (cadNorm(t.und) === 'SC') o.sacas += parseFloat(t.qtd) || 0;
+    });
+    return m;
+}
+function safrasDosCustos() {
+    const s = new Set(custosAtomos().map(a => a.safra)); s.add(obterSafraAtual()); s.delete('Sem Data');
+    return Array.from(s).sort().reverse();
+}
+const somaV = l => l.reduce((s, a) => s + a.valor, 0);
+const celula = (at, t, extra) => Object.assign({ v: somaV(at), at: at, t: t }, extra || {});
+
+function popularCustosTalhaoSafra() {
+    const sel = document.getElementById('cs_safra'); if (!sel) return; const atual = sel.value;
+    const safras = safrasDosCustos();
+    sel.innerHTML = '<option value="TODAS">TODAS AS SAFRAS</option>' + safras.map(s => `<option value="${s}">Safra ${s}</option>`).join('');
+    const padrao = safras.includes(obterSafraAtual()) ? obterSafraAtual() : 'TODAS';
+    sel.value = (atual && (atual === 'TODAS' || safras.includes(atual))) ? atual : padrao;
+    renderGestaoDespesas();
+}
+
+/* ---------- Visões ---------- */
+function gdLavouras(A, f) {
+    const comRec = f.nat === 'CUSTEIO'; const rec = receitasPorTalhao(f.safra); const cadT = cadLista('talhao'); const nomes = new Set(cadT);
+    A.forEach(a => { if (a.talhao) nomes.add(a.talhao); });
+    const lista = Array.from(nomes).sort((a, b) => { const ca = cadT.includes(a), cb = cadT.includes(b); return ca === cb ? a.localeCompare(b, 'pt-BR') : (ca ? -1 : 1); });
+    const cab = ['TALHÃO / LAVOURA'].concat(GRUPOS_CUSTO, ['TOTAL', 'ÁREA (ha)', 'R$/ha']); const moeda = [1, 2, 3, 4, 5, 6, 7, 8, 10], num = [9];
+    if (comRec) { cab.push('RECEITA', 'RESULTADO', 'SACAS', 'R$/SACA'); moeda.push(11, 12, 14); num.push(13); }
+    const linhaDe = (rot, at, area, r, est, titulo) => {
+        const c = [rot]; GRUPOS_CUSTO.forEach(g => c.push(celula(at.filter(a => grupoCusto(a.cat) === g), titulo + ' · ' + g)));
+        const tot = somaV(at); c.push(celula(at, titulo, { zero: true })); c.push(area > 0 ? area : ''); c.push(area > 0 ? tot / area : '');
+        if (comRec) { if (r) { c.push(r.valor, r.valor - tot, r.sacas > 0 ? r.sacas : '', r.sacas > 0 ? tot / r.sacas : ''); } else c.push('', '', '', ''); }
+        return { c: c, est: est || '' };
+    };
+    const linhas = []; const dados = [];
+    lista.forEach(n => {
+        const i = infoTalhao(n); const area = i ? (parseFloat(i.area) || 0) : 0; const at = A.filter(a => a.talhao === n);
+        const rot = cadT.includes(n) ? n : n + ' (setor)'; dados.push({ at: at, area: area, r: rec[n] }); linhas.push(linhaDe(rot, at, area, rec[n] || { valor: 0, sacas: 0 }, '', n));
+    });
+    const atL = A.filter(a => a.talhao); const areaT = dados.reduce((s, d) => s + d.area, 0); const custoComArea = dados.reduce((s, d) => s + (d.area > 0 ? somaV(d.at) : 0), 0);
+    const recT = dados.reduce((s, d) => { if (d.r) { s.valor += d.r.valor; s.sacas += d.r.sacas; } return s; }, { valor: 0, sacas: 0 });
+    const sub = linhaDe('SUBTOTAL LAVOURAS', atL, 0, recT, 'sub', 'Lavouras'); sub.c[9] = areaT > 0 ? areaT : ''; sub.c[10] = areaT > 0 ? custoComArea / areaT : ''; linhas.push(sub);
+    const atG = A.filter(a => !a.talhao); linhas.push(linhaDe('CUSTOS GERAIS (sem talhão)', atG, 0, null, '', 'Custos gerais'));
+    linhas.push(linhaDe('TOTAL GERAL', A, 0, null, 'total', 'Total geral'));
+    return { titulo: 'Custos por talhão (lavoura)', cab: cab, linhas: linhas, moeda: moeda, num: num, pct: [], texto: [0], vazio: !A.length && !lista.length,
+        nota: 'Lavoura = talhão. Inclui as aplicações realizadas (pelo custo do estoque) e as despesas do Caixa atribuídas ao talhão — direto, por rateio ou pelo setor ligado a ele (ex.: CAFÉ 1 = CAFÉ 01). Custos gerais não pertencem a um talhão e ficam à parte.' };
+}
+
+function gdOrdemSetores(A, sf) {
+    const set = new Set(A.map(a => a.setor)); cadLista('setor').forEach(s => { if (talhaoDoSetor(s) || (sf && orcGet(sf, s) > 0)) set.add(s); });
+    const tot = {}; A.forEach(a => { tot[a.setor] = (tot[a.setor] || 0) + a.valor; });
+    return Array.from(set).sort((a, b) => { const la = talhaoDoSetor(a) ? 0 : 1, lb = talhaoDoSetor(b) ? 0 : 1; return la !== lb ? la - lb : ((tot[b] || 0) - (tot[a] || 0)) || a.localeCompare(b, 'pt-BR'); });
+}
+function gdSetores(A, f) {
+    const sf = (f.safra !== 'TODAS' && f.nat === 'CUSTEIO') ? f.safra : null; const setores = gdOrdemSetores(A, sf);
+    const totCat = {}; A.forEach(a => { totCat[a.cat] = (totCat[a.cat] || 0) + a.valor; });
+    const cats = Object.keys(totCat).sort((a, b) => totCat[b] - totCat[a]);
+    const cab = ['SETOR', 'CLASSE'].concat(cats, ['TOTAL']); const nC = cats.length; const moeda = []; for (let i = 2; i <= nC + 2; i++) moeda.push(i); const pct = [];
+    if (sf) { cab.push('ORÇADO', '% USADO'); moeda.push(nC + 3); pct.push(nC + 4); }
+    const comOrc = new Set(sf ? setores.filter(s => orcGet(sf, s) > 0) : []); const realOrc = fn => somaV(A.filter(a => comOrc.has(a.setor) && fn(a)));
+    const linhaDe = (rot, classe, at, est, titulo, orc, real) => {
+        const c = [rot, classe]; cats.forEach(k => c.push(celula(at.filter(a => a.cat === k), titulo + ' · ' + k))); const tot = somaV(at); c.push(celula(at, titulo, { zero: true }));
+        if (sf) { c.push(orc > 0 ? orc : ''); c.push(orc > 0 ? { v: Math.round(real / orc * 1000) / 10, cls: real > orc ? 'gd-estouro' : '', zero: true } : ''); }
+        return { c: c, est: est || '' };
+    };
+    const linhas = []; let orcL = 0, orcG = 0;
+    setores.forEach(s => { const m = talhaoDoSetor(s); const orc = sf ? orcGet(sf, s) : 0; if (m) orcL += orc; else orcG += orc; const atS = A.filter(a => a.setor === s); linhas.push(linhaDe(s, m ? '🌾 ' + m : 'Geral', atS, '', s, orc, somaV(atS))); });
+    const isL = a => !!talhaoDoSetor(a.setor);
+    linhas.push(linhaDe('TOTAL LAVOURAS', '', A.filter(isL), 'sub', 'Lavouras', orcL, realOrc(isL)));
+    linhas.push(linhaDe('TOTAL GERAIS', '', A.filter(a => !isL(a)), 'sub', 'Gerais', orcG, realOrc(a => !isL(a))));
+    linhas.push(linhaDe('TOTAL', '', A, 'total', 'Total', orcL + orcG, realOrc(() => true)));
+    return { titulo: 'Despesas por setor e categoria', cab: cab, linhas: linhas, moeda: moeda, num: [], pct: pct, texto: [0, 1], vazio: !A.length && !setores.length,
+        nota: 'Cada linha é um setor (onde o dinheiro foi gasto); clique num valor para ver os lançamentos. ' + (sf ? 'Orçado e % usado referem-se ao custeio da safra ' + sf + ' (botão “Definir orçamento”).' : 'Escolha uma safra para acompanhar o orçamento.') };
+}
+
+function gdMensal(todos, f) {
+    const sf = f.safra === 'TODAS' ? obterSafraAtual() : f.safra; const A = todos.filter(a => a.safra === sf && a.nat === f.nat);
+    const y0 = 2000 + parseInt(sf.slice(0, 2), 10); const nomes = ['AGO', 'SET', 'OUT', 'NOV', 'DEZ', 'JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL'];
+    const meses = nomes.map((n, i) => { const m = i < 5 ? i + 8 : i - 4; const y = i < 5 ? y0 : y0 + 1; return { rot: n + '/' + String(y).slice(2), chave: y + '-' + String(m).padStart(2, '0') }; });
+    const setores = gdOrdemSetores(A, null); const cab = ['SETOR', 'CLASSE'].concat(meses.map(m => m.rot), ['TOTAL']); const moeda = []; for (let i = 2; i <= 14; i++) moeda.push(i);
+    const linhaDe = (rot, classe, at, est, titulo) => { const c = [rot, classe]; meses.forEach(m => c.push(celula(at.filter(a => a.data.indexOf(m.chave) === 0), titulo + ' · ' + m.rot))); c.push(celula(at, titulo, { zero: true })); return { c: c, est: est || '' }; };
+    const linhas = setores.map(s => { const m = talhaoDoSetor(s); return linhaDe(s, m ? '🌾 ' + m : 'Geral', A.filter(a => a.setor === s), '', s); });
+    const isL = a => !!talhaoDoSetor(a.setor);
+    linhas.push(linhaDe('TOTAL LAVOURAS', '', A.filter(isL), 'sub', 'Lavouras')); linhas.push(linhaDe('TOTAL GERAIS', '', A.filter(a => !isL(a)), 'sub', 'Gerais')); linhas.push(linhaDe('TOTAL', '', A, 'total', 'Total'));
+    return { titulo: 'Evolução mensal por setor', safraUsada: sf, cab: cab, linhas: linhas, moeda: moeda, num: [], pct: [], texto: [0, 1], vazio: !A.length && !setores.length,
+        nota: 'Meses da safra ' + sf + ' (agosto a julho)' + (f.safra === 'TODAS' ? ' — escolha outra safra no filtro para mudar' : '') + '. Clique num valor para ver os lançamentos.' };
+}
+
+function gdGerais(A) {
+    const G = A.filter(a => !a.talhao); const total = somaV(G); const porCat = {}; G.forEach(a => { (porCat[a.cat] || (porCat[a.cat] = [])).push(a); });
+    const cats = Object.keys(porCat).sort((a, b) => somaV(porCat[b]) - somaV(porCat[a]));
+    const cab = ['CATEGORIA', 'SETOR', 'TOTAL', '% DO GERAL']; const linhas = [];
+    cats.forEach(c => {
+        const porSet = {}; porCat[c].forEach(a => { (porSet[a.setor] || (porSet[a.setor] = [])).push(a); }); const sets = Object.keys(porSet).sort((a, b) => somaV(porSet[b]) - somaV(porSet[a]));
+        sets.forEach(s => { const v = somaV(porSet[s]); linhas.push({ c: [c, s, celula(porSet[s], c + ' · ' + s), { v: total ? Math.round(v / total * 1000) / 10 : 0, zero: true }], est: '' }); });
+        if (sets.length > 1) { const v = somaV(porCat[c]); linhas.push({ c: ['SUBTOTAL ' + c, '', celula(porCat[c], c), { v: total ? Math.round(v / total * 1000) / 10 : 0, zero: true }], est: 'sub' }); }
+    });
+    linhas.push({ c: ['TOTAL CUSTOS GERAIS', '', celula(G, 'Custos gerais', { zero: true }), { v: total ? 100 : 0, zero: true }], est: 'total' });
+    return { titulo: 'Custos gerais por categoria e setor', cab: cab, linhas: linhas, moeda: [2], num: [], pct: [3], texto: [0, 1], vazio: !G.length,
+        nota: 'Custos gerais: despesas que não pertencem a um talhão (FAZENDA, TRATOR, IRRIGAÇÃO, ENERGIA, RAÇÃO, FINANÇAS...). Veja o setor de cada categoria como cadastrado em Cadastros.' };
+}
+
+function gdComparativo(todos, f) {
+    const A = todos.filter(a => a.nat === f.nat); const safras = Array.from(new Set(A.map(a => a.safra))).sort(); const cadT = cadLista('talhao'); const nomes = new Set(cadT); A.forEach(a => { if (a.talhao) nomes.add(a.talhao); });
+    const lista = Array.from(nomes).sort((a, b) => { const ca = cadT.includes(a), cb = cadT.includes(b); return ca === cb ? a.localeCompare(b, 'pt-BR') : (ca ? -1 : 1); });
+    const cab = ['TALHÃO / LAVOURA'].concat(safras.map(s => 'SAFRA ' + s), ['TOTAL', 'ÁREA (ha)']); const moeda = []; for (let i = 1; i <= safras.length + 1; i++) moeda.push(i);
+    const linhaDe = (rot, at, area, est, titulo) => ({ c: [rot].concat(safras.map(s => celula(at.filter(a => a.safra === s), titulo + ' · safra ' + s)), [celula(at, titulo, { zero: true }), area > 0 ? area : '']), est: est || '' });
+    const linhas = lista.map(n => { const i = infoTalhao(n); return linhaDe(cadT.includes(n) ? n : n + ' (setor)', A.filter(a => a.talhao === n), i ? (parseFloat(i.area) || 0) : 0, '', n); });
+    linhas.push(linhaDe('CUSTOS GERAIS (sem talhão)', A.filter(a => !a.talhao), 0, '', 'Custos gerais')); linhas.push(linhaDe('TOTAL GERAL', A, 0, 'total', 'Total geral'));
+    return { titulo: 'Comparativo entre safras', cab: cab, linhas: linhas, moeda: moeda, num: [safras.length + 2], pct: [], texto: [0], vazio: !A.length,
+        nota: 'Mesmo critério da visão por talhão, comparando as safras (agosto a julho).' };
+}
+
+/* ---------- Painel ---------- */
+function renderCardsGestao(sel, f) {
+    const c = sel.filter(a => a.nat === 'CUSTEIO'), inv = sel.filter(a => a.nat === 'INVESTIMENTO'); const cl = c.filter(a => a.talhao), cg = c.filter(a => !a.talhao);
+    const card = (rot, v, sub, cor) => `<div class="gd-card" style="border-top-color:${cor};"><span>${rot}</span><b>${formatarMoeda(v)}</b><small>${sub}</small></div>`;
+    let h = card('Custeio total', somaV(c), 'Gastos da safra, sem investimento', 'var(--cor-laranja-flat)') + card('Custeio das lavouras', somaV(cl), 'Atribuído a talhões', 'var(--cor-verde-flat)') + card('Custos gerais', somaV(cg), 'Sem talhão (fazenda, trator, ração…)', '#7f8c8d') + card('Investimento', somaV(inv), 'Separado do custeio', 'var(--cor-roxo-flat, #8e44ad)');
+    if (f.safra !== 'TODAS') { const orcSet2 = cadLista('setor').filter(x => orcGet(f.safra, x) > 0); const orc = orcSet2.reduce((s, x) => s + orcGet(f.safra, x), 0); if (orc > 0) { const p = somaV(c.filter(a => orcSet2.includes(a.setor))) / orc * 100; h += card('Orçado (custeio)', orc, `${p.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% usado nos setores orçados`, p > 100 ? 'var(--cor-vermelho-flat)' : 'var(--cor-azul-flat)'); } }
+    const el = document.getElementById('gd_cards'); if (el) el.innerHTML = h;
+}
+
+function gdPlano(c) { return (c && typeof c === 'object') ? c.v : c; }
+function gdHtml(sp) {
+    const fmtV = (v, ci) => sp.pct.includes(ci) ? v.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%' : (sp.moeda.includes(ci) ? formatarMoeda(v) : v.toLocaleString('pt-BR', { maximumFractionDigits: 2 }));
+    const th = sp.cab.map((c, i) => `<th${sp.texto.includes(i) ? '' : ' style="text-align:right"'}>${strEscape(c)}</th>`).join('');
+    const corpo = sp.linhas.map(l => '<tr' + (l.est ? ` class="gd-${l.est}"` : '') + '>' + l.c.map((c, ci) => {
+        const al = sp.texto.includes(ci) ? '' : ' style="text-align:right"'; let txt, cls = '';
+        if (c && typeof c === 'object') {
+            txt = (c.v === 0 && !c.zero) ? '-' : fmtV(c.v, ci); cls = c.cls || '';
+            if (c.at && c.at.length) { gdCelulas.push({ t: c.t, at: c.at }); txt = `<a href="#" class="gd-clk" onclick="gdDetalhe(${gdCelulas.length - 1}); return false;">${txt}</a>`; }
+        } else if (typeof c === 'number') txt = fmtV(c, ci); else txt = (c === '' || c === null || c === undefined) ? '-' : strEscape(c);
+        return `<td${al}${cls ? ` class="${cls}"` : ''}>${txt}</td>`;
+    }).join('') + '</tr>').join('');
+    return `<thead><tr>${th}</tr></thead><tbody>${sp.vazio ? `<tr><td colspan="${sp.cab.length}" style="text-align:center; padding:30px; color:#aaa;">Sem despesas lançadas para esta seleção</td></tr>` : corpo}</tbody>`;
+}
+
+function renderGestaoDespesas() {
+    const tab = document.getElementById('cs_tabela'); if (!tab) return;
+    const f = { safra: safeVal('cs_safra') || 'TODAS', nat: safeVal('cs_nat') || 'CUSTEIO', visao: safeVal('cs_visao') || 'lavouras' };
+    const todos = custosAtomos(); gdCelulas = []; const sel = todos.filter(a => f.safra === 'TODAS' || a.safra === f.safra); const A = sel.filter(a => a.nat === f.nat);
+    renderCardsGestao(sel, f);
+    const sp = f.visao === 'setores' ? gdSetores(A, f) : f.visao === 'mensal' ? gdMensal(todos, f) : f.visao === 'gerais' ? gdGerais(A) : f.visao === 'comparativo' ? gdComparativo(todos, f) : gdLavouras(A, f);
+    tab.innerHTML = gdHtml(sp);
+    const natRot = f.nat === 'CUSTEIO' ? 'Custeio' : 'Investimento'; const safraRot = sp.safraUsada ? 'safra ' + sp.safraUsada : (f.visao === 'comparativo' || f.safra === 'TODAS' ? 'todas as safras' : 'safra ' + f.safra);
+    const nota = document.getElementById('cs_nota');
+    if (nota) nota.innerHTML = sp.nota + ' <b>Adubos e defensivos comprados para o estoque só entram no custo da lavoura quando são aplicados.</b>' + (f.nat === 'CUSTEIO' ? ' Investimento é mostrado à parte (troque o filtro “Natureza”).' : ' Você está vendo apenas investimentos; o custeio está no outro filtro.');
+    const bo = document.getElementById('gd_btn_orc'); if (bo) bo.style.display = (f.visao === 'setores' || f.visao === 'mensal') ? '' : 'none';
+    custosUltimo = { titulo: sp.titulo + ' — ' + natRot, subtitulo: 'Rancho 3C · ' + natRot + ' · ' + safraRot.charAt(0).toUpperCase() + safraRot.slice(1), cab: sp.cab, linhas: sp.linhas.map(l => l.c.map(gdPlano)), moeda: sp.moeda, num: sp.num.concat(sp.pct), totalRow: sp.linhas.length > 0 && !sp.vazio, vazio: sp.vazio };
+}
+
+function gdDetalhe(i) {
+    const d = gdCelulas[i]; if (!d) return; const at = d.at.slice().sort((a, b) => b.data.localeCompare(a.data) || b.valor - a.valor);
+    document.getElementById('gd_titulo').innerText = '🔎 ' + d.t; const total = somaV(at);
+    document.getElementById('gd_tabela').innerHTML = '<thead><tr><th>DATA</th><th>ORIGEM</th><th>CATEGORIA</th><th>SETOR</th><th>TALHÃO</th><th>DESCRIÇÃO</th><th style="text-align:right">VALOR</th></tr></thead><tbody>' +
+        at.map(a => `<tr><td>${formatarData(a.data)}</td><td>${a.origem}</td><td>${strEscape(a.cat)}</td><td>${strEscape(a.setor)}</td><td>${strEscape(a.talhao || '-')}</td><td>${strEscape(a.desc || '-')}</td><td style="text-align:right">${formatarMoeda(a.valor)}</td></tr>`).join('') +
+        `<tr class="gd-total"><td colspan="6">TOTAL — ${at.length} lançamento(s)</td><td style="text-align:right">${formatarMoeda(total)}</td></tr></tbody>`;
+    document.getElementById('modal-gd').style.display = 'flex';
+}
+function fecharModalGd() { document.getElementById('modal-gd').style.display = 'none'; }
+
+function exportarCustos(fmt) {
+    if (!custosUltimo || custosUltimo.vazio) { alert('Não há despesas para exportar nesta seleção.'); return; }
+    const c = custosUltimo; exportarTabela(fmt, 'despesas_rancho3c_' + hojeLocal(), c.titulo, c.subtitulo, c.cab, c.linhas, { moeda: c.moeda, num: c.num, totalRow: c.totalRow, planilha: 'Despesas' });
+}
+
+/* =========================================================================
+   18. EXPORTAÇÃO EM EXCEL (.xlsx) E PDF — sem bibliotecas externas
+========================================================================= */
+function semControle(s) { return String(s === null || s === undefined ? '' : s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g, ''); }
+function xmlEsc(s) { return semControle(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function colExcel(n) { let s = ''; n++; while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); } return s; }
+
+const _tabelaCrc = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); t[n] = c >>> 0; } return t; })();
+function crc32(b) { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = _tabelaCrc[(c ^ b[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+
+function zipArmazenar(arquivos) {
+    const enc = new TextEncoder(); const partes = []; const central = []; let desloc = 0;
+    const u16 = v => [v & 255, (v >>> 8) & 255]; const u32 = v => [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255];
+    arquivos.forEach(f => {
+        const nome = enc.encode(f.nome); const dados = enc.encode(f.conteudo); const crc = crc32(dados);
+        const cab = [0x50, 0x4B, 0x03, 0x04, ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21), ...u32(crc), ...u32(dados.length), ...u32(dados.length), ...u16(nome.length), ...u16(0)];
+        partes.push(new Uint8Array(cab), nome, dados);
+        central.push(new Uint8Array([0x50, 0x4B, 0x01, 0x02, ...u16(20), ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21), ...u32(crc), ...u32(dados.length), ...u32(dados.length), ...u16(nome.length), ...u16(0), ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(desloc)]), nome);
+        desloc += cab.length + nome.length + dados.length;
+    });
+    let tamCentral = 0; central.forEach(p => { tamCentral += p.length; });
+    const fim = new Uint8Array([0x50, 0x4B, 0x05, 0x06, ...u16(0), ...u16(0), ...u16(arquivos.length), ...u16(arquivos.length), ...u32(tamCentral), ...u32(desloc), ...u16(0)]);
+    return new Blob(partes.concat(central, [fim]), { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
+
+function montarXlsx(titulo, subtitulo, cab, linhas, meta) {
+    const moeda = new Set(meta.moeda || []), num = new Set(meta.num || []); const nCol = cab.length; const ultimaLinha = linhas.length;
+    const larg = cab.map((c, i) => { let w = String(c).length; linhas.forEach(l => { const v = l[i]; const t = (typeof v === 'number') ? 16 : String(v === null || v === undefined ? '' : v).length; if (t > w) w = t; }); return Math.min(Math.max(w + 2, 10), 48); });
+    let sd = '';
+    sd += `<row r="1"><c r="A1" s="1" t="inlineStr"><is><t>${xmlEsc(titulo)}</t></is></c></row>`;
+    sd += `<row r="2"><c r="A2" s="6" t="inlineStr"><is><t>${xmlEsc(subtitulo || '')}</t></is></c></row>`;
+    sd += `<row r="3">` + cab.map((c, i) => `<c r="${colExcel(i)}3" s="2" t="inlineStr"><is><t>${xmlEsc(c)}</t></is></c>`).join('') + '</row>';
+    linhas.forEach((l, ri) => {
+        const r = ri + 4; const total = meta.totalRow && ri === linhas.length - 1;
+        sd += `<row r="${r}">` + l.map((v, ci) => {
+            const ref = colExcel(ci) + r;
+            if (v === '' || v === null || v === undefined) return '';
+            if (typeof v === 'number' && isFinite(v)) { const est = total ? (moeda.has(ci) ? 7 : 8) : (moeda.has(ci) ? 3 : (num.has(ci) ? 4 : 5)); return `<c r="${ref}" s="${est}"><v>${v}</v></c>`; }
+            return `<c r="${ref}" s="${total ? 9 : 0}" t="inlineStr"><is><t xml:space="preserve">${xmlEsc(v)}</t></is></c>`;
+        }).join('') + '</row>';
+    });
+    const sheet = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="3" topLeftCell="A4" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>` +
+        larg.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('') + `</cols><sheetData>${sd}</sheetData>` + (ultimaLinha ? `<autoFilter ref="A3:${colExcel(nCol - 1)}${ultimaLinha + 3}"/>` : '') + `</worksheet>`;
+    const estilos = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="2"><numFmt numFmtId="164" formatCode="&quot;R$&quot;\\ #,##0.00"/><numFmt numFmtId="165" formatCode="#,##0.00"/></numFmts>` +
+        `<fonts count="4"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="14"/><color rgb="FF2F4A3A"/><name val="Calibri"/></font><font><i/><sz val="10"/><color rgb="FF666666"/><name val="Calibri"/></font></fonts>` +
+        `<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFD9EAD3"/><bgColor indexed="64"/></patternFill></fill></fills>` +
+        `<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top style="thin"><color auto="1"/></top><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>` +
+        `<cellXfs count="10"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/>` +
+        `<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/>` +
+        `<xf numFmtId="164" fontId="1" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1"/><xf numFmtId="165" fontId="1" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1"/></cellXfs>` +
+        `<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+    const nomePlan = xmlEsc((meta.planilha || 'Dados').replace(/[\[\]\*\?\/\\:]/g, ' ').substring(0, 31));
+    return zipArmazenar([
+        { nome: '[Content_Types].xml', conteudo: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>' },
+        { nome: '_rels/.rels', conteudo: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
+        { nome: 'xl/workbook.xml', conteudo: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${nomePlan}" sheetId="1" r:id="rId1"/></sheets></workbook>` },
+        { nome: 'xl/_rels/workbook.xml.rels', conteudo: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>' },
+        { nome: 'xl/styles.xml', conteudo: estilos },
+        { nome: 'xl/worksheets/sheet1.xml', conteudo: sheet }
+    ]);
+}
+
+// Larguras (por mil) da fonte Helvetica para os caracteres ASCII 32 a 126
+const HELV_W = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
+function pdfLimpar(s) {
+    return semControle(s).replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/…/g, '...').replace(/[–—]/g, '-').replace(/[•·]/g, '-')
+        .replace(/[^ -~ -ÿ]/g, '').replace(/\s+/g, ' ').trim();
+}
+function pdfLargChar(ch) {
+    const c = ch.charCodeAt(0); if (c >= 32 && c <= 126) return HELV_W[c - 32];
+    if (ch === 'º') return 365; if (ch === 'ª') return 370; if (ch === '²' || ch === '³') return 333;
+    const base = ch.normalize('NFD').charCodeAt(0); return (base >= 32 && base <= 126) ? HELV_W[base - 32] : 556;
+}
+function pdfLarg(txt, tam, neg) { let w = 0; for (const ch of txt) w += pdfLargChar(ch); return w * tam / 1000 * (neg ? 1.07 : 1); }
+function pdfTexto(s) {
+    let o = ''; for (const ch of s) { const c = ch.charCodeAt(0); if (ch === '\\' || ch === '(' || ch === ')') o += '\\' + ch; else if (c < 32) o += ' '; else if (c < 127) o += ch; else o += '\\' + c.toString(8).padStart(3, '0'); }
+    return o;
+}
+function pdfQuebrar(txt, larg, tam, maxLinhas, neg) {
+    txt = pdfLimpar(txt); if (!txt) return ['']; const palavras = txt.split(' '); const linhas = []; let atual = '';
+    const cabe = s => pdfLarg(s, tam, neg) <= larg;
+    palavras.forEach(p => {
+        let tentativa = atual ? atual + ' ' + p : p;
+        if (cabe(tentativa)) { atual = tentativa; return; }
+        if (atual) { linhas.push(atual); atual = ''; }
+        while (!cabe(p) && p.length > 1) { let i = p.length - 1; while (i > 1 && !cabe(p.slice(0, i))) i--; linhas.push(p.slice(0, i)); p = p.slice(i); }
+        atual = p;
+    });
+    if (atual) linhas.push(atual);
+    if (linhas.length > maxLinhas) { const cort = linhas.slice(0, maxLinhas); let u = cort[maxLinhas - 1]; while (u.length > 1 && !cabe(u + '...')) u = u.slice(0, -1); cort[maxLinhas - 1] = u + '...'; return cort; }
+    return linhas;
+}
+
+function montarPdf(titulo, subtitulo, cab, linhas, meta) {
+    const moeda = new Set(meta.moeda || []), num = new Set(meta.num || []); const dir = i => moeda.has(i) || num.has(i);
+    const fmt = (v, i) => { if (v === '' || v === null || v === undefined) return ''; if (typeof v === 'number') return moeda.has(i) ? formatarMoeda(v) : v.toLocaleString('pt-BR', { maximumFractionDigits: 2 }); return String(v); };
+    const paisagem = cab.length > 6; const PW = paisagem ? 842 : 595, PH = paisagem ? 595 : 842, M = 32, TAM = 7.5, LH = 10, PAD = 3;
+    const disp = PW - 2 * M; const corpo = linhas.map(l => l.map((v, i) => pdfLimpar(fmt(v, i))));
+    // larguras proporcionais ao conteúdo
+    let pesos = cab.map((c, i) => { let w = pdfLarg(pdfLimpar(c), TAM, true); corpo.forEach(l => { const t = pdfLarg(l[i], TAM); if (t > w) w = t; }); return Math.min(Math.max(w + 2 * PAD + 2, 34), 230); });
+    // cada coluna recebe ao menos a largura da sua maior palavra; o restante é dividido conforme o conteúdo
+    const minimos = cab.map((c, i) => { let w = 0; const palavras = pdfLimpar(c).split(/\s+/).concat(...corpo.map(l => String(l[i]).split(/\s+/))); palavras.forEach(p => { const t = pdfLarg(p, TAM, true); if (t > w) w = t; }); return Math.min(pesos[i], w + 2 * PAD + 2); });
+    const somaMin = minimos.reduce((s, v) => s + v, 0); let larguras;
+    if (somaMin >= disp) { larguras = minimos.map(m => m * disp / somaMin); }
+    else { const extra = pesos.map((p, i) => p - minimos[i]); const somaExtra = extra.reduce((s, v) => s + v, 0); const sobra = disp - somaMin; larguras = minimos.map((m, i) => m + (somaExtra > 0 ? sobra * extra[i] / somaExtra : sobra / cab.length)); }
+    const paginas = []; let ops = []; let y = 0; const novaPagina = () => { ops = []; paginas.push(ops); y = PH - M; };
+    const fy = v => v.toFixed(2);
+    const texto = (x, yy, s, tam, neg, cor) => ops.push(`BT /${neg ? 'F2' : 'F1'} ${tam} Tf ${cor || '0 g'} ${fy(x)} ${fy(yy)} Td (${pdfTexto(s)}) Tj ET`);
+    const retangulo = (x, yy, w, h, cor) => ops.push(`${cor} ${fy(x)} ${fy(yy)} ${fy(w)} ${fy(h)} re f`);
+    const cabecalho = () => {
+        const linhasCab = cab.map((c, i) => pdfQuebrar(c, larguras[i] - 2 * PAD, TAM, 2, true)); const altura = Math.max(...linhasCab.map(l => l.length)) * LH + 2 * PAD - 1;
+        retangulo(M, y - altura, disp, altura, '0.85 0.92 0.83 rg'); let x = M;
+        linhasCab.forEach((ls, i) => { ls.forEach((s, j) => { const w = pdfLarg(s, TAM, true); texto(dir(i) ? x + larguras[i] - PAD - w : x + PAD, y - PAD - TAM - j * LH + 1, s, TAM, true); }); x += larguras[i]; });
+        y -= altura;
+    };
+    novaPagina();
+    texto(M, y - 14, pdfLimpar(titulo), 14, true, '0.18 0.29 0.23 rg'); y -= 22;
+    if (subtitulo) { texto(M, y - 9, pdfLimpar(subtitulo), 9, false, '0.4 g'); y -= 16; }
+    y -= 4; cabecalho();
+    corpo.forEach((cel, ri) => {
+        const total = meta.totalRow && ri === corpo.length - 1;
+        const quebradas = cel.map((s, i) => pdfQuebrar(s, larguras[i] - 2 * PAD, TAM, 3, total)); const altura = Math.max(...quebradas.map(l => l.length)) * LH + 2 * PAD - 1;
+        if (y - altura < M + 22) { novaPagina(); cabecalho(); }
+        if (total) { retangulo(M, y - altura, disp, altura, '0.94 g'); ops.push(`0.6 G 0.6 w ${fy(M)} ${fy(y)} m ${fy(M + disp)} ${fy(y)} l S`); }
+        else if (ri % 2 === 1) retangulo(M, y - altura, disp, altura, '0.975 g');
+        let x = M; quebradas.forEach((ls, i) => { ls.forEach((s, j) => { const w = pdfLarg(s, TAM, total); texto(dir(i) ? x + larguras[i] - PAD - w : x + PAD, y - PAD - TAM - j * LH + 1, s, TAM, total); }); x += larguras[i]; });
+        y -= altura;
+    });
+    const agora = new Date(); const dt = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    paginas.forEach((p, i) => {
+        ops = p; texto(M, 18, 'Rancho 3C - gerado em ' + dt, 7, false, '0.5 g'); const t = 'Página ' + (i + 1) + ' de ' + paginas.length; texto(PW - M - pdfLarg(t, 7), 18, t, 7, false, '0.5 g');
+    });
+    // monta o arquivo
+    const objs = []; objs[1] = '<< /Type /Catalog /Pages 2 0 R >>';
+    const n = paginas.length; const kids = []; for (let i = 0; i < n; i++) kids.push((5 + i * 2) + ' 0 R');
+    objs[2] = `<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${n} >>`;
+    objs[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
+    objs[4] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>';
+    paginas.forEach((p, i) => {
+        const cont = p.join('\n'); objs[5 + i * 2] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${6 + i * 2} 0 R >>`;
+        objs[6 + i * 2] = `<< /Length ${cont.length} >>\nstream\n${cont}\nendstream`;
+    });
+    let out = '%PDF-1.4\n'; const pos = [];
+    for (let i = 1; i < objs.length; i++) { pos[i] = out.length; out += `${i} 0 obj\n${objs[i]}\nendobj\n`; }
+    const xref = out.length; out += `xref\n0 ${objs.length}\n0000000000 65535 f \n`;
+    for (let i = 1; i < objs.length; i++) out += String(pos[i]).padStart(10, '0') + ' 00000 n \n';
+    out += `trailer\n<< /Size ${objs.length} /Root 1 0 R /Info << /Title (${pdfTexto(pdfLimpar(titulo))}) /Producer (Rancho 3C) >> >>\nstartxref\n${xref}\n%%EOF`;
+    return new Blob([out], { type: 'application/pdf' });
+}
+
+function baixarBlob(nome, blob) {
+    const url = URL.createObjectURL(blob); const a = document.createElement('a');
+    a.href = url; a.download = nome; document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 800);
+}
+
+function exportarTabela(fmt, nomeBase, titulo, subtitulo, cab, linhas, meta) {
+    meta = meta || {};
+    try {
+        if (fmt === 'xlsx') baixarBlob(nomeBase + '.xlsx', montarXlsx(titulo, subtitulo, cab, linhas, meta));
+        else baixarBlob(nomeBase + '.pdf', montarPdf(titulo, subtitulo, cab, linhas, meta));
+        mostrarToast('Arquivo ' + (fmt === 'xlsx' ? 'Excel (.xlsx)' : 'PDF') + ' gerado!');
+    } catch (e) { alert('Não foi possível gerar o arquivo: ' + e.message); }
+}
+
+function exportarCaixa(fmt) {
+    const lista = ultimaListaFiltrada || [];
+    if (!lista.length) { alert('Nada para exportar com os filtros atuais.'); return; }
+    const cab = ['Data', 'Tipo', 'Categoria / Produto', 'Setor', 'Talhão', 'Fornecedor / Cliente', 'Descrição', 'Qtd', 'Und', 'V. Unit', 'Total', 'Situação'];
+    let rec = 0, sai = 0;
+    const linhas = lista.map(t => {
+        const rt = rateioDe(t); const tal = rt.map(x => rt.length > 1 ? `${x.talhao} (${x.pct}%)` : x.talhao).join(' / ');
+        const v = parseFloat(t.valor) || 0; if (String(t.tipo).toLowerCase() === 'receita') rec += v; else sai += v;
+        const q = parseFloat(t.qtd); const u = parseFloat(t.v_unit);
+        return [formatarData(t.data), String(t.tipo).toUpperCase(), strSafe(t.categoria), strSafe(t.setor) === '-' ? '' : strSafe(t.setor), tal, strSafe(t.local) === '-' ? '' : strSafe(t.local), strSafe(t.desc) === '-' ? '' : strSafe(t.desc), isNaN(q) ? '' : q, strSafe(t.und), isNaN(u) ? '' : u, v, strSafe(t.sit)];
+    });
+    const sub = `${lista.length} lançamento(s) · Receitas ${formatarMoeda(rec)} · Saídas ${formatarMoeda(sai)} · Saldo ${formatarMoeda(rec - sai)}`;
+    exportarTabela(fmt, 'caixa_rancho3c_' + hojeLocal(), 'Caixa Diário', sub, cab, linhas, { moeda: [9, 10], num: [7], planilha: 'Caixa Diário' });
+}
+
+function exportarRelatorioAgri(fmt) {
+    const tb = document.getElementById('tbody_rel_agri'); if (!tb) return;
+    const cab = Array.from(tb.closest('table').querySelectorAll('thead th')).map(th => th.innerText.trim());
+    const linhas = []; let temTotal = false;
+    Array.from(tb.querySelectorAll('tr')).forEach(tr => {
+        const tds = Array.from(tr.children); if (tds.length === 1 && tds[0].colSpan > 1) return;
+        const linha = []; tds.forEach(td => { for (let i = 1; i < (td.colSpan || 1); i++) linha.push(''); linha.push(td.innerText.trim()); });
+        if (tds.length < cab.length) temTotal = true;
+        while (linha.length < cab.length) linha.push('');
+        linhas.push(linha);
+    });
+    if (!linhas.length) { alert('Gere o relatório antes de exportar.'); return; }
+    const conv = linhas.map(l => l.map((v, i) => (i === cab.length - 1 && /^R\$\s/.test(v)) ? (parseFloat(v.replace(/[^\d,-]/g, '').replace(',', '.')) || 0) : v));
+    const sub = Array.from(document.querySelectorAll('#rel_agri_cabecalho div')).map(d => d.innerText.replace(/\s+/g, ' ').trim()).join(' ');
+    exportarTabela(fmt, 'aplicacoes_rancho3c_' + hojeLocal(), 'Relatório de Aplicações', sub, cab, conv, { moeda: [cab.length - 1], totalRow: temTotal, planilha: 'Aplicações' });
+}
+
 
 /* COMANDO GLOBAL PARA MAIÚSCULAS (só altera o valor quando necessário, para não fechar listas de sugestão) */
 document.addEventListener('input', function(e) {

@@ -122,7 +122,7 @@ tr.linha-herbicida td { background-color: rgba(155, 89, 182, 0.05); }
 .sub-tab { display: none; }
 .sub-tab.active { display: block; animation: fadeIn 0.3s;}
 
-#modal-edicao, #modal-grafico-detalhado, #modal-despesa, #modal-receita, #modal-chuvas { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(3px);}
+#modal-edicao, #modal-grafico-detalhado, #modal-despesa, #modal-receita, #modal-chuvas, #modal-gd, #modal-orcamento { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(3px);}
 .modal-content, .modal-grafico-content { background: white; padding: 30px; border-radius: var(--borda-raio); width: 90%; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
 .modal-grafico-content { max-width: 1000px; height: 85vh; display: flex; flex-direction: column;}
 
@@ -149,7 +149,7 @@ tr.linha-herbicida td { background-color: rgba(155, 89, 182, 0.05); }
 .btn-novo-receita { background: var(--cor-verde-flat); }
 
 /* Janelas flutuantes de lançamento */
-.modal-lanc { max-width: 960px; width: 94%; max-height: 92vh; overflow-y: auto; border-left: 5px solid #ccc; }
+.modal-lanc { max-width: 1180px; width: 96%; max-height: 92vh; overflow-y: auto; border-left: 5px solid #ccc; }
 .modal-borda-despesa { border-left-color: var(--cor-laranja-flat); }
 .modal-borda-invest { border-left-color: var(--cor-roxo-flat); }
 .modal-borda-receita { border-left-color: var(--cor-verde-flat); }
@@ -244,3 +244,49 @@ input[data-lista] { padding-right: 28px; background-image: url("data:image/svg+x
     .table-container { height: auto !important; max-height: none !important; overflow: visible !important; }
     @page { margin: 1cm; size: A4 portrait; }
 }
+/* Janelas de lançamento e edição: grade de 12 colunas para o texto caber por inteiro */
+.modal-lanc .grid-form, #form-edicao { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px 16px; align-items: end; }
+.f2 { grid-column: span 2; } .f3 { grid-column: span 3; } .f4 { grid-column: span 4; } .f5 { grid-column: span 5; } .f6 { grid-column: span 6; } .f8 { grid-column: span 8; } .f12 { grid-column: 1 / -1; }
+.modal-lanc input, .modal-lanc select, #form-edicao input, #form-edicao select { min-width: 0; text-overflow: ellipsis; }
+#modal-edicao .modal-content { max-width: 1080px; width: 96%; max-height: 92vh; overflow-y: auto; }
+.aviso-insumo { background: #fffbe6; border: 1px solid #f1e3a0; color: #7a6a1a; padding: 9px 12px; border-radius: var(--borda-raio); font-size: 12px; line-height: 1.5; }
+@media (max-width: 900px) {
+    .modal-lanc .grid-form, #form-edicao { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .f2, .f3, .f4, .f5, .f6, .f8 { grid-column: span 1; } .f12, .modal-lanc-botoes { grid-column: 1 / -1; }
+    .f6, .f8 { grid-column: 1 / -1; }
+}
+
+/* Logo grande ao fundo de todas as telas */
+.logo-fundo { position: fixed; left: 50%; top: calc(56px + (100vh - 56px) / 2); transform: translate(-50%, -50%); width: min(640px, 62vw); max-height: 68vh; object-fit: contain; opacity: 0.12; pointer-events: none; z-index: 60; }
+body.na-home .logo-fundo { display: none; }
+
+/* Cadastros: hierarquia categoria -> setor */
+.cad-hier { grid-column: 1 / -1; margin-bottom: 0; }
+.hier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; }
+.hier-titulo { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #777; margin-bottom: 8px; }
+.hier-lista { max-height: 340px; }
+.hier-cat { cursor: pointer; } .hier-cat:hover { background: #fff7ec; }
+.hier-cat.sel { background: #fdeed8; border-left: 4px solid var(--cor-laranja-flat); }
+.cad-form select { flex: 1; min-width: 0; }
+.hier-orfaos { margin-top: 14px; padding: 10px 12px; background: #fafafa; border: 1px dashed #ddd; border-radius: var(--borda-raio); font-size: 12px; line-height: 2; }
+.hier-chip { display: inline-block; background: #fff; border: 1px solid #e3e3e3; border-radius: 12px; padding: 1px 10px; margin: 0 4px 0 0; font-weight: 600; }
+.hier-chip a { color: var(--cor-vermelho-flat); text-decoration: none; margin-left: 4px; }
+
+/* Gestão de despesas */
+.gd-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 16px; }
+.gd-card { background: #fff; border-radius: var(--borda-raio); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 12px 16px; border-top: 4px solid #ccc; display: flex; flex-direction: column; gap: 2px; }
+.gd-card span { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #888; }
+.gd-card b { font-size: 20px; color: #333; font-family: 'Rubik', sans-serif; }
+.gd-card small { font-size: 11px; color: #999; }
+.gd-clk { color: inherit; text-decoration: none; border-bottom: 1px dotted #999; cursor: pointer; }
+.gd-clk:hover { color: var(--cor-azul-flat); border-bottom-color: var(--cor-azul-flat); }
+#cs_tabela tr.gd-sub td, #gd_tabela tr.gd-sub td { background: #f7f7f7; font-weight: 700; }
+#cs_tabela tr.gd-total td, #gd_tabela tr.gd-total td { background: #f0f0f0; font-weight: 700; border-top: 2px solid #ccc; }
+#cs_tabela td.gd-estouro { color: var(--cor-vermelho-flat); font-weight: 700; }
+.orc-in { width: 150px; text-align: right; }
+.hier-badge-lav { background: #e8f8ec; color: #1e8449; border-radius: 10px; padding: 1px 8px; font-weight: 700; font-size: 10px; }
+.hier-lav { margin-top: 14px; padding: 12px 14px; background: #f6fbf7; border: 1px solid #d9efdf; border-radius: var(--borda-raio); }
+.hier-lav-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px 14px; }
+.hier-lav-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #fff; border: 1px solid #e6e6e6; border-radius: 6px; padding: 5px 8px; font-size: 12px; font-weight: 700; }
+.hier-lav-item.ligado { border-color: #9bd8aa; background: #f0faf2; }
+.hier-lav-item select { width: 150px; min-width: 0; padding: 4px 6px; font-size: 12px; }
