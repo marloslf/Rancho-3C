@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Integrado Rancho 3C</title>
     <!-- Ligação com o arquivo de CSS separado -->
-    <link rel="stylesheet" href="style.css?v=20261028">
+    <link rel="stylesheet" href="style.css?v=20261028b">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -721,7 +721,8 @@
             <span id="col_titulo" style="font-size:15px; font-weight:700; color:var(--cor-verde-flat); font-family:'Rubik';"></span>
             <button type="button" class="btn-fechar-x" onclick="fecharModalColheita()" title="Fechar (Esc)">✕</button>
         </div>
-        <p style="font-size:12px; color:#777; margin:8px 0;">Informe quanto foi colhido em cada talhão nesta safra: <b>café em sacas (SC)</b> e <b>maracujá em quilos (KG)</b>. Com isso o sistema calcula o custo de cada saca ou quilo colhido.</p>
+        <div style="display:flex; align-items:center; gap:10px; margin:10px 0;"><label style="font-weight:700; font-size:12px;">SAFRA DA COLHEITA:</label><select id="col_safra" onchange="renderColheitaLinhas()" style="width:200px;"></select></div>
+        <p style="font-size:12px; color:#777; margin:8px 0;">Escolha a safra e informe quanto foi colhido em cada talhão: <b>café em sacas (SC)</b> e <b>maracujá em quilos (KG)</b>. Com isso o sistema calcula o custo de cada saca ou quilo colhido.</p>
         <div class="table-container no-fill" style="max-height: 55vh; overflow: auto;"><table id="col_corpo"></table></div>
         <div class="modal-lanc-botoes" style="margin-top:14px;">
             <button type="button" class="btn-limpar" onclick="fecharModalColheita()">Cancelar</button>
@@ -825,7 +826,7 @@
 <datalist id="lista_r_categoria"></datalist><datalist id="lista_r_local"></datalist>
 
 <!-- AQUI É O SEGREDO: Em vez de duplicar 800 linhas, agora basta isso! -->
-<script src="app.js?v=20261028"></script>
+<script src="app.js?v=20261028b"></script>
 
 </body>
 </html>

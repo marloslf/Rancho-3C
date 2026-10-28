@@ -296,3 +296,8 @@ body.na-home .logo-fundo { display: none; }
 .tal-cel { font-weight: 700; color: #222; }
 .hier-lav-item input[type="color"] { width: 46px; height: 28px; padding: 0; border: 1px solid #bbb; border-radius: 4px; cursor: pointer; background: #fff; }
 .col-in { width: 130px; }
+
+/* Linha inteira na cor (suave) do talhão: o tom por tipo de produto não se sobrepõe */
+tr[style*="background"].linha-adubo td, tr[style*="background"].linha-inseticida td, tr[style*="background"].linha-fungicida td, tr[style*="background"].linha-herbicida td { background-color: transparent; }
+tr[style*="background"] td { background-color: transparent; }
+tr[style*="background"] td.tal-cel { background-color: inherit; }

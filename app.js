@@ -828,7 +828,7 @@ function aplicarFiltros() {
             let cM = strSafe(t.categoria); if (!cM || cM === '-') cM = (tipoLower === 'receita') ? strSafe(t.desc) : strSafe(t.setor);
 
             linhasHTML.push(`
-                <tr class="${isAtrasado ? 'tr-alerta' : ''}">
+                <tr class="${isAtrasado ? 'tr-alerta' : ''}"${(!isAtrasado && rateioDe(t).length === 1) ? estiloLinhaTalhao(rateioDe(t)[0].talhao) : ''}>
                     <td>${formatarData(t.data)}</td><td><div class="badge-tipo ${badgeTipo}">${String(t.tipo).toUpperCase()}</div></td><td><b style="color:var(--cor-texto); font-weight:700;">${strEscape(cM)}</b></td>
                     <td>${strEscape(t.setor)}</td><td>${rotuloTalhao(t)}</td><td>${strEscape(t.local)}</td><td>${strEscape(t.desc)}</td>
                     <td>${strSafe(t.qtd)} ${strEscape(t.und)}</td><td>${formatarMoeda(t.v_unit)}</td>
@@ -998,7 +998,7 @@ function saveAndRenderApp() {
         try {
             let statusClass = rec.status === 'APLICADO' ? 'status-aplicado' : 'status-planejado';
             let itemEstoque = estoque.find(e => e && !e.deleted && e.produto === rec.produto && e.un === rec.dosagem_un);
-            let aviso = (rec.status === 'PLANEJADO' && (!itemEstoque || itemEstoque.qtd < rec.dosagem_qtd)) ? '<br><span class="stock-warning">⚠️ FALTA NO ESTOQUE</span>' : '';
+            let aviso = (String(rec.status).toUpperCase() === 'PLANEJADO' && (!itemEstoque || itemEstoque.qtd < rec.dosagem_qtd)) ? '<br><span class="stock-warning">⚠️ FALTA NO ESTOQUE</span>' : '';
             let custoTotal = custoAplicacao(rec);
             
             let cClass = ''; let tStr = String(rec.tipo||'').toUpperCase();
@@ -1007,7 +1007,7 @@ function saveAndRenderApp() {
             else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida';
             else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
 
-            html += `<tr class="${cClass}">
+            html += `<tr class="${cClass}"${estiloLinhaTalhao(rec.talhao)}>
                 <td>${formatarData(rec.data)}</td>${celTalhao(rec.talhao)}<td><b style="color:var(--cor-azul-flat);">${strEscape(rec.produto)}</b>${aviso}</td>
                 <td>${strEscape(rec.tipo)}</td><td>${strEscape(rec.alvo)||'-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strEscape(rec.forma)||'-'}</td>
                 <td style="font-family:'Rubik'; font-weight:700;">${formatarMoeda(custoTotal)}</td>
@@ -1037,6 +1037,13 @@ function addEstoque(e) {
     salvarDados(); renderDatalistsAgri(); saveAndRenderEstoque(); saveAndRenderApp(); document.getElementById('form_estoque').reset(); mostrarToast("Estoque Atualizado!"); focarPrimeiroCampo('est_produto');
 }
 
+// Quantidade que as aplicações PENDENTES (planejadas, do mês atual ou atrasadas) vão consumir do produto; aplicações já realizadas não contam
+function demandaPendente(rec) {
+    const mesAtual = hojeLocal().substring(0, 7); let d = 0;
+    agriRecords.forEach(r => { if (r && !r.deleted && String(r.status).toUpperCase() === 'PLANEJADO' && r.data && sanitizeDateString(r.data).substring(0, 7) <= mesAtual && r.produto === rec.produto && r.dosagem_un === (rec.un || rec.dosagem_un)) d += parseFloat(r.dosagem_qtd) || 0; });
+    return d;
+}
+
 function saveAndRenderEstoque() {
     let validEstoque = estoque.filter(e => e && !e.deleted && e.produto);
     validEstoque.sort((a, b) => {
@@ -1051,15 +1058,13 @@ function saveAndRenderEstoque() {
     
     validEstoque.forEach(rec => {
         try {
-            let demanda = 0; let mesAtual = hojeLocal().substring(0,7);
-            agriRecords.forEach(r => { if(r && !r.deleted && r.status === 'PLANEJADO' && r.data && sanitizeDateString(r.data).startsWith(mesAtual) && r.produto === rec.produto && r.dosagem_un === rec.un) demanda += parseFloat(r.dosagem_qtd)||0; });
+            const demanda = demandaPendente(rec);
             
             let corQtd = ''; let aviso = ''; let cClass = ''; let tStr = String(rec.tipo||'').toUpperCase();
             if (tStr.includes('ADUBO')) cClass = 'linha-adubo'; else if (tStr.includes('INSETICIDA')) cClass = 'linha-inseticida'; else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida'; else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
 
             let qEstoque = parseFloat(rec.qtd)||0;
-            if(qEstoque < 0) { cClass = 'tr-alerta'; corQtd = 'color: #c0392b; font-weight: 700;'; aviso = `<br><span class="stock-warning">⚠️ SALDO NEGATIVO</span>`; } 
-            else if (qEstoque < demanda) { cClass = 'tr-alerta'; corQtd = 'color: #c0392b; font-weight: 700;'; aviso = `<br><span class="stock-warning">⚠️ PRECISA DE ${demanda.toFixed(2)} ${rec.un}</span>`; }
+            if (qEstoque < demanda) { cClass = 'tr-alerta'; corQtd = 'color: #c0392b; font-weight: 700;'; aviso = `<br><span class="stock-warning">⚠️ FALTA PARA AS PENDENTES: precisa de ${demanda.toFixed(2)} ${rec.un}</span>`; }
             else if ((parseFloat(rec.qtd_min) || 0) > 0 && qEstoque < parseFloat(rec.qtd_min)) { cClass = 'tr-alerta'; corQtd = 'color: #c0392b; font-weight: 700;'; aviso = `<br><span class="stock-warning">⚠️ ABAIXO DO MÍNIMO (${parseFloat(rec.qtd_min).toFixed(2)} ${rec.un})</span>`; }
 
             let vTot = qEstoque > 0 ? (qEstoque * (rec.valor_unit || 0)) : 0; somaTotal += vTot;
@@ -1268,12 +1273,12 @@ function sortAgriTable(n) {
     visible.forEach(rec => {
         let statusClass = rec.status === 'APLICADO' ? 'status-aplicado' : 'status-planejado';
         let itemEstoque = estoque.find(e => e && !e.deleted && e.produto === rec.produto && e.un === rec.dosagem_un);
-        let aviso = (rec.status === 'PLANEJADO' && (!itemEstoque || itemEstoque.qtd < rec.dosagem_qtd)) ? '<br><span class="stock-warning">⚠️ FALTA NO ESTOQUE</span>' : '';
+        let aviso = (String(rec.status).toUpperCase() === 'PLANEJADO' && (!itemEstoque || itemEstoque.qtd < rec.dosagem_qtd)) ? '<br><span class="stock-warning">⚠️ FALTA NO ESTOQUE</span>' : '';
         let custoTotal = custoAplicacao(rec);
         let cClass = ''; let tStr = String(rec.tipo||'').toUpperCase();
         if (tStr.includes('ADUBO') || tStr.includes('FERTILIZANTE')) cClass = 'linha-adubo'; else if (tStr.includes('INSETICIDA')) cClass = 'linha-inseticida'; else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida'; else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
 
-        html += `<tr class="${cClass}">
+        html += `<tr class="${cClass}"${estiloLinhaTalhao(rec.talhao)}>
             <td>${formatarData(rec.data)}</td>${celTalhao(rec.talhao)}<td><b style="color:var(--cor-azul-flat);">${strEscape(rec.produto)}</b>${aviso}</td>
             <td>${strEscape(rec.tipo)}</td><td>${strEscape(rec.alvo)||'-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strEscape(rec.forma)||'-'}</td>
             <td style="font-family:'Rubik'; font-weight:700;">${formatarMoeda(custoTotal)}</td>
@@ -1386,7 +1391,7 @@ function salvarAnaliseSolo(e) {
 
 function renderizarTabelaHistoricoSolo() {
     let html = ''; let lista = [...analisesSolo].filter(a => a && !a.deleted && a.data).sort((a, b) => new Date(sanitizeDateString(b.data)) - new Date(sanitizeDateString(a.data)));
-    lista.forEach(an => { html += `<tr><td>${formatarData(an.data)}</td>${celTalhao(an.talhao)}<td>${an.prof}</td><td>${an.ph_h2o}</td><td>${an.p_meh}</td><td>${an.k}</td><td>${an.v}%</td><td>${an.mo}</td><td style="text-align:center;"><button class="btn-acao btn-editar" onclick="editarAnaliseSolo('${an.id}')">✏️</button> <button class="btn-acao btn-excluir" onclick="excluirAnaliseSolo('${an.id}')">🗑️</button></td></tr>`; });
+    lista.forEach(an => { html += `<tr${estiloLinhaTalhao(an.talhao)}><td>${formatarData(an.data)}</td>${celTalhao(an.talhao)}<td>${an.prof}</td><td>${an.ph_h2o}</td><td>${an.p_meh}</td><td>${an.k}</td><td>${an.v}%</td><td>${an.mo}</td><td style="text-align:center;"><button class="btn-acao btn-editar" onclick="editarAnaliseSolo('${an.id}')">✏️</button> <button class="btn-acao btn-excluir" onclick="excluirAnaliseSolo('${an.id}')">🗑️</button></td></tr>`; });
     const tbody = document.getElementById('tbody_historico_analises');
     if(tbody) tbody.innerHTML = html || '<tr><td colspan="9" style="text-align:center; padding:30px; color:#aaa;">Sem análises registadas</td></tr>';
 }
@@ -1714,7 +1719,7 @@ function gerarRelatorioAgri() {
     lista.forEach(rec => {
         const custo = custoAplicacao(rec); total += custo;
         if (rec.status === 'APLICADO') totalAplicado += custo; else totalPlanejado += custo;
-        html += `<tr><td>${formatarData(rec.data)}</td>${celTalhao(rec.talhao)}<td><b>${strEscape(rec.produto)}</b></td><td>${strEscape(rec.tipo)}</td><td>${strEscape(rec.alvo) || '-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strEscape(rec.forma) || '-'}</td><td>${strSafe(rec.status)}</td><td style="text-align:right; font-family:'Rubik'; font-weight:700;">${formatarMoeda(custo)}</td></tr>`;
+        html += `<tr${estiloLinhaTalhao(rec.talhao)}><td>${formatarData(rec.data)}</td>${celTalhao(rec.talhao)}<td><b>${strEscape(rec.produto)}</b></td><td>${strEscape(rec.tipo)}</td><td>${strEscape(rec.alvo) || '-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strEscape(rec.forma) || '-'}</td><td>${strSafe(rec.status)}</td><td style="text-align:right; font-family:'Rubik'; font-weight:700;">${formatarMoeda(custo)}</td></tr>`;
     });
     if (html) html += `<tr style="background:#f0f0f0; border-top:2px solid #ccc;"><td colspan="8" style="font-weight:700; text-align:right;">TOTAL DO PERÍODO</td><td style="text-align:right; font-family:'Rubik'; font-weight:700;">${formatarMoeda(total)}</td></tr>`;
 
@@ -1933,7 +1938,7 @@ function renderIndicadoresTalhao() {
         const custo = v.app + v.caixa; const res = v.receita - custo;
         tot.area += area; tot.plantas += plantas; tot.app += v.app; tot.caixa += v.caixa; tot.receita += v.receita; tot.sacas += v.sacas; if (area > 0) tot.custoComArea += custo;
         const enc = encAttr(n); const col = prodGet(safraSel, n), un = unidadeColheita(n);
-        html += `<tr>${celTalhao(n)}<td>${i && i.cultura ? (i.cultura === 'maracuja' ? 'MARACUJÁ' : 'CONILON') : '-'}</td>
+        html += `<tr${estiloLinhaTalhao(n)}>${celTalhao(n)}<td>${i && i.cultura ? (i.cultura === 'maracuja' ? 'MARACUJÁ' : 'CONILON') : '-'}</td>
             <td>${area > 0 ? area.toFixed(2) : '-'}</td><td>${plantas > 0 ? plantas.toLocaleString('pt-BR') : '-'}</td>
             <td>${formatarMoeda(v.app)}</td><td>${formatarMoeda(v.caixa)}</td><td style="font-weight:700;">${formatarMoeda(custo)}</td>
             <td>${area > 0 ? formatarMoeda(custo / area) : '-'}</td><td>${formatarMoeda(v.receita)}</td>
@@ -1964,7 +1969,7 @@ function atualizarAlertas() {
         else if (data < hoje) { pagVenc++; pagVencV += v; }
         else if (data <= lim) { pag7++; pag7V += v; }
     });
-    const baixo = estoque.filter(e => { if (!e || e.deleted || !e.produto) return false; const q = parseFloat(e.qtd) || 0; const m = parseFloat(e.qtd_min) || 0; return q < 0 || (m > 0 && q < m); }).length;
+    const baixo = estoque.filter(e => { if (!e || e.deleted || !e.produto) return false; const q = parseFloat(e.qtd) || 0; const m = parseFloat(e.qtd_min) || 0; return q < demandaPendente(e) || (m > 0 && q < m); }).length;
 
     const badge = (id, n) => { const el = document.getElementById(id); if (!el) return; if (n > 0) { el.innerText = n; el.style.display = 'inline-block'; } else el.style.display = 'none'; };
     badge('badge_atrasadas', pagVenc); badge('badge_estoque', baixo); try { atualizarMarcasMenu(); } catch (e2) {}
@@ -2623,7 +2628,7 @@ function atualizarMarcasMenu() {
 
 document.addEventListener('DOMContentLoaded', () => { try { atualizarMarcasMenu(); } catch (e) {} });
 
-const VERSAO_SISTEMA = 'v28/10/2026';
+const VERSAO_SISTEMA = 'v28/10/2026-b';
 document.addEventListener('DOMContentLoaded', () => { const v = document.getElementById('versao_sistema'); if (v) { v.textContent = VERSAO_SISTEMA; v.classList.add('ok'); } });
 
 /* =========================================================================
@@ -3094,7 +3099,7 @@ function gdPlano(c) { return (c && typeof c === 'object') ? c.v : c; }
 function gdHtml(sp) {
     const fmtV = (v, ci) => sp.pct.includes(ci) ? v.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%' : (sp.moeda.includes(ci) ? formatarMoeda(v) : v.toLocaleString('pt-BR', { maximumFractionDigits: 2 }));
     const th = sp.cab.map((c, i) => `<th${sp.texto.includes(i) ? '' : ' style="text-align:right"'}>${strEscape(c)}</th>`).join('');
-    const corpo = sp.linhas.map(l => '<tr' + (l.est ? ` class="gd-${l.est}"` : '') + '>' + l.c.map((c, ci) => {
+    const corpo = sp.linhas.map(l => '<tr' + (l.est ? ` class="gd-${l.est}"` : '') + (l.tal ? estiloLinhaTalhao(l.tal) : '') + '>' + l.c.map((c, ci) => {
         if (ci === 0 && l.tal && typeof c === 'string') return celTalhao(l.tal);
         const al = sp.texto.includes(ci) ? '' : ' style="text-align:right"'; let txt, cls = '';
         if (c && typeof c === 'object') {
@@ -3163,8 +3168,14 @@ function corLivreTalhao() {
     const usadas = new Set(cadLista('talhao').filter(temCorTalhao).map(n => corTalhao(n).toLowerCase()));
     return PALETA_TALHOES.find(c => !usadas.has(c)) || PALETA_TALHOES[usadas.size % PALETA_TALHOES.length];
 }
-function chipTalhao(n) { n = cadNorm(n); if (!n || n === '-') return '-'; return `<span class="tal-chip" style="background:${corTalhao(n)};">${strEscape(n)}</span>`; }
-function celTalhao(n) { n = cadNorm(n); if (!n || n === '-') return '<td>-</td>'; return `<td class="tal-cel" style="background:${corTalhao(n)};">${strEscape(n)}</td>`; }
+// Mistura a cor do talhão com branco: t = parte de branco (0 = cor cheia, 1 = branco)
+function clarear(hex, t) {
+    const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex || ''); if (!m) return '#f4f4f4';
+    const c = [m[1], m[2], m[3]].map(x => Math.round(parseInt(x, 16) + (255 - parseInt(x, 16)) * t)); return '#' + c.map(x => x.toString(16).padStart(2, '0')).join('');
+}
+function chipTalhao(n) { n = cadNorm(n); if (!n || n === '-') return '-'; return `<span class="tal-chip" style="background:${clarear(corTalhao(n), 0.45)};">${strEscape(n)}</span>`; }
+function celTalhao(n) { n = cadNorm(n); if (!n || n === '-') return '<td>-</td>'; return `<td class="tal-cel" style="background:${clarear(corTalhao(n), 0.45)};">${strEscape(n)}</td>`; }
+function estiloLinhaTalhao(n) { n = cadNorm(n); return (!n || n === '-') ? '' : ` style="background:${clarear(corTalhao(n), 0.72)};"`; }
 
 /* ---------- Colheita (quantidade colhida por talhão e safra) ---------- */
 function culturaDoTalhao(n) {
@@ -3186,19 +3197,25 @@ function prodSet(safra, talhao, valor) {
     valor = Math.round((parseFloat(valor) || 0) * 100) / 100; if (valor > 0) pr[pre + valor] = { u: agora, d: false };
 }
 function safrasComColheita() { const s = new Set(); Object.keys(opcoesDin.cad.producao || {}).forEach(k => { const e = opcoesDin.cad.producao[k]; if (e && !e.d) s.add(k.split('|')[0]); }); return Array.from(s); }
-function abrirColheita(origem) {
-    const sf0 = safeVal(origem === 'ind' ? 'ind_safra' : 'cs_safra'); const sf = (sf0 && sf0 !== 'TODAS') ? sf0 : obterSafraAtual();
-    document.getElementById('col_titulo').innerText = '🌾 COLHEITA POR TALHÃO — SAFRA ' + sf;
+function safraVizinha(sf, d) { const a = parseInt(String(sf).slice(0, 2), 10); if (isNaN(a)) return sf; const x = ((a + d) % 100 + 100) % 100; const y = (x + 1) % 100; return String(x).padStart(2, '0') + '/' + String(y).padStart(2, '0'); }
+function renderColheitaLinhas() {
+    const sf = safeVal('col_safra');
     document.getElementById('col_corpo').innerHTML = '<thead><tr><th>TALHÃO</th><th>CULTURA</th><th>UNIDADE</th><th style="text-align:right">QUANTIDADE COLHIDA</th></tr></thead><tbody>' +
         listaTodosTalhoes().map(n => { const u = unidadeColheita(n); const v = prodGet(sf, n);
             return `<tr>${celTalhao(n)}<td>${culturaDoTalhao(n)}</td><td>${u === 'SC' ? 'Sacas (SC)' : 'Quilos (KG)'}</td><td style="text-align:right"><input type="number" min="0" step="0.01" class="orc-in col-in" data-talhao="${encAttr(n)}" value="${v > 0 ? v : ''}" placeholder="0"> <b>${u}</b></td></tr>`; }).join('') + '</tbody>';
-    const m = document.getElementById('modal-colheita'); m.dataset.safra = sf; m.style.display = 'flex';
+}
+function abrirColheita(origem) {
+    const sf0 = safeVal(origem === 'ind' ? 'ind_safra' : 'cs_safra'); const atual = obterSafraAtual(); const sf = (sf0 && sf0 !== 'TODAS') ? sf0 : atual;
+    const set = new Set(safrasDosCustos().concat(safrasComColheita(), [safraVizinha(atual, -1), atual, safraVizinha(atual, 1)])); set.delete('Sem Data');
+    const safras = Array.from(set).sort().reverse();
+    document.getElementById('col_safra').innerHTML = safras.map(x => `<option value="${x}">Safra ${x}</option>`).join(''); document.getElementById('col_safra').value = sf;
+    renderColheitaLinhas(); document.getElementById('modal-colheita').style.display = 'flex';
 }
 function fecharModalColheita() { document.getElementById('modal-colheita').style.display = 'none'; }
 function salvarColheita() {
-    const m = document.getElementById('modal-colheita'); const sf = m.dataset.safra; if (!sf) return;
+    const m = document.getElementById('modal-colheita'); const sf = safeVal('col_safra'); if (!sf) { alert('Escolha a safra da colheita.'); return; }
     m.querySelectorAll('.col-in').forEach(i => { const t = decodeURIComponent(i.dataset.talhao); const novo = parseFloat(i.value) || 0; if (Math.abs(novo - prodGet(sf, t)) > 0.0001) prodSet(sf, t, novo); });
-    salvarDados(); fecharModalColheita(); try { renderGestaoDespesas(); } catch (e) {} try { renderIndicadoresTalhao(); } catch (e) {} mostrarToast('Colheita salva!');
+    salvarDados(); fecharModalColheita(); try { renderGestaoDespesas(); } catch (e) {} try { renderIndicadoresTalhao(); } catch (e) {} mostrarToast('Colheita da safra ' + sf + ' salva!');
 }
 
 /* ---------- Atividades (receita × custo) ---------- */
@@ -3258,7 +3275,7 @@ function renderAtividadesCadastro() {
             return `<label class="hier-lav-item${m ? ' ligado' : ''}"><span>${strEscape(p)}</span><select onchange="hierMapearProduto('${encAttr(p)}', this.value)"><option value="">Sem atividade</option>${ativs.map(a => `<option value="${strEscape(a)}"${a === m ? ' selected' : ''}>${strEscape(a)}</option>`).join('')}</select></label>`; }).join('') + `</div></div>
         <div class="hier-lav"><div class="hier-titulo">🎨 Cor de cada talhão</div>
         <div class="cad-dica" style="padding:0 0 10px;">A cor aparece como preenchimento do talhão em Aplicações, Caixa, Análises, Talhões e relatórios.</div>
-        <div class="hier-lav-grid">` + tal.map(n => `<label class="hier-lav-item" style="background:${corTalhao(n)};"><span>${strEscape(n)}</span><input type="color" value="${corTalhao(n)}" onchange="hierCorTalhao('${encAttr(n)}', this.value)"></label>`).join('') + '</div></div>';
+        <div class="hier-lav-grid">` + tal.map(n => `<label class="hier-lav-item" style="background:${clarear(corTalhao(n), 0.45)};"><span>${strEscape(n)}</span><input type="color" value="${corTalhao(n)}" onchange="hierCorTalhao('${encAttr(n)}', this.value)"></label>`).join('') + '</div></div>';
 }
 function hierMapearProduto(enc, valor) { const p = decodeURIComponent(enc); cadMapearProduto(p, valor); salvarDados(); renderAtividadesCadastro(); mostrarToast(valor ? `${p} → ${valor}` : `${p} sem atividade`); }
 function hierCorTalhao(enc, hex) {
