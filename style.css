@@ -122,7 +122,7 @@ tr.linha-herbicida td { background-color: rgba(155, 89, 182, 0.05); }
 .sub-tab { display: none; }
 .sub-tab.active { display: block; animation: fadeIn 0.3s;}
 
-#modal-edicao, #modal-grafico-detalhado, #modal-despesa, #modal-receita, #modal-chuvas, #modal-gd, #modal-orcamento { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(3px);}
+#modal-edicao, #modal-grafico-detalhado, #modal-despesa, #modal-receita, #modal-chuvas, #modal-gd, #modal-orcamento, #modal-colheita { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(3px);}
 .modal-content, .modal-grafico-content { background: white; padding: 30px; border-radius: var(--borda-raio); width: 90%; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
 .modal-grafico-content { max-width: 1000px; height: 85vh; display: flex; flex-direction: column;}
 
@@ -290,3 +290,9 @@ body.na-home .logo-fundo { display: none; }
 .hier-lav-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #fff; border: 1px solid #e6e6e6; border-radius: 6px; padding: 5px 8px; font-size: 12px; font-weight: 700; }
 .hier-lav-item.ligado { border-color: #9bd8aa; background: #f0faf2; }
 .hier-lav-item select { width: 150px; min-width: 0; padding: 4px 6px; font-size: 12px; }
+
+/* Cores dos talhões */
+.tal-chip { display: inline-block; padding: 2px 10px; border-radius: 10px; font-weight: 700; font-size: 12px; color: #222; border: 1px solid rgba(0,0,0,0.08); white-space: nowrap; }
+.tal-cel { font-weight: 700; color: #222; }
+.hier-lav-item input[type="color"] { width: 46px; height: 28px; padding: 0; border: 1px solid #bbb; border-radius: 4px; cursor: pointer; background: #fff; }
+.col-in { width: 130px; }
