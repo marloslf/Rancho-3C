@@ -335,7 +335,7 @@ function showTab(id) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.topbar button').forEach(b => b.classList.remove('btn-ativo'));
         document.getElementById(id).classList.add('active');
-        const btnMap = { 'home': 'btn_home', 'resumo': 'btn_resumo', 'movimentacoes': 'btn_movimentacoes', 'relatorios_detalhados': 'btn_relatorios_detalhados', 'pendencias': 'btn_pendencias', 'agri_app': 'btn_agri_app', 'agri_rel': 'btn_agri_app', 'agri_est': 'btn_agri_est', 'agri_dash': 'btn_agri_dash', 'chuvas_main': 'btn_chuvas', 'solo_main': 'btn_solo', 'talhoes_main': 'btn_talhoes', 'cadastros_main': 'btn_cadastros' };
+        const btnMap = { 'home': 'btn_home', 'resumo': 'btn_resumo', 'movimentacoes': 'btn_movimentacoes', 'relatorios_detalhados': 'btn_relatorios_detalhados', 'pendencias': 'btn_pendencias', 'agri_app': 'btn_agri_app', 'agri_rel': 'btn_agri_app', 'agri_est': 'btn_agri_est', 'agri_dash': 'btn_agri_dash', 'chuvas_main': 'btn_chuvas', 'solo_main': 'btn_solo', 'talhoes_main': 'btn_talhoes', 'cadastros_main': 'btn_cadastros', 'fluxo_main': 'btn_fluxo', 'agri_semana': 'btn_agri_semana', 'ficha_talhao': 'btn_ficha', 'monit_main': 'btn_monit' };
         if(btnMap[id]) document.getElementById(btnMap[id]).classList.add('btn-ativo');
         try { fecharMenusTopo(); atualizarMarcasMenu(); } catch (e2) {}
         
@@ -345,6 +345,11 @@ function showTab(id) {
         if(id === 'pendencias') { renderizarTabelasPendencias(); atualizarAlertas(); }
         if(id === 'agri_app') aplicarFiltroSafraApp();
         if(id === 'agri_rel') popularFiltrosRelAgri();
+        if(id === 'home') { try { renderHomeAlertas(); } catch (e3) {} }
+        if(id === 'fluxo_main') renderFluxoCaixa();
+        if(id === 'ficha_talhao') { popularFichaTalhao(); renderFichaTalhao(); }
+        if(id === 'agri_semana') { popularCalendarioAgri(); renderCalendarioAgri(); }
+        if(id === 'monit_main') { popularMonitoramento(); renderMonitoramento(); }
         if(id === 'talhoes_main') renderTalhoes();
         if(id === 'cadastros_main') renderCadastros();
         if(id === 'agri_est') saveAndRenderEstoque();
@@ -917,6 +922,7 @@ function addAgriApp(e) {
         };
         
         const editId = document.getElementById('editAgriIndex').value;
+        const avisoInt = verificarIntervalo(record, editId); if (avisoInt && !confirm(avisoInt + '\n\nGravar mesmo assim?')) return;
         
         if (!editId) {
             if (record.status === 'APLICADO') congelarCusto(record);
@@ -951,18 +957,15 @@ function addAgriApp(e) {
         salvarDados(); 
         popularSeletorSafraApp(); 
         
-        const ss = document.getElementById('safraSelector'); 
-        if(ss) { ss.value = obterSafraGeral(record.data); }
-        
-        aplicarFiltroSafraApp();
-        limparFiltrosAgri();
+        aplicarFiltroSafraApp(); // mantém a safra e os filtros que estavam aplicados
+        const linhaSalva = document.querySelector(`#tableBodyAgri tr[data-id="${record.id}"]`); const foraFiltro = !linhaSalva || linhaSalva.style.display === 'none';
         
         document.getElementById('appForm').reset(); 
         const st = document.getElementById('status'); 
         if(st) st.value = 'PLANEJADO'; 
         
         esconderSugestoesProduto();
-        mostrarToast("Registro Agrícola Salvo!");
+        mostrarToast("Registro Agrícola Salvo!" + (foraFiltro ? " (fora do filtro atual — use Limpar Filtros para vê-lo)" : ""));
         focarPrimeiroCampo('dataApp');
         
     } catch (err) {
@@ -1007,17 +1010,19 @@ function saveAndRenderApp() {
             else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida';
             else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
 
-            html += `<tr class="${cClass}"${estiloLinhaTalhao(rec.talhao)}>
+            html += `<tr class="${cClass}" data-id="${rec.id}"${estiloLinhaTalhao(rec.talhao)}>
                 <td>${formatarData(rec.data)}</td>${celTalhao(rec.talhao)}<td><b style="color:var(--cor-azul-flat);">${strEscape(rec.produto)}</b>${aviso}</td>
                 <td>${strEscape(rec.tipo)}</td><td>${strEscape(rec.alvo)||'-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strEscape(rec.forma)||'-'}</td>
                 <td style="font-family:'Rubik'; font-weight:700;">${formatarMoeda(custoTotal)}</td>
                 <td><button class="${statusClass}" onclick="toggleStatusApp('${rec.id}')">${strSafe(rec.status)} 🔄</button></td>
-                <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editAgriRecord('${rec.id}')">✏️</button><button class="btn-acao btn-excluir" onclick="deleteAgriRecord('${rec.id}')">🗑️</button></td>
+                <td class="no-print" style="text-align:center;"><button class="btn-acao" style="background:#3498db; color:#fff;" title="Duplicar aplicação" onclick="duplicarAplicacao('${rec.id}')">📋</button><button class="btn-acao btn-editar" onclick="editAgriRecord('${rec.id}')">✏️</button><button class="btn-acao btn-excluir" onclick="deleteAgriRecord('${rec.id}')">🗑️</button></td>
             </tr>`;
         } catch(e) {}
     });
     document.getElementById('tableBodyAgri').innerHTML = html || '<tr><td colspan="10" style="text-align:center; padding:30px; color:#aaa;">Nenhuma aplicação registada</td></tr>';
     updateFilterOptionsAgri(visibleRecords);
+    try { filterAgriTable(); } catch (e) {}
+    try { renderCarenciaBox(); } catch (e) {}
 }
 
 function addEstoque(e) {
@@ -1171,6 +1176,15 @@ function editAgriRecord(id) {
     const sVal = (idx, v) => { const e=document.getElementById(idx); if(e) e.value = v; };
     sVal('dataApp', sanitizeDateString(r.data)); sVal('talhao', r.talhao); sVal('produto', r.produto); sVal('tipo', r.tipo); sVal('alvo', r.alvo === '-' ? '' : r.alvo); sVal('dosagem_qtd', r.dosagem_qtd); sVal('dosagem_un', r.dosagem_un); sVal('forma', r.forma); sVal('status', r.status); sVal('editAgriIndex', id);
 }
+function duplicarAplicacao(id) {
+    const r = agriRecords.find(x => x.id === id); if (!r || r.deleted) return;
+    const sVal = (idx, v) => { const e = document.getElementById(idx); if (e) e.value = v; };
+    sVal('dataApp', sanitizeDateString(r.data)); sVal('talhao', r.talhao); sVal('produto', r.produto); sVal('tipo', r.tipo); sVal('alvo', r.alvo === '-' ? '' : r.alvo);
+    sVal('dosagem_qtd', r.dosagem_qtd); sVal('dosagem_un', r.dosagem_un); sVal('forma', r.forma); sVal('status', 'PLANEJADO'); sVal('editAgriIndex', '');
+    const f = document.getElementById('appForm'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => { const t = document.getElementById('talhao'); if (t) { t.focus(); t.select(); } }, 250);
+    mostrarToast('Aplicação duplicada no formulário: ajuste (ex.: talhão ou data) e clique em GRAVAR');
+}
 function deleteAgriRecord(id) { 
     if(confirm("EXCLUIR APLICAÇÃO?")) { 
         let r = agriRecords.find(x => x.id === id);
@@ -1278,15 +1292,16 @@ function sortAgriTable(n) {
         let cClass = ''; let tStr = String(rec.tipo||'').toUpperCase();
         if (tStr.includes('ADUBO') || tStr.includes('FERTILIZANTE')) cClass = 'linha-adubo'; else if (tStr.includes('INSETICIDA')) cClass = 'linha-inseticida'; else if (tStr.includes('FUNGICIDA')) cClass = 'linha-fungicida'; else if (tStr.includes('HERBICIDA')) cClass = 'linha-herbicida';
 
-        html += `<tr class="${cClass}"${estiloLinhaTalhao(rec.talhao)}>
+        html += `<tr class="${cClass}" data-id="${rec.id}"${estiloLinhaTalhao(rec.talhao)}>
             <td>${formatarData(rec.data)}</td>${celTalhao(rec.talhao)}<td><b style="color:var(--cor-azul-flat);">${strEscape(rec.produto)}</b>${aviso}</td>
             <td>${strEscape(rec.tipo)}</td><td>${strEscape(rec.alvo)||'-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strEscape(rec.forma)||'-'}</td>
             <td style="font-family:'Rubik'; font-weight:700;">${formatarMoeda(custoTotal)}</td>
             <td><button class="${statusClass}" onclick="toggleStatusApp('${rec.id}')">${strSafe(rec.status)} 🔄</button></td>
-            <td class="no-print" style="text-align:center;"><button class="btn-acao btn-editar" onclick="editAgriRecord('${rec.id}')">✏️</button><button class="btn-acao btn-excluir" onclick="deleteAgriRecord('${rec.id}')">🗑️</button></td>
+            <td class="no-print" style="text-align:center;"><button class="btn-acao" style="background:#3498db; color:#fff;" title="Duplicar aplicação" onclick="duplicarAplicacao('${rec.id}')">📋</button><button class="btn-acao btn-editar" onclick="editAgriRecord('${rec.id}')">✏️</button><button class="btn-acao btn-excluir" onclick="deleteAgriRecord('${rec.id}')">🗑️</button></td>
         </tr>`;
     });
     const tbody = document.getElementById('tableBodyAgri'); if(tbody) tbody.innerHTML = html;
+    try { filterAgriTable(); } catch (e) {}
 }
 
 /* -------------------------------------------------------------------------
@@ -1699,11 +1714,11 @@ function popularFiltrosRelAgri() {
     const atual = sel.value;
     sel.innerHTML = '<option value="">TODOS OS TALHÕES</option>' + Array.from(set).sort().map(t => `<option value="${strEscape(t)}">${strEscape(t)}</option>`).join('');
     sel.value = atual;
-    if (!safeVal('rel_agri_ini')) { const h = hojeLocal(); setVal('rel_agri_ini', h.substring(0, 8) + '01'); setVal('rel_agri_fim', h); }
+    if (!safeVal('rel_agri_ini')) { const h = hojeLocal(); const fimProx = new Date(parseInt(h.substring(0, 4), 10), parseInt(h.substring(5, 7), 10) + 1, 0); setVal('rel_agri_ini', h.substring(0, 8) + '01'); setVal('rel_agri_fim', fimProx.getFullYear() + '-' + String(fimProx.getMonth() + 1).padStart(2, '0') + '-' + String(fimProx.getDate()).padStart(2, '0')); }
 }
 
 function gerarRelatorioAgri() {
-    const ini = sanitizeDateString(safeVal('rel_agri_ini')); const fim = sanitizeDateString(safeVal('rel_agri_fim')); const talhao = safeVal('rel_agri_talhao');
+    const ini = sanitizeDateString(safeVal('rel_agri_ini')); const fim = sanitizeDateString(safeVal('rel_agri_fim')); const talhao = safeVal('rel_agri_talhao'); const situacao = safeVal('rel_agri_status');
     if (!ini || !fim) { alert("Informe a data de início e a data de fim."); return; }
     if (ini > fim) { alert("A data de início não pode ser maior que a data de fim."); return; }
 
@@ -1712,6 +1727,7 @@ function gerarRelatorioAgri() {
         const d = sanitizeDateString(r.data);
         if (!d || d < ini || d > fim) return false;
         if (talhao && r.talhao !== talhao) return false;
+        if (situacao && String(r.status).toUpperCase() !== situacao) return false;
         return true;
     }).sort((a, b) => sanitizeDateString(a.data).localeCompare(sanitizeDateString(b.data)));
 
@@ -1719,7 +1735,7 @@ function gerarRelatorioAgri() {
     lista.forEach(rec => {
         const custo = custoAplicacao(rec); total += custo;
         if (rec.status === 'APLICADO') totalAplicado += custo; else totalPlanejado += custo;
-        html += `<tr${estiloLinhaTalhao(rec.talhao)}><td>${formatarData(rec.data)}</td>${celTalhao(rec.talhao)}<td><b>${strEscape(rec.produto)}</b></td><td>${strEscape(rec.tipo)}</td><td>${strEscape(rec.alvo) || '-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strEscape(rec.forma) || '-'}</td><td>${strSafe(rec.status)}</td><td style="text-align:right; font-family:'Rubik'; font-weight:700;">${formatarMoeda(custo)}</td></tr>`;
+        html += `<tr${estiloLinhaTalhao(rec.talhao)}><td>${formatarData(rec.data)}</td>${celTalhao(rec.talhao)}<td><b>${strEscape(rec.produto)}</b></td><td>${strEscape(rec.tipo)}</td><td>${strEscape(rec.alvo) || '-'}</td><td>${strSafe(rec.dosagem)}</td><td>${strEscape(rec.forma) || '-'}</td><td style="font-weight:700; color:${String(rec.status).toUpperCase() === 'APLICADO' ? '#27ae60' : '#e67e22'};">${strSafe(rec.status)}</td><td style="text-align:right; font-family:'Rubik'; font-weight:700;">${formatarMoeda(custo)}</td></tr>`;
     });
     if (html) html += `<tr style="background:#f0f0f0; border-top:2px solid #ccc;"><td colspan="8" style="font-weight:700; text-align:right;">TOTAL DO PERÍODO</td><td style="text-align:right; font-family:'Rubik'; font-weight:700;">${formatarMoeda(total)}</td></tr>`;
 
@@ -1727,7 +1743,7 @@ function gerarRelatorioAgri() {
     document.getElementById('rel_agri_totais').innerHTML =
         `<div><span>Registros</span><b>${lista.length}</b></div><div><span>Aplicado</span><b>${formatarMoeda(totalAplicado)}</b></div><div><span>Planejado</span><b>${formatarMoeda(totalPlanejado)}</b></div><div><span>Custo Total</span><b style="color:var(--cor-laranja-flat);">${formatarMoeda(total)}</b></div>`;
     document.getElementById('rel_agri_cabecalho').innerHTML =
-        `<h3 style="margin:0 0 5px 0;">RELATÓRIO DE APLICAÇÕES - RANCHO 3C</h3><div style="font-size:13px;">Talhão: <b>${strEscape(talhao || 'TODOS')}</b> &nbsp;|&nbsp; Período: <b>${formatarData(ini)}</b> a <b>${formatarData(fim)}</b></div>`;
+        `<h3 style="margin:0 0 5px 0;">RELATÓRIO DE APLICAÇÕES - RANCHO 3C</h3><div style="font-size:13px;">Talhão: <b>${strEscape(talhao || 'TODOS')}</b> &nbsp;|&nbsp; Situação: <b>${situacao ? strEscape(situacao) : 'APLICADO + PLANEJADO'}</b> &nbsp;|&nbsp; Período: <b>${formatarData(ini)}</b> a <b>${formatarData(fim)}</b></div>`;
 }
 
 /* =========================================================================
@@ -1983,6 +1999,7 @@ function atualizarAlertas() {
             <div class="card" style="background-color: var(--cor-azul-flat);"><h4>A receber vencidas</h4><span>${formatarMoeda(recVencV)}</span><div style="${sub}">${recVenc} lançamento(s)</div></div>
             <div class="card" style="background-color: var(--cor-roxo-flat);"><h4>Estoque abaixo do mínimo</h4><span>${baixo}</span><div style="${sub}">item(ns) a repor</div></div>`;
     }
+    try { renderHomeAlertas(); } catch (e) {}
 }
 
 
@@ -2281,7 +2298,7 @@ function abrirDetalheCategoria(catEncoded, tipoFiltro) {
 
 document.addEventListener('keydown', ev => {
     if (ev.key !== 'Escape') return;
-    ['modal-despesa', 'modal-receita', 'modal-edicao', 'modal-chuvas', 'modal-gd', 'modal-orcamento', 'modal-colheita'].forEach(id => { const m = document.getElementById(id); if (m && m.style.display === 'flex') m.style.display = 'none'; });
+    ['modal-despesa', 'modal-receita', 'modal-edicao', 'modal-chuvas', 'modal-gd', 'modal-orcamento', 'modal-colheita', 'modal-carencia', 'modal-metas', 'modal-rateio', 'modal-amort'].forEach(id => { const m = document.getElementById(id); if (m && m.style.display === 'flex') m.style.display = 'none'; });
 });
 document.addEventListener('DOMContentLoaded', () => { try { vincularValidacaoCadastro(); } catch (e) {} });
 
@@ -2628,7 +2645,7 @@ function atualizarMarcasMenu() {
 
 document.addEventListener('DOMContentLoaded', () => { try { atualizarMarcasMenu(); } catch (e) {} });
 
-const VERSAO_SISTEMA = 'v28/10/2026-b';
+const VERSAO_SISTEMA = 'v28/10/2026-e';
 document.addEventListener('DOMContentLoaded', () => { const v = document.getElementById('versao_sistema'); if (v) { v.textContent = VERSAO_SISTEMA; v.classList.add('ok'); } });
 
 /* =========================================================================
@@ -2637,7 +2654,7 @@ document.addEventListener('DOMContentLoaded', () => { const v = document.getElem
 const MARCA_ESTRUTURA = 'ESTRUTURA-2026-10-25';
 let hierCat = '';
 
-function cadChaves() { return CADASTROS_DEF.map(d => d.chave).concat(['vinculo', 'migracao', 'lavoura', 'orcamento', 'producao', 'cor', 'ativprod']); }
+function cadChaves() { return CADASTROS_DEF.map(d => d.chave).concat(['vinculo', 'migracao', 'lavoura', 'orcamento', 'producao', 'cor', 'ativprod', 'meta', 'carencia', 'monit', 'rateiogeral', 'amort']); }
 function vincKey(c, s) { return cadNorm(c) + '|' + cadNorm(s); }
 function cadVinculado(c, s) { garantirOpcoes(); const e = opcoesDin.cad.vinculo[vincKey(c, s)]; return !!(e && !e.d); }
 function setoresDe(c) { c = cadNorm(c); if (!c) return []; return cadLista('setor').filter(s => cadVinculado(c, s)); }
@@ -2682,7 +2699,7 @@ function cadRenomear(chave, de, para) {
     garantirOpcoes(); const agora = Date.now(); const cad = opcoesDin.cad; let alterados = 0;
     cad[chave][para] = { u: agora, d: false }; cad[chave][de] = { u: agora, d: true };
     if (chave === 'talhao') alterados += propagarTalhao(de, para, agora);
-    if (chave === 'setor') moverSetorMapeamentos(de, para, agora);
+    if (chave === 'setor') { moverSetorMapeamentos(de, para, agora); try { moverRateioSetor(de, para, agora); } catch (e) {} }
     if (chave === 'setor' || chave === 'produto_receita') moverAtividades(chave, de, para, agora);
     if (chave === 'categoria_despesa' || chave === 'setor') {
         Object.keys(cad.vinculo).slice().forEach(k => {
@@ -2741,6 +2758,7 @@ function htmlHierarquia() {
         </div>
         <div id="hier_orfaos"></div>
         <div id="hier_lav"></div>
+        <div id="hier_rateio"></div>
         <div id="hier_ativ"></div>
     </div>`;
 }
@@ -2771,7 +2789,7 @@ function renderHierarquia() {
     const orf = cadLista('setor').filter(s => !categoriasDeSetor(s).length);
     document.getElementById('hier_orfaos').innerHTML = orf.length ? `<div class="hier-orfaos"><b>Setores sem categoria (${orf.length}):</b> ` + orf.map(s => `<span class="hier-chip">${strEscape(s)} <a href="#" title="Remover do cadastro" onclick="cadRemoverItem('setor', '${encAttr(s)}'); return false;">✕</a></span>`).join('') + ` <small>— use “Vincular setor já cadastrado” para ligá-los a uma categoria.</small></div>` : '';
     const c = document.getElementById('hier_cont'); if (c) c.innerText = cats.length + ' categorias';
-    renderLavourasSetores(); renderAtividadesCadastro();
+    renderLavourasSetores(); try { renderRateioGeral(); } catch (e) {} renderAtividadesCadastro();
 }
 
 function hierSelecionar(enc) { hierCat = decodeURIComponent(enc); renderHierarquia(); }
@@ -2882,6 +2900,7 @@ function propagarTalhao(de, para, agora) {
     const l = opcoesDin.cad.lavoura; Object.keys(l).slice().forEach(k => { const e = l[k]; if (!e || e.d) return; const x = k.indexOf('|'); if (k.slice(x + 1) === de) { l[k] = { u: agora, d: true }; l[k.slice(0, x) + '|' + para] = { u: agora, d: false }; } });
     const pr = opcoesDin.cad.producao; Object.keys(pr).slice().forEach(k => { const e = pr[k]; if (!e || e.d) return; const p = k.split('|'); if (p.length === 3 && p[1] === de) { pr[k] = { u: agora, d: true }; pr[p[0] + '|' + para + '|' + p[2]] = { u: agora, d: false }; } });
     const co = opcoesDin.cad.cor; Object.keys(co).slice().forEach(k => { const e = co[k]; if (!e || e.d) return; const i2 = k.indexOf('|'); if (k.slice(0, i2) === de) { co[k] = { u: agora, d: true }; co[para + '|' + k.slice(i2 + 1)] = { u: agora, d: false }; } });
+    try { propagarTalhaoV12(de, para, agora); propagarTalhaoV13(de, para, agora); } catch (e) {}
     sincronizarTalhoesDerivados();
     return n;
 }
@@ -2948,7 +2967,7 @@ function salvarOrcamento() {
 }
 
 /* ---------- Base de cálculo: cada "átomo" é um valor de custo com data, safra, categoria, setor e talhão ---------- */
-function custosAtomos() {
+function custosAtomosBase() {
     const out = [];
     agriRecords.forEach(r => {
         if (!r || r.deleted || r.status !== 'APLICADO' || !r.talhao || r.talhao === '-' || !r.data) return;
@@ -3114,13 +3133,13 @@ function gdHtml(sp) {
 function renderGestaoDespesas() {
     const tab = document.getElementById('cs_tabela'); if (!tab) return;
     const f = { safra: safeVal('cs_safra') || 'TODAS', nat: safeVal('cs_nat') || 'CUSTEIO', visao: safeVal('cs_visao') || 'lavouras' };
-    const todos = custosAtomos(); gdCelulas = []; const sel = todos.filter(a => f.safra === 'TODAS' || a.safra === f.safra); const A = sel.filter(a => a.nat === f.nat);
+    const todos = custosAtomos(safeVal('cs_custo') === 'DIRETO'); gdCelulas = []; const sel = todos.filter(a => f.safra === 'TODAS' || a.safra === f.safra); const A = sel.filter(a => a.nat === f.nat);
     renderCardsGestao(sel, f);
     const sp = f.visao === 'receitas' ? gdReceitas(todos, f) : f.visao === 'colheita' ? gdColheita(todos, f) : f.visao === 'setores' ? gdSetores(A, f) : f.visao === 'mensal' ? gdMensal(todos, f) : f.visao === 'gerais' ? gdGerais(A) : f.visao === 'comparativo' ? gdComparativo(todos, f) : gdLavouras(A, f);
     tab.innerHTML = gdHtml(sp);
     const natRot = f.nat === 'CUSTEIO' ? 'Custeio' : 'Investimento'; const safraRot = sp.safraUsada ? 'safra ' + sp.safraUsada : (f.visao === 'comparativo' || f.safra === 'TODAS' ? 'todas as safras' : 'safra ' + f.safra);
     const nota = document.getElementById('cs_nota');
-    if (nota) nota.innerHTML = sp.nota + ' <b>Adubos e defensivos comprados para o estoque só entram no custo da lavoura quando são aplicados.</b>' + (f.nat === 'CUSTEIO' ? ' Investimento é mostrado à parte (troque o filtro “Natureza”).' : ' Você está vendo apenas investimentos; o custeio está no outro filtro.');
+    if (nota) nota.innerHTML = sp.nota + (todos.some(a => a.rateio) ? ' <b>Inclui o rateio dos custos gerais entre as lavouras (regras em Cadastros).</b>' : '') + ' <b>Adubos e defensivos comprados para o estoque só entram no custo da lavoura quando são aplicados.</b>' + (f.nat === 'CUSTEIO' ? ' Investimento é mostrado à parte (troque o filtro “Natureza”).' : ' Você está vendo apenas investimentos; o custeio está no outro filtro.');
     const bo = document.getElementById('gd_btn_orc'); if (bo) bo.style.display = (f.visao === 'setores' || f.visao === 'mensal') ? '' : 'none';
     const bc = document.getElementById('gd_btn_col'); if (bc) bc.style.display = (f.visao === 'lavouras' || f.visao === 'colheita' || f.visao === 'receitas') ? '' : 'none';
     custosUltimo = { titulo: sp.titulo + ' — ' + natRot, subtitulo: 'Rancho 3C · ' + natRot + ' · ' + safraRot.charAt(0).toUpperCase() + safraRot.slice(1), cab: sp.cab, linhas: sp.linhas.map(l => l.c.map(gdPlano)), moeda: sp.moeda, num: sp.num.concat(sp.pct), totalRow: sp.linhas.length > 0 && !sp.vazio && !sp.semTotal, vazio: sp.vazio };
@@ -3205,7 +3224,7 @@ function renderColheitaLinhas() {
             return `<tr>${celTalhao(n)}<td>${culturaDoTalhao(n)}</td><td>${u === 'SC' ? 'Sacas (SC)' : 'Quilos (KG)'}</td><td style="text-align:right"><input type="number" min="0" step="0.01" class="orc-in col-in" data-talhao="${encAttr(n)}" value="${v > 0 ? v : ''}" placeholder="0"> <b>${u}</b></td></tr>`; }).join('') + '</tbody>';
 }
 function abrirColheita(origem) {
-    const sf0 = safeVal(origem === 'ind' ? 'ind_safra' : 'cs_safra'); const atual = obterSafraAtual(); const sf = (sf0 && sf0 !== 'TODAS') ? sf0 : atual;
+    const sf0 = safeVal(origem === 'ind' ? 'ind_safra' : (origem === 'ft' ? 'ft_safra' : 'cs_safra')); const atual = obterSafraAtual(); const sf = (sf0 && sf0 !== 'TODAS') ? sf0 : atual;
     const set = new Set(safrasDosCustos().concat(safrasComColheita(), [safraVizinha(atual, -1), atual, safraVizinha(atual, 1)])); set.delete('Sem Data');
     const safras = Array.from(set).sort().reverse();
     document.getElementById('col_safra').innerHTML = safras.map(x => `<option value="${x}">Safra ${x}</option>`).join(''); document.getElementById('col_safra').value = sf;
@@ -3215,7 +3234,7 @@ function fecharModalColheita() { document.getElementById('modal-colheita').style
 function salvarColheita() {
     const m = document.getElementById('modal-colheita'); const sf = safeVal('col_safra'); if (!sf) { alert('Escolha a safra da colheita.'); return; }
     m.querySelectorAll('.col-in').forEach(i => { const t = decodeURIComponent(i.dataset.talhao); const novo = parseFloat(i.value) || 0; if (Math.abs(novo - prodGet(sf, t)) > 0.0001) prodSet(sf, t, novo); });
-    salvarDados(); fecharModalColheita(); try { renderGestaoDespesas(); } catch (e) {} try { renderIndicadoresTalhao(); } catch (e) {} mostrarToast('Colheita da safra ' + sf + ' salva!');
+    salvarDados(); fecharModalColheita(); try { renderGestaoDespesas(); } catch (e) {} try { renderIndicadoresTalhao(); } catch (e) {} try { renderFichaTalhao(); } catch (e) {} mostrarToast('Colheita da safra ' + sf + ' salva!');
 }
 
 /* ---------- Atividades (receita × custo) ---------- */
@@ -3535,5 +3554,501 @@ document.addEventListener('input', function(e) {
         }
     }
 });
+
+
+/* =========================================================================
+   22. GESTÃO v12: fluxo de caixa projetado, alertas, ficha do talhão,
+       carência/calendário e monitoramento técnico
+========================================================================= */
+function n2(v) { return (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function somaDias(iso, n) { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function difDias(a, b) { return Math.round((new Date(a + 'T12:00:00') - new Date(b + 'T12:00:00')) / 86400000); }
+function limpaCampo(v) { return strSafe(v).replace(/[|\r\n]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+function nomeDiaSemana(iso) { try { return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long' }); } catch (e) { return ''; } }
+
+/* ---------- Armazenamento chave→valor nos cadastros sincronizados ---------- */
+function kvGet(chave, prefixo) {
+    garantirOpcoes(); const m = opcoesDin.cad[chave]; let u = -1, v = null;
+    Object.keys(m).forEach(k => { const e = m[k]; if (k.indexOf(prefixo) === 0 && e && !e.d && (e.u || 0) >= u) { u = e.u || 0; v = k.slice(prefixo.length); } });
+    return v;
+}
+function kvSet(chave, prefixo, valor) {
+    garantirOpcoes(); const m = opcoesDin.cad[chave]; const agora = Date.now();
+    Object.keys(m).forEach(k => { if (k.indexOf(prefixo) === 0 && m[k] && !m[k].d) m[k] = { u: agora, d: true }; });
+    if (valor !== null && valor !== undefined && valor !== '') m[prefixo + valor] = { u: agora, d: false };
+}
+
+/* ---------- 1. Fluxo de caixa projetado ---------- */
+function saldoCaixaAtual() {
+    let s = 0;
+    transacoes.forEach(t => { if (!t || t.deleted) return; if (!strSafe(t.sit).toLowerCase().includes('pago')) return; const v = parseFloat(t.valor) || 0; s += String(t.tipo).toLowerCase() === 'receita' ? v : -v; });
+    return s;
+}
+function itensFluxo() {
+    const hoje = hojeLocal(); const it = [];
+    transacoes.forEach(t => {
+        if (!t || t.deleted) return; const sit = strSafe(t.sit).toLowerCase();
+        if (!(sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente'))) return;
+        const d = sanitizeDateString(t.data); if (!d) return; const v = parseFloat(t.valor) || 0; if (!v) return; const rec = String(t.tipo).toLowerCase() === 'receita';
+        it.push({ data: d, tipo: rec ? 'ENTRADA' : 'SAÍDA', origem: rec ? 'A receber' : 'A pagar', desc: [strSafe(t.local), strSafe(t.desc)].filter(x => x && x !== '-').join(' — ') || strSafe(t.categoria), valor: rec ? v : -v });
+    });
+    const plan = agriRecords.filter(r => r && !r.deleted && String(r.status).toUpperCase() === 'PLANEJADO' && r.data).sort((a, b) => sanitizeDateString(a.data) < sanitizeDateString(b.data) ? -1 : 1);
+    const disp = {};
+    plan.forEach(r => {
+        const q = parseFloat(r.dosagem_qtd) || 0; if (q <= 0) return; const ch = r.produto + '|' + r.dosagem_un;
+        if (!(ch in disp)) { const e = estoque.find(x => x && !x.deleted && x.produto === r.produto && x.un === r.dosagem_un); disp[ch] = { q: e ? Math.max(0, parseFloat(e.qtd) || 0) : 0, preco: e ? (parseFloat(e.valor_unit) || 0) : 0 }; }
+        const o = disp[ch]; const usa = Math.min(o.q, q); o.q -= usa; const falta = q - usa;
+        if (falta > 0.0001) {
+            const d0 = sanitizeDateString(r.data); const d = d0 < hoje ? hoje : d0;
+            it.push({ data: d, tipo: 'SAÍDA', origem: 'Compra estimada', desc: `${r.produto}: faltam ${n2(falta)} ${r.dosagem_un} para aplicar em ${formatarData(d0)} (${r.talhao})` + (o.preco > 0 ? '' : ' — sem preço no estoque'), valor: -falta * o.preco });
+        }
+    });
+    return it.sort((a, b) => a.data < b.data ? -1 : (a.data > b.data ? 1 : 0));
+}
+function montarFluxo(dias) {
+    const hoje = hojeLocal(); const itens = itensFluxo(); const saldo0 = saldoCaixaAtual();
+    const per = [{ rot: 'Vencidos (até ontem)', ini: null, fim: somaDias(hoje, -1), ent: 0, sai: 0, cmp: 0, venc: true }];
+    for (let s = 0; s * 7 < dias; s++) { const ini = somaDias(hoje, s * 7); const fim = somaDias(hoje, Math.min(s * 7 + 6, dias - 1)); per.push({ rot: formatarData(ini) + ' a ' + formatarData(fim), ini: ini, fim: fim, ent: 0, sai: 0, cmp: 0 }); }
+    let depois = 0; const limite = somaDias(hoje, dias - 1);
+    itens.forEach(i => {
+        if (i.data < hoje) { const p = per[0]; if (i.valor > 0) p.ent += i.valor; else p.sai += i.valor; return; }
+        if (i.data > limite) { depois += i.valor; return; }
+        const p = per.find((x, idx) => idx > 0 && i.data >= x.ini && i.data <= x.fim); if (!p) return;
+        if (i.valor > 0) p.ent += i.valor; else if (i.origem === 'Compra estimada') p.cmp += i.valor; else p.sai += i.valor;
+    });
+    let acum = saldo0; per.forEach(p => { p.res = p.ent + p.sai + p.cmp; acum += p.res; p.acum = acum; });
+    return { saldo0: saldo0, per: per, itens: itens, depois: depois, limite: limite };
+}
+let chartFluxo = null;
+function renderFluxoCaixa() {
+    const dias = parseInt(safeVal('fx_dias'), 10) || 91; const F = montarFluxo(dias);
+    const totEnt = F.per.reduce((s, p) => s + p.ent, 0), totSai = F.per.reduce((s, p) => s + p.sai, 0), totCmp = F.per.reduce((s, p) => s + p.cmp, 0);
+    const final = F.per[F.per.length - 1].acum; let minP = F.per[0]; F.per.forEach(p => { if (p.acum < minP.acum) minP = p; });
+    const card = (cor, t, v, sub) => `<div class="card" style="background-color:${cor};"><h4>${t}</h4><span style="font-size:26px;">${formatarMoeda(v)}</span><div style="font-size:12px; opacity:0.9; margin-top:6px;">${sub}</div></div>`;
+    document.getElementById('fx_cards').innerHTML =
+        card('var(--cor-azul-flat)', 'Saldo em caixa hoje', F.saldo0, 'Receitas − despesas pagas') +
+        card('var(--cor-verde-flat)', 'A receber no período', totEnt, 'Inclui vencidos') +
+        card('var(--cor-laranja-flat)', 'A pagar no período', totSai, 'Contas pendentes (inclui vencidas)') +
+        card('var(--cor-roxo-flat)', 'Compras estimadas', totCmp, 'Insumos que faltam para as aplicações planejadas') +
+        card(final < 0 ? 'var(--cor-vermelho-flat)' : 'var(--cor-verde-flat)', 'Saldo projetado final', final, 'Em ' + formatarData(F.limite)) +
+        card(minP.acum < 0 ? 'var(--cor-vermelho-flat)' : '#7f8c8d', 'Menor saldo previsto', minP.acum, minP.rot);
+    document.getElementById('fx_tbody').innerHTML = F.per.map(p => `<tr${p.acum < 0 ? ' class="fx-neg"' : ''}><td><b>${strEscape(p.rot)}</b></td><td style="text-align:right; color:var(--cor-verde-flat); font-weight:700;">${formatarMoeda(p.ent)}</td><td style="text-align:right; color:var(--cor-vermelho-flat); font-weight:700;">${formatarMoeda(p.sai)}</td><td style="text-align:right; color:var(--cor-roxo-flat); font-weight:700;">${formatarMoeda(p.cmp)}</td><td style="text-align:right;">${formatarMoeda(p.res)}</td><td style="text-align:right; font-weight:700; color:${p.acum < 0 ? 'var(--cor-vermelho-flat)' : 'inherit'};">${formatarMoeda(p.acum)}${p.acum < 0 ? ' ⚠' : ''}</td></tr>`).join('');
+    document.getElementById('fx_itens').innerHTML = F.itens.length ? F.itens.map(i => `<tr><td>${formatarData(i.data)}${i.data < hojeLocal() ? ' <small style="color:var(--cor-vermelho-flat);">(vencido)</small>' : ''}</td><td>${i.origem}</td><td>${strEscape(i.desc)}</td><td style="text-align:right; font-weight:700; color:${i.valor >= 0 ? 'var(--cor-verde-flat)' : 'var(--cor-vermelho-flat)'};">${formatarMoeda(i.valor)}</td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center; padding:20px; color:#aaa;">Nenhum lançamento pendente nem aplicação planejada sem estoque</td></tr>';
+    document.getElementById('fx_nota').innerHTML = `Saldo de partida = receitas pagas − despesas pagas. Contas vencidas e não pagas entram no primeiro período, como se fossem liquidadas hoje. <b>Compras estimadas</b> = quantidade que falta no estoque para as aplicações PLANEJADAS (na ordem das datas) × preço atual do estoque; aplicações com estoque suficiente não geram saída de caixa nova.${F.depois ? ` Há ${formatarMoeda(F.depois)} previstos depois de ${formatarData(F.limite)} (fora do horizonte).` : ''}`;
+    if (typeof Chart !== 'undefined') {
+        const cv = document.getElementById('chart_fluxo'); if (!cv) return; if (chartFluxo) chartFluxo.destroy();
+        chartFluxo = new Chart(cv.getContext('2d'), { data: { labels: F.per.map(p => p.rot), datasets: [
+            { type: 'bar', label: 'Entradas', data: F.per.map(p => p.ent), backgroundColor: '#27ae60' },
+            { type: 'bar', label: 'Contas a pagar', data: F.per.map(p => p.sai), backgroundColor: '#e74c3c' },
+            { type: 'bar', label: 'Compras estimadas', data: F.per.map(p => p.cmp), backgroundColor: '#8e44ad' },
+            { type: 'line', label: 'Saldo acumulado', data: F.per.map(p => p.acum), borderColor: '#2980b9', backgroundColor: '#2980b9', tension: 0.2, borderWidth: 3 } ] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: c => c.dataset.label + ': ' + formatarMoeda(c.parsed.y) } } }, scales: { y: { ticks: { callback: v => 'R$ ' + (v / 1000).toLocaleString('pt-BR') + 'k' } } } } });
+    }
+}
+function exportarFluxo(fmt) {
+    const dias = parseInt(safeVal('fx_dias'), 10) || 91; const F = montarFluxo(dias);
+    const linhas = F.per.map(p => [p.rot, p.ent, p.sai, p.cmp, p.res, p.acum]);
+    exportarTabela(fmt, 'fluxo_caixa_' + hojeLocal(), 'Fluxo de caixa projetado', 'Saldo hoje: ' + formatarMoeda(F.saldo0) + ' — horizonte até ' + formatarData(F.limite), ['PERÍODO', 'ENTRADAS', 'CONTAS A PAGAR', 'COMPRAS ESTIMADAS', 'RESULTADO', 'SALDO ACUMULADO'], linhas, { moeda: [1, 2, 3, 4, 5], totalRow: false, planilha: 'Fluxo' });
+}
+
+/* ---------- Metas por talhão (custo por unidade colhida e produtividade) ---------- */
+function metaGet(tipo, safra, talhao) {
+    talhao = cadNorm(talhao); let v = kvGet('meta', tipo + '|' + safra + '|' + talhao + '|'); if (v === null || v === '') v = kvGet('meta', tipo + '|TODAS|' + talhao + '|');
+    return parseFloat(v) || 0;
+}
+function metaSet(tipo, safra, talhao, valor) { kvSet('meta', tipo + '|' + safra + '|' + cadNorm(talhao) + '|', valor > 0 ? Math.round(valor * 100) / 100 : ''); }
+function abrirMetas() {
+    const sf = safeVal('ft_safra') || obterSafraAtual(); const rot = sf === 'TODAS' ? 'TODAS AS SAFRAS (padrão)' : 'SAFRA ' + sf;
+    document.getElementById('mt_titulo').innerText = '🎯 METAS POR TALHÃO — ' + rot;
+    document.getElementById('mt_corpo').innerHTML = '<thead><tr><th>TALHÃO</th><th>UNIDADE</th><th style="text-align:right">CUSTO MÁXIMO POR UNIDADE (R$)</th><th style="text-align:right">PRODUTIVIDADE ALVO (und/ha)</th></tr></thead><tbody>' +
+        listaTodosTalhoes().map(n => `<tr>${celTalhao(n)}<td>${unidadeColheita(n)}</td><td style="text-align:right"><input type="number" min="0" step="0.01" class="orc-in mt-custo" data-talhao="${encAttr(n)}" value="${metaGet('CUSTO', sf, n) || ''}" placeholder="0,00"></td><td style="text-align:right"><input type="number" min="0" step="0.01" class="orc-in mt-prod" data-talhao="${encAttr(n)}" value="${metaGet('PRODHA', sf, n) || ''}" placeholder="0,00"></td></tr>`).join('') + '</tbody>';
+    const m = document.getElementById('modal-metas'); m.dataset.safra = sf; m.style.display = 'flex';
+}
+function fecharModalMetas() { document.getElementById('modal-metas').style.display = 'none'; }
+function salvarMetas() {
+    const m = document.getElementById('modal-metas'); const sf = m.dataset.safra; if (!sf) return;
+    m.querySelectorAll('.mt-custo').forEach(i => { const t = decodeURIComponent(i.dataset.talhao); const v = parseFloat(i.value) || 0; if (Math.abs(v - metaGet('CUSTO', sf, t)) > 0.001) metaSet('CUSTO', sf, t, v); });
+    m.querySelectorAll('.mt-prod').forEach(i => { const t = decodeURIComponent(i.dataset.talhao); const v = parseFloat(i.value) || 0; if (Math.abs(v - metaGet('PRODHA', sf, t)) > 0.001) metaSet('PRODHA', sf, t, v); });
+    salvarDados(); fecharModalMetas(); try { renderFichaTalhao(); } catch (e) {} mostrarToast('Metas salvas!');
+}
+
+/* ---------- 3. Ficha do talhão (custo, receita, produtividade e comparação entre safras) ---------- */
+function popularFichaTalhao() {
+    const st = document.getElementById('ft_talhao'), ss = document.getElementById('ft_safra'); if (!st || !ss) return;
+    const t0 = st.value, s0 = ss.value; const tal = listaTodosTalhoes();
+    st.innerHTML = tal.map(t => `<option value="${strEscape(t)}">${strEscape(t)}</option>`).join('');
+    const set = new Set(safrasDosCustos().concat(safrasComColheita(), [obterSafraAtual()])); set.delete('Sem Data'); const safras = Array.from(set).sort().reverse();
+    ss.innerHTML = '<option value="TODAS">TODAS AS SAFRAS</option>' + safras.map(s => `<option value="${s}">Safra ${s}</option>`).join('');
+    st.value = tal.includes(t0) ? t0 : (tal[0] || ''); ss.value = (s0 && (s0 === 'TODAS' || safras.includes(s0))) ? s0 : obterSafraAtual();
+}
+/* ---------- Rateio dos custos gerais e amortização do investimento (v13) ---------- */
+const MODOS_RATEIO = [['NENHUM', 'Não ratear (fica como custo geral)'], ['AREA_TODAS', 'Por área — todas as lavouras'], ['AREA_CAFE', 'Por área — só café'], ['AREA_MARACUJA', 'Por área — só maracujá'], ['MANUAL', 'Percentual definido por mim…']];
+function rgGet(setor) {
+    garantirOpcoes(); const s = cadNorm(setor); let u = -1, r = null; const m = opcoesDin.cad.rateiogeral;
+    Object.keys(m).forEach(k => { const e = m[k]; if (!e || e.d) return; const i = k.indexOf('|'); if (k.slice(0, i) !== s) return; if ((e.u || 0) >= u) { u = e.u || 0; const rest = k.slice(i + 1); const j = rest.indexOf('|'); r = { modo: j < 0 ? rest : rest.slice(0, j), det: j < 0 ? '' : rest.slice(j + 1) }; } });
+    return r;
+}
+function rgSet(setor, modo, det) {
+    garantirOpcoes(); const s = cadNorm(setor); const m = opcoesDin.cad.rateiogeral; const agora = Date.now();
+    Object.keys(m).forEach(k => { const e = m[k]; if (e && !e.d && k.slice(0, k.indexOf('|')) === s) m[k] = { u: agora, d: true }; });
+    if (modo && modo !== 'NENHUM') m[s + '|' + modo + '|' + (det || '')] = { u: agora, d: false };
+}
+function rateioGeralPesos(setor) {
+    const r = rgGet(setor); if (!r || r.modo === 'NENHUM') return [];
+    if (r.modo === 'MANUAL') {
+        const l = r.det.split(';').map(x => { const q = x.split('='); return { talhao: cadNorm(q[0]), pct: parseFloat(q[1]) || 0 }; }).filter(x => x.talhao && x.pct > 0 && cadTem('talhao', x.talhao));
+        const s = l.reduce((a, x) => a + x.pct, 0); return s > 0 ? l.map(x => ({ talhao: x.talhao, pct: x.pct / s * 100 })) : [];
+    }
+    let tal = cadLista('talhao'); if (r.modo === 'AREA_CAFE') tal = tal.filter(t => culturaDoTalhao(t) === 'CAFÉ'); else if (r.modo === 'AREA_MARACUJA') tal = tal.filter(t => culturaDoTalhao(t) === 'MARACUJÁ');
+    if (!tal.length) return [];
+    const ar = tal.map(t => { const i = infoTalhao(t); return i ? (parseFloat(i.area) || 0) : 0; }); const s = ar.reduce((a, b) => a + b, 0);
+    if (s <= 0) return tal.map(t => ({ talhao: t, pct: 100 / tal.length }));
+    return tal.map((t, i) => ({ talhao: t, pct: ar[i] / s * 100 })).filter(x => x.pct > 0);
+}
+// custos gerais com regra de rateio viram custos dos talhões (o total por setor não muda)
+function custosAtomos(direto) {
+    const base = custosAtomosBase(); if (direto) return base; const cache = {}; const out = [];
+    base.forEach(a => {
+        if (a.talhao) { out.push(a); return; }
+        const p = (a.setor in cache) ? cache[a.setor] : (cache[a.setor] = rateioGeralPesos(a.setor));
+        if (!p.length) { out.push(a); return; }
+        p.forEach(x => out.push(Object.assign({}, a, { talhao: x.talhao, valor: a.valor * x.pct / 100, origem: a.origem + ' (rateio)', rateio: true })));
+    });
+    return out;
+}
+function rgDescricao(setor) {
+    const p = rateioGeralPesos(setor); if (!p.length) return '';
+    return p.map(x => strEscape(x.talhao) + ' ' + n2(x.pct) + '%').join(' · ');
+}
+function renderRateioGeral() {
+    const box = document.getElementById('hier_rateio'); if (!box) return; const gerais = cadLista('setor').filter(s => !talhaoDoSetor(s));
+    box.innerHTML = `<div class="hier-lav"><div class="hier-titulo">🧮 Rateio dos custos gerais entre as lavouras</div>
+        <div class="cad-dica" style="padding:0 0 10px;">Setores sem talhão (trator, combustível, energia, mão de obra geral…) têm seu custo dividido entre as lavouras pela regra escolhida, para o <b>custo por saca/kg ficar completo</b>. O total de cada setor não muda. Deixe “Não ratear” para o que não pertence às lavouras (ex.: casa, galinhas).</div>
+        <div class="hier-lav-grid">` + (gerais.length ? gerais.map(s => { const r = rgGet(s); const modo = r ? r.modo : 'NENHUM'; const d = rgDescricao(s);
+            return `<label class="hier-lav-item${modo !== 'NENHUM' ? ' ligado' : ''}"><span>${strEscape(s)}${d ? `<br><small>${d}</small>` : ''}</span><select onchange="rgMudar('${encAttr(s)}', this.value)">${MODOS_RATEIO.map(o => `<option value="${o[0]}"${o[0] === modo ? ' selected' : ''}>${o[1]}</option>`).join('')}</select></label>`; }).join('') : '<div class="cad-dica">Nenhum setor sem talhão.</div>') + '</div></div>';
+}
+function rgMudar(enc, modo) {
+    const s = decodeURIComponent(enc);
+    if (modo === 'MANUAL') { abrirRateioManual(s); renderRateioGeral(); return; }
+    rgSet(s, modo, ''); salvarDados(); renderRateioGeral(); try { renderGestaoDespesas(); } catch (e) {} try { renderFichaTalhao(); } catch (e) {}
+    mostrarToast(modo === 'NENHUM' ? `${s}: custo geral (sem rateio)` : `${s}: custo rateado entre as lavouras`);
+}
+function abrirRateioManual(setor) {
+    const r = rgGet(setor); const atual = {}; if (r && r.modo === 'MANUAL') r.det.split(';').forEach(x => { const q = x.split('='); atual[cadNorm(q[0])] = parseFloat(q[1]) || 0; });
+    document.getElementById('rm_titulo').innerText = '🧮 RATEIO DE ' + setor;
+    document.getElementById('rm_corpo').innerHTML = '<thead><tr><th>TALHÃO</th><th style="text-align:right">PERCENTUAL (%)</th></tr></thead><tbody>' + listaTodosTalhoes().map(n => `<tr>${celTalhao(n)}<td style="text-align:right"><input type="number" min="0" max="100" step="0.01" class="orc-in rm-in" data-talhao="${encAttr(n)}" value="${atual[n] || ''}" oninput="somaRateioManual()" placeholder="0"></td></tr>`).join('') + '</tbody>';
+    const m = document.getElementById('modal-rateio'); m.dataset.setor = setor; m.style.display = 'flex'; somaRateioManual();
+}
+function somaRateioManual() { let s = 0; document.querySelectorAll('#modal-rateio .rm-in').forEach(i => { s += parseFloat(i.value) || 0; }); const e = document.getElementById('rm_soma'); if (e) { e.innerText = 'Soma: ' + n2(s) + '%'; e.style.color = Math.abs(s - 100) < 0.01 ? 'var(--cor-verde-flat)' : 'var(--cor-vermelho-flat)'; } return s; }
+function fecharModalRateio() { document.getElementById('modal-rateio').style.display = 'none'; }
+function salvarRateioManual() {
+    const m = document.getElementById('modal-rateio'); const setor = m.dataset.setor; if (!setor) return; const s = somaRateioManual();
+    if (Math.abs(s - 100) > 0.01) { alert('Os percentuais precisam somar 100%. Soma atual: ' + n2(s) + '%.'); return; }
+    const det = []; m.querySelectorAll('.rm-in').forEach(i => { const v = parseFloat(i.value) || 0; if (v > 0) det.push(decodeURIComponent(i.dataset.talhao) + '=' + v); });
+    rgSet(setor, 'MANUAL', det.join(';')); salvarDados(); fecharModalRateio(); renderRateioGeral(); try { renderGestaoDespesas(); } catch (e) {} try { renderFichaTalhao(); } catch (e) {} mostrarToast('Rateio de ' + setor + ' salvo!');
+}
+function moverRateioSetor(de, para, agora) {
+    const m = opcoesDin.cad.rateiogeral; Object.keys(m).slice().forEach(k => { const e = m[k]; if (!e || e.d) return; const i = k.indexOf('|'); if (k.slice(0, i) === de) { m[k] = { u: agora, d: true }; m[para + k.slice(i)] = { u: agora, d: false }; } });
+}
+
+/* Amortização: o investimento do talhão é diluído em N safras a partir de uma safra inicial */
+function amortGet(tal) {
+    garantirOpcoes(); const t = cadNorm(tal); let u = -1, r = null; const m = opcoesDin.cad.amort;
+    Object.keys(m).forEach(k => { const e = m[k]; if (!e || e.d) return; const p = k.split('|'); if (p[0] !== t) return; if ((e.u || 0) >= u) { u = e.u || 0; r = { ini: p[1], anos: parseInt(p[2], 10) || 0 }; } });
+    return (r && r.anos > 0 && r.ini) ? r : null;
+}
+function amortSet(tal, ini, anos) {
+    garantirOpcoes(); const t = cadNorm(tal); const m = opcoesDin.cad.amort; const agora = Date.now();
+    Object.keys(m).forEach(k => { const e = m[k]; if (e && !e.d && k.split('|')[0] === t) m[k] = { u: agora, d: true }; });
+    if (ini && anos > 0) m[t + '|' + ini + '|' + anos] = { u: agora, d: false };
+}
+function amortPorSafra(tal, atomos) {
+    const cfg = amortGet(tal); if (!cfg) return {}; const lim = obterSafraAtual(); const out = {}; const t = cadNorm(tal);
+    atomos.filter(a => a.nat === 'INVESTIMENTO' && a.talhao === t).forEach(a => {
+        let s = a.safra < cfg.ini ? cfg.ini : a.safra;
+        for (let i = 0; i < cfg.anos; i++) { if (s > lim) break; out[s] = (out[s] || 0) + a.valor / cfg.anos; s = safraVizinha(s, 1); }
+    });
+    return out;
+}
+function abrirAmort() {
+    const at = custosAtomos(); const atual = obterSafraAtual(); const safras = []; for (let d = -6; d <= 12; d++) safras.push(safraVizinha(atual, d));
+    document.getElementById('am_corpo').innerHTML = '<thead><tr><th>TALHÃO</th><th style="text-align:right">INVESTIMENTO LANÇADO</th><th>COMEÇAR A DILUIR NA SAFRA</th><th style="text-align:right">DILUIR EM (nº de safras)</th></tr></thead><tbody>' +
+        listaTodosTalhoes().map(n => { const inv = somaV(at.filter(a => a.talhao === n && a.nat === 'INVESTIMENTO')); const c = amortGet(n); const lista = safras.concat(c && !safras.includes(c.ini) ? [c.ini] : []);
+            return `<tr>${celTalhao(n)}<td style="text-align:right">${formatarMoeda(inv)}</td><td><select class="orc-in am-ini" data-talhao="${encAttr(n)}"><option value="">Não diluir</option>${lista.map(s => `<option value="${s}"${c && c.ini === s ? ' selected' : ''}>Safra ${s}</option>`).join('')}</select></td><td style="text-align:right"><input type="number" min="1" step="1" class="orc-in am-anos" data-talhao="${encAttr(n)}" value="${c ? c.anos : ''}" placeholder="safras"></td></tr>`; }).join('') + '</tbody>';
+    document.getElementById('modal-amort').style.display = 'flex';
+}
+function fecharModalAmort() { document.getElementById('modal-amort').style.display = 'none'; }
+function salvarAmort() {
+    const m = document.getElementById('modal-amort'); const dados = {};
+    m.querySelectorAll('.am-ini').forEach(i => { const t = decodeURIComponent(i.dataset.talhao); (dados[t] = dados[t] || {}).ini = i.value; });
+    m.querySelectorAll('.am-anos').forEach(i => { const t = decodeURIComponent(i.dataset.talhao); (dados[t] = dados[t] || {}).anos = parseInt(i.value, 10) || 0; });
+    const erro = Object.keys(dados).filter(t => (dados[t].ini && !(dados[t].anos > 0)) || (!dados[t].ini && dados[t].anos > 0));
+    if (erro.length) { alert('Informe a safra inicial E o número de safras (ou deixe os dois em branco) em: ' + erro.join(', ')); return; }
+    Object.keys(dados).forEach(t => { const a = amortGet(t); const novoIni = dados[t].ini || '', novoAnos = dados[t].anos || 0; if (!a && !novoIni) return; if (a && a.ini === novoIni && a.anos === novoAnos) return; amortSet(t, novoIni, novoAnos); });
+    salvarDados(); fecharModalAmort(); try { renderFichaTalhao(); } catch (e) {} mostrarToast('Amortização salva!');
+}
+
+/* ---------- Ficha do talhão com custo completo (direto + rateio + amortização) ---------- */
+function dadosFicha(tal, safra, atomos) {
+    const A = atomos.filter(a => a.talhao === tal && (safra === 'TODAS' || a.safra === safra));
+    const cust = A.filter(a => a.nat === 'CUSTEIO'), inv = A.filter(a => a.nat === 'INVESTIMENTO');
+    const rec = receitasPorTalhao(safra)[tal] || { valor: 0 }; const col = prodGet(safra, tal); const i = infoTalhao(tal); const area = i ? (parseFloat(i.area) || 0) : 0;
+    const direto = somaV(cust.filter(a => !a.rateio)), rateio = somaV(cust.filter(a => a.rateio)); const custo = direto + rateio;
+    const pa = amortPorSafra(tal, atomos); const amort = safra === 'TODAS' ? Object.keys(pa).reduce((s, k) => s + pa[k], 0) : (pa[safra] || 0); const total = custo + amort;
+    return { cust: cust, inv: inv, direto: direto, rateio: rateio, custo: custo, amort: amort, custoTotal: total, invest: somaV(inv), receita: rec.valor, col: col, und: unidadeColheita(tal), area: area,
+        custoUnd: col > 0 ? total / col : 0, custoUndDireto: col > 0 ? direto / col : 0, prodHa: (col > 0 && area > 0) ? col / area : 0, custoHa: area > 0 ? total / area : 0 };
+}
+function safrasDaFicha(tal, at) {
+    const set = new Set(safrasDosCustos().concat(safrasComColheita(), Object.keys(amortPorSafra(tal, at)))); set.delete('Sem Data'); return Array.from(set).sort().reverse();
+}
+let chartFicha = null;
+function renderFichaTalhao() {
+    const tal = safeVal('ft_talhao'); const sf = safeVal('ft_safra'); const box = document.getElementById('ft_conteudo'); if (!box) return;
+    if (!tal) { box.innerHTML = '<p style="padding:20px; color:#aaa;">Cadastre um talhão para ver a ficha.</p>'; return; }
+    const at = custosAtomos(); const D = dadosFicha(tal, sf, at); const u = D.und; const cor = corTalhao(tal); const cfg = amortGet(tal);
+    const mCusto = sf === 'TODAS' ? 0 : metaGet('CUSTO', sf, tal), mProd = sf === 'TODAS' ? 0 : metaGet('PRODHA', sf, tal);
+    const chuva = chuvas.filter(c => c && !c.deleted && (sf === 'TODAS' || obterSafraGeral(c.data) === sf)).reduce((s, c) => s + (parseFloat(c.mm) || 0), 0);
+    const apl = agriRecords.filter(r => r && !r.deleted && r.status === 'APLICADO' && cadNorm(r.talhao) === tal && (sf === 'TODAS' || obterSafraGeral(r.data) === sf));
+    const ocor = monitLista().filter(o => o.talhao === tal && (sf === 'TODAS' || obterSafraGeral(o.data) === sf));
+    const metaTxt = (real, meta, menorMelhor) => { if (!meta || !real) return ''; const ok = menorMelhor ? real <= meta : real >= meta; return `<div style="font-size:12px; margin-top:6px;">${ok ? '✔' : '⚠'} meta ${n2(meta)} (${n2(real / meta * 100)}%)</div>`; };
+    const card = (c, t, v, extra) => `<div class="card" style="background-color:${c}; padding:18px;"><h4>${t}</h4><span style="font-size:22px;">${v}</span>${extra || ''}</div>`;
+    const res = D.receita - D.custoTotal;
+    const cards = card('var(--cor-laranja-flat)', 'Custeio', formatarMoeda(D.custo), `<div style="font-size:12px; margin-top:6px;">direto ${formatarMoeda(D.direto)}${D.rateio > 0 ? ' + rateio dos gerais ' + formatarMoeda(D.rateio) : ''}</div>`) +
+        card('var(--cor-roxo-flat)', 'Investimento (gasto no período)', formatarMoeda(D.invest)) +
+        card('#8e6e53', 'Amortização do investimento', formatarMoeda(D.amort), `<div style="font-size:12px; margin-top:6px;">${cfg ? 'diluído em ' + cfg.anos + ' safra(s) desde ' + cfg.ini : 'não configurada (botão 🏗️)'}</div>`) +
+        card('#34495e', 'Custo total (custeio + amortização)', formatarMoeda(D.custoTotal), `<div style="font-size:12px; margin-top:6px;">${D.area > 0 ? formatarMoeda(D.custoHa) + ' por ha' : 'Informe a área do talhão'}</div>`) +
+        card('var(--cor-verde-flat)', 'Receita', formatarMoeda(D.receita)) +
+        card(res >= 0 ? 'var(--cor-azul-flat)' : 'var(--cor-vermelho-flat)', 'Resultado (receita − custo total)', formatarMoeda(res)) +
+        card('#16a085', 'Colhido', D.col > 0 ? n2(D.col) + ' ' + u : '—', D.col > 0 ? '' : '<div style="font-size:12px; margin-top:6px;">Use “Informar colheita”</div>') +
+        card(mCusto && D.custoUnd > mCusto ? 'var(--cor-vermelho-flat)' : '#2c3e50', 'Custo total por ' + u, D.custoUnd > 0 ? formatarMoeda(D.custoUnd) : '—', metaTxt(D.custoUnd, mCusto, true) + (D.col > 0 ? `<div style="font-size:12px; margin-top:4px;">só custeio direto: ${formatarMoeda(D.custoUndDireto)}</div>` : '')) +
+        card(mProd && D.prodHa > 0 && D.prodHa < mProd ? 'var(--cor-vermelho-flat)' : '#2c3e50', 'Produtividade (' + u + '/ha)', D.prodHa > 0 ? n2(D.prodHa) : '—', metaTxt(D.prodHa, mProd, false)) +
+        card('#2980b9', 'Chuva no período (fazenda)', n2(chuva) + ' mm', `<div style="font-size:12px; margin-top:6px;">${apl.length} aplicação(ões) realizada(s) · ${ocor.length} ocorrência(s)</div>`);
+    const ant = sf === 'TODAS' ? '' : safraVizinha(sf, -1); const Dant = ant ? dadosFicha(tal, ant, at) : null;
+    const porGrupo = (lista, g) => somaV(lista.filter(a => grupoCusto(a.cat) === g));
+    const linhaComp = (rot, a, b) => { const v = (Dant && b > 0) ? (a - b) / b * 100 : null;
+        return `<tr><td>${rot}</td><td style="text-align:right">${formatarMoeda(a)}</td><td style="text-align:right">${D.custoTotal > 0 ? n2(a / D.custoTotal * 100) + '%' : '-'}</td>${Dant ? `<td style="text-align:right">${formatarMoeda(b)}</td><td style="text-align:right; color:${v === null ? 'inherit' : (v > 0 ? 'var(--cor-vermelho-flat)' : 'var(--cor-verde-flat)')}; font-weight:700;">${v === null ? '-' : (v > 0 ? '+' : '') + n2(v) + '%'}</td>` : ''}<td style="text-align:right">${D.col > 0 ? formatarMoeda(a / D.col) : '-'}</td></tr>`; };
+    const comp = GRUPOS_CUSTO.map(g => linhaComp(g, porGrupo(D.cust, g), Dant ? porGrupo(Dant.cust, g) : 0)).join('') + linhaComp('AMORTIZAÇÃO DO INVESTIMENTO', D.amort, Dant ? Dant.amort : 0) + linhaComp('<b>CUSTO TOTAL</b>', D.custoTotal, Dant ? Dant.custoTotal : 0);
+    const hist = safrasDaFicha(tal, at).map(s => { const d = dadosFicha(tal, s, at); const mc = metaGet('CUSTO', s, tal), mp = metaGet('PRODHA', s, tal); if (!d.custo && !d.invest && !d.receita && !d.col && !d.amort) return null; return { s: s, d: d, mc: mc, mp: mp }; }).filter(Boolean);
+    const histHtml = hist.map(h => `<tr${h.s === sf ? ' style="background:#eef6ff;"' : ''}><td><b>${h.s}</b></td><td style="text-align:right">${formatarMoeda(h.d.custo)}</td><td style="text-align:right">${formatarMoeda(h.d.invest)}</td><td style="text-align:right">${formatarMoeda(h.d.amort)}</td><td style="text-align:right">${formatarMoeda(h.d.receita)}</td><td style="text-align:right; font-weight:700; color:${h.d.receita - h.d.custoTotal >= 0 ? 'var(--cor-verde-flat)' : 'var(--cor-vermelho-flat)'};">${formatarMoeda(h.d.receita - h.d.custoTotal)}</td><td style="text-align:right">${h.d.col > 0 ? n2(h.d.col) + ' ' + u : '-'}</td><td style="text-align:right">${h.d.custoUnd > 0 ? formatarMoeda(h.d.custoUnd) : '-'}${h.mc && h.d.custoUnd > 0 ? (h.d.custoUnd <= h.mc ? ' ✔' : ' ⚠') : ''}</td><td style="text-align:right">${h.d.prodHa > 0 ? n2(h.d.prodHa) : '-'}${h.mp && h.d.prodHa > 0 ? (h.d.prodHa >= h.mp ? ' ✔' : ' ⚠') : ''}</td></tr>`).join('') || '<tr><td colspan="9" style="text-align:center; padding:20px; color:#aaa;">Sem custos nem colheita registrados para este talhão</td></tr>';
+    box.innerHTML = `<div class="resumo-cards" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px;">${cards}</div>
+        <div class="widget-box" style="height:280px; border-top:4px solid ${cor};"><canvas id="chart_ficha"></canvas></div>
+        <div class="widget-box" style="padding:0; overflow:hidden;"><div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">🧮 COMPOSIÇÃO DO CUSTO${Dant ? ' — SAFRA ' + sf + ' × ' + ant : ''}</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><thead><tr><th>GRUPO</th><th style="text-align:right">${sf === 'TODAS' ? 'TOTAL' : 'SAFRA ' + sf}</th><th style="text-align:right">% DO CUSTO TOTAL</th>${Dant ? `<th style="text-align:right">SAFRA ${ant}</th><th style="text-align:right">VARIAÇÃO</th>` : ''}<th style="text-align:right">POR ${u}</th></tr></thead><tbody>${comp}</tbody></table></div></div>
+        <div class="widget-box" style="padding:0; overflow:hidden;"><div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">📚 HISTÓRICO POR SAFRA</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><thead><tr><th>SAFRA</th><th style="text-align:right">CUSTEIO</th><th style="text-align:right">INVESTIMENTO (GASTO)</th><th style="text-align:right">AMORTIZAÇÃO</th><th style="text-align:right">RECEITA</th><th style="text-align:right">RESULTADO</th><th style="text-align:right">COLHIDO</th><th style="text-align:right">CUSTO TOTAL/${u}</th><th style="text-align:right">${u}/HA</th></tr></thead><tbody>${histHtml}</tbody></table></div></div>`;
+    if (typeof Chart !== 'undefined') {
+        const cv = document.getElementById('chart_ficha'); if (!cv) return; if (chartFicha) chartFicha.destroy(); const h2 = hist.slice().reverse();
+        chartFicha = new Chart(cv.getContext('2d'), { data: { labels: h2.map(h => 'Safra ' + h.s), datasets: [
+            { type: 'bar', label: 'Custo total (R$)', data: h2.map(h => h.d.custoTotal), backgroundColor: '#e67e22', yAxisID: 'y' },
+            { type: 'bar', label: 'Receita (R$)', data: h2.map(h => h.d.receita), backgroundColor: '#27ae60', yAxisID: 'y' },
+            { type: 'line', label: 'Custo total por ' + u + ' (R$)', data: h2.map(h => h.d.custoUnd || null), borderColor: '#2c3e50', backgroundColor: '#2c3e50', borderWidth: 3, yAxisID: 'y1', spanGaps: true } ] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Custo, receita e custo por ' + u + ' — ' + tal } }, scales: { y: { position: 'left' }, y1: { position: 'right', grid: { drawOnChartArea: false } } } } });
+    }
+}
+function exportarFicha(fmt) {
+    const tal = safeVal('ft_talhao'); if (!tal) return; const at = custosAtomos(); const u = unidadeColheita(tal);
+    const linhas = safrasDaFicha(tal, at).map(s => { const d = dadosFicha(tal, s, at); if (!d.custo && !d.invest && !d.receita && !d.col && !d.amort) return null; return [s, d.custo, d.invest, d.amort, d.receita, d.receita - d.custoTotal, d.col > 0 ? d.col : '', d.custoUnd > 0 ? d.custoUnd : '', d.prodHa > 0 ? d.prodHa : '']; }).filter(Boolean);
+    if (!linhas.length) { alert('Não há dados para exportar neste talhão.'); return; }
+    exportarTabela(fmt, 'ficha_' + semAcento(tal).replace(/\s+/g, '_').toLowerCase() + '_' + hojeLocal(), 'Ficha do talhão ' + tal, 'Histórico por safra — custo total = custeio (direto + rateio dos gerais) + amortização do investimento; colheita em ' + u, ['SAFRA', 'CUSTEIO', 'INVESTIMENTO (GASTO)', 'AMORTIZAÇÃO', 'RECEITA', 'RESULTADO', 'COLHIDO (' + u + ')', 'CUSTO TOTAL/' + u, u + '/HA'], linhas, { moeda: [1, 2, 3, 4, 5, 7], num: [6, 8], totalRow: false, planilha: 'Ficha' });
+}
+function propagarTalhaoV13(de, para, agora) {
+    const am = opcoesDin.cad.amort; Object.keys(am).slice().forEach(k => { const e = am[k]; if (!e || e.d) return; const p = k.split('|'); if (p[0] === de) { am[k] = { u: agora, d: true }; p[0] = para; am[p.join('|')] = { u: agora, d: false }; } });
+    const rg = opcoesDin.cad.rateiogeral; Object.keys(rg).slice().forEach(k => { const e = rg[k]; if (!e || e.d) return; const i = k.indexOf('|'); const rest = k.slice(i + 1); const j = rest.indexOf('|'); if (rest.slice(0, j) !== 'MANUAL') return; const det = rest.slice(j + 1);
+        const nd = det.split(';').map(x => { const q = x.split('='); return (cadNorm(q[0]) === de ? para : q[0]) + '=' + q[1]; }).join(';'); if (nd !== det) { rg[k] = { u: agora, d: true }; rg[k.slice(0, i + 1 + j + 1) + nd] = { u: agora, d: false }; } });
+}
+
+/* ---------- 4. Carência, intervalo entre aplicações e calendário ---------- */
+function carGet(produto) {
+    garantirOpcoes(); const p = cadNorm(produto); let u = -1, r = { car: 0, int: 0 }; const m = opcoesDin.cad.carencia;
+    Object.keys(m).forEach(k => { const e = m[k]; if (!e || e.d) return; const i = k.indexOf('|'); if (k.slice(0, i) !== p) return; if ((e.u || 0) >= u) { u = e.u || 0; const q = k.slice(i + 1).split('|'); r = { car: parseInt(q[0], 10) || 0, int: parseInt(q[1], 10) || 0 }; } });
+    return r;
+}
+function carSet(produto, car, intervalo) {
+    garantirOpcoes(); const p = cadNorm(produto); const m = opcoesDin.cad.carencia; const agora = Date.now();
+    Object.keys(m).forEach(k => { const e = m[k]; if (e && !e.d && k.slice(0, k.indexOf('|')) === p) m[k] = { u: agora, d: true }; });
+    if (car > 0 || intervalo > 0) m[p + '|' + car + '|' + intervalo] = { u: agora, d: false };
+}
+function produtosConhecidos() {
+    const s = new Set(); estoque.forEach(e => { if (e && !e.deleted && e.produto) s.add(cadNorm(e.produto)); }); agriRecords.forEach(r => { if (r && !r.deleted && r.produto) s.add(cadNorm(r.produto)); });
+    return Array.from(s).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+}
+function abrirCarencia() {
+    const lista = produtosConhecidos();
+    document.getElementById('car_corpo').innerHTML = '<thead><tr><th>PRODUTO</th><th style="text-align:right">CARÊNCIA ATÉ A COLHEITA (dias)</th><th style="text-align:right">INTERVALO MÍNIMO ENTRE APLICAÇÕES (dias)</th></tr></thead><tbody>' +
+        (lista.length ? lista.map(p => { const c = carGet(p); return `<tr><td><b>${strEscape(p)}</b></td><td style="text-align:right"><input type="number" min="0" step="1" class="orc-in car-car" data-produto="${encAttr(p)}" value="${c.car || ''}" placeholder="0"></td><td style="text-align:right"><input type="number" min="0" step="1" class="orc-in car-int" data-produto="${encAttr(p)}" value="${c.int || ''}" placeholder="0"></td></tr>`; }).join('') : '<tr><td colspan="3" style="text-align:center; padding:20px; color:#aaa;">Cadastre produtos no Estoque primeiro</td></tr>') + '</tbody>';
+    document.getElementById('modal-carencia').style.display = 'flex';
+}
+function fecharModalCarencia() { document.getElementById('modal-carencia').style.display = 'none'; }
+function salvarCarencia() {
+    const m = document.getElementById('modal-carencia'); const por = {};
+    m.querySelectorAll('.car-car').forEach(i => { const p = decodeURIComponent(i.dataset.produto); (por[p] = por[p] || {}).car = parseInt(i.value, 10) || 0; });
+    m.querySelectorAll('.car-int').forEach(i => { const p = decodeURIComponent(i.dataset.produto); (por[p] = por[p] || {}).int = parseInt(i.value, 10) || 0; });
+    Object.keys(por).forEach(p => { const a = carGet(p); if (a.car !== por[p].car || a.int !== por[p].int) carSet(p, por[p].car, por[p].int); });
+    salvarDados(); fecharModalCarencia(); try { renderCarenciaBox(); renderCalendarioAgri(); } catch (e) {} mostrarToast('Carência e intervalos salvos!');
+}
+function verificarIntervalo(rec, editId) {
+    const c = carGet(rec.produto); if (!c.int) return ''; const d = sanitizeDateString(rec.data); if (!d) return '';
+    const outros = agriRecords.filter(r => r && !r.deleted && r.id !== editId && cadNorm(r.talhao) === cadNorm(rec.talhao) && cadNorm(r.produto) === cadNorm(rec.produto) && r.data && Math.abs(difDias(sanitizeDateString(r.data), d)) < c.int);
+    if (!outros.length) return '';
+    outros.sort((a, b) => Math.abs(difDias(sanitizeDateString(a.data), d)) - Math.abs(difDias(sanitizeDateString(b.data), d)));
+    const o = outros[0]; return `⏱ INTERVALO MÍNIMO\n\n${rec.produto} tem intervalo mínimo de ${c.int} dia(s) entre aplicações, mas já existe uma aplicação (${o.status}) em ${rec.talhao} no dia ${formatarData(o.data)}, a ${Math.abs(difDias(sanitizeDateString(o.data), d))} dia(s) desta.`;
+}
+function carenciasAtivas() {
+    const hoje = hojeLocal(); const m = {};
+    agriRecords.forEach(r => {
+        if (!r || r.deleted || r.status !== 'APLICADO' || !r.data || !r.talhao) return; const c = carGet(r.produto); if (c.car <= 0) return;
+        const d = sanitizeDateString(r.data); if (!d || d > hoje) return; const lib = somaDias(d, c.car); if (lib <= hoje) return; const t = cadNorm(r.talhao);
+        const o = m[t] || (m[t] = { talhao: t, lib: lib, itens: [] }); o.itens.push({ produto: r.produto, data: d, lib: lib, car: c.car }); if (lib > o.lib) o.lib = lib;
+    });
+    return Object.keys(m).map(k => m[k]).sort((a, b) => a.lib < b.lib ? -1 : 1);
+}
+function renderCarenciaBox() {
+    const box = document.getElementById('app_carencia_box'); if (!box) return; const l = carenciasAtivas(); const hoje = hojeLocal();
+    box.innerHTML = l.length ? `<div class="alerta-home alerta-a" style="cursor:default;"><b>⏳ Carência em andamento:</b> ` + l.map(o => `${chipTalhao(o.talhao)} liberado para colheita em <b>${formatarData(o.lib)}</b> (faltam ${difDias(o.lib, hoje)} dia(s) — ${o.itens.map(i => strEscape(i.produto)).join(', ')})`).join(' &nbsp;·&nbsp; ') + '</div>' : '';
+}
+function estoqueDisponivel(produto, un) { const e = estoque.find(x => x && !x.deleted && x.produto === produto && x.un === un); return e ? { q: parseFloat(e.qtd) || 0, preco: parseFloat(e.valor_unit) || 0, tem: true } : { q: 0, preco: 0, tem: false }; }
+function renderCalendarioAgri() {
+    const box = document.getElementById('sm_conteudo'); if (!box) return; const dias = parseInt(safeVal('sm_dias'), 10) || 7; const filtT = safeVal('sm_talhao');
+    const hoje = hojeLocal(); const fim = somaDias(hoje, dias - 1);
+    const plan = agriRecords.filter(r => r && !r.deleted && String(r.status).toUpperCase() === 'PLANEJADO' && r.data && (!filtT || cadNorm(r.talhao) === filtT)).sort((a, b) => sanitizeDateString(a.data) < sanitizeDateString(b.data) ? -1 : 1);
+    const atrasadas = plan.filter(r => sanitizeDateString(r.data) < hoje), janela = plan.filter(r => { const d = sanitizeDateString(r.data); return d >= hoje && d <= fim; });
+    const linha = r => { const est = estoqueDisponivel(r.produto, r.dosagem_un); const q = parseFloat(r.dosagem_qtd) || 0; const c = carGet(r.produto);
+        return `<tr${estiloLinhaTalhao(r.talhao)}><td>${formatarData(r.data)}</td>${celTalhao(r.talhao)}<td><b>${strEscape(r.produto)}</b></td><td>${strEscape(r.tipo)}</td><td>${strEscape(r.alvo) || '-'}</td><td>${strSafe(r.dosagem)}</td><td>${strEscape(r.forma) || '-'}</td><td>${est.q >= q ? '<span style="color:var(--cor-verde-flat); font-weight:700;">✔ OK</span>' : '<span style="color:var(--cor-vermelho-flat); font-weight:700;">⚠ falta ' + n2(q - Math.max(0, est.q)) + ' ' + strEscape(r.dosagem_un) + '</span>'}</td><td>${c.car ? c.car + ' d' : '-'}</td></tr>`; };
+    const cabTab = '<thead><tr><th>DATA</th><th>TALHÃO</th><th>PRODUTO</th><th>TIPO</th><th>ALVO</th><th>DOSE</th><th>FORMA</th><th>ESTOQUE</th><th>CARÊNCIA</th></tr></thead>';
+    let dia = ''; for (let i = 0; i < dias; i++) { const d = somaDias(hoje, i); const l = janela.filter(r => sanitizeDateString(r.data) === d); if (!l.length) continue; dia += `<tr class="sm-dia"><td colspan="9">📅 ${formatarData(d)} — ${nomeDiaSemana(d)}${i === 0 ? ' (hoje)' : ''} · ${l.length} aplicação(ões)</td></tr>` + l.map(linha).join(''); }
+    // necessidade de insumos
+    const nec = {}; atrasadas.concat(janela).forEach(r => { const ch = r.produto + '|' + r.dosagem_un; const o = nec[ch] || (nec[ch] = { produto: r.produto, un: r.dosagem_un, q: 0 }); o.q += parseFloat(r.dosagem_qtd) || 0; });
+    const necH = Object.keys(nec).sort().map(k => { const o = nec[k]; const e = estoqueDisponivel(o.produto, o.un); const falta = Math.max(0, o.q - Math.max(0, e.q)); return `<tr><td><b>${strEscape(o.produto)}</b></td><td style="text-align:right">${n2(o.q)} ${strEscape(o.un)}</td><td style="text-align:right">${e.tem ? n2(e.q) + ' ' + strEscape(o.un) : 'não cadastrado'}</td><td style="text-align:right; font-weight:700; color:${falta > 0 ? 'var(--cor-vermelho-flat)' : 'var(--cor-verde-flat)'};">${falta > 0 ? 'COMPRAR ' + n2(falta) + ' ' + strEscape(o.un) : '✔ suficiente'}</td><td style="text-align:right">${falta > 0 && e.preco > 0 ? formatarMoeda(falta * e.preco) : '-'}</td></tr>`; }).join('');
+    const car = carenciasAtivas().filter(o => !filtT || o.talhao === filtT);
+    const vazio = '<tr><td colspan="9" style="text-align:center; padding:20px; color:#aaa;">Nada planejado</td></tr>';
+    box.innerHTML = `<div class="widget-box" style="padding:0; overflow:hidden; border-top:4px solid var(--cor-vermelho-flat);"><div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">⚠ ATRASADAS (planejadas com data vencida) — ${atrasadas.length}</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table>${cabTab}<tbody>${atrasadas.map(linha).join('') || vazio}</tbody></table></div></div>
+        <div class="widget-box" style="padding:0; overflow:hidden; border-top:4px solid var(--cor-azul-flat);"><div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">🚜 LISTA DE SERVIÇO — próximos ${dias} dia(s) (${formatarData(hoje)} a ${formatarData(fim)})</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table>${cabTab}<tbody>${dia || vazio}</tbody></table></div></div>
+        <div class="widget-box" style="padding:0; overflow:hidden; border-top:4px solid var(--cor-roxo-flat);"><div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">📦 INSUMOS NECESSÁRIOS (atrasadas + período) × ESTOQUE</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><thead><tr><th>PRODUTO</th><th style="text-align:right">NECESSÁRIO</th><th style="text-align:right">EM ESTOQUE</th><th style="text-align:right">SITUAÇÃO</th><th style="text-align:right">CUSTO DA COMPRA</th></tr></thead><tbody>${necH || '<tr><td colspan="5" style="text-align:center; padding:20px; color:#aaa;">Nenhum insumo necessário</td></tr>'}</tbody></table></div></div>
+        <div class="widget-box" style="padding:0; overflow:hidden; border-top:4px solid var(--cor-laranja-flat);"><div class="widget-header" style="padding:15px; margin:0; background:#f9f9f9;">⏳ CARÊNCIAS EM ANDAMENTO (liberação para colheita)</div><div class="table-container" style="box-shadow:none; border-radius:0;"><table><thead><tr><th>TALHÃO</th><th>PRODUTO(S) E DATA DA APLICAÇÃO</th><th>LIBERADO EM</th><th style="text-align:right">FALTAM</th></tr></thead><tbody>${car.map(o => `<tr>${celTalhao(o.talhao)}<td>${o.itens.map(i => strEscape(i.produto) + ' (' + formatarData(i.data) + ', ' + i.car + ' d)').join('<br>')}</td><td><b>${formatarData(o.lib)}</b></td><td style="text-align:right; font-weight:700;">${difDias(o.lib, hoje)} dia(s)</td></tr>`).join('') || '<tr><td colspan="4" style="text-align:center; padding:20px; color:#aaa;">Nenhuma carência em andamento. Informe a carência de cada produto em “Carência e intervalos”.</td></tr>'}</tbody></table></div></div>`;
+}
+function popularCalendarioAgri() {
+    const s = document.getElementById('sm_talhao'); if (!s) return; const v = s.value;
+    s.innerHTML = '<option value="">TODOS OS TALHÕES</option>' + listaTodosTalhoes().map(t => `<option value="${strEscape(t)}">${strEscape(t)}</option>`).join(''); s.value = v;
+}
+function exportarCalendario(fmt) {
+    const dias = parseInt(safeVal('sm_dias'), 10) || 7; const filtT = safeVal('sm_talhao'); const hoje = hojeLocal(); const fim = somaDias(hoje, dias - 1);
+    const l = agriRecords.filter(r => r && !r.deleted && String(r.status).toUpperCase() === 'PLANEJADO' && r.data && sanitizeDateString(r.data) <= fim && (!filtT || cadNorm(r.talhao) === filtT)).sort((a, b) => sanitizeDateString(a.data) < sanitizeDateString(b.data) ? -1 : 1);
+    if (!l.length) { alert('Não há aplicações planejadas neste período.'); return; }
+    exportarTabela(fmt, 'lista_servico_' + hoje, 'Lista de serviço — aplicações planejadas', 'Até ' + formatarData(fim) + ' (inclui atrasadas)', ['DATA', 'TALHÃO', 'PRODUTO', 'TIPO', 'ALVO', 'DOSE', 'FORMA', 'ESTOQUE'],
+        l.map(r => { const e = estoqueDisponivel(r.produto, r.dosagem_un); const q = parseFloat(r.dosagem_qtd) || 0; return [formatarData(r.data), r.talhao, r.produto, r.tipo, r.alvo || '-', strSafe(r.dosagem), r.forma || '-', e.q >= q ? 'OK' : 'FALTA']; }), { planilha: 'Lista de serviço' });
+}
+
+/* ---------- 5. Monitoramento técnico (pragas, doenças, daninhas…) ---------- */
+function monitLista() {
+    garantirOpcoes(); const out = [];
+    Object.keys(opcoesDin.cad.monit).forEach(k => {
+        const e = opcoesDin.cad.monit[k]; if (!e || e.d) return; const p = k.split('|'); if (p.length < 6) return;
+        out.push({ key: k, id: p[0], data: sanitizeDateString(p[1]), talhao: p[2], tipo: p[3], alvo: p[4], nivel: p[5], obs: p.slice(6).join('|'), u: e.u || 0 });
+    });
+    return out.sort((a, b) => a.data < b.data ? 1 : (a.data > b.data ? -1 : 0));
+}
+function monitChave(o) { return [o.id, o.data, o.talhao, o.tipo, o.alvo, o.nivel].map(limpaCampo).join('|') + '|' + limpaCampo(o.obs); }
+function monitSalvar(ev) {
+    ev.preventDefault();
+    const data = sanitizeDateString(safeVal('mn_data')); const tal = cadNorm(safeVal('mn_talhao')); const alvoBruto = limpaCampo(safeVal('mn_alvo'));
+    if (!data || !tal || !alvoBruto) { alert('Informe data, talhão e o que foi observado (alvo).'); return; }
+    if (!cadTem('talhao', tal)) { alert(`O talhão "${tal}" não está cadastrado. Cadastre-o na tela Cadastros.`); return; }
+    const alvo = verificarNovaOpcao('alvos', alvoBruto); const idEd = safeVal('mn_id'); const agora = Date.now();
+    if (idEd) { const ant = monitLista().find(x => x.id === idEd); if (ant) opcoesDin.cad.monit[ant.key] = { u: agora, d: true }; }
+    const o = { id: idEd || generateUUID(), data: data, talhao: tal, tipo: safeVal('mn_tipo'), alvo: alvo, nivel: safeVal('mn_nivel'), obs: safeVal('mn_obs') };
+    opcoesDin.cad.monit[monitChave(o)] = { u: agora, d: false };
+    salvarDados(); monitLimparForm(); renderMonitoramento(); try { renderDatalistsAgri(); } catch (e) {} mostrarToast('Ocorrência registrada!');
+}
+function monitLimparForm() { ['mn_id', 'mn_alvo', 'mn_obs'].forEach(i => { const e = document.getElementById(i); if (e) e.value = ''; }); const d = document.getElementById('mn_data'); if (d) d.value = hojeLocal(); const b = document.getElementById('mn_btn'); if (b) b.innerText = 'Gravar ocorrência'; }
+function monitEditar(id) {
+    const o = monitLista().find(x => x.id === id); if (!o) return; const s = (i, v) => { const e = document.getElementById(i); if (e) e.value = v; };
+    s('mn_id', o.id); s('mn_data', o.data); s('mn_talhao', o.talhao); s('mn_tipo', o.tipo); s('mn_alvo', o.alvo); s('mn_nivel', o.nivel); s('mn_obs', o.obs); document.getElementById('mn_btn').innerText = 'Salvar alteração';
+    document.getElementById('form_monit').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function monitExcluir(id) {
+    const o = monitLista().find(x => x.id === id); if (!o) return; if (!confirm('EXCLUIR esta ocorrência?')) return;
+    opcoesDin.cad.monit[o.key] = { u: Date.now(), d: true }; salvarDados(); renderMonitoramento(); mostrarToast('Ocorrência excluída');
+}
+function acaoDaOcorrencia(o) {
+    const alvo = semAcento(o.alvo); if (!alvo) return null; const ini = o.data, fim = somaDias(ini, 30);
+    const c = agriRecords.filter(r => { if (!r || r.deleted || cadNorm(r.talhao) !== o.talhao || !r.data) return false; const d = sanitizeDateString(r.data); if (d < ini || d > fim) return false; const ra = semAcento(r.alvo); return ra && ra !== '-' && (ra === alvo || (Math.min(ra.length, alvo.length) >= 4 && (ra.indexOf(alvo) >= 0 || alvo.indexOf(ra) >= 0))); })
+        .sort((a, b) => { const pa = a.status === 'APLICADO' ? 0 : 1, pb = b.status === 'APLICADO' ? 0 : 1; return pa !== pb ? pa - pb : (sanitizeDateString(a.data) < sanitizeDateString(b.data) ? -1 : 1); });
+    return c[0] || null;
+}
+function chuvaAntes(data, dias) { const ini = somaDias(data, -dias); return chuvas.filter(c => c && !c.deleted && sanitizeDateString(c.data) > ini && sanitizeDateString(c.data) <= data).reduce((s, c) => s + (parseFloat(c.mm) || 0), 0); }
+function popularMonitoramento() {
+    const ft = document.getElementById('mn_filtro_talhao'); if (ft) { const v = ft.value; ft.innerHTML = '<option value="">TODOS OS TALHÕES</option>' + listaTodosTalhoes().map(t => `<option value="${strEscape(t)}">${strEscape(t)}</option>`).join(''); ft.value = v; }
+    const d = document.getElementById('mn_data'); if (d && !d.value) d.value = hojeLocal();
+}
+function renderMonitoramento() {
+    const tb = document.getElementById('mn_tbody'); if (!tb) return; const filtT = safeVal('mn_filtro_talhao'); const soSem = document.getElementById('mn_so_sem') && document.getElementById('mn_so_sem').checked;
+    const todas = monitLista(); const hoje = hojeLocal(); const sfAtual = obterSafraAtual();
+    const linhas = todas.filter(o => !filtT || o.talhao === filtT).map(o => ({ o: o, acao: acaoDaOcorrencia(o) })).filter(x => !soSem || !x.acao);
+    const cor = n => n === 'ALTO' ? 'var(--cor-vermelho-flat)' : (n === 'MÉDIO' ? 'var(--cor-laranja-flat)' : 'var(--cor-verde-flat)');
+    tb.innerHTML = linhas.map(x => { const o = x.o, a = x.acao; const ac = a ? `${a.status === 'APLICADO' ? '✔ APLICADO' : '🗓 PLANEJADO'} ${formatarData(a.data)} · ${strEscape(a.produto)} (${formatarMoeda(custoAplicacao(a))})` : (difDias(hoje, o.data) > 7 && o.nivel !== 'BAIXO' ? '<b style="color:var(--cor-vermelho-flat);">⚠ Sem aplicação registrada</b>' : '<span style="color:#999;">Sem aplicação ainda</span>');
+        return `<tr${estiloLinhaTalhao(o.talhao)}><td>${formatarData(o.data)}</td>${celTalhao(o.talhao)}<td>${strEscape(o.tipo)}</td><td><b>${strEscape(o.alvo)}</b></td><td style="font-weight:700; color:${cor(o.nivel)};">${strEscape(o.nivel)}</td><td style="text-align:right;">${n2(chuvaAntes(o.data, 7))} mm</td><td>${ac}</td><td>${strEscape(o.obs) || '-'}</td><td style="white-space:nowrap;"><button class="btn-acao btn-editar" onclick="monitEditar('${o.id}')">✏️</button><button class="btn-acao btn-excluir" onclick="monitExcluir('${o.id}')">🗑️</button></td></tr>`; }).join('') || '<tr><td colspan="9" style="text-align:center; padding:25px; color:#aaa;">Nenhuma ocorrência registrada</td></tr>';
+    // resumo por talhão (safra atual)
+    const at = custosAtomos(); const sem = todas.filter(o => o.nivel !== 'BAIXO' && difDias(hoje, o.data) > 7 && !acaoDaOcorrencia(o));
+    const resumo = listaTodosTalhoes().map(t => {
+        const oc = todas.filter(o => o.talhao === t && obterSafraGeral(o.data) === sfAtual); const def = somaV(at.filter(a => a.talhao === t && a.safra === sfAtual && a.nat === 'CUSTEIO' && grupoCusto(a.cat) === 'DEFENSIVOS'));
+        const solos = analisesSolo.filter(s => s && !s.deleted && cadNorm(s.talhao) === t).sort((a, b) => sanitizeDateString(a.data) < sanitizeDateString(b.data) ? 1 : -1); const col = prodGet(sfAtual, t); const i = infoTalhao(t); const area = i ? (parseFloat(i.area) || 0) : 0;
+        const chuva = chuvas.filter(c => c && !c.deleted && obterSafraGeral(c.data) === sfAtual).reduce((s, c) => s + (parseFloat(c.mm) || 0), 0);
+        return `<tr>${celTalhao(t)}<td style="text-align:right">${oc.length}</td><td style="text-align:right; font-weight:700; color:var(--cor-vermelho-flat);">${oc.filter(o => o.nivel === 'ALTO').length || ''}</td><td style="text-align:right">${formatarMoeda(def)}</td><td style="text-align:right">${col > 0 && area > 0 ? n2(col / area) + ' ' + unidadeColheita(t) + '/ha' : '-'}</td><td>${solos.length ? formatarData(solos[0].data) : '<span style="color:#999;">sem análise</span>'}</td><td style="text-align:right">${n2(chuva)} mm</td></tr>`; }).join('');
+    document.getElementById('mn_cards').innerHTML =
+        `<div class="card" style="background-color:var(--cor-azul-flat); padding:18px;"><h4>Ocorrências na safra ${sfAtual}</h4><span style="font-size:24px;">${todas.filter(o => obterSafraGeral(o.data) === sfAtual).length}</span></div>` +
+        `<div class="card" style="background-color:var(--cor-vermelho-flat); padding:18px;"><h4>Nível ALTO</h4><span style="font-size:24px;">${todas.filter(o => o.nivel === 'ALTO' && obterSafraGeral(o.data) === sfAtual).length}</span></div>` +
+        `<div class="card" style="background-color:var(--cor-laranja-flat); padding:18px;"><h4>Sem aplicação registrada</h4><span style="font-size:24px;">${sem.length}</span><div style="font-size:12px; margin-top:6px;">média/alta com mais de 7 dias</div></div>`;
+    document.getElementById('mn_resumo').innerHTML = resumo;
+}
+function exportarMonitoramento(fmt) {
+    const l = monitLista(); if (!l.length) { alert('Não há ocorrências para exportar.'); return; }
+    exportarTabela(fmt, 'monitoramento_' + hojeLocal(), 'Monitoramento técnico', 'Ocorrências por talhão', ['DATA', 'TALHÃO', 'TIPO', 'ALVO', 'NÍVEL', 'CHUVA 7D (mm)', 'AÇÃO', 'OBSERVAÇÃO'],
+        l.map(o => { const a = acaoDaOcorrencia(o); return [formatarData(o.data), o.talhao, o.tipo, o.alvo, o.nivel, chuvaAntes(o.data, 7), a ? a.status + ' ' + formatarData(a.data) + ' ' + a.produto : 'Sem aplicação', o.obs || '-']; }), { num: [5], planilha: 'Monitoramento' });
+}
+function propagarTalhaoV12(de, para, agora) {
+    const mt = opcoesDin.cad.meta; Object.keys(mt).slice().forEach(k => { const e = mt[k]; if (!e || e.d) return; const p = k.split('|'); if (p.length >= 4 && p[2] === de) { mt[k] = { u: agora, d: true }; p[2] = para; mt[p.join('|')] = { u: agora, d: false }; } });
+    const mo = opcoesDin.cad.monit; Object.keys(mo).slice().forEach(k => { const e = mo[k]; if (!e || e.d) return; const p = k.split('|'); if (p.length >= 6 && p[2] === de) { mo[k] = { u: agora, d: true }; p[2] = para; mo[p.join('|')] = { u: agora, d: false }; } });
+}
+
+/* ---------- 2. Alertas de gestão na tela inicial ---------- */
+function gerarAlertasGestao() {
+    const A = []; const hoje = hojeLocal(); const sf = obterSafraAtual(); const add = (n, t, d, tab) => A.push({ n: n, t: t, d: d, tab: tab });
+    const at = custosAtomos();
+    // orçamento por setor
+    const real = {}; at.filter(a => a.safra === sf && a.nat === 'CUSTEIO').forEach(a => { real[a.setor] = (real[a.setor] || 0) + a.valor; });
+    cadLista('setor').forEach(s => { const o = orcGet(sf, s); if (o <= 0) return; const r = real[s] || 0; const p = r / o * 100;
+        if (p >= 100) add('r', `Orçamento estourado: ${s}`, `${formatarMoeda(r)} gastos de ${formatarMoeda(o)} orçados (${n2(p)}%) — safra ${sf}`, 'relatorios_detalhados');
+        else if (p >= 80) add('a', `Orçamento perto do limite: ${s}`, `${n2(p)}% usado (${formatarMoeda(r)} de ${formatarMoeda(o)}) — safra ${sf}`, 'relatorios_detalhados'); });
+    // metas por talhão
+    listaTodosTalhoes().forEach(t => { const D = dadosFicha(t, sf, at); const mc = metaGet('CUSTO', sf, t), mp = metaGet('PRODHA', sf, t); const u = unidadeColheita(t);
+        if (mc > 0 && D.custoUnd > mc) add('r', `Custo por ${u} acima da meta: ${t}`, `${formatarMoeda(D.custoUnd)} por ${u} (meta ${formatarMoeda(mc)})`, 'ficha_talhao');
+        else if (mc > 0 && D.custoUnd > mc * 0.9) add('a', `Custo por ${u} perto da meta: ${t}`, `${formatarMoeda(D.custoUnd)} por ${u} (meta ${formatarMoeda(mc)})`, 'ficha_talhao');
+        if (mp > 0 && D.prodHa > 0 && D.prodHa < mp) add('a', `Produtividade abaixo da meta: ${t}`, `${n2(D.prodHa)} ${u}/ha (meta ${n2(mp)})`, 'ficha_talhao'); });
+    // financeiro
+    const F = montarFluxo(28); const neg = F.per.filter(p => p.acum < 0)[0];
+    if (neg) add('r', 'Saldo projetado negativo', `Caixa pode ficar negativo em ${neg.rot} (${formatarMoeda(neg.acum)}) — veja o fluxo de caixa`, 'fluxo_main');
+    let pv = 0, pvV = 0, p7 = 0, p7V = 0, rv = 0, rvV = 0; const lim = somaDias(hoje, 7);
+    transacoes.forEach(t => { if (!t || t.deleted) return; const sit = strSafe(t.sit).toLowerCase(); if (!(sit.includes('pagar') || sit.includes('receber') || sit.includes('pendente'))) return; const d = sanitizeDateString(t.data); if (!d) return; const v = parseFloat(t.valor) || 0;
+        if (String(t.tipo).toLowerCase() === 'receita') { if (d < hoje) { rv++; rvV += v; } } else if (d < hoje) { pv++; pvV += v; } else if (d <= lim) { p7++; p7V += v; } });
+    if (pv) add('r', `${pv} conta(s) a pagar vencida(s)`, formatarMoeda(pvV), 'pendencias');
+    if (p7) add('a', `${p7} conta(s) a pagar nos próximos 7 dias`, formatarMoeda(p7V), 'pendencias');
+    if (rv) add('a', `${rv} recebimento(s) em atraso`, formatarMoeda(rvV), 'pendencias');
+    // agrícola
+    const atras = agriRecords.filter(r => r && !r.deleted && String(r.status).toUpperCase() === 'PLANEJADO' && r.data && sanitizeDateString(r.data) < hoje).length;
+    const prox = agriRecords.filter(r => r && !r.deleted && String(r.status).toUpperCase() === 'PLANEJADO' && r.data && sanitizeDateString(r.data) >= hoje && sanitizeDateString(r.data) <= lim).length;
+    if (atras) add('r', `${atras} aplicação(ões) planejada(s) atrasada(s)`, 'Realize ou reprograme', 'agri_semana');
+    if (prox) add('i', `${prox} aplicação(ões) nos próximos 7 dias`, 'Veja a lista de serviço', 'agri_semana');
+    const baixo = estoque.filter(e => { if (!e || e.deleted || !e.produto) return false; const q = parseFloat(e.qtd) || 0; const m = parseFloat(e.qtd_min) || 0; return q < demandaPendente(e) || (m > 0 && q < m); }).length;
+    if (baixo) add('a', `${baixo} insumo(s) abaixo do necessário`, 'Estoque insuficiente para aplicações pendentes ou abaixo do mínimo', 'agri_est');
+    carenciasAtivas().forEach(o => add('i', `Carência em ${o.talhao}`, `Liberado para colheita em ${formatarData(o.lib)} (${difDias(o.lib, hoje)} dia(s))`, 'agri_semana'));
+    const sem = monitLista().filter(o => o.nivel !== 'BAIXO' && difDias(hoje, o.data) > 7 && difDias(hoje, o.data) < 90 && !acaoDaOcorrencia(o));
+    if (sem.length) add('a', `${sem.length} ocorrência(s) sem aplicação registrada`, sem.slice(0, 3).map(o => `${o.talhao}: ${o.alvo}`).join(' · '), 'monit_main');
+    const ord = { r: 0, a: 1, i: 2, v: 3 }; return A.sort((x, y) => ord[x.n] - ord[y.n]);
+}
+function renderHomeAlertas() {
+    const box = document.getElementById('home_alertas'); if (!box) return; let l = [];
+    try { l = gerarAlertasGestao(); } catch (e) { l = []; }
+    const ic = { r: '🔴', a: '🟠', i: '🔵' };
+    box.innerHTML = l.length ? `<div class="home-alertas-titulo">🔔 ATENÇÃO — ${l.length} ponto(s) para acompanhar</div>` + l.map(a => `<div class="alerta-home alerta-${a.n}" onclick="showTab('${a.tab}')"><span class="alerta-ic">${ic[a.n] || '🔵'}</span><span><b>${strEscape(a.t)}</b><br><small>${strEscape(a.d)}</small></span></div>`).join('')
+        : '<div class="alerta-home alerta-v" style="cursor:default;">✅ Tudo em dia: sem alertas de orçamento, metas, contas, aplicações ou estoque.</div>';
+}
 
 window.onload = () => { carregarDadosNuvem(); };
